@@ -46,14 +46,14 @@ describe("integration", () => {
       const canonicalFiles: PayloadFile[] = [
         {
           relativePath: "CLAUDE.md",
-          sourcePath: "/repo/.claude/CLAUDE.md",
+          sourcePath: "/repo/canonical/CLAUDE.md",
           component: "instructions",
           origin: "canonical-source",
           executable: false,
         },
         {
           relativePath: "skills/commit/SKILL.md",
-          sourcePath: "/repo/.claude/skills/commit/SKILL.md",
+          sourcePath: "/repo/canonical/skills/commit/SKILL.md",
           component: "skills",
           origin: "canonical-source",
           executable: false,
@@ -160,14 +160,14 @@ describe("integration", () => {
         payloadFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/.claude/CLAUDE.md",
+            sourcePath: "/repo/canonical/CLAUDE.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,
           },
           {
             relativePath: "skills/new/SKILL.md",
-            sourcePath: "/repo/.claude/skills/new/SKILL.md",
+            sourcePath: "/repo/canonical/skills/new/SKILL.md",
             component: "skills",
             origin: "canonical-source",
             executable: false,
@@ -200,7 +200,7 @@ describe("integration", () => {
         payloadFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/.claude/CLAUDE.md",
+            sourcePath: "/repo/canonical/CLAUDE.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,
@@ -226,7 +226,7 @@ describe("integration", () => {
         payloadFiles: [
           {
             relativePath: "skills/kept/SKILL.md",
-            sourcePath: "/repo/.claude/skills/kept/SKILL.md",
+            sourcePath: "/repo/canonical/skills/kept/SKILL.md",
             component: "skills",
             origin: "canonical-source",
             executable: false,
@@ -273,7 +273,7 @@ describe("integration", () => {
         canonicalFiles: [
           {
             relativePath: "skills/feature/SKILL.md",
-            sourcePath: "/repo/.claude/skills/feature/SKILL.md",
+            sourcePath: "/repo/canonical/skills/feature/SKILL.md",
             component: "skills",
             origin: "canonical-source",
             executable: false,
@@ -289,7 +289,7 @@ describe("integration", () => {
 
       // Local canonical source wins
       expect(feature.origin).toBe("canonical-source");
-      expect(feature.sourcePath).toBe("/repo/.claude/skills/feature/SKILL.md");
+      expect(feature.sourcePath).toBe("/repo/canonical/skills/feature/SKILL.md");
 
       // Conflict recorded
       expect(result.conflicts).toHaveLength(1);

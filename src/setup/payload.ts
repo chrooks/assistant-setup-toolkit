@@ -25,7 +25,7 @@ export interface BuildPayloadInput {
   readonly components: readonly ComponentKind[];
   /** Files from External Sources (applied first, may be overridden). */
   readonly externalFiles: readonly PayloadFile[];
-  /** Files from the Canonical Assistant Source .claude/ (applied last, wins conflicts). */
+  /** Files from the Canonical Assistant Source canonical/ (applied last, wins conflicts). */
   readonly canonicalFiles: readonly PayloadFile[];
   /** Files from Target Projections (.codex/, .agents/). */
   readonly projectionFiles: readonly PayloadFile[];

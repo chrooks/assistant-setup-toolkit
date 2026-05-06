@@ -131,7 +131,7 @@ _Avoid_: instructions, summary, todo
 - A **Skill Artifact** is not the canonical source of a **Skill**.
 - The **Setup Wizard** may generate **Skill Artifacts** even when it cannot automate desktop app installation.
 - `artifacts/<skill-name>.zip` is a **Skill Artifact**.
-- `.claude/` is the **Canonical Assistant Source** for shared assistant instructions and skills.
+- `canonical/` is the **Canonical Assistant Source** for shared assistant instructions and skills.
 - `.codex/` and `.agents/` are **Target Projections** for Codex CLI.
 - **Target Projections** are derived from the **Canonical Assistant Source**.
 - The **Setup Wizard** regenerates **Target Projections** before installing Codex payloads to avoid drift.

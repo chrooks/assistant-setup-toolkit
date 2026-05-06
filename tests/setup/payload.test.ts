@@ -21,7 +21,7 @@ describe("payload", () => {
         canonicalFiles: [
           {
             relativePath: "skills/feature/SKILL.md",
-            sourcePath: "/repo/.claude/skills/feature/SKILL.md",
+            sourcePath: "/repo/canonical/skills/feature/SKILL.md",
             component: "skills",
             origin: "canonical-source",
             executable: false,
@@ -63,7 +63,7 @@ describe("payload", () => {
         canonicalFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/.claude/CLAUDE.md",
+            sourcePath: "/repo/canonical/CLAUDE.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,

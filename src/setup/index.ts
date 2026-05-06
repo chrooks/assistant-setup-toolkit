@@ -53,11 +53,11 @@ function targetLabel(targetId: AssistantTargetId): string {
   return labels[targetId];
 }
 
-/** Discover which .claude/ files exist and categorize them by component kind. */
+/** Discover which canonical/ files exist and categorize them by component kind. */
 async function discoverCanonicalFiles(
   repoRoot: string,
 ): Promise<PayloadFile[]> {
-  const claudeDir = path.join(repoRoot, ".claude");
+  const canonicalDir = path.join(repoRoot, "canonical");
   const files: PayloadFile[] = [];
 
   // Map directories to component kinds
@@ -72,7 +72,7 @@ async function discoverCanonicalFiles(
     ["CLAUDE.md", "instructions"],
     ["PLAN.md", "plans"],
   ] as const) {
-    const filePath = path.join(claudeDir, filename);
+    const filePath = path.join(canonicalDir, filename);
     try {
       await fs.access(filePath);
       files.push({
@@ -89,7 +89,7 @@ async function discoverCanonicalFiles(
 
   // Walk component directories
   for (const [dirName, component] of Object.entries(dirComponentMap)) {
-    const dirPath = path.join(claudeDir, dirName);
+    const dirPath = path.join(canonicalDir, dirName);
     try {
       await fs.access(dirPath);
       const entries = await walkDir(dirPath);
@@ -138,7 +138,7 @@ async function walkDir(
 async function discoverSkillDirs(
   repoRoot: string,
 ): Promise<Array<{ name: string; files: string[] }>> {
-  const skillsDir = path.join(repoRoot, ".claude", "skills");
+  const skillsDir = path.join(repoRoot, "canonical", "skills");
   const result: Array<{ name: string; files: string[] }> = [];
 
   try {
@@ -226,11 +226,11 @@ export async function runSetupWizard(
     const hasCodex = profile.targets.includes("codex-cli");
     const projectionMappings: ProjectionMapping[] = [];
     if (hasCodex) {
-      // Discover what's in .claude/ for projection planning
+      // Discover what's in canonical/ for projection planning
       const claudeFiles: string[] = [];
       for (const name of ["CLAUDE.md", "PLAN.md"]) {
         try {
-          await fs.access(path.join(repoRoot, ".claude", name));
+          await fs.access(path.join(repoRoot, "canonical", name));
           claudeFiles.push(name);
         } catch {
           // skip
@@ -242,13 +242,13 @@ export async function runSetupWizard(
 
       console.log("Target Projections:");
       for (const mapping of mappings) {
-        console.log(`  - regenerate ${mapping.target} from .claude/${mapping.source}`);
+        console.log(`  - regenerate ${mapping.target} from canonical/${mapping.source}`);
       }
 
       // Actually regenerate Target Projections in-repo before using as payload sources.
-      // Read each .claude/ source, rewrite content for Codex, write to .codex/.agents/.
+      // Read each canonical/ source, rewrite content for Codex, write to .codex/.agents/.
       for (const mapping of mappings) {
-        const sourcePath = path.join(repoRoot, ".claude", mapping.source);
+        const sourcePath = path.join(repoRoot, "canonical", mapping.source);
         const targetPath = path.join(repoRoot, mapping.target);
         const sourceContent = await fs.readFile(sourcePath, "utf-8");
         const rewritten = rewriteContentForCodex(sourceContent, mapping.isSkill);

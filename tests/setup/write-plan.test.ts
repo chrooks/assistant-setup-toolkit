@@ -6,7 +6,7 @@ import type { PayloadFile, InstallReceipt } from "../../src/setup/domain.js";
 function makeFile(relativePath: string, sourcePath?: string): PayloadFile {
   return {
     relativePath,
-    sourcePath: sourcePath ?? `/repo/.claude/${relativePath}`,
+    sourcePath: sourcePath ?? `/repo/canonical/${relativePath}`,
     component: "skills",
     origin: "canonical-source",
     executable: false,

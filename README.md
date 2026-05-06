@@ -62,12 +62,15 @@ After setup, the wizard prints Next Steps for actions it cannot automate:
 ## Structure
 
 ```
-.claude/              # Canonical Assistant Source — edit here
-  CLAUDE.md           # Global instructions
+canonical/            # Canonical Assistant Source — distributable content
+  CLAUDE.md           # Global instructions (installed to ~/.claude/CLAUDE.md)
   PLAN.md             # ExecPlan template
-  skills/             # Skill directories (SKILL.md each)
+  skills/             # Distributable skill directories (SKILL.md each)
   commands/           # Claude Code commands
   hooks/              # Session hooks
+.claude/              # Repo-local Claude Code config
+  skills/             # Project-scoped skills (e.g., /ingest-skill)
+  rules/              # Claude Code rules
 manifests/
   install.yaml        # Installation Manifest — External Sources
 scripts/
@@ -81,11 +84,11 @@ tests/setup/          # Test suite
 
 ### Canonical Assistant Source
 
-`.claude/` is the single source of truth. Codex CLI files (`.codex/`, `.agents/`) are Target Projections regenerated from `.claude/` before Codex installs. Edit `.claude/` — never edit Target Projections directly.
+`canonical/` is the single source of truth for distributable content. Codex CLI files (`.codex/`, `.agents/`) are Target Projections regenerated from `canonical/` before Codex installs. Edit `canonical/` for distributable content — never edit Target Projections directly. `.claude/` is reserved for repo-local Claude Code project config (project-scoped skills, rules).
 
 ### Installation Manifest
 
-`manifests/install.yaml` lists External Sources the wizard can fetch: skills, plugins, and MCP servers. During a Default Install, external sources are prepared first, then local Toolkit Components from `.claude/` are applied last so local skills win conflicts.
+`manifests/install.yaml` lists External Sources the wizard can fetch: skills, plugins, and MCP servers. During a Default Install, external sources are prepared first, then local Toolkit Components from `canonical/` are applied last so local skills win conflicts.
 
 ## Skills
 

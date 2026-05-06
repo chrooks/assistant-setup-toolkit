@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    Creates Codex-compatible project structure from .claude/ source.
+    Creates Codex-compatible project structure from canonical/ source.
 
 .DESCRIPTION
     Mapping:
-      .claude/CLAUDE.md       -> .codex/AGENTS.md
-      .claude/PLAN.md         -> .codex/PLAN.md
-      .claude/skills/         -> .agents/skills/
-      .claude/commands/       -> skipped (no Codex equivalent)
-      .claude/hooks/          -> skipped (no Codex equivalent)
-      .claude/settings.*.json -> skipped (Codex uses .codex/config.toml)
+      canonical/CLAUDE.md       -> .codex/AGENTS.md
+      canonical/PLAN.md         -> .codex/PLAN.md
+      canonical/skills/         -> .agents/skills/
+      canonical/commands/       -> skipped (no Codex equivalent)
+      canonical/hooks/          -> skipped (no Codex equivalent)
+      canonical/settings.*.json -> skipped (Codex uses .codex/config.toml)
 #>
 
 [CmdletBinding()]
@@ -20,7 +20,7 @@ $ErrorActionPreference = 'Stop'
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$sourceDir = Join-Path $repoRoot '.claude'
+$sourceDir = Join-Path $repoRoot 'canonical'
 
 function Write-Log {
     param([string]$Message)
@@ -187,7 +187,7 @@ if (-not (Test-Path -LiteralPath $sourceDir -PathType Container)) {
     Write-Error "Error: source directory not found: $sourceDir"
 }
 
-Write-Log 'Creating Codex project structure from .claude/'
+Write-Log 'Creating Codex project structure from canonical/'
 
 # 1. CLAUDE.md -> .codex/AGENTS.md
 $codexDir = Join-Path $repoRoot '.codex'
@@ -237,13 +237,13 @@ if (Test-Path -LiteralPath $skillsDir -PathType Container) {
 foreach ($skipped in @('commands', 'hooks')) {
     $skippedPath = Join-Path $sourceDir $skipped
     if (Test-Path -LiteralPath $skippedPath -PathType Container) {
-        Write-Log "Skipping .claude/$skipped/ (no Codex equivalent)"
+        Write-Log "Skipping canonical/$skipped/ (no Codex equivalent)"
     }
 }
 
 $settingsFiles = Get-ChildItem -LiteralPath $sourceDir -Filter 'settings*.json' -ErrorAction SilentlyContinue
 if ($settingsFiles) {
-    Write-Log 'Skipping .claude/settings*.json (Codex uses .codex/config.toml)'
+    Write-Log 'Skipping canonical/settings*.json (Codex uses .codex/config.toml)'
 }
 
 # 4. Copy PLAN.md if present -> .codex/PLAN.md

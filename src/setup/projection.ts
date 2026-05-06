@@ -1,5 +1,5 @@
 /**
- * Target Projection generation from the Canonical Assistant Source (.claude/)
+ * Target Projection generation from the Canonical Assistant Source (canonical/)
  * to Codex Target Projections (.codex/ and .agents/).
  *
  * Ports the behavior of scripts/create-codex-dir.sh into a testable
@@ -9,9 +9,9 @@
 
 // -- Types --
 
-/** A single planned file mapping from .claude/ source to Codex target. */
+/** A single planned file mapping from canonical/ source to Codex target. */
 export interface ProjectionMapping {
-  /** Relative path within .claude/ (e.g. "CLAUDE.md", "skills/commit/SKILL.md") */
+  /** Relative path within canonical/ (e.g. "CLAUDE.md", "skills/commit/SKILL.md") */
   readonly source: string;
   /** Relative path for the Codex target (e.g. ".codex/AGENTS.md", ".agents/skills/commit/SKILL.md") */
   readonly target: string;
@@ -21,7 +21,7 @@ export interface ProjectionMapping {
 
 /** Input describing the Canonical Assistant Source structure for projection planning. */
 export interface ProjectionInput {
-  /** Top-level files in .claude/ to project (e.g. ["CLAUDE.md", "PLAN.md"]) */
+  /** Top-level files in canonical/ to project (e.g. ["CLAUDE.md", "PLAN.md"]) */
   readonly claudeFiles: readonly string[];
   /** Skill directories, each with a name and list of relative file paths */
   readonly skillDirs: readonly SkillDirEntry[];
@@ -35,7 +35,7 @@ export interface SkillDirEntry {
 
 // -- File mapping rules --
 
-/** Maps top-level .claude/ filenames to their .codex/ targets. */
+/** Maps top-level canonical/ filenames to their .codex/ targets. */
 const FILE_MAP: Record<string, string> = {
   "CLAUDE.md": ".codex/AGENTS.md",
   "PLAN.md": ".codex/PLAN.md",
@@ -115,7 +115,7 @@ function sanitizeSkillFrontmatter(content: string): string {
 // -- Projection planning --
 
 /**
- * Plan the Codex Target Projection mappings from .claude/ source files.
+ * Plan the Codex Target Projection mappings from canonical/ source files.
  * Returns an array of source→target mappings without touching the filesystem.
  *
  * Commands and hooks are not projected — they have no Codex equivalent.

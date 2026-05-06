@@ -1,5 +1,7 @@
 # Build the Assistant Setup Toolkit Setup Wizard
 
+> **2026-05-06:** Canonical Assistant Source moved from `.claude/` to `canonical/`. Historical references to `.claude/` as the source directory in this plan now map to `canonical/`. The `.claude/` directory is now reserved for repo-local Claude Code project config.
+
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
 
 This plan follows the ExecPlan requirements in `~/.codex/PLAN.md`. Keep this file self-contained: a future contributor should be able to implement the feature from this document alone, without reading the original chat.
