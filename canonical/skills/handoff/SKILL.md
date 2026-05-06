@@ -2,14 +2,50 @@
 name: handoff
 description: Create a copyable markdown handoff or continuation prompt for the next Claude Code session. Use when work spans multiple sessions, when the user asks for a handoff or session summary, or when the next conversation needs the current plan, constraints, verification baseline, and next concrete step preserved.
 argument-hint: "[optional next step or scope to carry forward]"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
-# Handoff Workflow
+<what-to-do>
 
-Use this workflow to package the current session into one immediately usable markdown block for the next session.
+Package the current session into one immediately usable markdown block for the next session. Read `CONTEXT.md` for domain vocabulary and `docs/adr/` for existing decisions — use the project's terminology in the handoff body.
 
-## Current Context
+If the user supplied `$ARGUMENTS`, use that as the requested next step or scope hint. Otherwise, infer the next concrete step from the active plan and latest user direction.
+
+Return exactly one fenced markdown code block. Use the format in [HANDOFF-FORMAT.md](./HANDOFF-FORMAT.md). Add no extra commentary unless a one-sentence lead-in is genuinely helpful.
+
+</what-to-do>
+
+<supporting-info>
+
+## Domain awareness
+
+During handoff composition, look for existing documentation:
+
+### File structure
+
+```
+/
+├── CONTEXT.md
+├── docs/
+│   ├── adr/
+│   └── prd/
+└── .cowork/
+    ├── handoffs/
+    ├── config.yaml
+    └── index.md
+```
+
+Read `CONTEXT.md` for domain vocabulary — use the project's canonical terms in the handoff, not synonyms. Reference ADRs and PRDs by path when they're relevant to the next session's work.
+
+### Path conventions
+
+Write handoff files to `.cowork/handoffs/<YYYY-MM-DD>-<slug>.md`. This path is not configurable (`.cowork/` is plumbing, not user-facing).
+
+### Index update (standalone invocation)
+
+After writing a handoff file, if `.cowork/index.md` exists, update the **Handoffs** section: add an entry for the new handoff file. Update the header timestamp: `Last updated: <YYYY-MM-DD> by /handoff`. If `.cowork/index.md` does not exist, skip — no-op.
+
+## Current context
 
 Branch:
 !`git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git branch --show-current || echo "(not a git repo)"`
@@ -17,7 +53,7 @@ Branch:
 Changed files:
 !`git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git status --short || echo "(not a git repo)"`
 
-## Instructions
+## Process
 
 1. Identify the source of truth for the work.
    - Prefer an active plan file and matching questions file, usually under `feature_requests/`.
@@ -38,60 +74,11 @@ Changed files:
    - Keep the list concise and actionable.
 
 5. Define the next step narrowly.
-   - If the user supplied `$ARGUMENTS`, use that as the requested next step or scope hint.
-   - Otherwise, infer the next concrete step from the active plan and the latest user direction.
    - Keep the next step narrow enough that the next session can start immediately without drifting into later phases if needed.
 
 6. Add a verification baseline.
    - List the focused tests that should remain green before and after the next step.
    - Use the repo-local `.venv` interpreter when that is the established environment.
-
-7. Compose a title line.
-   - Format: `# <couple-word summary of previous convo> -> <next step> Handoff`.
-   - Keep the summary to ~2-5 words and the next step short and concrete.
-
-8. Return exactly one fenced markdown code block when the user directly asked for a handoff.
-   - Start with the `#` title line, then the `##` sections below.
-   - Capitalize each section title (Title Case) and prepend `##`.
-   - Add no extra commentary unless a one-sentence lead-in is genuinely helpful.
-
-## Output Template
-
-````md
-# <Previous Convo Summary> -> <Next Step> Handoff
-
-## Context
-Read and follow <plan-file> as the source of truth. Also respect <questions-file>.
-
-## Current Implementation Status
-- Completed <completed paragraph or milestone>.
-- Added/updated:
-  - <path>
-  - <path>
-- Focused tests currently pass for <area list>.
-
-## Important Working Instructions
-- <instruction>
-- <instruction>
-
-## Next 3 Steps
-1. <the next narrow step>
-2. <the next narrow step>
-3. <the next narrow step>
-
-## Expectations For This Conversation
-1. <expectation>
-2. <expectation>
-
-## Verification Baseline
-Use the repo `.venv` interpreter. Preserve passing tests for:
-- <test module>
-- <test module>
-
-**DO NOT PROCEED WITH IMPLEMENTING ANY NEXT STEPS YET**
-Acknowledge the receipt of thsi handoff, explore the repo for relevant context, propose a direction, and wait for further instruction.
-If the next step sounds like a non-trivial feature request, recommend the use of the `feature` skill.
-````
 
 ## Guardrails
 
@@ -99,6 +86,8 @@ If the next step sounds like a non-trivial feature request, recommend the use of
 - Do not speculate about work that was not implemented or verified.
 - Do not silently drop constraints from an earlier handoff that still apply.
 - Use repo-relative paths in the handoff body unless the user explicitly asks for absolute paths.
-- When referring to specific files or lines of code. [include a link to the file](some/path/to/file):<line number start>-<line number end>
+- When referring to specific files or lines of code, [include a link to the file](some/path/to/file):<line number start>-<line number end>.
 - Do not include internal chain-of-thought or speculation.
 - Ask a concise follow-up only when the source-of-truth file, the exact next step, or the authority of a prior handoff cannot be inferred safely.
+
+</supporting-info>
