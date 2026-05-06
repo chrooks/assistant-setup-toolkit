@@ -1,7 +1,10 @@
 # Development Guidelines
 
 # ExecPlans
-- When writing complex features or significant refactors, use an ExecPlan (as described in ~/.claude/PLAN.md) from design to implementation.
+- When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in ~/.claude/PLAN.md) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
+
+# Find-Skill
+- ALWAYS use `/find-skill` command to choose the best, most relevant skill for a task. 
 
 ## Tech Stack
 
@@ -75,6 +78,19 @@ When implementing or explaining a solution:
 - **Never** silently swallow exceptions
 
 ## Project Integration
+
+### Skill Packaging Helper
+
+- Use `./scripts/get-skills.sh` when a task needs to download agent skills and create Claude.ai-uploadable zip files.
+- With no arguments, it downloads the repo's default skills from `mattpocock/skills` and writes each skill to `artifacts/<skill-name>/SKILL.md` plus `artifacts/<skill-name>.zip`.
+- It accepts one or more `mattpocock/skills` paths, such as `engineering/to-prd` or `engineering/grill-with-docs`.
+- It also accepts GitHub skill-folder URLs in the form `https://github.com/<owner>/<repo>/tree/<branch>/<path-to-skill>`, such as `https://github.com/vercel-labs/skills/tree/main/skills/find-skills`.
+- Example usage:
+  ```bash
+  ./scripts/get-skills.sh
+  ./scripts/get-skills.sh engineering/to-prd
+  ./scripts/get-skills.sh https://github.com/vercel-labs/skills/tree/main/skills/find-skills
+  ```
 
 ### Learn the Codebase
 
