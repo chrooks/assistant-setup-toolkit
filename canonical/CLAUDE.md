@@ -1,12 +1,12 @@
 # Development Conversation Guidelines
 
-# Terminology Usage
+## Terminology Usage
 - If a  `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source-of-truth for our shared vocabulary in our converations.
 -  The shared terminology in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
 - Be VERY strict about using the vocabulary when applicable instead of other similar word or terms.
 - Whenever you use a vocabulary word in conversation, define it. Do this until I tell you explicitly that I don't need the definition repeated anymore. Don't be afraid to be annoying/verbose about these terms. The goal is for us to get comfortable using the terminology.
 
-# Ground Answers in Truth
+## Ground Answers in Truth
 - If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.
   - Good examples include:
     - Tutorials with specific instructions - ex: "How do I get my database connection url from the Supabase dashboard"
@@ -15,22 +15,22 @@
     - Answering a question that requires expert knowledge - ex: "How can I best make my UI feel rewarding to use from a HCI, UI/UX, psychology standpoint"
 - 
 
-# ExecPlans
+## ExecPlans
 - When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
-# Find-Skill
+## Find-Skill
 - ALWAYS use `/find-skill` command to choose the best, most relevant skill for a task. 
 
-# Frontend/Design Work
+## Frontend/Design Work
 - Prefer to use a combination of `/ui-ux-pro-max` skill and `~/<Assistant_Home>/design-principles.md` when does frontend design work.
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
 
-## Tech Stack
+## Preferred Tech Stack
 
 Primary languages and frameworks across projects:
 - **Frontend**: TypeScript, React, Next.js
 - **Backend**: Python (Flask/FastAPI), TypeScript (Node.js)
-- **Database**: PostgreSQL (via Supabase)
+- **Database**: PostgreSQL (via Supabase), SQLite locallys
 
 For language-specific rules, import them in the project-level CLAUDE.md:
 - Python projects: `@~/.claude/rules/python/`
@@ -52,33 +52,6 @@ For language-specific rules, import them in the project-level CLAUDE.md:
 - **No clever tricks** - choose the boring solution
 - If you need to explain it, it's too complex
 
-## Learning & Growth
-
-The user is actively developing their software engineering knowledge. When explaining
-or implementing anything non-trivial, prioritize understanding at the architectural
-and design level over language-level detail.
-
-### Explain Why Before How
-
-When implementing or explaining a solution:
-- **Lead with purpose** — why does this solution exist? What problem does it solve?
-- **Name the pattern** — if the code uses a known pattern (task queue, producer-consumer,
-  middleware, factory, etc.), name it, and briefly explain what makes it that pattern
-- **Explain the shape** — why is the system structured this way? What would get harder
-  or break with a different structure?
-- **Skip the obvious** — assume fluency in the languages being used; don't explain
-  syntax unless it's genuinely non-obvious or explicitly asked about
-
-### Levels of Explanation (in priority order)
-
-1. **Architectural** — how do systems fit together and why? (stateless servers, task
-   queues, pre-computation caches, message brokers, event streams)
-2. **Design** — how do components within a system relate? (dependency injection,
-   middleware chains, factory functions, observer pattern)
-3. **Implementation** — how is this specific thing built? (polling workers, connection
-   pooling, JWT validation, DB transactions)
-4. **Language/syntax** — only when explicitly asked or when a language feature
-   is doing something genuinely non-obvious
 
 ## Technical Standards
 
@@ -98,19 +71,6 @@ When implementing or explaining a solution:
 
 ## Project Integration
 
-### Skill Packaging Helper
-
-- Use `./scripts/get-skills.sh` when a task needs to download agent skills and create Claude.ai-uploadable zip files.
-- With no arguments, it downloads the repo's default skills from `mattpocock/skills` and writes each skill to `artifacts/<skill-name>/SKILL.md` plus `artifacts/<skill-name>.zip`.
-- It accepts one or more `mattpocock/skills` paths, such as `engineering/to-prd` or `engineering/grill-with-docs`.
-- It also accepts GitHub skill-folder URLs in the form `https://github.com/<owner>/<repo>/tree/<branch>/<path-to-skill>`, such as `https://github.com/vercel-labs/skills/tree/main/skills/find-skills`.
-- Example usage:
-  ```bash
-  ./scripts/get-skills.sh
-  ./scripts/get-skills.sh engineering/to-prd
-  ./scripts/get-skills.sh https://github.com/vercel-labs/skills/tree/main/skills/find-skills
-  ```
-
 ### Learn the Codebase
 
 - Find similar features/components
@@ -127,7 +87,7 @@ When implementing or explaining a solution:
 
 ### Code Style
 
-- When writing frontend code (React, HTML, etc.) ALWAYS give elements id's that I, the human, can use to communicate to you with
+- AGAIN, When writing frontend code (React, HTML, etc.) ALWAYS give elements id's that I, the human, can use to communicate to you with
 - Follow existing conventions in the project
 - Refer to linter configurations and .editorconfig, if present
 - Text files should always end with an empty line
@@ -142,7 +102,7 @@ When implementing or explaining a solution:
 
 ## MCP Tool Use
 
-- Always use context7 when I need code generation, setup or configuration steps, or
+- AGAIN, Always use context7 when I need code generation, setup or configuration steps, or
 library/API documentation. This means you should automatically use the Context7 MCP
 tools to resolve library id and get library docs without me having to explicitly ask
 
