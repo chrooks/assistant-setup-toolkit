@@ -9,7 +9,8 @@
 
 import path from "node:path";
 import fs from "node:fs/promises";
-import { parseCliFlags } from "./cli.js";
+import { tryParseCliFlags } from "./cli.js";
+import { runInteractivePrompts } from "./prompts.js";
 import { resolveAssistantHomes } from "./domain.js";
 import type { AssistantTargetId, AssistantHomeId, PayloadFile, ComponentKind } from "./domain.js";
 import { loadInstallationManifest } from "./manifest.js";
@@ -170,12 +171,20 @@ export async function runSetupWizard(
   _env?: Partial<NodeJS.ProcessEnv>,
 ): Promise<number> {
   try {
-    // Parse CLI flags into a Setup Profile
-    const profile = parseCliFlags(argv);
+    // Parse CLI flags — fall through to interactive prompts if insufficient
+    const parseResult = tryParseCliFlags(argv);
+    let profile;
+    if (parseResult.kind === "profile") {
+      profile = parseResult.profile;
+    } else {
+      // Interactive mode — prompt for missing selections
+      profile = await runInteractivePrompts(parseResult.partial);
+    }
+
     const repoRoot = findRepoRoot();
 
     // Print header
-    console.log("Assistant Setup Toolkit Setup Wizard");
+    console.log("\nAssistant Setup Toolkit Setup Wizard");
     console.log(`Mode: ${profile.dryRun ? "dry-run" : "live"}`);
     console.log(`Setup Profile: ${profile.mode === "default" ? "Default Install" : "Custom Install"}`);
     console.log(`Write behavior: ${profile.writeBehavior === "safe-merge" ? "Safe Merge" : profile.writeBehavior === "overwrite" ? "Overwrite Install" : "Prune Install"}`);
