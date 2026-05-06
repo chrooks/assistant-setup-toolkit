@@ -1,0 +1,83 @@
+# Installation Manifest for the Assistant Setup Toolkit
+# Lists External Sources the Setup Wizard can fetch and install.
+# See CONTEXT.md for domain language definitions.
+
+version: 1
+externalSources:
+  - id: matt-pocock-skills
+    name: Matt Pocock Skills
+    kind: skill-pack
+    url: https://github.com/mattpocock/skills
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - Includes engineering and productivity skills.
+
+  - id: find-skills
+    name: find-skills
+    kind: skill
+    url: https://github.com/vercel-labs/skills/tree/main/skills/find-skills
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+
+  - id: ui-ux-pro-max
+    name: UI/UX Pro Max
+    kind: skill-or-plugin
+    url: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+
+  - id: caveman
+    name: Caveman
+    kind: plugin
+    url: https://github.com/JuliusBrussee/caveman
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+
+  - id: everything-claude-code
+    name: Everything Claude Code
+    kind: plugin
+    url: https://github.com/affaan-m/everything-claude-code
+    default: true
+    targets:
+      - claude-code
+
+  - id: codex-plugin-cc
+    name: Codex for Claude Code
+    kind: plugin
+    url: https://github.com/openai/codex-plugin-cc
+    default: true
+    targets:
+      - claude-code
+    installWhen:
+      assistantTargetExists: claude-code
+
+  - id: playwright-mcp
+    name: Playwright MCP
+    kind: mcp-server
+    url: https://github.com/microsoft/playwright-mcp
+    default: false
+    targets:
+      - claude-code
+      - codex-cli
+    requiresConfirmation: true
+
+  - id: context7
+    name: Context7
+    kind: mcp-server
+    url: https://github.com/upstash/context7
+    default: false
+    targets:
+      - claude-code
+      - codex-cli
+    requiresConfirmation: true
+    requiredSecrets:
+      - CONTEXT7_API_KEY
