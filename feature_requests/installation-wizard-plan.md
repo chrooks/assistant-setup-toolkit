@@ -18,9 +18,9 @@ The observable outcome is a working command, `npm run setup`, plus a direct comm
 - [x] (2026-05-06 17:22Z) Add the Node and TypeScript project scaffolding needed to run and test the Setup Wizard.
 - [x] (2026-05-06 17:28Z) Add a YAML Installation Manifest that replaces or pairs with the current human-readable `PLUGINS.md`.
 - [x] (2026-05-06 17:28Z) Implement the domain model and manifest parser.
-- [ ] Implement Target Projection generation from `.claude/` to Codex views.
-- [ ] Implement Assistant Payload building with external-first, local-last precedence.
-- [ ] Implement write planning, backups, Safe Merge, Overwrite Install, Prune Install, and Install Receipts.
+- [x] (2026-05-06 17:35Z) Implement Target Projection generation from `.claude/` to Codex views.
+- [x] (2026-05-06 17:35Z) Implement Assistant Payload building with external-first, local-last precedence.
+- [x] (2026-05-06 17:35Z) Implement write planning, backups, Safe Merge, Overwrite Install, Prune Install, and Install Receipts.
 - [ ] Implement External Source fetching and Skill Artifact generation.
 - [ ] Implement MCP Server planning and Next Steps without silently installing or running servers.
 - [ ] Implement the CLI prompts and flags.
