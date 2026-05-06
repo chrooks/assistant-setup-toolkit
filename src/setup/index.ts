@@ -26,6 +26,8 @@ import { planMcpNextSteps } from "./mcp.js";
 import { buildStandardNextSteps, formatNextSteps } from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
 import { applyWritePlan } from "./apply.js";
+import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
+import type { PlannedArtifact } from "./artifacts.js";
 
 // -- Helpers --
 
@@ -134,12 +136,12 @@ async function walkDir(
   return results;
 }
 
-/** Discover skill directories for projection planning. */
+/** Discover skill directories for projection planning and artifact generation. */
 async function discoverSkillDirs(
   repoRoot: string,
-): Promise<Array<{ name: string; files: string[] }>> {
+): Promise<Array<{ name: string; files: string[]; sourceDir: string }>> {
   const skillsDir = path.join(repoRoot, "canonical", "skills");
-  const result: Array<{ name: string; files: string[] }> = [];
+  const result: Array<{ name: string; files: string[]; sourceDir: string }> = [];
 
   try {
     const entries = await fs.readdir(skillsDir, { withFileTypes: true });
@@ -151,6 +153,7 @@ async function discoverSkillDirs(
       result.push({
         name: entry.name,
         files: skillFiles.filter((f) => !f.startsWith(".")),
+        sourceDir: skillPath,
       });
     }
   } catch {
@@ -377,6 +380,34 @@ export async function runSetupWizard(
       }
     }
 
+    // Skill Artifact generation — plan and create ZIPs for desktop/web upload
+    const skillDirs = await discoverSkillDirs(repoRoot);
+    const artifactsDir = path.join(repoRoot, "artifacts");
+    const plannedArtifacts = planSkillArtifacts({ skillDirs, artifactsDir });
+    let hasSkillArtifacts = false;
+
+    if (plannedArtifacts.length > 0) {
+      if (profile.dryRun) {
+        console.log("Skill Artifacts (dry-run):");
+        for (const artifact of plannedArtifacts) {
+          console.log(`  [planned] ${artifact.skillName}.zip (${artifact.sourceFiles.length} file(s))`);
+        }
+        hasSkillArtifacts = true;
+      } else {
+        console.log("Skill Artifacts:");
+        const artifactResult = await createSkillArtifacts(plannedArtifacts);
+
+        for (const zipPath of artifactResult.created) {
+          console.log(`  [created] ${path.basename(zipPath)}`);
+        }
+        for (const err of artifactResult.errors) {
+          console.error(`  [error] ${err.skillName}: ${err.message}`);
+        }
+
+        hasSkillArtifacts = artifactResult.created.length > 0;
+      }
+    }
+
     // Verification Step
     const verificationResult = planVerificationChecks(writePlans, profile.dryRun);
     console.log("Verification Step:");
@@ -386,7 +417,7 @@ export async function runSetupWizard(
 
     // Next Steps
     const mcpSteps = planMcpNextSteps(manifest.externalSources);
-    const standardSteps = buildStandardNextSteps(false);
+    const standardSteps = buildStandardNextSteps(hasSkillArtifacts);
     const allNextSteps: NextStep[] = [...standardSteps, ...mcpSteps];
     console.log("Next Steps:");
     for (const line of formatNextSteps(allNextSteps)) {
