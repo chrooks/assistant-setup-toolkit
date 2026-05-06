@@ -13,7 +13,7 @@ Usage: $(basename "$0") [--claude] [--codex] [--dry-run]
 Copy agent config directories from this repo to your home directory.
 
 Flags:
-  --claude    Copy .claude/ to ~/.claude/
+  --claude    Copy canonical/ to ~/.claude/
   --codex     Copy .codex/ to ~/.codex/ and .agents/ to ~/.agents/
   --dry-run   Show what would be copied without doing it
 
@@ -71,7 +71,7 @@ install_dir() {
 }
 
 if $INSTALL_CLAUDE; then
-  install_dir "${REPO_ROOT}/.claude" "${HOME_DIR}/.claude" ".claude"
+  install_dir "${REPO_ROOT}/canonical" "${HOME_DIR}/.claude" "canonical -> ~/.claude"
 fi
 
 if $INSTALL_CODEX; then
