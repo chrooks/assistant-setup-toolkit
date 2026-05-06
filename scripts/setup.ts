@@ -2,13 +2,9 @@
  * CLI entry point for the Setup Wizard.
  * Delegates to the orchestration module and sets the process exit code.
  */
-async function main(): Promise<number> {
-  // Placeholder — orchestration module added in Milestone 4
-  console.log("Setup Wizard not yet implemented.");
-  return 0;
-}
+import { runSetupWizard } from "../src/setup/index.js";
 
-main()
+runSetupWizard(process.argv.slice(2), process.env)
   .then((code) => {
     process.exitCode = code;
   })

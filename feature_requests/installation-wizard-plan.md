@@ -21,12 +21,14 @@ The observable outcome is a working command, `npm run setup`, plus a direct comm
 - [x] (2026-05-06 17:35Z) Implement Target Projection generation from `.claude/` to Codex views.
 - [x] (2026-05-06 17:35Z) Implement Assistant Payload building with external-first, local-last precedence.
 - [x] (2026-05-06 17:35Z) Implement write planning, backups, Safe Merge, Overwrite Install, Prune Install, and Install Receipts.
+- [x] (2026-05-06 17:47Z) Implement MCP Server planning and Next Steps without silently installing or running servers.
+- [x] (2026-05-06 17:47Z) Implement the CLI flags and Setup Profile parsing.
+- [x] (2026-05-06 17:47Z) Implement CLI orchestration, verification, and dry-run output.
+- [x] (2026-05-06 17:47Z) Hit acceptance target: `npm run setup -- --claude --codex --default --dry-run` works.
 - [ ] Implement External Source fetching and Skill Artifact generation.
-- [ ] Implement MCP Server planning and Next Steps without silently installing or running servers.
-- [ ] Implement the CLI prompts and flags.
-- [ ] Add unit and integration tests, including fake Assistant Homes.
+- [ ] Add integration tests with fake Assistant Homes.
 - [ ] Update README and compatibility scripts.
-- [ ] Run verification commands and fill in Outcomes & Retrospective.
+- [ ] Run final verification and fill in Outcomes & Retrospective.
 
 ## Surprises & Discoveries
 
