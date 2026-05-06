@@ -21,7 +21,7 @@ Usage: $scriptName [-Claude] [-Codex] [-DryRun]
 Copy agent config directories from this repo to your home directory.
 
 Flags:
-  -Claude   Copy .claude/ to ~/.claude/
+  -Claude   Copy canonical/ to ~/.claude/
   -Codex    Copy .codex/ to ~/.codex/ and .agents/ to ~/.agents/
   -DryRun   Show what would be copied without doing it
 
@@ -173,7 +173,7 @@ if (-not $Claude -and -not $Codex) {
 }
 
 if ($Claude) {
-    Copy-AgentDirectory -Source (Join-Path $repoRoot '.claude') -Destination (Join-Path $homeDir '.claude') -Label '.claude'
+    Copy-AgentDirectory -Source (Join-Path $repoRoot 'canonical') -Destination (Join-Path $homeDir '.claude') -Label 'canonical -> ~/.claude'
 }
 
 if ($Codex) {

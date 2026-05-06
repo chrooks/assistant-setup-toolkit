@@ -12,10 +12,10 @@ Use this workflow to package the current session into one immediately usable mar
 ## Current Context
 
 Branch:
-!`git branch --show-current`
+!`git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git branch --show-current || echo "(not a git repo)"`
 
 Changed files:
-!`git status --short`
+!`git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git status --short || echo "(not a git repo)"`
 
 ## Instructions
 

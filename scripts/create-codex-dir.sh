@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-# Creates Codex-compatible project structure from .claude/ source.
+# Creates Codex-compatible project structure from canonical/ source.
 #
 # Mapping:
-#   .claude/CLAUDE.md       -> .codex/AGENTS.md
-#   .claude/PLAN.md         -> .codex/PLAN.md
-#   .claude/skills/         -> .agents/skills/
-#   .claude/commands/       -> skipped (no Codex equivalent)
-#   .claude/hooks/          -> skipped (no Codex equivalent)
-#   .claude/settings.*.json -> skipped (Codex uses .codex/config.toml)
+#   canonical/CLAUDE.md       -> .codex/AGENTS.md
+#   canonical/PLAN.md         -> .codex/PLAN.md
+#   canonical/skills/         -> .agents/skills/
+#   canonical/commands/       -> skipped (no Codex equivalent)
+#   canonical/hooks/          -> skipped (no Codex equivalent)
+#   canonical/settings.*.json -> skipped (Codex uses .codex/config.toml)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-SOURCE_DIR="${REPO_ROOT}/.claude"
+SOURCE_DIR="${REPO_ROOT}/canonical"
 
 log() {
   printf '%s\n' "$*"
@@ -128,7 +128,7 @@ main() {
     exit 1
   fi
 
-  log "Creating Codex project structure from .claude/"
+  log "Creating Codex project structure from canonical/"
 
   # 1. CLAUDE.md -> .codex/AGENTS.md
   local codex_dir="${REPO_ROOT}/.codex"
@@ -170,12 +170,12 @@ main() {
   # 3. Log skipped directories
   for skipped in commands hooks; do
     if [ -d "${SOURCE_DIR}/${skipped}" ]; then
-      log "Skipping .claude/${skipped}/ (no Codex equivalent)"
+      log "Skipping canonical/${skipped}/ (no Codex equivalent)"
     fi
   done
 
   if ls "${SOURCE_DIR}"/settings*.json 1>/dev/null 2>&1; then
-    log "Skipping .claude/settings*.json (Codex uses .codex/config.toml)"
+    log "Skipping canonical/settings*.json (Codex uses .codex/config.toml)"
   fi
 
   # 4. Copy PLAN.md if present -> .codex/PLAN.md

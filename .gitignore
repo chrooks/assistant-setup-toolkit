@@ -4,3 +4,8 @@ prompts/
 .DS_Store
 .mcp.json
 artifacts/
+node_modules/
+dist/
+.setup-cache/
+tests/.tmp/
+feature_requests/
