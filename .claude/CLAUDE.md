@@ -1,10 +1,23 @@
-# Development Guidelines
+# Development Conversation Guidelines
+
+# Ground Answers in Truth
+- If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.
+  - Good examples include:
+    - Tutorials with specific instructions - ex: "How do I get my database connection url from the Supabase dashboard"
+    - Working with unfamiliar libraries - ex: "How do I train an agent with poke-api Python library"
+    - Recalling specific numbers, figures, and facts - ex: "What is Lebron James averaging in the playoffs right now?"
+    - Answering a question that requires expert knowledge - ex: "How can I best make my UI feel rewarding to use from a HCI, UI/UX, psychology standpoint"
+- 
 
 # ExecPlans
-- When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in ~/.claude/PLAN.md) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
+- When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
 # Find-Skill
 - ALWAYS use `/find-skill` command to choose the best, most relevant skill for a task. 
+
+# Frontend/Design Work
+- Prefer to use a combination of `/ui-ux-pro-max` skill and `~/<Assistant_Home>/design-principles.md` when does frontend design work.
+- **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
 
 ## Tech Stack
 
