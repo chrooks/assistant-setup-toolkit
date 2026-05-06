@@ -24,6 +24,7 @@ import { planVerificationChecks, formatVerificationResult } from "./verify.js";
 import { planMcpNextSteps } from "./mcp.js";
 import { buildStandardNextSteps, formatNextSteps } from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
+import { applyWritePlan } from "./apply.js";
 
 // -- Helpers --
 
@@ -311,6 +312,51 @@ export async function runSetupWizard(
       }
     }
 
+    // Apply write plans (live mode) or skip (dry-run)
+    if (!profile.dryRun) {
+      console.log("Applying writes...");
+      let totalWritten = 0;
+      let totalSkipped = 0;
+      let totalRemoved = 0;
+      const allErrors: Array<{ home: string; relativePath: string; message: string }> = [];
+
+      for (const payload of payloadResult.payloads) {
+        const plan = writePlans.find(
+          (p) => p.assistantHome === resolveAssistantHomePath(payload.homeId),
+        );
+        if (!plan) continue;
+
+        const result = await applyWritePlan(plan, {
+          assistantTarget: payload.target,
+          mode: profile.mode,
+          components: [...profile.components],
+          writeBehavior: profile.writeBehavior,
+        });
+
+        totalWritten += result.filesWritten;
+        totalSkipped += result.filesSkipped;
+        totalRemoved += result.filesRemoved;
+
+        for (const err of result.errors) {
+          allErrors.push({
+            home: homeLabel(payload.homeId),
+            relativePath: err.relativePath,
+            message: err.message,
+          });
+        }
+      }
+
+      console.log(`  ${totalWritten} file(s) written, ${totalSkipped} skipped, ${totalRemoved} removed`);
+
+      if (allErrors.length > 0) {
+        console.error("Errors during apply:");
+        for (const err of allErrors) {
+          console.error(`  ${err.home}/${err.relativePath}: ${err.message}`);
+        }
+        return 1;
+      }
+    }
+
     // Verification Step
     const verificationResult = planVerificationChecks(writePlans, profile.dryRun);
     console.log("Verification Step:");
@@ -327,9 +373,11 @@ export async function runSetupWizard(
       console.log(line);
     }
 
-    // Dry-run footer
+    // Footer
     if (profile.dryRun) {
       console.log("\nDry-run complete. No files were written.");
+    } else {
+      console.log("\nSetup complete.");
     }
 
     return 0;
