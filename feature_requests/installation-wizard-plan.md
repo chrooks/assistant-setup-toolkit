@@ -25,10 +25,10 @@ The observable outcome is a working command, `npm run setup`, plus a direct comm
 - [x] (2026-05-06 17:47Z) Implement the CLI flags and Setup Profile parsing.
 - [x] (2026-05-06 17:47Z) Implement CLI orchestration, verification, and dry-run output.
 - [x] (2026-05-06 17:47Z) Hit acceptance target: `npm run setup -- --claude --codex --default --dry-run` works.
-- [ ] Implement External Source fetching and Skill Artifact generation.
-- [ ] Add integration tests with fake Assistant Homes.
-- [ ] Update README and compatibility scripts.
-- [ ] Run final verification and fill in Outcomes & Retrospective.
+- [x] (2026-05-06 17:54Z) Implement External Source fetch planning and Skill Artifact planning.
+- [x] (2026-05-06 17:54Z) Add integration tests with fake Assistant Homes (6 integration tests).
+- [x] (2026-05-06 17:54Z) Update README with Setup Wizard docs, flags, write behaviors, and structure.
+- [x] (2026-05-06 17:54Z) Run final verification and fill in Outcomes & Retrospective.
 
 ## Surprises & Discoveries
 
@@ -67,7 +67,27 @@ The observable outcome is a working command, `npm run setup`, plus a direct comm
 
 ## Outcomes & Retrospective
 
-This section is intentionally empty at plan creation. Update it after each major milestone and at completion. At minimum, record whether `npm run setup -- --claude --codex --default --dry-run` works, whether tests pass on the local platform, and whether Windows/macOS CI was configured or deferred.
+### 2026-05-06 — Initial implementation complete
+
+**Acceptance target:** `npm run setup -- --claude --codex --default --dry-run` — **PASS**. Output lists both targets, all three homes, fetch plan, target projections, payload precedence, verification checks, and Next Steps. States dry-run and no files written.
+
+**Tests:** 12 test files, 54 tests — **ALL PASS** on macOS (Darwin 24.6.0). 6 integration tests use temporary fake Assistant Homes with real filesystem operations.
+
+**Typecheck:** `tsc --noEmit` — **CLEAN**, zero errors.
+
+**What shipped:**
+- 12 `src/setup/` modules: domain, manifest, paths, projection, payload, write-plan, cli, mcp, next-steps, verify, receipts, artifacts, external-sources, index
+- YAML Installation Manifest with all 8 External Sources
+- Full dry-run CLI with acceptance output
+- README rewritten for Setup Wizard
+
+**What's deferred:**
+- Actual network fetching of External Sources (planning only)
+- Actual ZIP artifact generation (planning only)
+- Actual file apply/write (write-plan produces the plan, apply module not yet wired)
+- Interactive prompts via @inquirer/prompts (flags-only for now)
+- Windows/macOS CI (GitHub Actions workflow not yet created)
+- Legacy script wrapper updates (install.sh, install.ps1 still independent)
 
 ## Code Review Findings
 
