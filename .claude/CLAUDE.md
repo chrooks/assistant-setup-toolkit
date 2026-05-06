@@ -1,5 +1,11 @@
 # Development Conversation Guidelines
 
+# Terminology Usage
+- If a  `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source-of-truth for our shared vocabulary in our converations.
+-  The shared terminology in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
+- Be VERY strict about using the vocabulary when applicable instead of other similar word or terms.
+- Whenever you use a vocabulary word in conversation, define it. Do this until I tell you explicitly that I don't need the definition repeated anymore. Don't be afraid to be annoying/verbose about these terms. The goal is for us to get comfortable using the terminology.
+
 # Ground Answers in Truth
 - If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.
   - Good examples include:
