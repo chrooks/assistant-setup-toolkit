@@ -213,7 +213,7 @@ export async function runSetupWizard(
       console.log(`  - ${source.id}: next steps only${secretNote}`);
     }
 
-    // Plan Target Projections if Codex is selected
+    // Plan and regenerate Target Projections if Codex is selected
     const hasCodex = profile.targets.includes("codex-cli");
     const projectionMappings: ProjectionMapping[] = [];
     if (hasCodex) {
@@ -235,12 +235,23 @@ export async function runSetupWizard(
       for (const mapping of mappings) {
         console.log(`  - regenerate ${mapping.target} from .claude/${mapping.source}`);
       }
+
+      // Actually regenerate Target Projections in-repo before using as payload sources.
+      // Read each .claude/ source, rewrite content for Codex, write to .codex/.agents/.
+      for (const mapping of mappings) {
+        const sourcePath = path.join(repoRoot, ".claude", mapping.source);
+        const targetPath = path.join(repoRoot, mapping.target);
+        const sourceContent = await fs.readFile(sourcePath, "utf-8");
+        const rewritten = rewriteContentForCodex(sourceContent, mapping.isSkill);
+        await fs.mkdir(path.dirname(targetPath), { recursive: true });
+        await fs.writeFile(targetPath, rewritten, "utf-8");
+      }
     }
 
     // Discover Canonical Assistant Source files
     const canonicalFiles = await discoverCanonicalFiles(repoRoot);
 
-    // Build projection files for Codex targets
+    // Build projection files for Codex targets — now pointing at freshly regenerated files
     const projectionFiles: PayloadFile[] = projectionMappings.map((m) => ({
       relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
       sourcePath: path.join(repoRoot, m.target),
