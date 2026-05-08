@@ -138,7 +138,7 @@ externalSources:
       const ids = manifest.externalSources.map((s) => s.id);
       expect(ids).toContain("matt-pocock-skills");
       expect(ids).toContain("find-skills");
-      expect(ids).toContain("ui-ux-pro-max");
+      expect(ids).toContain("impeccable");
       expect(ids).toContain("caveman");
       expect(ids).toContain("everything-claude-code");
       expect(ids).toContain("codex-plugin-cc");

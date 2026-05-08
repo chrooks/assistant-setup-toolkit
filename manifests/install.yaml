@@ -24,14 +24,16 @@ externalSources:
       - claude-code
       - codex-cli
 
-  - id: ui-ux-pro-max
-    name: UI/UX Pro Max
-    kind: skill-or-plugin
-    url: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+  - id: impeccable
+    name: Impeccable
+    kind: skill
+    url: https://github.com/pbakaus/impeccable
     default: true
     targets:
       - claude-code
       - codex-cli
+    notes:
+      - Install via `npx skills add pbakaus/impeccable`.
 
   - id: caveman
     name: Caveman

@@ -1,6 +1,6 @@
 # Plugins To Install
 
-- UI/UX Pro Max Skill:      https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+- Impeccable Skill:         https://github.com/pbakaus/impeccable (npx skills add pbakaus/impeccable)
 - Caveman:                  https://github.com/JuliusBrussee/caveman/tree/main
 - Everything Claude Code:   https://github.com/affaan-m/everything-claude-code
 Not a Plugin per se
