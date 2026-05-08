@@ -13,17 +13,23 @@
     - Working with unfamiliar libraries - ex: "How do I train an agent with poke-api Python library"
     - Recalling specific numbers, figures, and facts - ex: "What is Lebron James averaging in the playoffs right now?"
     - Answering a question that requires expert knowledge - ex: "How can I best make my UI feel rewarding to use from a HCI, UI/UX, psychology standpoint"
-- 
 
 ## ExecPlans
 - When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
-## Find-Skill
-- ALWAYS use `/find-skill` command to choose the best, most relevant skill for a task. 
+## Using the Right Skill for the Right Job
+ALWAYS:
+- Use a the `/impeccable` family of skills for design/frontend work
+- Use `/tdd` when implementing a feature, especially if its testable logic. 
+- Use `/verification-loop` after implementing a feature.
+- Use `/commit` when its time to commit work to version control.
+> `/tdd` + `/verification-loop` + `/commit` is a VERY common workflow when implementing.
+- Otherwise, if no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
-## Frontend/Design Work
-- Prefer to use a combination of `/ui-ux-pro-max` skill and `~/<Assistant_Home>/design-principles.md` when does frontend design work.
+## Code Style Preferences
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
+- Refer to linter configurations and .editorconfig, if present
+- Text files should always end with an empty line
 
 ## Preferred Tech Stack
 
@@ -85,13 +91,6 @@ For language-specific rules, import them in the project-level CLAUDE.md:
 - Use project's formatter/linter settings
 - Don't introduce new tools without strong justification
 
-### Code Style
-
-- AGAIN, When writing frontend code (React, HTML, etc.) ALWAYS give elements id's that I, the human, can use to communicate to you with
-- Follow existing conventions in the project
-- Refer to linter configurations and .editorconfig, if present
-- Text files should always end with an empty line
-
 ## Rules
 
 @~/.claude/rules/common/coding-style.md
@@ -102,9 +101,7 @@ For language-specific rules, import them in the project-level CLAUDE.md:
 
 ## MCP Tool Use
 
-- AGAIN, Always use context7 when I need code generation, setup or configuration steps, or
-library/API documentation. This means you should automatically use the Context7 MCP
-tools to resolve library id and get library docs without me having to explicitly ask
+- AGAIN, Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask
 
 ## Important Reminders
 
