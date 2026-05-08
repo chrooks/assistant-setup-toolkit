@@ -28,6 +28,9 @@ import type { NextStep } from "./next-steps.js";
 import { applyWritePlan } from "./apply.js";
 import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
 import type { PlannedArtifact } from "./artifacts.js";
+import { planExternalFetches } from "./external-sources.js";
+import { fetchPlannedSources } from "./external-fetcher.js";
+import os from "node:os";
 
 // -- Helpers --
 
@@ -176,15 +179,30 @@ export async function runSetupWizard(
   try {
     // Parse CLI flags — fall through to interactive prompts if insufficient
     const parseResult = tryParseCliFlags(argv);
+    const repoRoot = findRepoRoot();
+
+    // Load Installation Manifest early so the interactive prompt can offer
+    // External Sources to pick from. Failures here should not abort setup;
+    // we fall back to an empty manifest and continue.
+    const manifestPath = path.join(repoRoot, "manifests", "install.yaml");
+    let manifest;
+    try {
+      manifest = await loadInstallationManifest(manifestPath);
+    } catch {
+      console.log("Warning: Could not load manifests/install.yaml — continuing without External Sources.");
+      manifest = { version: 1 as const, externalSources: [] };
+    }
+
     let profile;
     if (parseResult.kind === "profile") {
       profile = parseResult.profile;
     } else {
-      // Interactive mode — prompt for missing selections
-      profile = await runInteractivePrompts(parseResult.partial);
+      // Interactive mode — prompt for missing selections, including External Sources
+      profile = await runInteractivePrompts(
+        parseResult.partial,
+        manifest.externalSources,
+      );
     }
-
-    const repoRoot = findRepoRoot();
 
     // Print header
     console.log("\nAssistant Setup Toolkit Setup Wizard");
@@ -201,28 +219,65 @@ export async function runSetupWizard(
       console.log(`  - ${targetLabel(target)} -> ${homeLabels}`);
     }
 
-    // Load Installation Manifest
-    const manifestPath = path.join(repoRoot, "manifests", "install.yaml");
-    let manifest;
-    try {
-      manifest = await loadInstallationManifest(manifestPath);
-    } catch {
-      console.log("Warning: Could not load manifests/install.yaml — continuing without External Sources.");
-      manifest = { version: 1 as const, externalSources: [] };
+    // Plan External Source fetches based on profile + manifest. Selection comes
+    // from `selectedExternalSourceIds` (interactive picker or --sources flag);
+    // when absent, falls back to manifest defaults. MCP sources always skipped
+    // here — they're surfaced through Next Steps below.
+    const fetchPlan = planExternalFetches(manifest.externalSources, {
+      targets: profile.targets,
+      fetch: profile.fetch,
+      selectedIds: profile.selectedExternalSourceIds,
+    });
+    const mcpSources = manifest.externalSources.filter(
+      (s) => s.kind === "mcp-server",
+    );
+
+    console.log("Fetch Step:");
+    for (const planned of fetchPlan.planned) {
+      console.log(`  - ${planned.id}: ${profile.dryRun ? "planned" : "queued"}`);
+    }
+    for (const skipped of fetchPlan.skipped) {
+      // MCP entries get a special note about required secrets.
+      const mcp = mcpSources.find((m) => m.id === skipped.id);
+      if (mcp) {
+        const secretNote = mcp.requiredSecrets?.length
+          ? `, requires ${mcp.requiredSecrets.join(", ")}`
+          : "";
+        console.log(`  - ${skipped.id}: next steps only${secretNote}`);
+      } else {
+        console.log(`  - ${skipped.id}: skipped (${skipped.reason})`);
+      }
     }
 
-    // Print Fetch Step plan
-    const mcpSources = manifest.externalSources.filter((s) => s.kind === "mcp-server");
-    const fetchableSources = manifest.externalSources.filter((s) => s.kind !== "mcp-server" && s.default);
-    console.log("Fetch Step:");
-    for (const source of fetchableSources) {
-      console.log(`  - ${source.id}: ${profile.dryRun ? "planned" : "fetching"}`);
-    }
-    for (const source of mcpSources) {
-      const secretNote = source.requiredSecrets?.length
-        ? `, requires ${source.requiredSecrets.join(", ")}`
-        : "";
-      console.log(`  - ${source.id}: next steps only${secretNote}`);
+    // Resolve which ExternalSource objects correspond to the planned IDs so we
+    // can hand them to the fetcher, which needs full source records (kind etc.).
+    const plannedSources = manifest.externalSources.filter((s) =>
+      fetchPlan.planned.some((p) => p.id === s.id),
+    );
+
+    // Per-run working dir — cleaned up in the `finally` block at the bottom.
+    let externalWorkDir: string | null = null;
+    let externalFiles: PayloadFile[] = [];
+    // Wrap rest of the run so we can always reclaim the temp clone dir.
+    try {
+    if (!profile.dryRun && plannedSources.length > 0) {
+      externalWorkDir = await fs.mkdtemp(
+        path.join(os.tmpdir(), "assistant-setup-toolkit-"),
+      );
+      const fetchResult = await fetchPlannedSources(
+        plannedSources,
+        externalWorkDir,
+      );
+      externalFiles = [...fetchResult.files];
+      // Print per-source outcome — `[fetched]` or `[failed]` so the user can
+      // see which clones succeeded before any writes happen.
+      for (const r of fetchResult.results) {
+        if (r.error) {
+          console.error(`  [failed] ${r.sourceId}: ${r.error}`);
+        } else {
+          console.log(`  [fetched] ${r.sourceId} (${r.files.length} file(s))`);
+        }
+      }
     }
 
     // Plan and regenerate Target Projections if Codex is selected
@@ -277,11 +332,12 @@ export async function runSetupWizard(
     console.log("  - External Sources prepared first");
     console.log("  - Canonical Assistant Source applied last; local files win conflicts");
 
-    // Build Assistant Payloads (external files empty for now — fetch not implemented)
+    // Build Assistant Payloads — external files come from the fetcher above
+    // (empty array on dry-run or when no sources were selected).
     const payloadResult = buildAssistantPayloads({
       targets: [...profile.targets],
       components: [...profile.components],
-      externalFiles: [],
+      externalFiles,
       canonicalFiles,
       projectionFiles,
     });
@@ -432,6 +488,12 @@ export async function runSetupWizard(
     }
 
     return 0;
+    } finally {
+      // Always reclaim the per-run External Source clone dir, even on error.
+      if (externalWorkDir) {
+        await fs.rm(externalWorkDir, { recursive: true, force: true });
+      }
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Error: ${message}`);
