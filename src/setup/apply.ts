@@ -31,7 +31,7 @@ export interface ApplyResult {
 }
 
 /** An error encountered during apply for a specific file. */
-export interface ApplyError {
+interface ApplyError {
   readonly relativePath: string;
   readonly action: string;
   readonly message: string;

@@ -6,7 +6,7 @@
  */
 
 /** The kind of Next Step — determines how it's presented. */
-export type NextStepKind =
+type NextStepKind =
   | "mcp-secret"
   | "mcp-confirmation"
   | "desktop-upload"

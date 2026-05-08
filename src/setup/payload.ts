@@ -32,7 +32,7 @@ export interface BuildPayloadInput {
 }
 
 /** A recorded conflict where two sources provided the same relative path. */
-export interface PayloadConflict {
+interface PayloadConflict {
   readonly relativePath: string;
   readonly winner: PayloadFileOrigin;
   readonly loser: PayloadFileOrigin;
