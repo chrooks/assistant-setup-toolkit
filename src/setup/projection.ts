@@ -2,9 +2,8 @@
  * Target Projection generation from the Canonical Assistant Source (canonical/)
  * to Codex Target Projections (.codex/ and .agents/).
  *
- * Ports the behavior of scripts/create-codex-dir.sh into a testable
- * TypeScript module. The projection is planned as data — actual filesystem
- * writes happen in the apply module.
+ * The projection is planned as data — actual filesystem writes happen
+ * in the apply module.
  */
 
 // -- Types --
@@ -44,8 +43,7 @@ const FILE_MAP: Record<string, string> = {
 // -- Text rewriting --
 
 /**
- * Rewrite text content from Claude conventions to Codex conventions.
- * Matches the sed replacements in create-codex-dir.sh:
+ * Rewrite text content from Claude conventions to Codex conventions:
  *   .claude -> .codex
  *   CLAUDE.md -> AGENTS.md
  *   claude -> codex
@@ -75,7 +73,6 @@ export function rewriteContentForCodex(
 
 /**
  * Ensure description and argument-hint values in YAML frontmatter are quoted.
- * Matches the awk sanitize_skill_frontmatter function in create-codex-dir.sh.
  */
 function sanitizeSkillFrontmatter(content: string): string {
   const lines = content.split("\n");

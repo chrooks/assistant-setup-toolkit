@@ -75,9 +75,7 @@ manifests/
   install.yaml        # Installation Manifest — External Sources
 scripts/
   setup.ts            # Setup Wizard entry point
-  install.sh          # Legacy shell installer
-  install.ps1         # Legacy PowerShell installer
-  create-codex-dir.sh # Legacy Codex projection script
+  get-skills.sh       # Skill packaging helper
 src/setup/            # Setup Wizard modules
 tests/setup/          # Test suite
 ```

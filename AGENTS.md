@@ -52,7 +52,7 @@ Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`
 | `.Codex/skills/` | Project-scoped skills (e.g., `/ingest-skill`) |
 | `src/setup/` | Setup Wizard TypeScript source modules |
 | `tests/setup/` | Vitest tests mirroring `src/setup/` by filename |
-| `scripts/` | Entry point (`setup.ts`) and shell helpers (`get-skills.sh`, legacy installers) |
+| `scripts/` | Setup Wizard entry point (`setup.ts`) and skill packaging helper (`get-skills.sh`) |
 | `manifests/` | YAML Installation Manifests listing External Sources |
 | `artifacts/` | Generated Skill Artifacts (ZIPs for manual upload); gitignored |
 | `feature_requests/` | ExecPlan docs, PRDs, and design questions for features |
