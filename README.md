@@ -1,30 +1,60 @@
 # Assistant Setup Toolkit
 
-A portable collection of instructions, skills, hooks, manifests, and installers that configures coding assistants consistently across machines. Clone this repo on any machine and run the Setup Wizard to install for Claude Code, Codex CLI, or both.
+A portable collection of instructions, skills, hooks, manifests, and installers that configures coding assistants consistently across machines. Clone this repo on any machine and run the **Setup Wizard** to install for Claude Code, Codex CLI, or both.
 
-## Quick Install
+## Quick Start
 
 ```bash
 npm install
+npm run setup
+```
+
+That's it. The Setup Wizard walks you through every choice interactively and is the recommended path for almost everyone.
+
+### What the wizard asks
+
+1. **Assistant Targets** — Claude Code, Codex CLI, or both.
+2. **Setup mode** — Default Install (everything) or Custom Install (pick components).
+3. **External Sources** — checkbox list of skills and plugins from `manifests/install.yaml` (find-skills, impeccable, caveman, etc.). Leave empty to skip them all.
+4. **Write behavior** — Safe Merge, Overwrite, or Prune (see below).
+5. **Dry-run?** — preview planned writes without touching the filesystem.
+6. **Confirm summary** — review and proceed.
+
+External Sources are cloned with `git clone --depth 1` into a per-run temp dir, mapped into your Assistant Home, then cleaned up. Local content from `canonical/` always wins conflicts.
+
+### Write Behaviors
+
+- **Safe Merge** (default): Copies missing files, skips existing conflicts. Never deletes unrelated files.
+- **Overwrite Install**: Replaces conflicting selected payload files. Does not delete unrelated files.
+- **Prune Install**: Installs the payload and removes toolkit-owned files from previous installs that are no longer selected. Only removes files tracked in an Install Receipt.
+
+All non-dry-run writes create a timestamped backup before modifying an Assistant Home.
+
+### After install
+
+The wizard prints **Next Steps** for actions it cannot automate:
+- Manual desktop skill upload (Skill Artifacts in `artifacts/*.zip`)
+- MCP Server configuration requiring secrets or confirmation
+
+It also writes an **Install Receipt** at `<assistant-home>/.assistant-setup-toolkit/receipt.json` listing every installed file — needed later for safe Prune Install.
+
+## Non-interactive / scripted install
+
+For CI, dotfiles repos, or anyone who wants to skip the prompts, every wizard choice has an equivalent flag:
+
+```bash
+# Both targets, all components, defaults
 npm run setup -- --claude --codex --default
+
+# Single target, dry-run preview
+npm run setup -- --claude --default --dry-run
+
+# Pick specific External Sources only
+npm run setup -- --claude --default --sources find-skills,impeccable
+
+# Skip all External Sources
+npm run setup -- --claude --default --no-sources
 ```
-
-Preview what would happen without writing files:
-
-```bash
-npm run setup -- --claude --codex --default --dry-run
-```
-
-Or install for a single target:
-
-```bash
-npm run setup -- --claude --default
-npm run setup -- --codex --default
-```
-
-## Setup Wizard
-
-The Setup Wizard (`npm run setup`) is the recommended way to install the toolkit. It supports interactive and flag-driven setup.
 
 ### Flags
 
@@ -38,26 +68,10 @@ The Setup Wizard (`npm run setup`) is the recommended way to install the toolkit
 | `--overwrite` | Overwrite Install — replace conflicting payload files |
 | `--prune` | Prune Install — remove stale toolkit-owned files |
 | `--symlink` | Use symlinks where supported |
-| `--no-fetch` | Skip External Source fetching |
+| `--sources <ids>` | Comma-separated External Source IDs to install |
+| `--no-sources` | Skip all External Sources |
+| `--no-fetch` | Skip External Source fetching entirely |
 | `--yes` | Skip confirmation prompts |
-
-### Write Behaviors
-
-- **Safe Merge** (default): Copies missing files, skips existing conflicts. Never deletes unrelated files.
-- **Overwrite Install** (`--overwrite`): Replaces conflicting selected payload files. Does not delete unrelated files.
-- **Prune Install** (`--prune`): Installs the payload and removes toolkit-owned files from previous installs that are no longer selected. Only removes files tracked in an Install Receipt.
-
-All non-dry-run writes create a timestamped backup before modifying an Assistant Home.
-
-### Install Receipts
-
-After a successful install, the wizard writes an Install Receipt at `<assistant-home>/.assistant-setup-toolkit/receipt.json`. This records which files were installed, enabling safe Prune Install later.
-
-### Next Steps
-
-After setup, the wizard prints Next Steps for actions it cannot automate:
-- Manual desktop skill upload (Skill Artifacts in `artifacts/*.zip`)
-- MCP Server configuration requiring secrets or confirmation
 
 ## Structure
 
