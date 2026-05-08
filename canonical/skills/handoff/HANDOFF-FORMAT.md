@@ -37,7 +37,6 @@ Use the repo `.venv` interpreter. Preserve passing tests for:
 
 **DO NOT PROCEED WITH IMPLEMENTING ANY NEXT STEPS YET**
 Acknowledge the receipt of this handoff, explore the repo for relevant context, propose a direction, and wait for further instruction.
-Use `/find-skills` if available, to suggest the best skill to use with the proposed next step.
 ````
 
 ## Section guidance
