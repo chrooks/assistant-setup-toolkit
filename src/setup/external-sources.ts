@@ -10,7 +10,7 @@ import type { ExternalSource } from "./manifest.js";
 import type { AssistantTargetId } from "./domain.js";
 
 /** A source planned for fetching. */
-export interface PlannedFetch {
+interface PlannedFetch {
   readonly id: string;
   readonly name: string;
   readonly url: string;
@@ -18,7 +18,7 @@ export interface PlannedFetch {
 }
 
 /** A source skipped with a reason. */
-export interface SkippedFetch {
+interface SkippedFetch {
   readonly id: string;
   readonly name: string;
   readonly reason: string;
@@ -34,6 +34,12 @@ export interface FetchPlan {
 export interface FetchPlanOptions {
   readonly targets: readonly AssistantTargetId[];
   readonly fetch: boolean;
+  /**
+   * Explicit list of source IDs the user picked. When provided, replaces the
+   * default-only gate: only listed IDs are eligible. When omitted (undefined),
+   * fall back to `source.default === true` (non-interactive default).
+   */
+  readonly selectedIds?: readonly string[];
 }
 
 /**
@@ -86,8 +92,17 @@ export function planExternalFetches(
       continue;
     }
 
-    // Only fetch default sources (custom selection not yet implemented)
-    if (!source.default) {
+    // Eligibility: explicit selection takes precedence over `default` flag.
+    if (options.selectedIds !== undefined) {
+      if (!options.selectedIds.includes(source.id)) {
+        skipped.push({
+          id: source.id,
+          name: source.name,
+          reason: `Not selected by user`,
+        });
+        continue;
+      }
+    } else if (!source.default) {
       skipped.push({
         id: source.id,
         name: source.name,

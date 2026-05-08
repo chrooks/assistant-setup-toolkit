@@ -63,5 +63,32 @@ describe("cli", () => {
         /--default or --custom/,
       );
     });
+
+    it("parses --sources <ids> into selectedExternalSourceIds", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--sources",
+        "find-skills,impeccable",
+      ]);
+      expect(profile.selectedExternalSourceIds).toEqual([
+        "find-skills",
+        "impeccable",
+      ]);
+    });
+
+    it("parses --no-sources into an empty selectedExternalSourceIds", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--no-sources",
+      ]);
+      expect(profile.selectedExternalSourceIds).toEqual([]);
+    });
+
+    it("leaves selectedExternalSourceIds undefined when no source flag passed", () => {
+      const profile = parseCliFlags(["--claude", "--default"]);
+      expect(profile.selectedExternalSourceIds).toBeUndefined();
+    });
   });
 });

@@ -64,6 +64,12 @@ export interface SetupProfile {
   readonly fetch: boolean;
   readonly symlink: boolean;
   readonly yes: boolean;
+  /**
+   * IDs of External Sources the user picked for this run.
+   * `undefined` = use manifest defaults (preserves non-interactive behavior).
+   * `[]` = explicitly install no External Sources.
+   */
+  readonly selectedExternalSourceIds?: readonly string[];
 }
 
 /** Where a payload file came from — used for precedence and conflict reporting. */

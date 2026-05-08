@@ -16,6 +16,7 @@ import type {
 } from "./domain.js";
 import { ALL_COMPONENT_KINDS } from "./domain.js";
 import type { PartialFlags } from "./cli.js";
+import type { ExternalSource } from "./manifest.js";
 
 /**
  * Run the full interactive prompt flow, returning a complete SetupProfile.
@@ -23,6 +24,7 @@ import type { PartialFlags } from "./cli.js";
  */
 export async function runInteractivePrompts(
   partial: PartialFlags,
+  externalSources: readonly ExternalSource[] = [],
 ): Promise<SetupProfile> {
   console.log("\nAssistant Setup Toolkit Setup Wizard\n");
 
@@ -44,6 +46,18 @@ export async function runInteractivePrompts(
     components = await promptComponents();
   } else {
     components = [...ALL_COMPONENT_KINDS];
+  }
+
+  // Step 3.5: Select External Sources (skip if --sources/--no-sources given,
+  // or if --no-fetch was set, or if the manifest has nothing to offer).
+  let selectedExternalSourceIds: readonly string[] | undefined =
+    partial.selectedExternalSourceIds;
+  if (
+    selectedExternalSourceIds === undefined &&
+    !partial.noFetch &&
+    externalSources.length > 0
+  ) {
+    selectedExternalSourceIds = await promptExternalSources(externalSources);
   }
 
   // Step 4: Select write behavior (skip if provided via flags)
@@ -72,6 +86,7 @@ export async function runInteractivePrompts(
     fetch: !partial.noFetch,
     symlink: partial.symlink,
     yes: partial.yes,
+    selectedExternalSourceIds,
   };
 
   if (!partial.yes) {
@@ -156,6 +171,36 @@ async function promptWriteBehavior(): Promise<WriteBehavior> {
         value: "prune",
       },
     ],
+  });
+}
+
+/**
+ * Prompt user to choose which External Sources to install. MCP servers are
+ * shown disabled (configure manually). Returns the selected source IDs;
+ * empty array means the user opted out of all External Sources.
+ */
+async function promptExternalSources(
+  sources: readonly ExternalSource[],
+): Promise<string[]> {
+  // Build choice list — MCP entries are disabled, non-MCP defaults are pre-checked.
+  const choices = sources.map((s) => {
+    const isMcp = s.kind === "mcp-server";
+    const label = isMcp
+      ? `${s.name} (${s.kind} — configure manually)`
+      : `${s.name} (${s.kind})`;
+    return {
+      name: label,
+      value: s.id,
+      checked: !isMcp && s.default,
+      disabled: isMcp ? "next steps only" : false,
+    };
+  });
+
+  return checkbox<string>({
+    message:
+      "Select External Sources to install (space to toggle, enter to confirm; leave empty to skip all):",
+    choices,
+    required: false,
   });
 }
 

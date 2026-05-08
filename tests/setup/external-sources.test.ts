@@ -60,5 +60,34 @@ describe("external-sources", () => {
       expect(plan.skipped).toHaveLength(1);
       expect(plan.skipped[0].reason).toContain("target");
     });
+
+    it("uses selectedIds when provided (overrides default flag)", () => {
+      const NON_DEFAULT: ExternalSource = {
+        ...SKILL_SOURCE,
+        id: "non-default-skill",
+        default: false,
+      };
+      const plan = planExternalFetches([SKILL_SOURCE, NON_DEFAULT], {
+        targets: ["claude-code"],
+        fetch: true,
+        selectedIds: ["non-default-skill"],
+      });
+
+      expect(plan.planned.map((p) => p.id)).toEqual(["non-default-skill"]);
+      const skippedDefault = plan.skipped.find((s) => s.id === "test-skill");
+      expect(skippedDefault?.reason).toContain("Not selected");
+    });
+
+    it("empty selectedIds skips all sources", () => {
+      const plan = planExternalFetches([SKILL_SOURCE], {
+        targets: ["claude-code"],
+        fetch: true,
+        selectedIds: [],
+      });
+
+      expect(plan.planned).toHaveLength(0);
+      expect(plan.skipped).toHaveLength(1);
+      expect(plan.skipped[0].reason).toContain("Not selected");
+    });
   });
 });

@@ -27,6 +27,12 @@ export interface PartialFlags {
   readonly symlink: boolean;
   readonly noFetch: boolean;
   readonly yes: boolean;
+  /**
+   * Optional explicit External Source IDs from `--sources <a,b,c>`.
+   * `undefined` means user didn't pass the flag (use manifest defaults).
+   * `[]` means `--no-sources` was passed (skip all External Sources).
+   */
+  readonly selectedExternalSourceIds?: readonly string[];
 }
 
 /**
@@ -50,6 +56,24 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
   const noFetch = flags.has("--no-fetch");
   const yes = flags.has("--yes");
 
+  // Parse `--sources <ids>` (comma-separated) and `--no-sources` shortcut.
+  // Both feed `selectedExternalSourceIds` so the caller can override the
+  // manifest's default-only gate.
+  let selectedExternalSourceIds: readonly string[] | undefined;
+  if (flags.has("--no-sources")) {
+    selectedExternalSourceIds = [];
+  } else {
+    const argvList = [...argv];
+    const idx = argvList.indexOf("--sources");
+    if (idx !== -1 && idx + 1 < argvList.length) {
+      const raw = argvList[idx + 1];
+      selectedExternalSourceIds = raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+    }
+  }
+
   // If we have targets + mode, we can build a complete profile
   if (targets.length > 0 && (hasDefault || hasCustom)) {
     const mode: SetupMode = hasCustom ? "custom" : "default";
@@ -68,6 +92,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
         fetch: !noFetch,
         symlink,
         yes,
+        selectedExternalSourceIds,
       },
     };
   }
@@ -75,7 +100,16 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
   // Not enough flags — need interactive prompts
   return {
     kind: "interactive",
-    partial: { targets, dryRun, overwrite, prune, symlink, noFetch, yes },
+    partial: {
+      targets,
+      dryRun,
+      overwrite,
+      prune,
+      symlink,
+      noFetch,
+      yes,
+      selectedExternalSourceIds,
+    },
   };
 }
 
