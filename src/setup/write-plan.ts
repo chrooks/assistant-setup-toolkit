@@ -16,7 +16,7 @@ import { resolveBackupPath } from "./paths.js";
 // -- Types --
 
 /** What action to take for a single file. */
-export type WriteAction = "copy" | "overwrite" | "skip" | "remove";
+type WriteAction = "copy" | "overwrite" | "skip" | "remove";
 
 /** A planned action for a single file in the Assistant Home. */
 export interface PlannedAction {

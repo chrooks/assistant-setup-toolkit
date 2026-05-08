@@ -27,7 +27,7 @@ export interface ProjectionInput {
 }
 
 /** A skill directory containing files to project. */
-export interface SkillDirEntry {
+interface SkillDirEntry {
   readonly name: string;
   readonly files: readonly string[];
 }

@@ -19,12 +19,13 @@
 
 ## Using the Right Skill for the Right Job
 ALWAYS:
-- Use a the `/impeccable` family of skills for design/frontend work
+- Use the `/impeccable` family of skills for design/frontend work.
 - Use `/tdd` when implementing a feature, especially if its testable logic. 
 - Use `/verification-loop` after implementing a feature.
 - Use `/commit` when its time to commit work to version control.
+- Use `/diagnose` for fixing difficult bugs.
 > `/tdd` + `/verification-loop` + `/commit` is a VERY common workflow when implementing.
-- Otherwise, if no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
+Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
 ## Code Style Preferences
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.

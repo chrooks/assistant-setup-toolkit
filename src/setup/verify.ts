@@ -9,7 +9,7 @@
 import type { WritePlan, PlannedAction } from "./write-plan.js";
 
 /** A single verification check result. */
-export interface VerificationCheck {
+interface VerificationCheck {
   readonly name: string;
   readonly passed: boolean;
   readonly detail: string;
