@@ -88,8 +88,37 @@ Runs between Steps 5 and 8. See [REFERENCE.md](REFERENCE.md) § Step 6. Skip if 
 ## Step 7 — Promote Cowork HTML widgets
 Runs between Steps 6 and 8. See [REFERENCE.md](REFERENCE.md) § Step 7. Skip if `mcp__cowork__list_artifacts` unavailable.
 
+## Step 9b — Copy continuation prompt to clipboard
+
+After index regeneration, generate a continuation prompt and copy it to the system clipboard so the user can `/exit` and paste into a new session.
+
+### 9b.1. Build the prompt
+
+Construct a continuation prompt referencing the handoff file and any source-of-truth docs that exist:
+
+```
+Read the handoff at .cowork/handoffs/<YYYY-MM-DD>-<slug>.md, then <list of existing docs: CONTEXT.md, PRODUCT.md, DESIGN.md>. Resume from where the previous session left off. The handoff contains full context.
+```
+
+Only include docs that actually exist in the project root. Check before listing.
+
+### 9b.2. Copy to clipboard
+
+Detect platform and copy:
+- **macOS**: `echo "<prompt>" | pbcopy`
+- **Linux**: `echo "<prompt>" | xclip -selection clipboard` (or `xsel --clipboard`)
+- **WSL**: `echo "<prompt>" | clip.exe`
+
+If no clipboard tool is available, skip the copy silently. The prompt is still displayed in Step 10.
+
+### 9b.3. Confirm
+
+Print: *"Continuation prompt copied to clipboard. `/exit` and paste into a new session to resume."*
+
+If clipboard copy failed, print the prompt in a fenced code block instead: *"Copy this into a new session:"*
+
 ## Step 10 — Rich surface
-After Step 9. See [REFERENCE.md](REFERENCE.md) § Step 10. Falls back to basic surface (8f) when no seed-chat tool available.
+After Step 9b. See [REFERENCE.md](REFERENCE.md) § Step 10. Falls back to basic surface (8f) when no seed-chat tool available.
 
 ## Invariants (forward-compat for auto-load)
 

@@ -26,6 +26,11 @@ import { planMcpNextSteps } from "./mcp.js";
 import { buildStandardNextSteps, formatNextSteps } from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
 import { applyWritePlan } from "./apply.js";
+import {
+  loadWiringManifest,
+  planHookWiring,
+  applyHookWiring,
+} from "./hook-wiring.js";
 import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
 import type { PlannedArtifact } from "./artifacts.js";
 import { planExternalFetches } from "./external-sources.js";
@@ -75,6 +80,7 @@ async function discoverCanonicalFiles(
   // Check for top-level instruction files
   for (const [filename, component] of [
     ["CLAUDE.md", "instructions"],
+    ["CONTEXT.md", "instructions"],
     ["PLAN.md", "plans"],
   ] as const) {
     const filePath = path.join(canonicalDir, filename);
@@ -286,7 +292,7 @@ export async function runSetupWizard(
     if (hasCodex) {
       // Discover what's in canonical/ for projection planning
       const claudeFiles: string[] = [];
-      for (const name of ["CLAUDE.md", "PLAN.md"]) {
+      for (const name of ["CLAUDE.md", "CONTEXT.md", "PLAN.md"]) {
         try {
           await fs.access(path.join(repoRoot, "canonical", name));
           claudeFiles.push(name);
@@ -295,7 +301,18 @@ export async function runSetupWizard(
         }
       }
       const skillDirs = await discoverSkillDirs(repoRoot);
-      const mappings = planCodexProjection({ claudeFiles, skillDirs });
+      // Discover hook scripts under canonical/hooks/ for 1:1 projection to .codex/hooks/
+      const hookFiles: string[] = [];
+      const canonicalHooksDir = path.join(repoRoot, "canonical", "hooks");
+      try {
+        const entries = await fs.readdir(canonicalHooksDir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isFile()) hookFiles.push(entry.name);
+        }
+      } catch {
+        // canonical/hooks/ doesn't exist — skip
+      }
+      const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles });
       projectionMappings.push(...mappings);
 
       console.log("Target Projections:");
@@ -304,28 +321,47 @@ export async function runSetupWizard(
       }
 
       // Actually regenerate Target Projections in-repo before using as payload sources.
-      // Read each canonical/ source, rewrite content for Codex, write to .codex/.agents/.
+      // Read each canonical/ source, rewrite content for Codex (markdown only),
+      // write to .codex/.agents/. Hook scripts are copied verbatim — text rewrites
+      // could mangle shell logic that legitimately references either path.
       for (const mapping of mappings) {
         const sourcePath = path.join(repoRoot, "canonical", mapping.source);
         const targetPath = path.join(repoRoot, mapping.target);
-        const sourceContent = await fs.readFile(sourcePath, "utf-8");
-        const rewritten = rewriteContentForCodex(sourceContent, mapping.isSkill);
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
-        await fs.writeFile(targetPath, rewritten, "utf-8");
+        if (mapping.isHook) {
+          await fs.copyFile(sourcePath, targetPath);
+        } else {
+          const sourceContent = await fs.readFile(sourcePath, "utf-8");
+          const rewritten = rewriteContentForCodex(sourceContent, mapping.isSkill);
+          await fs.writeFile(targetPath, rewritten, "utf-8");
+        }
       }
     }
 
     // Discover Canonical Assistant Source files
     const canonicalFiles = await discoverCanonicalFiles(repoRoot);
 
-    // Build projection files for Codex targets — now pointing at freshly regenerated files
-    const projectionFiles: PayloadFile[] = projectionMappings.map((m) => ({
-      relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
-      sourcePath: path.join(repoRoot, m.target),
-      component: m.target.includes("skills") ? ("skills" as const) : ("instructions" as const),
-      origin: "target-projection" as const,
-      executable: false,
-    }));
+    // Build projection files for Codex targets — now pointing at freshly regenerated files.
+    // Tag the right component so payload routing sends each file to the right home:
+    //   hooks   → ~/.codex/hooks/   (codex-home)
+    //   skills  → ~/.agents/skills/ (agents-home)
+    //   default → ~/.codex/         (codex-home)
+    const projectionFiles: PayloadFile[] = projectionMappings.map((m) => {
+      const component: ComponentKind = m.isHook
+        ? "hooks"
+        : m.target.includes("skills")
+          ? "skills"
+          : "instructions";
+      return {
+        relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
+        sourcePath: path.join(repoRoot, m.target),
+        component,
+        origin: "target-projection" as const,
+        // Hook scripts must keep their executable bit when projected. fs.copyFile
+        // already preserves mode, but the receipt records this metadata.
+        executable: m.isHook,
+      };
+    });
 
     // Print payload precedence
     console.log("Payload precedence:");
@@ -433,6 +469,52 @@ export async function runSetupWizard(
           console.error(`  ${err.home}/${err.relativePath}: ${err.message}`);
         }
         return 1;
+      }
+    }
+
+    // Hook Wiring — declarative manifest-driven registration of hook scripts
+    // into the right Assistant settings file. Reads canonical/hooks/wiring.yaml;
+    // returns silently when the manifest is absent, so toolkits without it
+    // continue to install cleanly. Idempotent: re-running never duplicates.
+    //
+    // Runs in both live and dry-run modes — dry-run reports the would-add/
+    // would-skip counts without touching the filesystem.
+    {
+      const canonicalHooksDir = path.join(repoRoot, "canonical", "hooks");
+      const wiringEntries = await loadWiringManifest(canonicalHooksDir);
+      if (wiringEntries.length > 0) {
+        const homesByTarget: Partial<Record<AssistantTargetId, string>> = {};
+        for (const target of profile.targets) {
+          const homeId: AssistantHomeId =
+            target === "claude-code" ? "claude-home" : "codex-home";
+          homesByTarget[target] = resolveAssistantHomePath(homeId);
+        }
+
+        const wiringPlans = planHookWiring(wiringEntries, homesByTarget);
+        if (wiringPlans.length > 0) {
+          console.log("Hook Wiring:");
+          for (const plan of wiringPlans) {
+            const result = await applyHookWiring(plan, {
+              dryRun: profile.dryRun,
+            });
+            const verbAdd = profile.dryRun ? "would add" : "added";
+            const verbSkip = profile.dryRun
+              ? "would skip"
+              : "already present";
+            const flagSuffix = plan.featureFlag
+              ? ` (codex_hooks flag: ${
+                  result.flagAdded
+                    ? profile.dryRun
+                      ? "would set"
+                      : "set"
+                    : "already present"
+                })`
+              : "";
+            console.log(
+              `  [${plan.target}] ${result.added} ${verbAdd}, ${result.alreadyPresent} ${verbSkip}${flagSuffix}`,
+            );
+          }
+        }
       }
     }
 

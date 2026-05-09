@@ -1,10 +1,16 @@
 # Development Conversation Guidelines
 
-## Terminology Usage
-- If a  `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source-of-truth for our shared vocabulary in our converations.
--  The shared terminology in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
-- Be VERY strict about using the vocabulary when applicable instead of other similar word or terms.
-- Whenever you use a vocabulary word in conversation, define it. Do this until I tell you explicitly that I don't need the definition repeated anymore. Don't be afraid to be annoying/verbose about these terms. The goal is for us to get comfortable using the terminology.
+## Lexicon Usage
+- If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
+- If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon.
+- The shared Lexicon in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
+- The project Lexicon takes precedence over the global Lexicon when the same term appears in both.
+- Be VERY strict about using Lexicon terms when applicable instead of other similar words or terms.
+- Whenever you use a Lexicon term in conversation, define it. Do this until I tell you explicitly that I don't need the definition repeated anymore. Don't be afraid to be annoying/verbose about these terms. The goal is for us to get comfortable using the Lexicon.
+- **ACTIVE EVERY RESPONSE.** Lexicon enforcement does not decay across turns. Do not drift back to common synonyms (the `_Avoid_` lists) after a long session, after tool use, or after compaction. If you catch yourself using an `_Avoid_` synonym, restate using the Lexicon term and continue.
+
+### Active Lexicon (global)
+@~/.claude/CONTEXT.md
 
 ## Ground Answers in Truth
 - If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.

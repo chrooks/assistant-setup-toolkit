@@ -10,12 +10,18 @@
 
 /** A single planned file mapping from canonical/ source to Codex target. */
 export interface ProjectionMapping {
-  /** Relative path within canonical/ (e.g. "CLAUDE.md", "skills/commit/SKILL.md") */
+  /** Relative path within canonical/ (e.g. "CLAUDE.md", "skills/commit/SKILL.md", "hooks/lexicon-reminder.sh") */
   readonly source: string;
-  /** Relative path for the Codex target (e.g. ".codex/AGENTS.md", ".agents/skills/commit/SKILL.md") */
+  /** Relative path for the Codex target (e.g. ".codex/AGENTS.md", ".agents/skills/commit/SKILL.md", ".codex/hooks/lexicon-reminder.sh") */
   readonly target: string;
   /** Whether this file is a SKILL.md that needs frontmatter sanitization */
   readonly isSkill: boolean;
+  /**
+   * Whether this file is a hook script. Hook scripts are copied verbatim —
+   * the Claude→Codex text rewrites (e.g. ".claude"→".codex") are skipped to
+   * avoid mangling shell logic that may legitimately reference either path.
+   */
+  readonly isHook: boolean;
 }
 
 /** Input describing the Canonical Assistant Source structure for projection planning. */
@@ -24,6 +30,8 @@ export interface ProjectionInput {
   readonly claudeFiles: readonly string[];
   /** Skill directories, each with a name and list of relative file paths */
   readonly skillDirs: readonly SkillDirEntry[];
+  /** Hook script filenames under canonical/hooks/ to project (e.g. ["lexicon-reminder.sh"]) */
+  readonly hookFiles?: readonly string[];
 }
 
 /** A skill directory containing files to project. */
@@ -38,6 +46,7 @@ interface SkillDirEntry {
 const FILE_MAP: Record<string, string> = {
   "CLAUDE.md": ".codex/AGENTS.md",
   "PLAN.md": ".codex/PLAN.md",
+  "CONTEXT.md": ".codex/CONTEXT.md",
 };
 
 // -- Text rewriting --
@@ -115,15 +124,20 @@ function sanitizeSkillFrontmatter(content: string): string {
  * Plan the Codex Target Projection mappings from canonical/ source files.
  * Returns an array of source→target mappings without touching the filesystem.
  *
- * Commands and hooks are not projected — they have no Codex equivalent.
- * Only files explicitly passed in claudeFiles and skillDirs are mapped.
+ * Commands are not projected — Codex has no equivalent surface for them.
+ * Hooks ARE now projected (Codex CLI ships a hooks system at ~/.codex/hooks.json
+ * with the same major events as Claude Code). Hook scripts are mapped 1:1 from
+ * canonical/hooks/<name> to .codex/hooks/<name> and are flagged isHook=true so
+ * the writer skips Claude→Codex text rewrites.
+ *
+ * Only files explicitly passed in claudeFiles, skillDirs, and hookFiles are mapped.
  */
 export function planCodexProjection(
   input: ProjectionInput,
 ): readonly ProjectionMapping[] {
   const mappings: ProjectionMapping[] = [];
 
-  // Map known top-level files (CLAUDE.md, PLAN.md)
+  // Map known top-level files (CLAUDE.md, PLAN.md, CONTEXT.md)
   for (const file of input.claudeFiles) {
     const target = FILE_MAP[file];
     if (target) {
@@ -131,6 +145,7 @@ export function planCodexProjection(
         source: file,
         target,
         isSkill: false,
+        isHook: false,
       });
     }
   }
@@ -142,8 +157,19 @@ export function planCodexProjection(
         source: `skills/${skillDir.name}/${file}`,
         target: `.agents/skills/${skillDir.name}/${file}`,
         isSkill: file === "SKILL.md",
+        isHook: false,
       });
     }
+  }
+
+  // Map hook scripts to .codex/hooks/ (1:1, no path rewrites)
+  for (const hookFile of input.hookFiles ?? []) {
+    mappings.push({
+      source: `hooks/${hookFile}`,
+      target: `.codex/hooks/${hookFile}`,
+      isSkill: false,
+      isHook: true,
+    });
   }
 
   return mappings;
