@@ -122,6 +122,33 @@ externalSources:
         assistantTargetExists: "claude-code",
       });
     });
+
+    it("parses per-target plugin install commands", () => {
+      const yaml = `
+version: 1
+externalSources:
+  - id: plugin-source
+    name: Plugin Source
+    kind: plugin
+    url: https://github.com/example/plugin-source
+    default: true
+    targets: [claude-code, codex-cli]
+    installCommands:
+      claude-code:
+        - claude plugin marketplace add example/plugin-source
+        - claude plugin install source@plugin
+      codex-cli:
+        - npx skills add example/plugin-source -a codex
+`;
+      const manifest = parseInstallationManifestYaml(yaml, "plugin.yaml");
+      expect(manifest.externalSources[0].installCommands).toEqual({
+        "claude-code": [
+          "claude plugin marketplace add example/plugin-source",
+          "claude plugin install source@plugin",
+        ],
+        "codex-cli": ["npx skills add example/plugin-source -a codex"],
+      });
+    });
   });
 
   describe("real manifest: manifests/install.yaml", () => {
@@ -144,6 +171,16 @@ externalSources:
       expect(ids).toContain("codex-plugin-cc");
       expect(ids).toContain("playwright-mcp");
       expect(ids).toContain("context7");
+
+      const caveman = manifest.externalSources.find((s) => s.id === "caveman")!;
+      expect(caveman.kind).toBe("plugin");
+      expect(caveman.installCommands?.["claude-code"]).toEqual([
+        "claude plugin marketplace add JuliusBrussee/caveman",
+        "claude plugin install caveman@caveman",
+      ]);
+      expect(caveman.installCommands?.["codex-cli"]).toEqual([
+        "npx skills add JuliusBrussee/caveman -a codex",
+      ]);
 
       // MCP servers require confirmation
       const playwright = manifest.externalSources.find((s) => s.id === "playwright-mcp")!;

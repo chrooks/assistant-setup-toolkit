@@ -118,6 +118,19 @@ tests/setup/          # Test suite
 | `session-mode-loader.sh` | Restore persisted learning mode on session start |
 | `session-mode-cleanup.sh` | Clear non-persisted mode on session end |
 | `knowledge-sync.sh` | Auto-sync knowledge files to Obsidian vault on write |
+| `lexicon-reminder.sh` | UserPromptSubmit hook: re-injects a Lexicon-enforcement reminder every turn (see `canonical/CLAUDE.md` Lexicon Usage). Disable per session with `CLAUDE_LEXICON_REMINDER=0` or globally with `touch ~/.claude/.lexicon-reminder.off`. Wired automatically via `canonical/hooks/wiring.yaml`. |
+
+### Hook Wiring
+
+`canonical/hooks/wiring.yaml` is a declarative manifest that tells the Setup Wizard which hook scripts to register against which lifecycle event in each Assistant Target's settings file. During `npm run setup`, after files are copied, the wizard:
+
+- Loads `wiring.yaml` (returns silently if absent — wiring is opt-in).
+- For each entry, idempotently merges a hook command into the right config file: `~/.claude/settings.json` for Claude Code, `~/.codex/hooks.json` for Codex CLI.
+- For Codex CLI, also asserts `[features] codex_hooks = true` in `~/.codex/config.toml` (Codex hooks are gated behind that flag).
+
+Idempotency is keyed on the rendered command string. Re-running the wizard never produces duplicate entries, and a hook wired manually before this manifest existed won't be re-added.
+
+To add a new hook: drop the script in `canonical/hooks/`, add an entry to `wiring.yaml` (declare `file`, `event`, and `targets`), and re-run `npm run setup`.
 
 ## Development
 

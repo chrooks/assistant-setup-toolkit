@@ -43,6 +43,14 @@ externalSources:
     targets:
       - claude-code
       - codex-cli
+    installCommands:
+      claude-code:
+        - claude plugin marketplace add JuliusBrussee/caveman
+        - claude plugin install caveman@caveman
+      codex-cli:
+        - npx skills add JuliusBrussee/caveman -a codex
+    notes:
+      - Native plugin install commands from the Caveman README Install section.
 
   - id: everything-claude-code
     name: Everything Claude Code

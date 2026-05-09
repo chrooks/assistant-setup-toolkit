@@ -17,6 +17,14 @@ const InstallWhenSchema = z.object({
   assistantTargetExists: z.enum(["claude-code", "codex-cli"]).optional(),
 });
 
+/** Native installation commands grouped by Assistant Target. */
+const InstallCommandsSchema = z
+  .object({
+    "claude-code": z.array(z.string().min(1)).optional(),
+    "codex-cli": z.array(z.string().min(1)).optional(),
+  })
+  .strict();
+
 /** Schema for a single External Source entry in the manifest. */
 const ExternalSourceSchema = z.object({
   id: z.string().min(1, "id must not be empty"),
@@ -26,6 +34,7 @@ const ExternalSourceSchema = z.object({
   default: z.boolean(),
   targets: z.array(z.enum(["claude-code", "codex-cli"])).min(1, "targets must have at least one entry"),
   notes: z.array(z.string()).optional(),
+  installCommands: InstallCommandsSchema.optional(),
   requiresConfirmation: z.boolean().optional(),
   requiredSecrets: z.array(z.string()).optional(),
   installWhen: InstallWhenSchema.optional(),

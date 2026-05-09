@@ -1,0 +1,30 @@
+# Hook Wiring Manifest
+#
+# Declares which hook scripts under canonical/hooks/ should be registered
+# against which lifecycle event in each Assistant Target's settings file.
+#
+# The Setup Wizard reads this file during `npm run setup` and idempotently
+# merges entries into:
+#   - claude-code: ~/.claude/settings.json (under hooks.<event>)
+#   - codex-cli:   ~/.codex/hooks.json     (under hooks.<event>)
+#                  and asserts [features] codex_hooks = true in ~/.codex/config.toml
+#
+# Entries are keyed on the rendered command string for idempotency:
+# re-running the wizard never produces duplicate entries, and a hook
+# wired by hand earlier won't be re-added.
+#
+# Existing pre-toolkit hooks (session-mode-loader.sh, knowledge-sync.sh,
+# session-mode-cleanup.sh) are intentionally NOT listed here — they are
+# wired by hand today with bespoke matcher patterns and we don't want to
+# disturb working state. New hooks opt in here.
+
+version: 1
+
+hooks:
+  - file: lexicon-reminder.sh
+    event: UserPromptSubmit
+    targets: [claude-code, codex-cli]
+    # Optional fields you can add per entry:
+    #   matcher: "Bash"          # only honored where the event supports it
+    #   timeoutSec: 30
+    #   command: "bash {hook}"   # default is `bash {hook}` where {hook} is the absolute hook path

@@ -66,6 +66,17 @@ describe("projection", () => {
       expect(plan[0].target).toBe(".codex/PLAN.md");
     });
 
+    it("maps CONTEXT.md to .codex/CONTEXT.md", () => {
+      const plan = planCodexProjection({
+        claudeFiles: ["CONTEXT.md"],
+        skillDirs: [],
+      });
+
+      expect(plan).toHaveLength(1);
+      expect(plan[0].source).toBe("CONTEXT.md");
+      expect(plan[0].target).toBe(".codex/CONTEXT.md");
+    });
+
     it("maps skill directories to .agents/skills/", () => {
       const plan = planCodexProjection({
         claudeFiles: [],
@@ -78,9 +89,8 @@ describe("projection", () => {
       expect(plan[0].isSkill).toBe(true);
     });
 
-    it("skips commands and hooks (no Codex equivalent)", () => {
-      // planCodexProjection only receives files and skillDirs,
-      // so commands/hooks are simply not passed in — verifying the contract
+    it("skips commands (no Codex equivalent surface)", () => {
+      // planCodexProjection has no commands input — commands are not projected
       const plan = planCodexProjection({
         claudeFiles: ["CLAUDE.md"],
         skillDirs: [],
@@ -88,7 +98,48 @@ describe("projection", () => {
 
       const targets = plan.map((p) => p.target);
       expect(targets.every((t) => !t.includes("commands/"))).toBe(true);
-      expect(targets.every((t) => !t.includes("hooks/"))).toBe(true);
+    });
+
+    it("maps hook scripts to .codex/hooks/ verbatim with isHook=true", () => {
+      const plan = planCodexProjection({
+        claudeFiles: [],
+        skillDirs: [],
+        hookFiles: ["lexicon-reminder.sh", "session-mode-loader.sh"],
+      });
+
+      expect(plan).toHaveLength(2);
+
+      const lexicon = plan.find((m) => m.source === "hooks/lexicon-reminder.sh");
+      expect(lexicon).toBeDefined();
+      expect(lexicon?.target).toBe(".codex/hooks/lexicon-reminder.sh");
+      expect(lexicon?.isHook).toBe(true);
+      expect(lexicon?.isSkill).toBe(false);
+
+      const session = plan.find(
+        (m) => m.source === "hooks/session-mode-loader.sh",
+      );
+      expect(session).toBeDefined();
+      expect(session?.target).toBe(".codex/hooks/session-mode-loader.sh");
+      expect(session?.isHook).toBe(true);
+    });
+
+    it("treats hookFiles as optional — omitting it produces no hook mappings", () => {
+      const plan = planCodexProjection({
+        claudeFiles: ["CLAUDE.md"],
+        skillDirs: [],
+      });
+
+      expect(plan.every((m) => !m.isHook)).toBe(true);
+    });
+
+    it("non-hook mappings have isHook=false", () => {
+      const plan = planCodexProjection({
+        claudeFiles: ["CLAUDE.md"],
+        skillDirs: [{ name: "commit", files: ["SKILL.md"] }],
+        hookFiles: [],
+      });
+
+      expect(plan.every((m) => m.isHook === false)).toBe(true);
     });
   });
 });
