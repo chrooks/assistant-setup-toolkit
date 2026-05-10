@@ -73,6 +73,22 @@ npm run setup -- --claude --default --no-sources
 | `--no-fetch` | Skip External Source fetching entirely |
 | `--yes` | Skip confirmation prompts |
 
+## Iteration Loop (resync after edits)
+
+When you edit a skill, hook, or instruction in the **Canonical Assistant Source** (`canonical/`), both **Assistant Homes** (`~/.claude/`, `~/.codex/`) need the update. Two helpers automate this:
+
+```bash
+# One-shot: push canonical/ to both Assistant Homes
+npm run sync
+
+# Watcher: auto-resync on every save
+npm run sync:watch
+```
+
+Both expand to a non-interactive Setup Wizard run with `--claude --codex --default --no-fetch --yes`. `--no-fetch` skips External Source git clones since edits are local; `--yes` skips confirmation prompts. Skill Artifact ZIPs in `artifacts/` are rebuilt each run.
+
+`sync:watch` uses `chokidar-cli` against `canonical/**` and `manifests/**`. Run it in a background terminal during iteration; edits to `canonical/skills/explain/SKILL.md` (or any tracked file) trigger an immediate resync.
+
 ## Structure
 
 ```
