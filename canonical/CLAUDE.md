@@ -33,6 +33,9 @@ ALWAYS:
 > `/tdd` + `/verification-loop` + `/commit` is a VERY common workflow when implementing.
 Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
+## Assistant Extension Guidance
+- When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `assistant-extension-advisor` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
+
 ## Code Style Preferences
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
 - Refer to linter configurations and .editorconfig, if present
