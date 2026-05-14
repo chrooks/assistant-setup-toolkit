@@ -8,23 +8,23 @@ const skillPath = path.join(
   repoRoot,
   "canonical",
   "skills",
-  "assistant-extension-advisor",
+  "consult",
   "SKILL.md",
 );
 const referencePath = path.join(
   repoRoot,
   "canonical",
   "skills",
-  "assistant-extension-advisor",
+  "consult",
   "references",
   "claude-howto-extension-map.md",
 );
 
-describe("assistant-extension-advisor Skill", () => {
+describe("consult Skill (formerly assistant-extension-advisor)", () => {
   it("defines an automatic advisory Skill for assistant extension decisions", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("name: assistant-extension-advisor");
+    expect(skill).toContain("name: consult");
     expect(skill).toContain("user-invocable: false");
     expect(skill).toContain("references/claude-howto-extension-map.md");
     expect(skill).toMatch(/description:.*Skills/i);
@@ -49,7 +49,7 @@ describe("assistant-extension-advisor Skill", () => {
 
   it("is discoverable with nested reference files for projection and artifacts", async () => {
     const skills = await discoverSkillDirs(repoRoot);
-    const advisor = skills.find((skill) => skill.name === "assistant-extension-advisor");
+    const advisor = skills.find((skill) => skill.name === "consult");
 
     expect(advisor?.files).toContain("SKILL.md");
     expect(advisor?.files).toContain("references/claude-howto-extension-map.md");
