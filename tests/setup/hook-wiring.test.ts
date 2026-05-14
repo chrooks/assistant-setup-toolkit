@@ -46,6 +46,46 @@ describe("hook-wiring", () => {
       expect(entries[0].targets).toEqual(["claude-code", "codex-cli"]);
     });
 
+    it("parses strategic compact PreToolUse wiring", async () => {
+      const dir = await makeTempDir("strategic-compact");
+      const yaml = [
+        "version: 1",
+        "hooks:",
+        "  - file: strategic-compact.js",
+        "    event: PreToolUse",
+        '    matcher: "Edit|Write"',
+        "    targets: [claude-code, codex-cli]",
+        '    command: "node {hook}"',
+        "",
+      ].join("\n");
+      await fs.writeFile(path.join(dir, "wiring.yaml"), yaml, "utf-8");
+
+      const entries = await loadWiringManifest(dir);
+      expect(entries).toEqual([
+        {
+          file: "strategic-compact.js",
+          event: "PreToolUse",
+          matcher: "Edit|Write",
+          targets: ["claude-code", "codex-cli"],
+          command: "node {hook}",
+        },
+      ]);
+    });
+
+    it("loads the repository strategic compact wiring entry", async () => {
+      const entries = await loadWiringManifest(
+        path.join(process.cwd(), "canonical", "hooks"),
+      );
+
+      expect(entries).toContainEqual({
+        file: "strategic-compact.js",
+        event: "PreToolUse",
+        matcher: "Edit|Write",
+        targets: ["claude-code", "codex-cli"],
+        command: "node {hook}",
+      });
+    });
+
     it("rejects a malformed manifest with a clear error mentioning the path", async () => {
       const dir = await makeTempDir("invalid");
       const yaml = ["version: 99", "hooks:", "  - notAField: bad", ""].join(
@@ -119,6 +159,37 @@ describe("hook-wiring", () => {
       expect(plans[0].actions[0].command).toBe(
         "/usr/bin/env bash -lc 'exec /home/u/.claude/hooks/x.sh'",
       );
+    });
+
+    it("plans strategic compact wiring for both assistant targets", () => {
+      const strategicCompactEntries: WiringEntry[] = [
+        {
+          file: "strategic-compact.js",
+          event: "PreToolUse",
+          matcher: "Edit|Write",
+          targets: ["claude-code", "codex-cli"],
+          command: "node {hook}",
+        },
+      ];
+
+      const plans = planHookWiring(strategicCompactEntries, {
+        "claude-code": "/home/u/.claude",
+        "codex-cli": "/home/u/.codex",
+      });
+
+      const claudePlan = plans.find((p) => p.target === "claude-code");
+      const codexPlan = plans.find((p) => p.target === "codex-cli");
+
+      expect(claudePlan?.actions[0]).toMatchObject({
+        event: "PreToolUse",
+        matcher: "Edit|Write",
+        command: "node /home/u/.claude/hooks/strategic-compact.js",
+      });
+      expect(codexPlan?.actions[0]).toMatchObject({
+        event: "PreToolUse",
+        matcher: "Edit|Write",
+        command: "node /home/u/.codex/hooks/strategic-compact.js",
+      });
     });
   });
 
