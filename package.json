@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "setup": "tsx scripts/setup.ts",
-    "sync": "npm run setup -- --claude --codex --default --no-fetch --yes",
+    "sync": "npm run setup -- --sync",
     "sync:watch": "chokidar 'canonical/**/*' 'manifests/**/*' -c 'npm run sync' --initial",
     "test": "vitest run",
     "test:watch": "vitest",

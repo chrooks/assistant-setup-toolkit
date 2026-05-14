@@ -28,6 +28,29 @@ export async function runInteractivePrompts(
 ): Promise<SetupProfile> {
   console.log("\nAssistant Setup Toolkit Setup Wizard\n");
 
+  // Step 0: Operation — Quick Sync re-projects Canonical Assistant Source over
+  // all targets with Overwrite (no fetch, no confirmation). Acts like `git pull`
+  // for the projection. Full Setup falls through to normal prompts.
+  const operation = await promptOperation();
+  if (operation === "sync") {
+    const syncTargets: AssistantTargetId[] =
+      partial.targets.length > 0
+        ? [...partial.targets]
+        : ["claude-code", "codex-cli"];
+    return {
+      mode: "default",
+      targets: syncTargets,
+      components: [...ALL_COMPONENT_KINDS],
+      writeBehavior: "overwrite",
+      dryRun: partial.dryRun,
+      fetch: false,
+      symlink: partial.symlink,
+      yes: true,
+      quiet: partial.quiet,
+      selectedExternalSourceIds: [],
+    };
+  }
+
   // Step 1: Select Assistant Targets (skip if already provided via flags)
   let targets: AssistantTargetId[];
   if (partial.targets.length > 0) {
@@ -101,6 +124,23 @@ export async function runInteractivePrompts(
 }
 
 // -- Individual prompt functions --
+
+/** Prompt user to choose Quick Sync or Full Setup. */
+async function promptOperation(): Promise<"sync" | "setup"> {
+  return select<"sync" | "setup">({
+    message: "What do you want to do?",
+    choices: [
+      {
+        name: "Quick Sync — re-project canonical → all targets, overwrite (like `git pull`)",
+        value: "sync",
+      },
+      {
+        name: "Full Setup — choose targets, mode, components, and write behavior",
+        value: "setup",
+      },
+    ],
+  });
+}
 
 /** Prompt user to select one or more Assistant Targets. */
 async function promptAssistantTargets(): Promise<AssistantTargetId[]> {
