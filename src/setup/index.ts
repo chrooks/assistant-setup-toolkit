@@ -150,7 +150,7 @@ async function walkDir(
 }
 
 /** Discover skill directories for projection planning and artifact generation. */
-async function discoverSkillDirs(
+export async function discoverSkillDirs(
   repoRoot: string,
 ): Promise<Array<{ name: string; files: string[]; sourceDir: string }>> {
   const skillsDir = path.join(repoRoot, "canonical", "skills");
@@ -162,10 +162,13 @@ async function discoverSkillDirs(
       if (!entry.isDirectory()) continue;
 
       const skillPath = path.join(skillsDir, entry.name);
-      const skillFiles = await fs.readdir(skillPath);
+      const skillFiles = (await walkDir(skillPath))
+        .map((file) => path.relative(skillPath, file.path))
+        .filter((file) => !file.split(path.sep).some((part) => part.startsWith(".")))
+        .sort();
       result.push({
         name: entry.name,
-        files: skillFiles.filter((f) => !f.startsWith(".")),
+        files: skillFiles,
         sourceDir: skillPath,
       });
     }
