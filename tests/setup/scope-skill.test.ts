@@ -14,27 +14,25 @@ describe("scope Skill", () => {
     expect(skill).toContain("name: scope");
     expect(skill).toMatch(/\/plan.*\/grill-me.*\/to-prd.*\/execute/is);
     expect(skill).toContain("4. /execute");
-    expect(skill).toContain("Using the Right Skill for the Right Job");
-    expect(skill).toContain("~/.claude/CLAUDE.md");
-    expect(skill).toContain("/tdd");
-    expect(skill).toContain("/impeccable");
+    expect(skill).toMatch(/invoke the `execute` Skill/i);
+    expect(skill).toContain("Right Skill, Right Job");
     expect(skill).not.toMatch(/\bTrivial\b/);
     expect(skill).not.toMatch(/\btrivial\b/);
   });
 
-  it("projects execute guidance to the Codex user-level instruction file", async () => {
+  it("projects execute guidance without embedding user-level instruction paths", async () => {
     const skill = await readFile(skillPath, "utf-8");
     const projected = rewriteContentForCodex(skill, true);
 
-    expect(projected).toContain("~/.codex/AGENTS.md");
-    expect(projected).toContain("when running in Codex Code");
+    expect(projected).toContain("execute` Skill");
     expect(projected).not.toContain("~/.claude/CLAUDE.md");
+    expect(projected).not.toContain("~/.codex/AGENTS.md");
   });
 
   it("keeps Workflow Triage instructions aligned with execute", async () => {
     const instructions = await readFile(instructionsPath, "utf-8");
 
-    expect(instructions).toContain("## Using the Right Skill for the Right Job");
+    expect(instructions).toContain("## Right Skill, Right Job");
     expect(instructions).toMatch(/\/scope.*\/plan.*\/grill-me.*\/to-prd.*\/execute/is);
     expect(instructions).not.toMatch(/\bor Trivial\b/);
   });
