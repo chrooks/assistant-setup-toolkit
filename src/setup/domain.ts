@@ -64,6 +64,7 @@ export interface SetupProfile {
   readonly fetch: boolean;
   readonly symlink: boolean;
   readonly yes: boolean;
+  readonly quiet: boolean;
   /**
    * IDs of External Sources the user picked for this run.
    * `undefined` = use manifest defaults (preserves non-interactive behavior).
@@ -130,6 +131,7 @@ export function createDefaultSetupProfile(
     fetch: true,
     symlink: false,
     yes: false,
+    quiet: false,
   };
 }
 
