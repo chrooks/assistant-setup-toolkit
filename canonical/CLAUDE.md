@@ -33,6 +33,9 @@ ALWAYS:
 > `/tdd` + `/verification-loop` + `/commit` is a VERY common workflow when implementing.
 Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
+## Workflow Triage
+- When the user gives an open-ended feature, change, or refactor request without specifying a workflow, suggest `/scope` before starting implementation. `/scope` presents four options: `/plan`, `/grill-me`, `/to-prd`, or `/execute`. `/execute` invokes the `Using the Right Skill for the Right Job` section above before starting work.
+
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `assistant-extension-advisor` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
 
