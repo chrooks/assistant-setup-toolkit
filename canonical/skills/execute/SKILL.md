@@ -20,7 +20,8 @@ Skill workflow, and then starts that workflow.
 ## Process
 
 1. Read the user-level assistant instructions:
-   - Read `~/.claude/CLAUDE.md` when running in Claude Code.
+   - Read `~/.claude/CLAUDE.md` when running in Claude Code.¸
+   - Read `~/.codex/AGENTS.md` when running in Codex.¸
 2. Invoke the `## Right Skill, Right Job` section from that file.
 3. Choose the matching workflow:
    - Use `/impeccable` for design/frontend work.
