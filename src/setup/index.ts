@@ -23,7 +23,11 @@ import { planWrites } from "./write-plan.js";
 import type { WritePlan } from "./write-plan.js";
 import { planVerificationChecks, formatVerificationResult } from "./verify.js";
 import { planMcpNextSteps } from "./mcp.js";
-import { buildStandardNextSteps, formatNextSteps } from "./next-steps.js";
+import {
+  buildStandardNextSteps,
+  formatNextStepsSection,
+  planInstallCommandNextSteps,
+} from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
 import { applyWritePlan } from "./apply.js";
 import {
@@ -210,19 +214,24 @@ export async function runSetupWizard(
       );
     }
 
+    // Quiet mode suppresses informational output; errors always print.
+    const log = profile.quiet
+      ? (..._args: unknown[]) => {}
+      : (...args: unknown[]) => console.log(...args);
+
     // Print header
-    console.log("\nAssistant Setup Toolkit Setup Wizard");
-    console.log(`Mode: ${profile.dryRun ? "dry-run" : "live"}`);
-    console.log(`Setup Profile: ${profile.mode === "default" ? "Default Install" : "Custom Install"}`);
-    console.log(`Write behavior: ${profile.writeBehavior === "safe-merge" ? "Safe Merge" : profile.writeBehavior === "overwrite" ? "Overwrite Install" : "Prune Install"}`);
+    log("\nAssistant Setup Toolkit Setup Wizard");
+    log(`Mode: ${profile.dryRun ? "dry-run" : "live"}`);
+    log(`Setup Profile: ${profile.mode === "default" ? "Default Install" : "Custom Install"}`);
+    log(`Write behavior: ${profile.writeBehavior === "safe-merge" ? "Safe Merge" : profile.writeBehavior === "overwrite" ? "Overwrite Install" : "Prune Install"}`);
 
     // Print Assistant Targets and Homes
     const homes = resolveAssistantHomes(profile.targets);
-    console.log("Assistant Targets:");
+    log("Assistant Targets:");
     for (const target of profile.targets) {
       const targetHomes = resolveAssistantHomes([target]);
       const homeLabels = targetHomes.map(homeLabel).join(", ");
-      console.log(`  - ${targetLabel(target)} -> ${homeLabels}`);
+      log(`  - ${targetLabel(target)} -> ${homeLabels}`);
     }
 
     // Plan External Source fetches based on profile + manifest. Selection comes
@@ -238,9 +247,9 @@ export async function runSetupWizard(
       (s) => s.kind === "mcp-server",
     );
 
-    console.log("Fetch Step:");
+    log("Fetch Step:");
     for (const planned of fetchPlan.planned) {
-      console.log(`  - ${planned.id}: ${profile.dryRun ? "planned" : "queued"}`);
+      log(`  - ${planned.id}: ${profile.dryRun ? "planned" : "queued"}`);
     }
     for (const skipped of fetchPlan.skipped) {
       // MCP entries get a special note about required secrets.
@@ -249,9 +258,9 @@ export async function runSetupWizard(
         const secretNote = mcp.requiredSecrets?.length
           ? `, requires ${mcp.requiredSecrets.join(", ")}`
           : "";
-        console.log(`  - ${skipped.id}: next steps only${secretNote}`);
+        log(`  - ${skipped.id}: next steps only${secretNote}`);
       } else {
-        console.log(`  - ${skipped.id}: skipped (${skipped.reason})`);
+        log(`  - ${skipped.id}: skipped (${skipped.reason})`);
       }
     }
 
@@ -281,7 +290,7 @@ export async function runSetupWizard(
         if (r.error) {
           console.error(`  [failed] ${r.sourceId}: ${r.error}`);
         } else {
-          console.log(`  [fetched] ${r.sourceId} (${r.files.length} file(s))`);
+          log(`  [fetched] ${r.sourceId} (${r.files.length} file(s))`);
         }
       }
     }
@@ -315,9 +324,9 @@ export async function runSetupWizard(
       const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles });
       projectionMappings.push(...mappings);
 
-      console.log("Target Projections:");
+      log("Target Projections:");
       for (const mapping of mappings) {
-        console.log(`  - regenerate ${mapping.target} from canonical/${mapping.source}`);
+        log(`  - regenerate ${mapping.target} from canonical/${mapping.source}`);
       }
 
       // Actually regenerate Target Projections in-repo before using as payload sources.
@@ -364,9 +373,9 @@ export async function runSetupWizard(
     });
 
     // Print payload precedence
-    console.log("Payload precedence:");
-    console.log("  - External Sources prepared first");
-    console.log("  - Canonical Assistant Source applied last; local files win conflicts");
+    log("Payload precedence:");
+    log("  - External Sources prepared first");
+    log("  - Canonical Assistant Source applied last; local files win conflicts");
 
     // Build Assistant Payloads — external files come from the fetcher above
     // (empty array on dry-run or when no sources were selected).
@@ -380,17 +389,17 @@ export async function runSetupWizard(
 
     // Report conflicts if any
     if (payloadResult.conflicts.length > 0) {
-      console.log("Conflicts resolved:");
+      log("Conflicts resolved:");
       for (const conflict of payloadResult.conflicts) {
-        console.log(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
+        log(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
       }
     }
 
     // Plan writes for each Assistant Home
     const writePlans: WritePlan[] = [];
-    console.log("Planned writes:");
+    log("Planned writes:");
     if (profile.dryRun) {
-      console.log("  (dry-run — no files will be written)");
+      log("  (dry-run — no files will be written)");
     }
 
     for (const payload of payloadResult.payloads) {
@@ -417,19 +426,19 @@ export async function runSetupWizard(
       writePlans.push(plan);
 
       if (!profile.dryRun && plan.backupPath) {
-        console.log(`  Backup: ${plan.backupPath}`);
+        log(`  Backup: ${plan.backupPath}`);
       }
 
       for (const action of plan.actions) {
         if (action.action !== "skip") {
-          console.log(`  [${action.action}] ${homeLabel(payload.homeId)}/${action.relativePath}`);
+          log(`  [${action.action}] ${homeLabel(payload.homeId)}/${action.relativePath}`);
         }
       }
     }
 
     // Apply write plans (live mode) or skip (dry-run)
     if (!profile.dryRun) {
-      console.log("Applying writes...");
+      log("Applying writes...");
       let totalWritten = 0;
       let totalSkipped = 0;
       let totalRemoved = 0;
@@ -461,7 +470,7 @@ export async function runSetupWizard(
         }
       }
 
-      console.log(`  ${totalWritten} file(s) written, ${totalSkipped} skipped, ${totalRemoved} removed`);
+      log(`  ${totalWritten} file(s) written, ${totalSkipped} skipped, ${totalRemoved} removed`);
 
       if (allErrors.length > 0) {
         console.error("Errors during apply:");
@@ -492,7 +501,7 @@ export async function runSetupWizard(
 
         const wiringPlans = planHookWiring(wiringEntries, homesByTarget);
         if (wiringPlans.length > 0) {
-          console.log("Hook Wiring:");
+          log("Hook Wiring:");
           for (const plan of wiringPlans) {
             const result = await applyHookWiring(plan, {
               dryRun: profile.dryRun,
@@ -510,7 +519,7 @@ export async function runSetupWizard(
                     : "already present"
                 })`
               : "";
-            console.log(
+            log(
               `  [${plan.target}] ${result.added} ${verbAdd}, ${result.alreadyPresent} ${verbSkip}${flagSuffix}`,
             );
           }
@@ -526,17 +535,17 @@ export async function runSetupWizard(
 
     if (plannedArtifacts.length > 0) {
       if (profile.dryRun) {
-        console.log("Skill Artifacts (dry-run):");
+        log("Skill Artifacts (dry-run):");
         for (const artifact of plannedArtifacts) {
-          console.log(`  [planned] ${artifact.skillName}.zip (${artifact.sourceFiles.length} file(s))`);
+          log(`  [planned] ${artifact.skillName}.zip (${artifact.sourceFiles.length} file(s))`);
         }
         hasSkillArtifacts = true;
       } else {
-        console.log("Skill Artifacts:");
+        log("Skill Artifacts:");
         const artifactResult = await createSkillArtifacts(plannedArtifacts);
 
         for (const zipPath of artifactResult.created) {
-          console.log(`  [created] ${path.basename(zipPath)}`);
+          log(`  [created] ${path.basename(zipPath)}`);
         }
         for (const err of artifactResult.errors) {
           console.error(`  [error] ${err.skillName}: ${err.message}`);
@@ -548,25 +557,33 @@ export async function runSetupWizard(
 
     // Verification Step
     const verificationResult = planVerificationChecks(writePlans, profile.dryRun);
-    console.log("Verification Step:");
+    log("Verification Step:");
     for (const line of formatVerificationResult(verificationResult)) {
-      console.log(line);
+      log(line);
     }
 
     // Next Steps
+    const installCommandSteps = planInstallCommandNextSteps({
+      sources: manifest.externalSources,
+      selectedSourceIds: fetchPlan.planned.map((source) => source.id),
+      targets: profile.targets,
+    });
     const mcpSteps = planMcpNextSteps(manifest.externalSources);
     const standardSteps = buildStandardNextSteps(hasSkillArtifacts);
-    const allNextSteps: NextStep[] = [...standardSteps, ...mcpSteps];
-    console.log("Next Steps:");
-    for (const line of formatNextSteps(allNextSteps)) {
-      console.log(line);
+    const allNextSteps: NextStep[] = [
+      ...installCommandSteps,
+      ...standardSteps,
+      ...mcpSteps,
+    ];
+    for (const line of formatNextStepsSection(allNextSteps)) {
+      log(line);
     }
 
     // Footer
     if (profile.dryRun) {
-      console.log("\nDry-run complete. No files were written.");
+      log("\nDry-run complete. No files were written.");
     } else {
-      console.log("\nSetup complete.");
+      log("\nSetup complete.");
     }
 
     return 0;

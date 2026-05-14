@@ -27,6 +27,7 @@ export interface PartialFlags {
   readonly symlink: boolean;
   readonly noFetch: boolean;
   readonly yes: boolean;
+  readonly quiet: boolean;
   /**
    * Optional explicit External Source IDs from `--sources <a,b,c>`.
    * `undefined` means user didn't pass the flag (use manifest defaults).
@@ -55,6 +56,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
   const symlink = flags.has("--symlink");
   const noFetch = flags.has("--no-fetch");
   const yes = flags.has("--yes");
+  const quiet = flags.has("--quiet");
 
   // Parse `--sources <ids>` (comma-separated) and `--no-sources` shortcut.
   // Both feed `selectedExternalSourceIds` so the caller can override the
@@ -92,6 +94,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
         fetch: !noFetch,
         symlink,
         yes,
+        quiet,
         selectedExternalSourceIds,
       },
     };
@@ -108,6 +111,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
       symlink,
       noFetch,
       yes,
+      quiet,
       selectedExternalSourceIds,
     },
   };

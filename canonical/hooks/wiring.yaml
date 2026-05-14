@@ -28,3 +28,12 @@ hooks:
     #   matcher: "Bash"          # only honored where the event supports it
     #   timeoutSec: 30
     #   command: "bash {hook}"   # default is `bash {hook}` where {hook} is the absolute hook path
+  - file: strategic-compact.js
+    event: PreToolUse
+    matcher: "Edit|Write"
+    targets: [claude-code, codex-cli]
+    command: "node {hook}"
+  - file: canonical-sync.sh
+    event: PostToolUse
+    matcher: "Edit|Write"
+    targets: [claude-code, codex-cli]

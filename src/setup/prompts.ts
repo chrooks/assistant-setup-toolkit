@@ -86,6 +86,7 @@ export async function runInteractivePrompts(
     fetch: !partial.noFetch,
     symlink: partial.symlink,
     yes: partial.yes,
+    quiet: partial.quiet,
     selectedExternalSourceIds,
   };
 
