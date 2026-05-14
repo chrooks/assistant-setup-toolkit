@@ -1,19 +1,19 @@
 ---
 name: verification-loop
-description: "Comprehensive post-change verification with optional explanatory reporting and concurrent review synthesis."
+description: "Comprehensive post-change verification with optional explanatory reporting and delegated review fan-out."
 origin: ECC
 ---
 
 # Verification Loop Skill
 
 A comprehensive verification system for coding sessions. Use it after code
-changes to prove the work, explain what changed, and optionally fan out to
-parallel review tools before deciding whether to fix forward with `/tdd` or
-`/diagnose`.
+changes to prove the work, explain what changed, and optionally delegate
+parallel review to `/review-fanout` before deciding whether to fix forward with
+`/tdd` or `/diagnose`.
 
 ## When to Use
 
-Invoke this skill:
+Invoke this Skill:
 - After completing a feature or significant code change
 - Before creating a PR
 - After refactoring
@@ -96,7 +96,7 @@ Review each changed file for:
 - Missing error handling
 - Potential edge cases
 - Missing or mismatched tests
-- Drift from the project's `CONTEXT.md` domain language
+- Drift from the project's `CONTEXT.md` Lexicon
 
 Diff coverage rules:
 - `git diff HEAD` covers staged and unstaged tracked files.
@@ -128,57 +128,27 @@ it working.]
 
 Keep the report source-faithful:
 - Ground it in the actual diff, tests, and user-visible behavior.
-- Define project Lexicon terms from `CONTEXT.md` when using them.
+- Correct Lexicon misuse or missing established terms from `CONTEXT.md` briefly.
 - Do not add speculative benefits that the code does not deliver.
 
-## Optional Concurrent Review
+## Optional Review Fan-Out
 
 After offering the code report, ask whether the user wants a concurrent review
 fan-out.
 
-If they accept, launch these review paths concurrently when available:
-- `code-reviewer` agent via ECC, focused on defects, security, maintainability,
-  and missing tests.
-- `/improve-codebase-architecture`, in review-only mode, focused on deepening
-  opportunities, seams, leverage, locality, and testability.
-- `/codex:adversarial-review`, focused on challenging the implementation
-  approach, design choices, tradeoffs, and assumptions.
+If they accept, invoke `/review-fanout` with:
+- The current diff scope
+- The verification evidence from this run
+- Any user-stated risk focus
+- Any files, behaviors, or assumptions that need extra challenge
 
-Review fan-out rules:
-- Run the review paths in parallel where the assistant runtime supports it.
-- Keep all review paths read-only. Do not apply patches during review fan-out.
-- Give every path the same diff scope and any user-stated risk focus.
-- If one path is unavailable, say which one was skipped and continue with the
-  available reviewers.
-- Wait for available review results before synthesis unless the user explicitly
-  chooses background-only review.
-
-## Concern Synthesis
-
-Deduplicate overlapping findings and list only concerns that are concrete enough
-to act on. Prefer a short list of high-signal issues over exhaustive noise.
-
-Use this exact shape for each synthesized concern:
-
-```markdown
-- **Issue:** [/caveman ultra synopsis]
-  **Fix:** [How we can fix it]
-  **Difficulty:** [Trivial|Simple|Moderate|Hard|Risky]
-```
-
-Difficulty values:
-- `Trivial`: mechanical one-line or copy-only fix
-- `Simple`: localized change with obvious tests
-- `Moderate`: several files or behavior paths, still well-scoped
-- `Hard`: broad design impact or unclear integration risk
-- `Risky`: data loss, security, migration, or production-behavior risk
-
-If review produces no actionable concerns, say so directly and name any residual
-risk or unrun verification.
+Paste the returned concern synthesis and next workflow recommendation into the
+verification report. If they decline, mark review fan-out as declined.
 
 ## Fix-Forward Offer
 
-After concern synthesis, offer the next workflow based on the concern shape:
+After diff review or `/review-fanout` concern synthesis, offer the next workflow
+based on the concern shape:
 - Offer `/tdd` when the fix is a planned behavior change, testable logic, or
   missing test coverage.
 - Offer `/diagnose` when the issue is a failing check, unclear root cause,
@@ -215,7 +185,30 @@ Review Fan-Out:
 
 Next Workflow:
 [/tdd recommended | /diagnose recommended | none]
+
+Acceptance Criteria:
+1. [Concrete thing user can verify manually — e.g., "run X and see Y"]
+2. [Another checkable outcome]
+3. ...
 ```
+
+## Acceptance Criteria
+
+After the verification report, list concrete acceptance criteria the user can
+manually verify. Each criterion should be:
+
+- **Observable** — the user can check it themselves without reading code.
+- **Specific** — names the file, command, URL, or UI element to inspect.
+- **Binary** — clearly passes or fails, no judgment calls.
+
+Derive criteria from:
+- What the user asked for in the original request.
+- What files were created, changed, or deleted.
+- What behavior changed (commands to run, pages to visit, outputs to compare).
+- What tests were added and what they prove.
+
+Keep the list short — 3 to 8 items. If the change is trivial (rename, config
+tweak), 1-2 items is fine.
 
 ## Continuous Mode
 
