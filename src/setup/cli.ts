@@ -48,14 +48,24 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
   if (flags.has("--claude")) targets.push("claude-code");
   if (flags.has("--codex")) targets.push("codex-cli");
 
-  const hasDefault = flags.has("--default");
+  // `--sync` = quick "git pull"-style re-projection: both targets, all
+  // components, default mode, overwrite, skip fetch + confirmation. Other
+  // explicit flags still win (e.g. `--sync --claude` syncs only Claude).
+  const sync = flags.has("--sync");
+  if (sync) {
+    if (targets.length === 0) {
+      targets.push("claude-code", "codex-cli");
+    }
+  }
+
+  const hasDefault = flags.has("--default") || sync;
   const hasCustom = flags.has("--custom");
   const dryRun = flags.has("--dry-run");
-  const overwrite = flags.has("--overwrite");
+  const overwrite = flags.has("--overwrite") || sync;
   const prune = flags.has("--prune");
   const symlink = flags.has("--symlink");
-  const noFetch = flags.has("--no-fetch");
-  const yes = flags.has("--yes");
+  const noFetch = flags.has("--no-fetch") || sync;
+  const yes = flags.has("--yes") || sync;
   const quiet = flags.has("--quiet");
 
   // Parse `--sources <ids>` (comma-separated) and `--no-sources` shortcut.
