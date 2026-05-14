@@ -1,5 +1,7 @@
 # Development Conversation Guidelines
 
+Invoke `/caveman lite` for all communication to avoid dense, wordy responses. Unless explicitly told otherwise.
+
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
 - If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon.
