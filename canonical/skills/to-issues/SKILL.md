@@ -11,7 +11,9 @@ Break a plan into independently-grabbable issues or local TODO tasks using verti
 
 By default, this Skill publishes approved slices to the project issue tracker. With the `local` subcommand, update the project-root `TODO.md` instead and make no issue tracker mutations.
 
-The issue tracker and triage label vocabulary should have been provided to you for default mode — run `/setup-matt-pocock-skills` if not. Local mode does not require issue tracker setup.
+Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md). Load that file only when local mode is active or when the user asks about the local TODO.md format.
+
+The issue tracker and triage labels should have been provided to you for default mode — run `/setup-matt-pocock-skills` if not. Local mode does not require issue tracker setup.
 
 ## Invocation forms
 
@@ -30,7 +32,7 @@ In local mode, read issue references when needed for context, but do not create,
 
 ### 2. Explore the codebase (optional)
 
-If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
+If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and descriptions should use the project's Lexicon terms from `CONTEXT.md`, and respect ADRs in the area you're touching.
 
 ### 3. Run existing work pass
 
@@ -152,7 +154,7 @@ Omit this section if there are no related issues beyond "Blocked by".
 
 Do NOT close or modify any parent issue.
 
-In local mode, write the approved breakdown to project-root `TODO.md` instead.
+In local mode, write the approved breakdown to project-root `TODO.md` using [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md).
 
 - Do not publish issue tracker tickets.
 - Do not comment on, label, close, or otherwise mutate issue tracker items.
@@ -160,34 +162,4 @@ In local mode, write the approved breakdown to project-root `TODO.md` instead.
 - Preserve existing `TODO.md` content. If the file already contains `<!-- to-issues:begin -->` and `<!-- to-issues:end -->`, replace only that generated block. Otherwise append a `## To Issues` section.
 - Preserve checked items and user-written notes when an existing TODO entry clearly matches an approved slice.
 - Write slices in dependency order, blockers first.
-- Use stable Markdown headings so future `/to-issues local` runs can reference and update the same tasks.
-
-<todo-template>
-## To Issues
-
-<!-- to-issues:begin -->
-
-### Slice title
-
-Type: AFK
-Status: Todo
-Blocked by: None - can start immediately
-Existing work relation: None
-Source: Brief source reference, if available.
-
-#### What to build
-
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation.
-
-#### Acceptance criteria
-
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
-#### Related work
-
-- Omit this section if there is no related work beyond "Blocked by".
-
-<!-- to-issues:end -->
-</todo-template>
+- Use stable TODO titles so future `/to-issues local` runs can reference and update the same TODOs.
