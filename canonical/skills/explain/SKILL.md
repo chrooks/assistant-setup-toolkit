@@ -54,7 +54,7 @@ Always this structure, always all three layers in this order:
 - If concept ambiguous, pick most likely interpretation in context. Note alternatives at bottom.
 - Keep total output under ~40 lines. Brevity is point.
 - If project has `CONTEXT.md`, check it for domain-specific definitions of concept.
-- If concept is glossary term, use glossary definition as ground truth for Human layer.
+- If concept is a Lexicon term, use Lexicon definition as ground truth for Human layer.
 
 ## Example
 

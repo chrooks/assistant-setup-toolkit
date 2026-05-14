@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# UserPromptSubmit hook: per-turn Lexicon reminder.
+# UserPromptSubmit hook: per-turn Lexicon coaching reminder.
 #
-# Re-injects a short reminder to use Lexicon terms (defined in
-# ~/.claude/CONTEXT.md and/or <project>/CONTEXT.md) on every user turn.
-# This is the per-turn anti-drift Seam that complements the @import of
-# CONTEXT.md in CLAUDE.md, which only loads at session start.
+# Re-injects a short reminder to use Lexicon terms from ~/.claude/CONTEXT.md,
+# ~/.codex/CONTEXT.md, and/or <project>/CONTEXT.md on every user turn.
+# This is the per-turn anti-drift guard that complements the @import of
+# CONTEXT.md in CLAUDE.md or AGENTS.md, which only loads at session start.
 #
 # Wire it in ~/.claude/settings.json (Claude Code):
 #
@@ -50,6 +50,6 @@ fi
 # This is intentional: Claude Code's structured output uses {"additionalContext": "..."}
 # (flat) and Codex uses {"hookSpecificOutput": {..., "additionalContext": "..."}} (nested).
 # Plain stdout sidesteps the shape difference and works on both surfaces.
-printf '%s\n' 'Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Define each term on first use unless the user has said to stop. Do not drift to the _Avoid_ synonyms — if you catch yourself, restate using the Lexicon term and continue. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction.'
+printf '%s\n' 'Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Correct the user when they misuse a Lexicon term, use an _Avoid_ synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so the shared language becomes natural. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction.'
 
 exit 0

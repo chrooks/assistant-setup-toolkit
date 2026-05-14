@@ -1,13 +1,13 @@
 # Lexicon
 
-A reusable glossary of engineering conversation terms that coding assistants should use consistently during Development Conversations.
+A reusable set of engineering conversation terms that coding assistants should use consistently during Development Conversations.
 
-The glossary should prefer established industry meanings so using it helps the human communicate more clearly in common software engineering language.
+The Lexicon should prefer established industry meanings so using it helps the human communicate more clearly in common software engineering language.
 
 ## Language
 
 **Lexicon**:
-A reusable glossary of engineering conversation terms that coding assistants should use consistently during Development Conversations.
+A reusable set of engineering conversation terms that coding assistants should use consistently during Development Conversations.
 _Avoid_: Development Conversation Lexicon, engineering glossary, coding terms, shared vocabulary
 
 **Seam**:
@@ -87,5 +87,5 @@ _Avoid_: sitemap, nav, layout
 
 - "Target Home Directory" was used to mean **Assistant Home** — resolved: use **Assistant Home** for user-level install destinations owned by, or discovered by, an assistant.
 - "technological terms" could mean technology names or engineering conversation terms — resolved: include conversation-shaping terms such as **Seam**, **Boundary**, **Vertical Slice**, and **Layer**; exclude plain technology names such as React, FastAPI, PostgreSQL, Vitest, and Supabase.
-- "my house style" could mean private definitions that differ from industry usage — resolved: prefer industry-standard meanings so the glossary reinforces clearer industry tech-speak.
+- "my house style" could mean private definitions that differ from industry usage — resolved: prefer industry-standard meanings so the Lexicon reinforces clearer industry tech-speak.
 - "teaching glossary" could mean long explanations, examples, and common misuses for every term — resolved: default each term to a concise definition and `_Avoid_` line; use `## Flagged ambiguities` only when a misuse is important enough to preserve.

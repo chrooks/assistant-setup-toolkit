@@ -6,7 +6,7 @@
  * This module is pure — no filesystem or IO dependencies.
  */
 
-// -- Literal unions matching the domain glossary --
+// -- Literal unions matching the project Lexicon --
 
 /** A supported assistant runtime the toolkit can configure. */
 export type AssistantTargetId = "claude-code" | "codex-cli";

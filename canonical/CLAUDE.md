@@ -6,7 +6,7 @@
 - The shared Lexicon in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
 - The project Lexicon takes precedence over the global Lexicon when the same term appears in both.
 - Be VERY strict about using Lexicon terms when applicable instead of other similar words or terms.
-- Whenever you use a Lexicon term in conversation, define it. Do this until I tell you explicitly that I don't need the definition repeated anymore. Don't be afraid to be annoying/verbose about these terms. The goal is for us to get comfortable using the Lexicon.
+- Do not define Lexicon terms repeatedly by default. Instead, correct me when I misuse a Lexicon term, use an `_Avoid_` synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so I get used to the shared language.
 - **ACTIVE EVERY RESPONSE.** Lexicon enforcement does not decay across turns. Do not drift back to common synonyms (the `_Avoid_` lists) after a long session, after tool use, or after compaction. If you catch yourself using an `_Avoid_` synonym, restate using the Lexicon term and continue.
 
 ### Active Lexicon (global)
@@ -16,6 +16,7 @@
 - If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.
   - Good examples include:
     - Tutorials with specific instructions - ex: "How do I get my database connection url from the Supabase dashboard"
+    - Settings for technology that may have changes - ex: "How do I disable keyboard tick sounds on my iPhone"
     - Working with unfamiliar libraries - ex: "How do I train an agent with poke-api Python library"
     - Recalling specific numbers, figures, and facts - ex: "What is Lebron James averaging in the playoffs right now?"
     - Answering a question that requires expert knowledge - ex: "How can I best make my UI feel rewarding to use from a HCI, UI/UX, psychology standpoint"
@@ -30,14 +31,14 @@ ALWAYS:
 - Use `/verification-loop` after implementing a feature.
 - Use `/commit` when its time to commit work to version control.
 - Use `/diagnose` for fixing difficult bugs.
-> `/tdd` + `/verification-loop` + `/commit` is a VERY common workflow when implementing.
+> `/tdd` and/or `/impeccable` + `/verification-loop` + wait for user feedback + when satified `/commit` is a VERY common workflow when implementing.
 Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
 ## Workflow Triage
 - When the user gives an open-ended feature, change, or refactor request without specifying a workflow, suggest `/scope` before starting implementation. `/scope` presents four options: `/plan`, `/grill-me`, `/to-prd`, or `/execute`. `/execute` invokes the `Right Skill, Right Job` section above before starting work.
 
 ## Assistant Extension Guidance
-- When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `assistant-extension-advisor` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
+- When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `consult` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
 
 ## Code Style Preferences
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
