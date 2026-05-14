@@ -52,11 +52,21 @@ const FILE_MAP: Record<string, string> = {
 // -- Text rewriting --
 
 /**
- * Rewrite text content from Claude conventions to Codex conventions:
- *   .claude -> .codex
- *   CLAUDE.md -> AGENTS.md
- *   claude -> codex
- *   Claude -> Codex
+ * Rewrite text content from Claude conventions to Codex conventions.
+ *
+ * Compound product-name forms must run BEFORE generic Claude→Codex so that
+ * "Claude Code" maps to "Codex CLI" (the actual product name) rather than
+ * the meaningless "Codex Code".
+ *
+ * Order:
+ *   "Claude Code"   -> "Codex CLI"
+ *   "claude code"   -> "codex cli"
+ *   "Claude-Code"   -> "Codex-CLI"
+ *   "claude-code"   -> "codex-cli"
+ *   ".claude"       -> ".codex"
+ *   "CLAUDE.md"     -> "AGENTS.md"
+ *   "claude"        -> "codex"
+ *   "Claude"        -> "Codex"
  *
  * For SKILL.md files, also sanitizes frontmatter description/argument-hint
  * fields by ensuring values are quoted.
@@ -65,14 +75,16 @@ export function rewriteContentForCodex(
   content: string,
   isSkill: boolean,
 ): string {
-  // Apply text replacements in the same order as the shell script
   let result = content
+    .replace(/Claude Code/g, "Codex CLI")
+    .replace(/claude code/g, "codex cli")
+    .replace(/Claude-Code/g, "Codex-CLI")
+    .replace(/claude-code/g, "codex-cli")
     .replace(/\.claude/g, ".codex")
     .replace(/CLAUDE\.md/g, "AGENTS.md")
     .replace(/claude/g, "codex")
     .replace(/Claude/g, "Codex");
 
-  // Sanitize SKILL.md frontmatter if needed
   if (isSkill) {
     result = sanitizeSkillFrontmatter(result);
   }
