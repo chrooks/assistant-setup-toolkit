@@ -135,6 +135,7 @@ tests/setup/          # Test suite
 | `session-mode-cleanup.sh` | Clear non-persisted mode on session end |
 | `knowledge-sync.sh` | Auto-sync knowledge files to Obsidian vault on write |
 | `lexicon-reminder.sh` | UserPromptSubmit hook: re-injects a Lexicon-enforcement reminder every turn (see `canonical/CLAUDE.md` Lexicon Usage). Disable per session with `CLAUDE_LEXICON_REMINDER=0` or globally with `touch ~/.claude/.lexicon-reminder.off`. Wired automatically via `canonical/hooks/wiring.yaml`. |
+| `canonical-sync.sh` | Project-level PostToolUse hook: when `canonical/` changes, runs the Setup Wizard quietly so Assistant Homes and Target Projections stay synced. Disable per session with `CANONICAL_SYNC=0` or per project with `touch .canonical-sync.off`. |
 
 ### Hook Wiring
 
@@ -143,6 +144,7 @@ tests/setup/          # Test suite
 - Loads `wiring.yaml` (returns silently if absent — wiring is opt-in).
 - For each entry, idempotently merges a hook command into the right config file: `~/.claude/settings.json` for Claude Code, `~/.codex/hooks.json` for Codex CLI.
 - For Codex CLI, also asserts `[features] codex_hooks = true` in `~/.codex/config.toml` (Codex hooks are gated behind that flag).
+- For entries with `scope: project`, writes project config instead: `.claude/settings.json`, `.codex/hooks.json`, and `.codex/config.toml`.
 
 Idempotency is keyed on the rendered command string. Re-running the wizard never produces duplicate entries, and a hook wired manually before this manifest existed won't be re-added.
 

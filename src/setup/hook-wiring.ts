@@ -23,14 +23,18 @@ import type { AssistantTargetId } from "./domain.js";
 /** Targets a wiring entry can apply to. */
 const TargetSchema = z.enum(["claude-code", "codex-cli"]);
 
+/** Where the hook should be registered. Defaults to the selected Assistant Home. */
+const WiringScopeSchema = z.enum(["assistant-home", "project"]);
+
 /** A single wiring entry — one hook script bound to one event on one or more targets. */
 const WiringEntrySchema = z.object({
   file: z.string().min(1, "file must not be empty"),
   event: z.string().min(1, "event must not be empty"),
   targets: z.array(TargetSchema).min(1, "targets must not be empty"),
+  scope: WiringScopeSchema.optional(),
   matcher: z.string().optional(),
   timeoutSec: z.number().int().positive().optional(),
-  /** Optional command template. `{hook}` is replaced with the absolute hook path. Defaults to `bash {hook}`. */
+  /** Optional command template. `{hook}` and `{project}` are replaced with absolute paths. Defaults to `bash {hook}`. */
   command: z.string().optional(),
 });
 
@@ -79,6 +83,10 @@ export interface ApplyWiringResult {
   readonly added: number;
   readonly alreadyPresent: number;
   readonly flagAdded: boolean;
+}
+
+export interface PlanHookWiringOptions {
+  readonly projectRoot?: string;
 }
 
 // -- Loader --
@@ -141,18 +149,44 @@ const SETTINGS_PATH_BY_TARGET: Record<AssistantTargetId, string> = {
 export function planHookWiring(
   entries: readonly WiringEntry[],
   assistantHomeByTarget: Readonly<Partial<Record<AssistantTargetId, string>>>,
+  options: PlanHookWiringOptions = {},
 ): readonly WiringPlan[] {
-  const plansByTarget = new Map<AssistantTargetId, WiringAction[]>();
+  const plansBySettingsPath = new Map<
+    string,
+    {
+      target: AssistantTargetId;
+      settingsPath: string;
+      actions: WiringAction[];
+      featureFlag?: FeatureFlagAssertion;
+    }
+  >();
 
   for (const entry of entries) {
     for (const target of entry.targets) {
       const home = assistantHomeByTarget[target];
       if (!home) continue; // target not selected this run
 
-      const settingsPath = path.join(home, SETTINGS_PATH_BY_TARGET[target]);
-      const hookAbsPath = path.join(home, "hooks", entry.file);
+      const scope = entry.scope ?? "assistant-home";
+      const settingsRoot =
+        scope === "project"
+          ? getProjectSettingsRoot(target, options.projectRoot)
+          : home;
+      const settingsPath = path.join(
+        settingsRoot,
+        SETTINGS_PATH_BY_TARGET[target],
+      );
+      const projectRoot =
+        scope === "project" || entry.command?.includes("{project}") === true
+          ? getProjectRoot(options.projectRoot)
+          : "";
+      const hookAbsPath =
+        scope === "project"
+          ? path.join(projectRoot, "canonical", "hooks", entry.file)
+          : path.join(home, "hooks", entry.file);
       const commandTemplate = entry.command ?? "bash {hook}";
-      const renderedCommand = commandTemplate.replace(/\{hook\}/g, hookAbsPath);
+      const renderedCommand = commandTemplate
+        .replace(/\{hook\}/g, hookAbsPath)
+        .replace(/\{project\}/g, projectRoot);
 
       const action: WiringAction = {
         target,
@@ -163,35 +197,31 @@ export function planHookWiring(
         command: renderedCommand,
       };
 
-      const existing = plansByTarget.get(target);
+      const featureFlag: FeatureFlagAssertion | undefined =
+        target === "codex-cli"
+          ? {
+              tomlPath: path.join(settingsRoot, "config.toml"),
+              section: "features",
+              key: "codex_hooks",
+              value: true,
+            }
+          : undefined;
+      const planKey = `${target}\0${settingsPath}`;
+      const existing = plansBySettingsPath.get(planKey);
       if (existing) {
-        existing.push(action);
+        existing.actions.push(action);
       } else {
-        plansByTarget.set(target, [action]);
+        plansBySettingsPath.set(planKey, {
+          target,
+          settingsPath,
+          actions: [action],
+          featureFlag,
+        });
       }
     }
   }
 
-  const plans: WiringPlan[] = [];
-  for (const [target, actions] of plansByTarget) {
-    const home = assistantHomeByTarget[target];
-    if (!home) continue;
-
-    const settingsPath = path.join(home, SETTINGS_PATH_BY_TARGET[target]);
-    const featureFlag: FeatureFlagAssertion | undefined =
-      target === "codex-cli"
-        ? {
-            tomlPath: path.join(home, "config.toml"),
-            section: "features",
-            key: "codex_hooks",
-            value: true,
-          }
-        : undefined;
-
-    plans.push({ target, settingsPath, actions, featureFlag });
-  }
-
-  return plans;
+  return Array.from(plansBySettingsPath.values());
 }
 
 // -- Applier --
@@ -418,4 +448,19 @@ function getMessage(error: unknown): string {
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getProjectSettingsRoot(
+  target: AssistantTargetId,
+  projectRoot: string | undefined,
+): string {
+  const root = getProjectRoot(projectRoot);
+  return path.join(root, target === "claude-code" ? ".claude" : ".codex");
+}
+
+function getProjectRoot(projectRoot: string | undefined): string {
+  if (!projectRoot) {
+    throw new Error("Project-scoped hook wiring requires a project root.");
+  }
+  return projectRoot;
 }

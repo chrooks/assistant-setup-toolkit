@@ -86,6 +86,20 @@ describe("hook-wiring", () => {
       });
     });
 
+    it("loads canonical sync as a project-scoped hook", async () => {
+      const entries = await loadWiringManifest(
+        path.join(process.cwd(), "canonical", "hooks"),
+      );
+
+      expect(entries).toContainEqual({
+        file: "canonical-sync.sh",
+        event: "PostToolUse",
+        matcher: "Edit|Write",
+        targets: ["claude-code", "codex-cli"],
+        scope: "project",
+      });
+    });
+
     it("rejects a malformed manifest with a clear error mentioning the path", async () => {
       const dir = await makeTempDir("invalid");
       const yaml = ["version: 99", "hooks:", "  - notAField: bad", ""].join(
@@ -190,6 +204,87 @@ describe("hook-wiring", () => {
         matcher: "Edit|Write",
         command: "node /home/u/.codex/hooks/strategic-compact.js",
       });
+    });
+
+    it("keeps project-scoped canonical sync out of user-level Assistant Homes", () => {
+      const mixedEntries: WiringEntry[] = [
+        {
+          file: "lexicon-reminder.sh",
+          event: "UserPromptSubmit",
+          targets: ["claude-code", "codex-cli"],
+        },
+        {
+          file: "canonical-sync.sh",
+          event: "PostToolUse",
+          matcher: "Edit|Write",
+          targets: ["claude-code", "codex-cli"],
+          scope: "project",
+        },
+      ];
+
+      const plans = planHookWiring(
+        mixedEntries,
+        {
+          "claude-code": "/home/u/.claude",
+          "codex-cli": "/home/u/.codex",
+        },
+        { projectRoot: "/repo/toolkit" },
+      );
+
+      const claudeHomePlan = plans.find(
+        (p) => p.settingsPath === "/home/u/.claude/settings.json",
+      );
+      const claudeProjectPlan = plans.find(
+        (p) => p.settingsPath === "/repo/toolkit/.claude/settings.json",
+      );
+      const codexHomePlan = plans.find(
+        (p) => p.settingsPath === "/home/u/.codex/hooks.json",
+      );
+      const codexProjectPlan = plans.find(
+        (p) => p.settingsPath === "/repo/toolkit/.codex/hooks.json",
+      );
+
+      expect(claudeHomePlan?.actions.map((a) => a.command)).toEqual([
+        "bash /home/u/.claude/hooks/lexicon-reminder.sh",
+      ]);
+      expect(claudeProjectPlan?.actions).toMatchObject([
+        {
+          event: "PostToolUse",
+          matcher: "Edit|Write",
+          command: "bash /repo/toolkit/canonical/hooks/canonical-sync.sh",
+        },
+      ]);
+      expect(codexHomePlan?.actions.map((a) => a.command)).toEqual([
+        "bash /home/u/.codex/hooks/lexicon-reminder.sh",
+      ]);
+      expect(codexProjectPlan?.actions).toMatchObject([
+        {
+          event: "PostToolUse",
+          matcher: "Edit|Write",
+          command: "bash /repo/toolkit/canonical/hooks/canonical-sync.sh",
+        },
+      ]);
+      expect(codexProjectPlan?.featureFlag).toEqual({
+        tomlPath: "/repo/toolkit/.codex/config.toml",
+        section: "features",
+        key: "codex_hooks",
+        value: true,
+      });
+    });
+
+    it("requires a project root for project-scoped hook wiring", () => {
+      const projectEntries: WiringEntry[] = [
+        {
+          file: "canonical-sync.sh",
+          event: "PostToolUse",
+          targets: ["claude-code"],
+          scope: "project",
+        },
+      ];
+
+      expect(() =>
+        planHookWiring(projectEntries, { "claude-code": "/home/u/.claude" }),
+      ).toThrow(/project root/i);
     });
   });
 

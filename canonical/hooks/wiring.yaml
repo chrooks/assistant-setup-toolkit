@@ -5,9 +5,15 @@
 #
 # The Setup Wizard reads this file during `npm run setup` and idempotently
 # merges entries into:
+# Assistant Home scope writes:
 #   - claude-code: ~/.claude/settings.json (under hooks.<event>)
 #   - codex-cli:   ~/.codex/hooks.json     (under hooks.<event>)
 #                  and asserts [features] codex_hooks = true in ~/.codex/config.toml
+#
+# Project scope writes:
+#   - claude-code: <repo>/.claude/settings.json
+#   - codex-cli:   <repo>/.codex/hooks.json
+#                  and asserts [features] codex_hooks = true in <repo>/.codex/config.toml
 #
 # Entries are keyed on the rendered command string for idempotency:
 # re-running the wizard never produces duplicate entries, and a hook
@@ -36,4 +42,5 @@ hooks:
   - file: canonical-sync.sh
     event: PostToolUse
     matcher: "Edit|Write"
+    scope: project
     targets: [claude-code, codex-cli]
