@@ -502,7 +502,9 @@ export async function runSetupWizard(
           homesByTarget[target] = resolveAssistantHomePath(homeId);
         }
 
-        const wiringPlans = planHookWiring(wiringEntries, homesByTarget);
+        const wiringPlans = planHookWiring(wiringEntries, homesByTarget, {
+          projectRoot: repoRoot,
+        });
         if (wiringPlans.length > 0) {
           log("Hook Wiring:");
           for (const plan of wiringPlans) {
