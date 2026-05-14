@@ -61,9 +61,9 @@ After writing files, if `.cowork/index.md` exists, update the **Source-of-truth 
 
 ## During the session
 
-### Challenge against the glossary
+### Challenge against the Lexicon
 
-When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y — which is it?"
+When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your Lexicon defines 'cancellation' as X, but you seem to mean Y — which is it?"
 
 ### Sharpen fuzzy language
 
