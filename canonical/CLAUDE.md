@@ -23,7 +23,7 @@
 ## ExecPlans
 - When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
-## Using the Right Skill for the Right Job
+## Right Skill, Right Job
 ALWAYS:
 - Use the `/impeccable` family of skills for design/frontend work.
 - Use `/tdd` when implementing a feature, especially if its testable logic. 
@@ -34,7 +34,7 @@ ALWAYS:
 Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
 
 ## Workflow Triage
-- When the user gives an open-ended feature, change, or refactor request without specifying a workflow, suggest `/scope` before starting implementation. `/scope` presents four options: `/plan`, `/grill-me`, `/to-prd`, or `/execute`. `/execute` invokes the `Using the Right Skill for the Right Job` section above before starting work.
+- When the user gives an open-ended feature, change, or refactor request without specifying a workflow, suggest `/scope` before starting implementation. `/scope` presents four options: `/plan`, `/grill-me`, `/to-prd`, or `/execute`. `/execute` invokes the `Right Skill, Right Job` section above before starting work.
 
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `assistant-extension-advisor` Skill first. It maps local `claude-howto` examples to this repo's decision rules.

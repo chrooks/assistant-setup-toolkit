@@ -34,16 +34,9 @@ Present exactly four options with a one-line rationale for each, tailored to the
 4. /execute — [why this fits: ready to do now using the right Skill workflow]
 ```
 
-For **/execute**, state which workflow(s) you would use by invoking the
-`## Using the Right Skill for the Right Job` section from the user-level
-assistant instructions:
-
-- Read `~/.claude/CLAUDE.md` when running in Claude Code.
-- Use `/tdd` for testable logic.
-- Use `/impeccable` for design/frontend work.
-- Use both when the task spans logic and UI.
-- If no other Skill has been invoked, use `/find-skill` to choose the best
-  workflow before starting.
+For **/execute**, state that you will invoke the `execute` Skill, which reads
+the user-level `## Right Skill, Right Job` section and starts the selected
+workflow.
 
 ### Step 3: Recommend
 
@@ -52,8 +45,7 @@ State which option you recommend and why, in one sentence. Wait for the user to 
 ### Step 4: Execute
 
 Once the user picks, invoke the corresponding Skill. For `/execute`, invoke the
-`## Using the Right Skill for the Right Job` section from the user-level
-assistant instructions, then start work with the selected Skill workflow.
+`execute` Skill.
 
 ## Rules
 
