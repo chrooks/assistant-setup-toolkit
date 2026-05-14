@@ -54,6 +54,6 @@ fi
 
 # Run Setup Wizard in quiet mode, all targets, default install, no fetch
 cd "$REPO_ROOT"
-npm run setup -- --claude --codex --default --no-fetch --quiet 2>/dev/null || true
+npm run setup -- --claude --codex --default --no-fetch --quiet --overwrite 2>/dev/null || true
 
 exit 0
