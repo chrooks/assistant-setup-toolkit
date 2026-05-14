@@ -35,7 +35,7 @@ For each incoming task, decide whether it is:
 - **Related only**: context worth referencing, but not a dependency.
 - **Conflicts / supersedes**: the proposed task changes direction from an existing issue and needs human approval.
 
-Use exact issue references (`#123`) whenever available. If the tracker has no relevant issues, say that explicitly.
+Use rich issue references whenever available: number, title, and link. Prefer `[#123 Issue title](https://tracker/issue/123)` over a bare `#123`. If links are not available, use `#123 Issue title`. If the tracker has no relevant issues, say that explicitly.
 
 ### 4. Draft vertical slices
 
@@ -61,24 +61,20 @@ Before asking for approval, show a compact dependency chart that includes:
 - blocking relationships
 - non-blocking related relationships when useful
 
-Use a readable text chart by default:
+Use a readable Markdown chart by default, so issue references can be linked:
 
-```text
-#9 Existing blocker
-└─ New: Retune Skill Tier values
-
-#12 Existing related issue
-↔ New: Player Archetypes
-
-Roll into #11
-└─ Task: Add landing-page status card
-```
+- Existing blocker: [#9 Evaluation Version publishing](https://tracker/issue/9)
+  - New: Retune Skill Tier values
+- Existing related issue: [#12 Redo live tips system](https://tracker/issue/12)
+  - Related: Player Archetypes
+- Roll into [#11 Update old admin dashboard](https://tracker/issue/11)
+  - Task: Add landing-page status card
 
 Use Mermaid only when the user's surface is likely to render it well. Keep labels short.
 
 ### 6. Quiz the user
 
-Present the proposed breakdown as a numbered list. For each slice, show:
+Present the proposed breakdown as a bulleted list, not a numbered list. Numbered proposals are easy to confuse with real issue numbers. For each slice, show:
 
 - **Title**: short descriptive name
 - **Type**: HITL / AFK
