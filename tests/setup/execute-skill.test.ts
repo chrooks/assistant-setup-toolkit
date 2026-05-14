@@ -29,7 +29,7 @@ describe("execute Skill", () => {
     const projected = rewriteContentForCodex(skill, true);
 
     expect(projected).toContain("~/.codex/AGENTS.md");
-    expect(projected).toContain("when running in Codex Code");
+    expect(projected).toContain("when running in Codex CLI");
     expect(projected).not.toContain("~/.claude/CLAUDE.md");
   });
 });

@@ -10,7 +10,39 @@ describe("projection", () => {
       const input = "See .claude/CLAUDE.md for Claude Code instructions.";
       const result = rewriteContentForCodex(input, false);
 
-      expect(result).toBe("See .codex/AGENTS.md for Codex Code instructions.");
+      expect(result).toBe("See .codex/AGENTS.md for Codex CLI instructions.");
+    });
+
+    it("rewrites compound 'Claude Code' to 'Codex CLI' (not 'Codex Code')", () => {
+      const input =
+        "Claude Code skills support frontmatter. The Claude Code runtime ignores foo.";
+      const result = rewriteContentForCodex(input, false);
+
+      expect(result).toBe(
+        "Codex CLI skills support frontmatter. The Codex CLI runtime ignores foo.",
+      );
+      expect(result).not.toContain("Codex Code");
+    });
+
+    it("rewrites lowercase 'claude code' to 'codex cli'", () => {
+      const input = "the claude code runtime";
+      const result = rewriteContentForCodex(input, false);
+
+      expect(result).toBe("the codex cli runtime");
+    });
+
+    it("still rewrites standalone 'Claude' to 'Codex'", () => {
+      const input = "Claude reads the file.";
+      const result = rewriteContentForCodex(input, false);
+
+      expect(result).toBe("Codex reads the file.");
+    });
+
+    it("rewrites hyphenated 'Claude-Code-only' to 'Codex-CLI-only'", () => {
+      const input = "These fields are Claude-Code-only.";
+      const result = rewriteContentForCodex(input, false);
+
+      expect(result).toBe("These fields are Codex-CLI-only.");
     });
 
     it("quotes unquoted description and argument-hint in SKILL.md frontmatter", () => {
