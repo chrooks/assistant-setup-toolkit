@@ -104,10 +104,14 @@ describe("projection", () => {
       const plan = planCodexProjection({
         claudeFiles: [],
         skillDirs: [],
-        hookFiles: ["lexicon-reminder.sh", "session-mode-loader.sh"],
+        hookFiles: [
+          "lexicon-reminder.sh",
+          "session-mode-loader.sh",
+          "strategic-compact.js",
+        ],
       });
 
-      expect(plan).toHaveLength(2);
+      expect(plan).toHaveLength(3);
 
       const lexicon = plan.find((m) => m.source === "hooks/lexicon-reminder.sh");
       expect(lexicon).toBeDefined();
@@ -121,6 +125,13 @@ describe("projection", () => {
       expect(session).toBeDefined();
       expect(session?.target).toBe(".codex/hooks/session-mode-loader.sh");
       expect(session?.isHook).toBe(true);
+
+      const strategicCompact = plan.find(
+        (m) => m.source === "hooks/strategic-compact.js",
+      );
+      expect(strategicCompact).toBeDefined();
+      expect(strategicCompact?.target).toBe(".codex/hooks/strategic-compact.js");
+      expect(strategicCompact?.isHook).toBe(true);
     });
 
     it("treats hookFiles as optional — omitting it produces no hook mappings", () => {
