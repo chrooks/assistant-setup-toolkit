@@ -1,3 +1,9 @@
+---
+name: explain
+description: "Explain concepts in a three-layer caveman sandwich: terse TLDR, short human explanation, and ASCII diagram. Use when the user invokes /explain, asks to explain a concept, or wants a concise Lexicon-grounded explanation."
+argument-hint: "<concept>"
+---
+
 # /explain — Caveman Sandwich Concept Explainer
 
 Explains any concept as a caveman sandwich: caveman tldr on top, human language in middle, caveman diagram on bottom. No prompts, immediate output.
