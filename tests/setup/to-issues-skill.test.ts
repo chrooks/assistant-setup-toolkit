@@ -13,10 +13,28 @@ const localTodoFormatPath = path.join(
 );
 
 describe("to-issues Skill", () => {
+  it("documents issue-record create, update, close, and sub-issue modes", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    expect(skill).toContain("argument-hint: \"[local|update|close|sub-issues] <source|issue|path>\"");
+    expect(skill).toContain("create, update, and close issue records");
+    expect(skill).toContain("/to-issues sub-issues <parent-issue> <source...>");
+    expect(skill).toContain("/to-issues update <issue> <source...>");
+    expect(skill).toContain("/to-issues close <issue...>");
+    expect(skill).toContain("Do not close issue records until verification evidence is present");
+  });
+
+  it("routes missing issue-tracker setup to project-flow-setup", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    expect(skill).toContain("docs/agents/issue-tracker.md");
+    expect(skill).toContain("docs/agents/triage-labels.md");
+    expect(skill).toContain("/project-flow-setup docs");
+  });
+
   it("documents the local TODO.md subcommand", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("argument-hint: \"[local] <plan|spec|prd|issue|path>\"");
     expect(skill).toContain("disable-model-invocation: true");
     expect(skill).toContain("/to-issues local <source...>");
     expect(skill).toContain("update the project-root `TODO.md`");
