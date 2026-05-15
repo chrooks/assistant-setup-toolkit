@@ -25,8 +25,8 @@ Skill workflow, and then starts that workflow.
 2. Invoke the `## Right Skill, Right Job` section from that file.
 3. Choose the matching workflow:
    - Use `/impeccable` for design/frontend work.
+   - Use `/idea-to-design` for synthesizing ideas into concrete designs.
    - Use `/tdd` when implementing a feature, especially testable logic.
-   - Use `/verification-loop` after implementing a feature.
    - Use `/commit` when it is time to commit work to version control.
    - Use `/diagnose` for difficult bugs.
    - If no other Skill has been invoked for the request, use `/find-skill` to
@@ -34,6 +34,7 @@ Skill workflow, and then starts that workflow.
 4. State the selected workflow in one short sentence.
 5. Start the selected workflow immediately unless it requires a user decision
    point.
+6. If applicable, use `/verification-loop` after implementing a feature.
 
 ## Rules
 
