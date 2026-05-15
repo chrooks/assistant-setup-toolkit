@@ -1,0 +1,261 @@
+version: 1
+source: docs/project-flow-how-to.md
+trees:
+  - id: project-flow-router
+    title: Project Flow Router
+    entry: start
+    nodes:
+      - id: start
+        type: decision
+        label: What state are you in?
+        options:
+          - label: Repo needs Project Flow docs or GitHub setup
+            next: project_flow_setup
+          - label: Fuzzy idea
+            next: scope
+          - label: Plan or task list exists
+            next: to_issues
+          - label: Need next issue record
+            next: roadmap
+          - label: Ready issue record selected
+            next: execute
+          - label: Diff is ready after verification
+            next: prep_pr
+      - id: project_flow_setup
+        type: command
+        label: /project-flow-setup
+        next: roadmap
+      - id: scope
+        type: command
+        label: /scope idea
+        next: scope_outcome
+      - id: scope_outcome
+        type: decision
+        label: What did /scope decide?
+        options:
+          - label: Needs questions
+            next: grill
+          - label: Needs plan
+            next: plan
+          - label: Ready work
+            next: execute
+      - id: grill
+        type: command
+        label: /grill-me
+        next: to_issues
+      - id: plan
+        type: command
+        label: /plan
+        next: to_issues
+      - id: to_issues
+        type: command
+        label: /to-issues source
+        next: roadmap
+      - id: roadmap
+        type: command
+        label: /roadmap next
+        next: execute
+      - id: execute
+        type: command
+        label: /execute #issue
+        next: verification_loop
+      - id: verification_loop
+        type: command
+        label: /verification-loop
+        next: verification_result
+      - id: verification_result
+        type: decision
+        label: Did verification pass?
+        options:
+          - label: Yes
+            next: close_issue
+          - label: Follow-up work appeared
+            next: update_issue
+          - label: No
+            next: diagnose_or_tdd
+      - id: close_issue
+        type: command
+        label: /to-issues close #issue
+        next: prep_pr
+      - id: update_issue
+        type: command
+        label: /to-issues update #issue
+        next: roadmap
+      - id: diagnose_or_tdd
+        type: decision
+        label: What failed?
+        options:
+          - label: Missing behavior or test coverage
+            next: tdd
+          - label: Difficult bug
+            next: diagnose
+      - id: tdd
+        type: command
+        label: /tdd
+        next: verification_loop
+      - id: diagnose
+        type: command
+        label: /diagnose
+        next: verification_loop
+      - id: prep_pr
+        type: command
+        label: /prep-pr
+        next: done
+      - id: done
+        type: terminal
+        label: Ready for review or PR
+
+  - id: first-time-setup
+    title: First-Time Setup
+    entry: start
+    nodes:
+      - id: start
+        type: command
+        label: /project-flow-setup
+        next: audit
+      - id: audit
+        type: action
+        label: Audit repo-local docs and GitHub setup
+        next: docs_missing
+      - id: docs_missing
+        type: decision
+        label: Are repo-local docs missing?
+        options:
+          - label: Yes
+            next: docs
+          - label: No
+            next: github_inspect
+      - id: docs
+        type: command
+        label: /project-flow-setup docs
+        next: github_inspect
+      - id: github_inspect
+        type: decision
+        label: Inspect GitHub labels, milestones, and Project?
+        options:
+          - label: Yes
+            next: apply
+          - label: No
+            next: next_command
+      - id: apply
+        type: command
+        label: /project-flow-setup apply
+        next: next_command
+      - id: next_command
+        type: decision
+        label: What exists next?
+        options:
+          - label: Issue records exist
+            next: roadmap
+          - label: Source plan or task list exists
+            next: to_issues
+      - id: roadmap
+        type: command
+        label: /roadmap next
+      - id: to_issues
+        type: command
+        label: /to-issues source
+
+  - id: new-work
+    title: New Work
+    entry: idea
+    nodes:
+      - id: idea
+        type: action
+        label: Fuzzy idea
+        next: scope
+      - id: scope
+        type: command
+        label: /scope idea
+        next: scope_result
+      - id: scope_result
+        type: decision
+        label: What does /scope return?
+        options:
+          - label: Needs questions
+            next: grill
+          - label: Needs an ExecPlan
+            next: plan
+          - label: Ready work
+            next: execute
+      - id: grill
+        type: command
+        label: /grill-me
+        next: shaped
+      - id: plan
+        type: command
+        label: /plan
+        next: shaped
+      - id: shaped
+        type: decision
+        label: Plan or clear task list now exists?
+        options:
+          - label: Yes
+            next: to_issues
+          - label: No
+            next: scope
+      - id: to_issues
+        type: command
+        label: /to-issues source
+        next: roadmap
+      - id: roadmap
+        type: command
+        label: /roadmap next
+        next: execute
+      - id: execute
+        type: command
+        label: /execute
+
+  - id: daily-work
+    title: Daily Work
+    entry: start
+    nodes:
+      - id: start
+        type: command
+        label: /roadmap next
+        next: selected
+      - id: selected
+        type: decision
+        label: Is an issue record ready?
+        options:
+          - label: Yes
+            next: execute
+          - label: No, needs shaping
+            next: roadmap_update
+      - id: roadmap_update
+        type: command
+        label: /roadmap
+        next: start
+      - id: execute
+        type: command
+        label: /execute #issue
+        next: verify
+      - id: verify
+        type: command
+        label: /verification-loop
+        next: result
+      - id: result
+        type: decision
+        label: Did verification pass?
+        options:
+          - label: Yes
+            next: close
+          - label: Follow-up work appeared
+            next: update
+          - label: No
+            next: fix_forward
+      - id: close
+        type: command
+        label: /to-issues close #issue
+        next: prep
+      - id: update
+        type: command
+        label: /to-issues update #issue
+        next: start
+      - id: fix_forward
+        type: command
+        label: /tdd or /diagnose
+        next: verify
+      - id: prep
+        type: command
+        label: /prep-pr
