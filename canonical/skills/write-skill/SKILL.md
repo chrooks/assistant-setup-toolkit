@@ -112,7 +112,7 @@ allowed-tools: Read, Edit, Bash # Claude Code only — if restricting
 # Skill Name
 
 ## Quick start
-[Minimal working example. Parse args from the user's invocation positionally — works in both runtimes. If using Claude-Code-only `$ARGUMENTS` / `${CLAUDE_SKILL_DIR}` / `` !`cmd` `` substitutions, either keep a fallback path or accept the feature only fires on Claude Code.]
+[Minimal working example. Parse args from the user's invocation positionally — works in both runtimes. If using Claude-Code-only `$ARGUMENTS` / `${CLAUDE_SKILL_DIR}` / `` \!`cmd` `` substitutions, either keep a fallback path or accept the feature only fires on Claude Code.]
 
 ## Workflows
 [Step-by-step with checklists]

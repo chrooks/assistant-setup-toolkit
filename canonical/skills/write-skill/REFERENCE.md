@@ -35,7 +35,7 @@ Push large material into Level 3. Keep Level 2 lean.
 | `effort` | Effort override | `low`, `medium`, `high`, `xhigh`, `max` |
 | `context` | `fork` runs skill in isolated subagent context | `fork` |
 | `agent` | Subagent type (with `context: fork`) | `Explore`, `Plan`, `general-purpose`, or custom |
-| `shell` | Shell for `` !`cmd` `` substitutions | `bash` (default), `powershell` |
+| `shell` | Shell for `` \!`cmd` `` substitutions | `bash` (default), `powershell` |
 | `hooks` | Skill-scoped lifecycle hooks (same format as global) | see below |
 | `paths` | Glob patterns gating auto-activation | `"src/api/**/*.ts"` or YAML list |
 
@@ -72,13 +72,13 @@ hooks:
 
 ### Dynamic context injection
 
-`` !`command` `` runs at load time, output inlined before Claude sees it.
+`` \!`command` `` runs at load time, output inlined before Claude sees it.
 
 ```md
 ## Repo state
-- Branch: !`git branch --show-current`
-- PR diff: !`gh pr diff`
-- Changed files: !`gh pr diff --name-only`
+- Branch: \!`git branch --show-current`
+- PR diff: \!`gh pr diff`
+- Changed files: \!`gh pr diff --name-only`
 ```
 
 Default `bash`; switch with `shell: powershell` in frontmatter.
@@ -137,7 +137,7 @@ Codex CLI consumes only the open Agent Skills standard. Claude Code extensions a
 | `paths` | ✅ | ❌ ignored |
 | `$ARGUMENTS` / `$N` | ✅ | partial — varies by Codex version |
 | `${CLAUDE_*}` vars | ✅ | ❌ |
-| `` !`cmd` `` dynamic context | ✅ | ❌ |
+| `` \!`cmd` `` dynamic context | ✅ | ❌ |
 | Bundled resources | ✅ | ✅ |
 
 **Guidance:** keep core skill behavior runnable with just `name` + `description` + body + bundled resources. Treat Claude-only fields as progressive enhancement, not load-bearing.
