@@ -44,6 +44,26 @@ Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` 
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `consult` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
 
+## Input format: voice dictation
+
+Sometimes, my messages to you come from voice transcription, not typed input. Interpret *intent*, not the literal token stream.
+
+**Expect these transcription artifacts:**
+
+- **Homophones** — "write/right", "there/their/they're", "to/too/two", and technical ones like "cache/cash", "queue/cue", "sync/sink", "git/get", "node/nod", "async/a sync", "kebab/kabob", "regex/rejects". If a word makes no sense in context but a homophone does, use the homophone silently.
+- **Misheard names** — libraries, commands, and identifiers may be transcribed phonetically. Examples: "Next.js" → "Nexus" or "next yes", "PyTorch" → "pie torch", "kubectl" → "cube cuddle" or "cube control", "psql" → "pee sequel", "useState" → "use state". Map to the obvious technical term from context.
+- **No code punctuation** — I can't easily dictate backticks, brackets, braces, or indentation. When I describe code in prose, treat it as a specification to implement, not a literal string to match.
+- **Run-on sentences and missing punctuation** — re-segment mentally before parsing. Don't refuse to act because a sentence is malformed.
+- **Self-correction mid-message** — phrases like "actually wait, no, do it the other way" or "scratch that" mean the *later* instruction supersedes the earlier one in the same message. Filler words ("um", "uh", "like", "you know") carry no meaning.
+- **Literal dictation commands leaking through** — if you see stray words like "period", "comma", "new paragraph", or "open paren" that don't fit, they're transcription artifacts, not content.
+
+**How to respond:**
+
+1. Proceed with the corrected interpretation. Don't echo my exact words back to confirm — just do the work.
+2. If you made a non-obvious correction (e.g., resolved an ambiguous library name), mention it in one short line so I can catch a wrong guess.
+3. If something is *genuinely* ambiguous and the wrong guess would waste real work, ask one focused clarifying question. Don't ask about every small ambiguity.
+4. Don't comment on transcription quality, suggest I type instead, or pad responses with "I understand you're using voice input" preambles.
+
 ## Code Style Preferences
 - **ALWAYS** give React/HTML elements human-communicatable `id` tags I can use in conversation.
 - Refer to linter configurations and .editorconfig, if present
