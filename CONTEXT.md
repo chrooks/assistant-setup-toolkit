@@ -6,23 +6,33 @@ A portable collection of instructions, skills, hooks, manifests, and installers 
 
 **Assistant Setup Toolkit**:
 A portable collection of instructions, skills, hooks, manifests, and installers that configures coding assistants consistently across machines.
+_AKA_: toolkit, harness toolkit
 _Avoid_: dotfiles, config repo, plugin repo
 
 **Assistant Home**:
 A user-level install destination owned by, or discovered by, an assistant.
 _Avoid_: config folder, dot directory, install path
+_AKA_: harness home
 
 **Assistant Target**:
 A supported assistant runtime that the toolkit can configure.
 _Avoid_: app, platform, client
+_AKA_: target
 
-**Assistant Payload**:
+**Bundle**:
 A selected set of toolkit files prepared for installation into an Assistant Home.
 _Avoid_: config, stuff, files, bundle
+_AKA_: assistant payload
 
 **Toolkit Component**:
 A user-selectable part of the toolkit that can be included in an Assistant Payload.
 _Avoid_: module, package, asset
+AKA: component
+
+**Tool**:
+A discrete capability or system used by the Assistant Setup Toolkit to execute a workflow stage, including Skills, Plugins, MCP Servers, frameworks, and external libraries.
+_Avoid_: skill, plugin, utility
+_AKA_: capability
 
 **Skill**:
 A portable agent instruction package rooted at `SKILL.md` that teaches an assistant a specialized workflow.
@@ -109,6 +119,8 @@ _Avoid_: instructions, summary, todo
 - A default **Assistant Payload** includes everything relevant for that **Assistant Target**.
 - A custom **Assistant Payload** includes only the components selected by the user.
 - **Toolkit Components** include instructions, plans, hooks, skills, commands, settings, and manifests.
+- A **Tool** may be a **Skill**, **Plugin**, **MCP Server**, framework, or external library used during an assistant workflow.
+- A **Tool** is broader than a **Toolkit Component** because some useful tools are not installed by the **Setup Wizard**.
 - A **Skill** is a **Toolkit Component**.
 - A **Plugin** may contain one or more **Skills**.
 - A GitHub repository can be a plugin source, a skill source, or both; the manifest decides how the wizard treats it.
