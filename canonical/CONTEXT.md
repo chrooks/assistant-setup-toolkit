@@ -70,11 +70,78 @@ _Avoid_: error message, validation text, failure
 How content, actions, and navigation are organized so users can find and understand things.
 _Avoid_: sitemap, nav, layout
 
+**Interface**:
+The Boundary where a human and a system interact.
+_Avoid_: UI, screen, frontend
+
+**Touchpoint**:
+A specific moment where a user interacts with a product, service, or system.
+_Avoid_: step, screen, interaction
+
+**Signifier**:
+A visible cue that communicates an Affordance.
+_Avoid_: hint, decoration, label
+
+**Seamlessness**:
+A quality where users do not perceive transitions, mechanics, or system boundaries while completing a task.
+_Avoid_: smoothness, magic, hidden complexity
+
+**Frictionless**:
+The absence of cognitive or mechanical resistance in a user flow.
+_Avoid_: easy, effortless, simple
+
+**Intuitive**:
+Usable without conscious deliberation because the Interface matches a user's expectations and mental model.
+_Avoid_: obvious, natural, self-explanatory
+
+**Transparent**:
+A quality where the Interface recedes and the user thinks about the task rather than the tool.
+_Avoid_: invisible, hidden, clear
+
+**Calm Technology**:
+Technology that informs without demanding attention and can move between the center and periphery of awareness.
+_Avoid_: ambient UX, quiet UI, background tech
+
+**Flow**:
+A focused psychological state where Friction drops away and attention is absorbed by the activity.
+_Avoid_: seamlessness, immersion, engagement
+
+**Honest Signifier**:
+A Signifier that accurately communicates the software's real capability, consequence, and intent.
+_Avoid_: dark pattern, misleading cue, engagement trick
+
+**Transparent Friction**:
+Intentionally surfaced Friction that helps users understand consequences, make better decisions, or avoid dependency.
+_Avoid_: blocker, slowdown, engagement brake
+
+**Design Boundary**:
+The clearly communicated limit between what software does for a user and what it does with a user.
+_Avoid_: limitation, scope, product boundary
+
+**Partnership Model**:
+A design posture where humans grow alongside a tool instead of being replaced by it or made dependent on it.
+_Avoid_: human-in-the-loop, user empowerment, AI collaboration
+
+**Software as Education**:
+Software that teaches a user a framework for thinking rather than only completing a transaction.
+_Avoid_: tutorial, explanation, learning app
+
+**Mom Test**:
+Testing an Interface with a real non-technical user as a forcing function for clear Signifiers and Progressive Disclosure.
+_Avoid_: user test, usability test, beginner test
+
+**Conversation Thread**:
+A distinct topical branch within a conversation that can continue, fork, or rejoin other branches.
+_Avoid_: tangent, topic, branch
+_AKA_: thread
+
 ## Relationships
 
 - The **Lexicon** is installed into one or more **Assistant Homes**.
 - The **Lexicon** is separate from a project-specific `CONTEXT.md`.
 - The **Lexicon** includes conversation-shaping engineering terms, not plain technology names.
+- HCI terms in the **Lexicon** should preserve prior-art meanings unless a project-specific `CONTEXT.md` narrows them.
+- Chris-specific design terms such as **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, and **Software as Education** should be used when they clarify design intent.
 - The **Lexicon** should align terms with established industry usage instead of inventing private meanings.
 - The **Lexicon** should stay lean because it is intended to live in the assistant's context window.
 
