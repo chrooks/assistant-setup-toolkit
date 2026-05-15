@@ -27,14 +27,14 @@ Skill workflow, and then starts that workflow.
    - Use `/impeccable` for design/frontend work.
    - Use `/idea-to-design` for synthesizing ideas into concrete designs.
    - Use `/tdd` when implementing a feature, especially testable logic.
-   - Use `/commit` when it is time to commit work to version control.
    - Use `/diagnose` for difficult bugs.
    - If no other Skill has been invoked for the request, use `/find-skill` to
      choose the best, most relevant Skill before starting.
 4. State the selected workflow in one short sentence.
 5. Start the selected workflow immediately unless it requires a user decision
    point.
-6. If applicable, use `/verification-loop` after implementing a feature.
+6. If applicable, use `/verification-loop` after implementing the feature.
+7. Use `/commit` to commit the changes.
 
 ## Rules
 
