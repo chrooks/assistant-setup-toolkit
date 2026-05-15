@@ -26,18 +26,20 @@ Invoke `/caveman lite` for all communication to avoid dense, wordy responses. Un
 ## ExecPlans
 - When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
+## Workflow Triage
+- When the user gives an open-ended prompt, feature, change, or refactor request without specifying a workflow, use `/scope`. `/scope` decides whether to `/execute`, plan, or grill before starting work.
+- Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` decides whether to execute, plan, or grill.
+
 ## Right Skill, Right Job
 ALWAYS:
-- Use the `/impeccable` family of skills for design/frontend work.
-- Use `/tdd` when implementing a feature, especially if its testable logic. 
+- Use `/project-flow-setup` when a repository lacks project-flow docs, issue-tracker guidance, triage labels, GitHub milestone setup, or GitHub Project setup. Bare `/project-flow-setup` should guide audit, docs, and apply phases with approval gates.
+- Use `/to-issues` to turn plans, tasks, TODOs, PRDs, or existing issue context into issue-tracker records or local TODO.md tasks. Use it when creating issues, creating sub-issues, rolling work into an existing issue, updating issue acceptance criteria, commenting with follow-up work, or closing an issue after verification.
+- Use `/roadmap` to zoom out across issue-tracker work and decide sequencing, priority, milestone fit, board status, blockers, and what to pick up next. Use it when there is no obvious next slice after finishing work, when a milestone or Kanban board needs reshaping, or when choosing between open issues.
+- Use `/execute` to implement a feature.
 - Use `/verification-loop` after implementing a feature.
-- Use `/commit` when its time to commit work to version control.
+- Use `/commit` when it's time to commit work to version control.
 - Use `/diagnose` for fixing difficult bugs.
-> `/tdd` and/or `/impeccable` + `/verification-loop` + wait for user feedback + when satified `/commit` is a VERY common workflow when implementing.
-Otherwise, iff no other skill has been invoked for a request, use  `/find-skill` to choose the best, most relevant skill for the task. 
-
-## Workflow Triage
-- When the user gives an open-ended feature, change, or refactor request without specifying a workflow, suggest `/scope` before starting implementation. `/scope` presents four options: `/plan`, `/grill-me`, `/to-prd`, or `/execute`. `/execute` invokes the `Right Skill, Right Job` section above before starting work.
+Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` to choose the best, most relevant Skill for the task.
 
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `consult` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
