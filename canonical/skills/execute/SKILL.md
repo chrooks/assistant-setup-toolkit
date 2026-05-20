@@ -2,7 +2,7 @@
 name: execute
 description: Execute ready work by choosing and running the right Skill workflow from user-level assistant instructions.
 argument-hint: "<ready task or selected /scope option>"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Execute

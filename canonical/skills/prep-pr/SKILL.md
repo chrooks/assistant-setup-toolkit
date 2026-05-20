@@ -2,7 +2,7 @@
 name: prep-pr
 description: Prepare a pull request for human review by creating or finding the PR, running review-fanout, posting review feedback, fixing actionable concerns, pushing commits, and updating the PR. Use when the user asks to prep a PR, ready a PR, run a PR review loop, review-fanout a PR, or fix-forward from PR feedback.
 argument-hint: "[base-branch]"
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Read, Edit, Bash, Grep, Glob
 ---
 

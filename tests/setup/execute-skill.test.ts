@@ -11,7 +11,7 @@ describe("execute Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("name: execute");
-    expect(skill).toContain("disable-model-invocation: true");
+    expect(skill).toContain("disable-model-invocation: false");
     expect(skill).toContain("Right Skill, Right Job");
     expect(skill).toContain("~/.claude/CLAUDE.md");
     expect(skill).toContain("/tdd");

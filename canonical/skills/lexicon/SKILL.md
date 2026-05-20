@@ -2,7 +2,7 @@
 name: lexicon
 description: "Manage CONTEXT.md Lexicon entries: add a term from a name and definition, name only, or definition only; look up remembered terms; list, update, and remove entries. Use when the user invokes /lexicon or mistypes /lxicon."
 argument-hint: "add <term - definition | term | definition> | <lookup> | list | remove <term>"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # /lexicon - Lexicon Manager

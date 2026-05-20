@@ -2,7 +2,7 @@
 name: to-issues
 description: Create, update, close, or break work into issue-tracker records or local TODO.md tasks using tracer-bullet vertical slices. Use when turning plans, specs, PRDs, TODOs, or existing issue context into issues, sub-issues, roll-ins, acceptance criteria, follow-up comments, verified closures, or local TODO.md entries.
 argument-hint: "[local|update|close|sub-issues] <source|issue|path>"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # To Issues
