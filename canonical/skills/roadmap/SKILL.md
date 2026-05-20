@@ -2,7 +2,7 @@
 name: roadmap
 description: Choose, prioritize, sequence, and reshape issue-tracker work across open issues, sub-issues, Projects, milestones, labels, priorities, and blockers. Use when deciding what to pick up next, reviewing a Kanban board, milestone, roadmap, or backlog, triaging blocked work, or choosing between open issue records.
 argument-hint: "[next|board|milestone|blocked|reprioritize] [issue|milestone|project]"
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Roadmap

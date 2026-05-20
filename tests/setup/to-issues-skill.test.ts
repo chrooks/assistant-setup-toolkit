@@ -35,7 +35,7 @@ describe("to-issues Skill", () => {
   it("documents the local TODO.md subcommand", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("disable-model-invocation: true");
+    expect(skill).toContain("disable-model-invocation: false");
     expect(skill).toContain("/to-issues local <source...>");
     expect(skill).toContain("update the project-root `TODO.md`");
     expect(skill).toContain("Do not publish issue tracker tickets.");

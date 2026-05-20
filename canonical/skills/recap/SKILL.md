@@ -2,7 +2,7 @@
 name: recap
 description: Package a conversation into dual-format recap artifacts: an incremental visual HTML recap for humans and a structured markdown recap for LLM context loading. Use when the user asks to recap, package the conversation, wrap this up, summarize the convo, make this digestible, give me a visual summary, convo recap, or wants both human-readable and machine-readable versions of a long or sprawling conversation.
 argument-hint: "[optional short topic slug]"
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: Read, Write, Edit
 ---
 

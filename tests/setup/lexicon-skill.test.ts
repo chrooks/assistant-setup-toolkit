@@ -11,7 +11,7 @@ describe("lexicon Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("name: lexicon");
-    expect(skill).toContain("disable-model-invocation: true");
+    expect(skill).toContain("disable-model-invocation: false");
     expect(skill).toContain("/lexicon add");
     expect(skill).toContain("/lexicon add rectangle - four-sided 2D shape with 4 right angles");
     expect(skill).toContain("/lexicon add rectangle");

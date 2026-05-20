@@ -11,7 +11,7 @@ describe("roadmap Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("name: roadmap");
-    expect(skill).toContain("disable-model-invocation: true");
+    expect(skill).toContain("disable-model-invocation: false");
     expect(skill).toContain("chooses, prioritizes, sequences, and reshapes work");
     expect(skill).toContain("/roadmap next");
     expect(skill).toContain("/roadmap board");
