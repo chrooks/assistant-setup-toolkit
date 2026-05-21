@@ -17,9 +17,13 @@ describe("execute Skill", () => {
     expect(skill).toContain("/tdd");
     expect(skill).toContain("/impeccable");
     expect(skill).toContain("/verification-loop");
+    expect(skill).toContain("/review-fanout");
     expect(skill).toContain("/commit");
     expect(skill).toContain("/diagnose");
     expect(skill).toContain("/find-skill");
+    expect(skill).toMatch(
+      /run `\/verification-loop`[\s\S]*run `\/review-fanout`[\s\S]*use\s+`\/tdd`[\s\S]*Use `\/commit`/,
+    );
     expect(skill).not.toMatch(/\bTrivial\b/);
     expect(skill).not.toMatch(/\btrivial\b/);
   });
