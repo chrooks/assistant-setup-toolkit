@@ -341,14 +341,28 @@ async function writeSettings(
   await fs.writeFile(settingsPath, json, "utf-8");
 }
 
-/** True if any matcher group in the array contains the exact rendered command. */
+/** True if any matcher group in the array contains an equivalent command. */
 function commandAlreadyPresent(
   groups: readonly MatcherGroup[],
   command: string,
 ): boolean {
+  const normalizedNew = normalizeHookCommand(command);
   return groups.some((group) =>
-    group.hooks.some((hook) => hook.command === command),
+    group.hooks.some(
+      (hook) => normalizeHookCommand(hook.command) === normalizedNew,
+    ),
   );
+}
+
+/**
+ * Normalize a hook command for idempotency comparison.
+ * Resolves `~` to `$HOME` so that `bash ~/.claude/hooks/foo.sh` and
+ * `bash /Users/alice/.claude/hooks/foo.sh` are treated as the same hook.
+ */
+function normalizeHookCommand(command: string): string {
+  const home = process.env.HOME ?? process.env.USERPROFILE ?? "";
+  if (!home) return command;
+  return command.replace(home, "~");
 }
 
 /** Convert a planned WiringAction into the matcher-group shape settings.json expects. */
