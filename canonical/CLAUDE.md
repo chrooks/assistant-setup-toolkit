@@ -1,13 +1,16 @@
 # Development Conversation Guidelines
 
-Invoke `/caveman lite` for all communication to avoid dense, wordy responses. Unless explicitly told otherwise.
+## Communication Style
+- Use clean, colloquial-like prose. Avoid being dense, tech-y, or corporate-like.
+- Responses **MUST** be easy for anyone familiar with the Lexicon terms to understand.
 
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
-- If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon.
+- If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon. We may not always have a project-level `CONTEXT.md` — when absent, fall back to the global Lexicon only.
 - The shared Lexicon in `CONTEXT.md` serves as a contract for domain-related semantics between you, the agent, and me, the human.
 - The project Lexicon takes precedence over the global Lexicon when the same term appears in both.
 - Be VERY strict about using Lexicon terms when applicable instead of other similar words or terms.
+- When you use a Lexicon term, link it to its definition in the corresponding `CONTEXT.md` — e.g. `[Seam](~/.claude/CONTEXT.md)` for a global term, `[Term](./CONTEXT.md)` for a project term. Link every occurrence of every term.
 - Do not define Lexicon terms repeatedly by default. Instead, correct me when I misuse a Lexicon term, use an `_Avoid_` synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so I get used to the shared language.
 - **ACTIVE EVERY RESPONSE.** Lexicon enforcement does not decay across turns. Do not drift back to common synonyms (the `_Avoid_` lists) after a long session, after tool use, or after compaction. If you catch yourself using an `_Avoid_` synonym, restate using the Lexicon term and continue.
 
