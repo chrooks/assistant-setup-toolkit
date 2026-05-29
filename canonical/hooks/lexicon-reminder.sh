@@ -50,6 +50,6 @@ fi
 # This is intentional: Claude Code's structured output uses {"additionalContext": "..."}
 # (flat) and Codex uses {"hookSpecificOutput": {..., "additionalContext": "..."}} (nested).
 # Plain stdout sidesteps the shape difference and works on both surfaces.
-printf '%s\n' 'Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Correct the user when they misuse a Lexicon term, use an _Avoid_ synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so the shared language becomes natural. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction.'
+printf '%s\n' 'Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Speak in clean, colloquial prose — not dense, tech-y, or corporate — easy for anyone familiar with the terms to follow. Link every occurrence of every Lexicon term to its definition in the matching CONTEXT.md, e.g. [Seam](~/.claude/CONTEXT.md). Correct the user when they misuse a Lexicon term, use an _Avoid_ synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so the shared language becomes natural. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction.'
 
 exit 0
