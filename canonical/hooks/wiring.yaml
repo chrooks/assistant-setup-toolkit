@@ -19,7 +19,7 @@
 # re-running the wizard never produces duplicate entries, and a hook
 # wired by hand earlier won't be re-added.
 #
-# Existing pre-toolkit hooks (session-mode-loader.sh, knowledge-sync.sh,
+# Existing pre-toolkit hooks (session-mode-loader.sh,
 # session-mode-cleanup.sh) are intentionally NOT listed here — they are
 # wired by hand today with bespoke matcher patterns and we don't want to
 # disturb working state. New hooks opt in here.
