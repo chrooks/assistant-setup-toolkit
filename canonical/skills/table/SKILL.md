@@ -73,7 +73,8 @@ filters — just give good `type`s:
 - `type: "string"` with ≤ 25 distinct values → a select dropdown filter.
 - `type: "string"` with many distinct values → a text "contains" filter.
 
-Fill three placeholders and open the result.
+Build it with the bundled fill script — it injects your data, escapes `</script>` so a
+hostile value cannot break the page, HTML-escapes the title, and writes a self-contained file.
 
 ### Steps
 
@@ -83,28 +84,21 @@ Fill three placeholders and open the result.
        unique**, they key the filter-type dropdown.
      - `type` is `"string"` or `"number"` — `number` sorts numerically and right-aligns.
    - `DATA`: `[{ "name": "...", "pts": 12 }, ...]` — one object per row.
-2. **Read** `templates/table-template.html` and replace, exactly:
-   - `__TABLE_TITLE__` (appears twice: `<title>` and `<h1>`) → a short descriptive title.
-   - `/*__TABLE_COLUMNS__*/[]` → the `COLUMNS` JSON (replace the whole `/*…*/[]` token).
-   - `/*__TABLE_DATA__*/[]` → the `DATA` JSON (replace the whole `/*…*/[]` token).
-   - **Make the JSON safe to sit inside `<script>`:** after `JSON.stringify`, a cell
-     containing `</script>` would close the block and kill the page. Replace
-     `</script` → `<\/script` and `<!--` → `<\!--` (both identical JSON). The simplest
-     reliable fill is a tiny Python pass:
-     ```python
-     def js_safe(s): return s.replace("</script", "<\\/script").replace("</SCRIPT", "<\\/SCRIPT").replace("<!--", "<\\!--")
-     html = html.replace("/*__TABLE_DATA__*/[]", js_safe(json.dumps(DATA))).replace("/*__TABLE_COLUMNS__*/[]", js_safe(json.dumps(COLUMNS)))
-     ```
-3. **Write** the filled HTML to a findable, repo-clean location:
-   - Prefer `<cwd>/.table-exports/<slug>.html`. Create `.table-exports/` if missing.
-   - `<slug>` is a short kebab-case name from the title. Add a number if it exists.
-4. **Open** it: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows).
-5. **Report** the absolute path in one line so Chris can find, move, or re-open it.
+2. **Write the spec** to a JSON file: `{ "title": "...", "columns": COLUMNS, "data": DATA }`.
+3. **Run the fill script** (it lives in `scripts/` next to this SKILL.md; `templates/` is its sibling):
+   ```bash
+   python3 scripts/build-table.py spec.json        # or: build-table.py spec.json out.html
+   ```
+   It fills the template, escapes `</script>`/`<!--` in the data, HTML-escapes the title,
+   writes to `<cwd>/.table-exports/<slug>.html`, and prints the absolute path.
+4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
+   and report it so Chris can find, move, or re-open it.
 
 ### Notes
 
 - The template handles its own sort/filter/search/column-toggle — do not add libraries.
-- Validate the JSON you inject; a trailing comma breaks the whole page.
+- Use the script, not a hand-rolled fill: it is the tested path
+  (`tests/setup/skill-html-fill.test.ts`) that guarantees the `</script>` escaping.
 - `.table-exports/` is a generated-output dir — mention it can be gitignored if the
   project does not already ignore it.
 

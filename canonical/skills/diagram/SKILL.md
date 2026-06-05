@@ -80,42 +80,31 @@ the vendored, offline `vis-network` library ([`vendor/`](vendor/)). It gives pan
 drag-to-rearrange nodes, hover tooltips, and a **click → detail panel** that shows a
 node's or edge's full `description` + `meta`.
 
+Build it with the bundled fill script — it injects the model, inlines the vendored library,
+escapes `</script>` (in both the data and the minified lib), and HTML-escapes the title.
+
 ### Steps
 
-1. **Shape the model** into `NODES` and `EDGES` arrays (same shape as above). Node `group`
+1. **Shape the model** into `nodes` and `edges` arrays (same shape as above). Node `group`
    controls the detail-panel tag; `description` powers hover + click.
-2. **Read** `templates/diagram-template.html` and replace, exactly:
-   - `__DIAGRAM_TITLE__` (appears in `<title>` and `<h1>`) → a short title.
-   - `/*__DIAGRAM_KIND__*/"flow"` → the **quoted** kind string, e.g. `"architecture"`
-     (replace the whole `/*…*/"flow"` token, quotes included; drives layout — hierarchical
-     for flow/architecture/sequence/state, physics for er/mindmap).
-   - `/*__DIAGRAM_NODES__*/[]` → the `NODES` JSON (replace the whole `/*…*/[]` token).
-   - `/*__DIAGRAM_EDGES__*/[]` → the `EDGES` JSON.
-   - `/*__DIAGRAM_OPTIONS__*/{}` → `{}` unless you need vis-network option overrides.
-   - **Make injected JSON safe inside `<script>`:** after `JSON.stringify`, replace
-     `</script` → `<\/script` and `<!--` → `<\!--` — a node label/description containing
-     `</script>` would otherwise close the block and kill the page.
-3. **Inline the vendored library** so the file is self-contained and offline:
-   - `/*__VIS_NETWORK_CSS__*/` → the contents of `vendor/vis-network.min.css`.
-   - `/*__VIS_NETWORK_JS__*/` → the contents of `vendor/vis-network.min.js`, with the same
-     `</script` → `<\/script` neutralization (minified libs contain such string literals).
-   The simplest reliable way is a tiny Python pass:
-   ```python
-   def js_safe(s): return s.replace("</script", "<\\/script").replace("</SCRIPT", "<\\/SCRIPT").replace("<!--", "<\\!--")
-   html = (tpl
-     .replace('/*__DIAGRAM_KIND__*/"flow"', json.dumps(kind))
-     .replace("/*__DIAGRAM_NODES__*/[]", js_safe(json.dumps(NODES)))
-     .replace("/*__DIAGRAM_EDGES__*/[]", js_safe(json.dumps(EDGES)))
-     .replace("/*__DIAGRAM_OPTIONS__*/{}", js_safe(json.dumps(OPTIONS)))
-     .replace("/*__VIS_NETWORK_JS__*/", js_safe(vis_js))
-     .replace("/*__VIS_NETWORK_CSS__*/", vis_css))
+2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options"? }`.
+   `kind` is one of flow/architecture/sequence/state/er/mindmap (drives layout — hierarchical
+   for flow/architecture/sequence/state, physics for er/mindmap).
+3. **Run the fill script** (it lives in `scripts/` next to this SKILL.md; `templates/` and
+   `vendor/` are its siblings):
+   ```bash
+   python3 scripts/build-diagram.py model.json     # or: build-diagram.py model.json out.html
    ```
-4. **Write** to `<cwd>/.diagram-exports/<slug>.html` (create the dir if missing).
-5. **Open** it: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows). **Report** the path.
+   It fills the template, inlines `vendor/vis-network.min.{js,css}`, escapes `</script>` in
+   the data and the lib, HTML-escapes the title, writes to `<cwd>/.diagram-exports/<slug>.html`,
+   and prints the absolute path.
+4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
+   and report it.
 
 ### Notes
 
-- Validate the JSON you inject; a trailing comma breaks the page.
+- Use the script, not a hand-rolled fill: it is the tested path
+  (`tests/setup/skill-html-fill.test.ts`) that guarantees the `</script>` escaping.
 - Do not add other libraries — vis-network is vendored on purpose for offline use.
 - The detail panel reads `description` and `meta`, so write those for the nodes/edges that
   carry the teaching value, not just labels.
