@@ -66,9 +66,9 @@ Do BOTH, every time:
    - `mindmap` → `mindmap`
    Put edge labels on the arrows (`A -->|SetupProfile| B`).
 3. **Render and open the Mermaid picture** (Chris chose auto-open): if `mmdc` is on PATH,
-   run `mmdc -i <slug>.mmd -o <slug>.svg` then `open "<slug>.svg"`. If `mmdc` is missing,
-   skip rendering, keep the `.mmd`, and tell Chris it is ready to preview (VSCode Markdown
-   Preview Enhanced / Mermaid Chart render it).
+   run `mmdc -i <slug>.mmd -o <slug>.svg` then `open "<slug>.svg"`. If `mmdc` is missing
+   or the browser renderer fails, skip the picture, keep the `.mmd`, and tell Chris it is
+   ready to preview (VSCode Markdown Preview Enhanced / Mermaid Chart render it).
 
 `.diagram-exports/` is generated output — mention it can be gitignored if the project
 does not already ignore it.
