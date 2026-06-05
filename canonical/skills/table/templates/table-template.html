@@ -230,7 +230,14 @@
     });
   }
   function compareVals(a, b, type) {
-    if (type === "number") return (parseFloat(a) || 0) - (parseFloat(b) || 0);
+    if (type === "number") {
+      const na = parseFloat(a), nb = parseFloat(b);
+      // Non-numeric cells sort to the end instead of collapsing to 0.
+      if (isNaN(na) && isNaN(nb)) return 0;
+      if (isNaN(na)) return 1;
+      if (isNaN(nb)) return -1;
+      return na - nb;
+    }
     return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true });
   }
   function stableMultiSort(rows) {
@@ -345,7 +352,8 @@
         const to = state.entries.findIndex((x) => x.id === entry.id);
         if (from === -1 || to === -1 || from === to) return;
         const [moved] = state.entries.splice(from, 1);
-        state.entries.splice(to, 0, moved);
+        // `to` was computed before removal; shift left by one when moving rightward.
+        state.entries.splice(from < to ? to - 1 : to, 0, moved);
         afterChange();
       });
       wrap.appendChild(pill);

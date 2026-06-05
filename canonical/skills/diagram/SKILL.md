@@ -86,16 +86,30 @@ node's or edge's full `description` + `meta`.
    controls the detail-panel tag; `description` powers hover + click.
 2. **Read** `templates/diagram-template.html` and replace, exactly:
    - `__DIAGRAM_TITLE__` (appears in `<title>` and `<h1>`) → a short title.
-   - `/*__DIAGRAM_KIND__*/flow` → the kind string (drives layout: hierarchical for
-     flow/architecture/sequence/state, physics for er/mindmap).
-   - `/*__DIAGRAM_NODES__*/[]` → the `NODES` JSON.
+   - `/*__DIAGRAM_KIND__*/"flow"` → the **quoted** kind string, e.g. `"architecture"`
+     (replace the whole `/*…*/"flow"` token, quotes included; drives layout — hierarchical
+     for flow/architecture/sequence/state, physics for er/mindmap).
+   - `/*__DIAGRAM_NODES__*/[]` → the `NODES` JSON (replace the whole `/*…*/[]` token).
    - `/*__DIAGRAM_EDGES__*/[]` → the `EDGES` JSON.
    - `/*__DIAGRAM_OPTIONS__*/{}` → `{}` unless you need vis-network option overrides.
+   - **Make injected JSON safe inside `<script>`:** after `JSON.stringify`, replace
+     `</script` → `<\/script` and `<!--` → `<\!--` — a node label/description containing
+     `</script>` would otherwise close the block and kill the page.
 3. **Inline the vendored library** so the file is self-contained and offline:
    - `/*__VIS_NETWORK_CSS__*/` → the contents of `vendor/vis-network.min.css`.
-   - `/*__VIS_NETWORK_JS__*/` → the contents of `vendor/vis-network.min.js`.
-   The simplest reliable way is a tiny Python pass that reads the template + the two vendor
-   files and writes the filled HTML (string replace, not templating).
+   - `/*__VIS_NETWORK_JS__*/` → the contents of `vendor/vis-network.min.js`, with the same
+     `</script` → `<\/script` neutralization (minified libs contain such string literals).
+   The simplest reliable way is a tiny Python pass:
+   ```python
+   def js_safe(s): return s.replace("</script", "<\\/script").replace("</SCRIPT", "<\\/SCRIPT").replace("<!--", "<\\!--")
+   html = (tpl
+     .replace('/*__DIAGRAM_KIND__*/"flow"', json.dumps(kind))
+     .replace("/*__DIAGRAM_NODES__*/[]", js_safe(json.dumps(NODES)))
+     .replace("/*__DIAGRAM_EDGES__*/[]", js_safe(json.dumps(EDGES)))
+     .replace("/*__DIAGRAM_OPTIONS__*/{}", js_safe(json.dumps(OPTIONS)))
+     .replace("/*__VIS_NETWORK_JS__*/", js_safe(vis_js))
+     .replace("/*__VIS_NETWORK_CSS__*/", vis_css))
+   ```
 4. **Write** to `<cwd>/.diagram-exports/<slug>.html` (create the dir if missing).
 5. **Open** it: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows). **Report** the path.
 

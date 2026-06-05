@@ -79,13 +79,22 @@ Fill three placeholders and open the result.
 
 1. **Shape the data** into two arrays:
    - `COLUMNS`: `[{ "key": "name", "label": "Name", "type": "string" }, ...]`
-     - `key` matches the row object keys. `label` is the human header.
+     - `key` matches the row object keys. `label` is the human header — **labels must be
+       unique**, they key the filter-type dropdown.
      - `type` is `"string"` or `"number"` — `number` sorts numerically and right-aligns.
    - `DATA`: `[{ "name": "...", "pts": 12 }, ...]` — one object per row.
 2. **Read** `templates/table-template.html` and replace, exactly:
    - `__TABLE_TITLE__` (appears twice: `<title>` and `<h1>`) → a short descriptive title.
-   - `/*__TABLE_COLUMNS__*/[]` → the `COLUMNS` JSON (keep it valid JSON).
-   - `/*__TABLE_DATA__*/[]` → the `DATA` JSON.
+   - `/*__TABLE_COLUMNS__*/[]` → the `COLUMNS` JSON (replace the whole `/*…*/[]` token).
+   - `/*__TABLE_DATA__*/[]` → the `DATA` JSON (replace the whole `/*…*/[]` token).
+   - **Make the JSON safe to sit inside `<script>`:** after `JSON.stringify`, a cell
+     containing `</script>` would close the block and kill the page. Replace
+     `</script` → `<\/script` and `<!--` → `<\!--` (both identical JSON). The simplest
+     reliable fill is a tiny Python pass:
+     ```python
+     def js_safe(s): return s.replace("</script", "<\\/script").replace("</SCRIPT", "<\\/SCRIPT").replace("<!--", "<\\!--")
+     html = html.replace("/*__TABLE_DATA__*/[]", js_safe(json.dumps(DATA))).replace("/*__TABLE_COLUMNS__*/[]", js_safe(json.dumps(COLUMNS)))
+     ```
 3. **Write** the filled HTML to a findable, repo-clean location:
    - Prefer `<cwd>/.table-exports/<slug>.html`. Create `.table-exports/` if missing.
    - `<slug>` is a short kebab-case name from the title. Add a number if it exists.
