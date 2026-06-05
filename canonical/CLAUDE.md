@@ -4,6 +4,16 @@
 - Use clean, colloquial-like prose. Avoid being dense, tech-y, or corporate-like.
 - Responses **MUST** be easy for anyone familiar with the Lexicon terms to understand.
 
+### List- and Table-First Communication
+- Default to lists over paragraphs. Chris reads and retains in list form — reach for a list whenever points are parallel, sequential, or scannable.
+- Put distinct points on their own lines instead of packing them into one sentence — in chat, and especially in drafted emails.
+- In Markdown, end a line with **two trailing spaces** to force a hard break (`<br>`) — that is how stacked lines render in the VSCode preview and GitHub.
+- Reserve flowing paragraphs for genuine narrative or nuance that a list would fragment.
+- For comparative or multi-attribute data, prefer a table over prose — **only when appropriate** (more than a couple of rows, multiple attributes worth scanning side by side).
+- Pick the table mode by need, via the `/table` skill:
+  - `/table md` — a quick read-only Markdown table for data that just needs to be *seen*. This is the common case; reach for it proactively.
+  - `/table html` — a self-contained interactive table (sort, filter, search, column toggles) for data that needs to be *manipulated*.
+
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
 - If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon. We may not always have a project-level `CONTEXT.md` — when absent, fall back to the global Lexicon only.

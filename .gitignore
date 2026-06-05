@@ -10,3 +10,4 @@ dist/
 .setup-cache/
 tests/.tmp/
 feature_requests/
+.table-exports/
