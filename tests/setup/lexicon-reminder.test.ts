@@ -34,14 +34,17 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
 
-    // The per-turn hook reminds about lists and routes quick tables to /table md.
+    // The per-turn hook reminds about lists and routes quick tables/diagrams.
     expect(hook).toMatch(/list/i);
     expect(hook).toContain("/table md");
+    expect(hook).toContain("/diagram md");
 
-    // The session-start instructions carry the durable list/table preference.
-    expect(instructions).toMatch(/List- and Table-First Communication/i);
+    // The session-start instructions carry the durable list/table/diagram preference.
+    expect(instructions).toMatch(/List-, Table-, and Diagram-First Communication/i);
     expect(instructions).toContain("/table md");
     expect(instructions).toContain("/table html");
+    expect(instructions).toContain("/diagram md");
+    expect(instructions).toContain("/diagram html");
     expect(instructions).toMatch(/two trailing spaces/i);
   });
 });

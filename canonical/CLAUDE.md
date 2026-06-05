@@ -4,7 +4,7 @@
 - Use clean, colloquial-like prose. Avoid being dense, tech-y, or corporate-like.
 - Responses **MUST** be easy for anyone familiar with the Lexicon terms to understand.
 
-### List- and Table-First Communication
+### List-, Table-, and Diagram-First Communication
 - Default to lists over paragraphs. Chris reads and retains in list form — reach for a list whenever points are parallel, sequential, or scannable.
 - Put distinct points on their own lines instead of packing them into one sentence — in chat, and especially in drafted emails.
 - In Markdown, end a line with **two trailing spaces** to force a hard break (`<br>`) — that is how stacked lines render in the VSCode preview and GitHub.
@@ -13,6 +13,9 @@
 - Pick the table mode by need, via the `/table` skill:
   - `/table md` — a quick read-only Markdown table for data that just needs to be *seen*. This is the common case; reach for it proactively.
   - `/table html` — a self-contained interactive table (sort, filter, search, column toggles) for data that needs to be *manipulated*.
+- For structure or process — architecture, a pipeline, a user flow, a sequence, a state machine — show a **diagram** instead of describing it in prose. Do this especially when bringing Chris along on something he is not yet deep in; it is the point of the partnership. Pick the mode via the `/diagram` skill:
+  - `/diagram md` — an ASCII sketch in chat **plus** an auto-rendered Mermaid picture, for a quick visual. Reach for it proactively.
+  - `/diagram html` — a self-contained interactive graph (pan/zoom, drag, click nodes/edges to read explanations) for bigger or exploratory structures.
 
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
