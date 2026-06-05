@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>__DIAGRAM_TITLE__</title>
+<style>/*__VIS_NETWORK_CSS__*/</style>
+<style>
+  :root {
+    --bg: oklch(98% 0.004 250);
+    --surface: oklch(100% 0 0);
+    --text: oklch(22% 0.01 260);
+    --subtle: oklch(50% 0.02 260);
+    --line: oklch(90% 0.01 260);
+    --accent: #7c3aed;
+    --accent-soft: oklch(95% 0.035 300);
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); display: flex; flex-direction: column; }
+  header#hdr { padding: 0.8rem 1.1rem 0.6rem; }
+  header#hdr h1 { margin: 0 0 0.1rem; font-size: clamp(1.2rem, 1rem + 1vw, 1.7rem); letter-spacing: -0.02em; }
+  header#hdr .sub { color: var(--subtle); font-size: 0.8rem; }
+  #stage { flex: 1; display: flex; gap: 0.7rem; min-height: 0; padding: 0 1.1rem 0.8rem; }
+  #net { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  #detail { width: clamp(16rem, 24vw, 22rem); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.9rem 1rem; overflow-y: auto; }
+  #detail .empty { color: var(--subtle); font-size: 0.85rem; }
+  #detail .kind { display: inline-block; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 0.1rem 0.45rem; margin-bottom: 0.5rem; }
+  #detail h2 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  #detail p { margin: 0 0 0.7rem; font-size: 0.88rem; color: var(--text); }
+  #detail .meta { border-top: 1px solid var(--line); padding-top: 0.6rem; margin-top: 0.6rem; }
+  #detail .meta dt { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--subtle); margin-top: 0.4rem; }
+  #detail .meta dd { margin: 0; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  #toolbar { display: flex; gap: 0.4rem; padding: 0 1.1rem 0.9rem; flex-wrap: wrap; align-items: center; }
+  .btn { cursor: pointer; border-radius: 6px; padding: 0.32rem 0.7rem; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; font-size: 0.8rem; transition: all .12s; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .hint { color: var(--subtle); font-size: 0.74rem; margin-left: auto; }
+</style>
+</head>
+<body>
+  <header id="hdr">
+    <h1>__DIAGRAM_TITLE__</h1>
+    <div class="sub" id="sub"></div>
+  </header>
+  <div id="stage">
+    <div id="net"></div>
+    <aside id="detail"><div class="empty">Click a node or edge to read its explanation. Drag to rearrange, scroll to zoom, drag the background to pan.</div></aside>
+  </div>
+  <div id="toolbar">
+    <button class="btn" id="fit-btn" type="button">Fit view</button>
+    <button class="btn" id="physics-btn" type="button">Freeze layout</button>
+    <span class="hint">Hover for a tooltip · click for the full explanation</span>
+  </div>
+
+<script>/*__VIS_NETWORK_JS__*/</script>
+<script>
+  // ===== Injected by the /diagram skill =====
+  const DIAGRAM_KIND = /*__DIAGRAM_KIND__*/"flow";
+  const RAW_NODES = /*__DIAGRAM_NODES__*/[];
+  const RAW_EDGES = /*__DIAGRAM_EDGES__*/[];
+  const OPTION_OVERRIDES = /*__DIAGRAM_OPTIONS__*/{};
+
+  const ACCENT = "#7c3aed";
+  // Hover tooltip = the node/edge description (plain text).
+  const nodes = new vis.DataSet(RAW_NODES.map((n) => ({
+    shape: "box",
+    ...n,
+    title: n.description || undefined,
+  })));
+  const edges = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+    id: e.id != null ? e.id : "edge-" + i,
+    arrows: "to",
+    ...e,
+    title: e.description || undefined,
+  })));
+
+  // On-brand, muted palette for groups (violet-anchored) — replaces vis-network's
+  // loud default group colors. Assigned to distinct groups in first-seen order.
+  const GROUP_PALETTE = [
+    ["#ede9fe", "#7c3aed"], ["#e0e7ff", "#4f46e5"], ["#ccfbf1", "#0d9488"],
+    ["#fef3c7", "#b45309"], ["#fce7f3", "#be185d"], ["#e2e8f0", "#475569"],
+    ["#cffafe", "#0e7490"], ["#dcfce7", "#15803d"],
+  ];
+  const groupOptions = {};
+  [...new Set(RAW_NODES.map((n) => n.group).filter(Boolean))].forEach((g, i) => {
+    const [bg, bd] = GROUP_PALETTE[i % GROUP_PALETTE.length];
+    groupOptions[g] = { color: { background: bg, border: bd, highlight: { background: bg, border: bd } }, font: { color: "#1f1147" } };
+  });
+
+  const baseOptions = {
+    nodes: {
+      shape: "box", margin: 10, borderWidth: 1.5,
+      color: { background: "#faf5ff", border: ACCENT, highlight: { background: "#ede9fe", border: ACCENT } },
+      font: { size: 14, color: "#1f1147", face: "ui-sans-serif, system-ui, sans-serif" },
+      shapeProperties: { borderRadius: 8 },
+    },
+    edges: {
+      color: { color: "#b3a4d4", highlight: ACCENT },
+      width: 1.5, smooth: { type: "cubicBezier", roundness: 0.5 },
+      font: { size: 12, color: "#5b5570", strokeWidth: 4, strokeColor: "#ffffff" },
+      arrows: { to: { scaleFactor: 0.7 } },
+    },
+    physics: { stabilization: true, barnesHut: { springLength: 140, gravitationalConstant: -6000 } },
+    interaction: { hover: true, tooltipDelay: 120, navigationButtons: false, keyboard: false },
+    groups: groupOptions,
+    layout: {},
+  };
+  // Hierarchical layout reads better for flow / architecture / sequence-style diagrams.
+  if (["flow", "architecture", "sequence", "state"].includes(DIAGRAM_KIND)) {
+    baseOptions.layout = { hierarchical: { enabled: true, direction: DIAGRAM_KIND === "sequence" ? "LR" : "UD", sortMethod: "directed", levelSeparation: 110, nodeSpacing: 140 } };
+    baseOptions.physics = false;
+  }
+  const options = deepMerge(baseOptions, OPTION_OVERRIDES);
+
+  const container = document.getElementById("net");
+  const network = new vis.Network(container, { nodes, edges }, options);
+
+  document.getElementById("sub").textContent = `${RAW_NODES.length} nodes · ${RAW_EDGES.length} edges · ${DIAGRAM_KIND}`;
+
+  const detail = document.getElementById("detail");
+  function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+  function renderMeta(meta) {
+    if (!meta || typeof meta !== "object") return "";
+    const rows = Object.entries(meta).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    return rows ? `<dl class="meta">${rows}</dl>` : "";
+  }
+  function showNode(id) {
+    const n = nodes.get(id);
+    detail.innerHTML = `<span class="kind">${esc(n.group || "node")}</span><h2>${esc(n.label || id)}</h2>` +
+      (n.description ? `<p>${esc(n.description)}</p>` : `<p class="empty">No description.</p>`) + renderMeta(n.meta);
+  }
+  function showEdge(id) {
+    const e = edges.get(id);
+    const from = nodes.get(e.from), to = nodes.get(e.to);
+    detail.innerHTML = `<span class="kind">edge</span><h2>${esc((from && from.label) || e.from)} → ${esc((to && to.label) || e.to)}</h2>` +
+      (e.label ? `<p><strong>${esc(e.label)}</strong></p>` : "") +
+      (e.description ? `<p>${esc(e.description)}</p>` : `<p class="empty">No description.</p>`) + renderMeta(e.meta);
+  }
+  network.on("click", (params) => {
+    if (params.nodes.length) showNode(params.nodes[0]);
+    else if (params.edges.length) showEdge(params.edges[0]);
+    else detail.innerHTML = `<div class="empty">Click a node or edge to read its explanation. Drag to rearrange, scroll to zoom, drag the background to pan.</div>`;
+  });
+  network.on("doubleClick", (params) => { if (params.nodes.length) network.focus(params.nodes[0], { scale: 1.2, animation: true }); });
+
+  document.getElementById("fit-btn").onclick = () => network.fit({ animation: true });
+  let physicsOn = options.physics !== false;
+  const physicsBtn = document.getElementById("physics-btn");
+  physicsBtn.textContent = physicsOn ? "Freeze layout" : "Unfreeze layout";
+  physicsBtn.onclick = () => { physicsOn = !physicsOn; network.setOptions({ physics: physicsOn }); physicsBtn.textContent = physicsOn ? "Freeze layout" : "Unfreeze layout"; };
+
+  function deepMerge(a, b) {
+    const out = Array.isArray(a) ? a.slice() : { ...a };
+    for (const k in b) {
+      if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k]) && a[k] && typeof a[k] === "object") out[k] = deepMerge(a[k], b[k]);
+      else out[k] = b[k];
+    }
+    return out;
+  }
+</script>
+</body>
+</html>

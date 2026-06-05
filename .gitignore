@@ -10,3 +10,8 @@ dist/
 .setup-cache/
 tests/.tmp/
 feature_requests/
+.table-exports/
+.diagram-exports/
+
+# Personal self-profile: local-only, generated from "Chris's Brain" via /sync-self.
+canonical/PROFILE.md
