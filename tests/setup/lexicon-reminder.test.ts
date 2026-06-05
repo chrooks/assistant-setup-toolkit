@@ -23,4 +23,28 @@ describe("Lexicon reminder", () => {
     expect(hook).toMatch(/fail to use/i);
     expect(hook).toContain("_Avoid_");
   });
+
+  it("nudges list- and table-first communication", async () => {
+    const instructions = await readFile(
+      path.join(repoRoot, "canonical", "CLAUDE.md"),
+      "utf-8",
+    );
+    const hook = await readFile(
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      "utf-8",
+    );
+
+    // The per-turn hook reminds about lists and routes quick tables/diagrams.
+    expect(hook).toMatch(/list/i);
+    expect(hook).toContain("/table md");
+    expect(hook).toContain("/diagram md");
+
+    // The session-start instructions carry the durable list/table/diagram preference.
+    expect(instructions).toMatch(/List-, Table-, and Diagram-First Communication/i);
+    expect(instructions).toContain("/table md");
+    expect(instructions).toContain("/table html");
+    expect(instructions).toContain("/diagram md");
+    expect(instructions).toContain("/diagram html");
+    expect(instructions).toMatch(/two trailing spaces/i);
+  });
 });
