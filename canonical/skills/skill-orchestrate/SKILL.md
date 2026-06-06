@@ -88,6 +88,7 @@ For each agent that has a mapped skill:
 1. Find the skill's SKILL.md in search roots (in order):
    - `./.claude/skills/<skill-name>/SKILL.md`
    - `~/.claude/skills/<skill-name>/SKILL.md`
+   - `~/.agents/skills/<skill-name>/SKILL.md` (Codex CLI projection)
 2. Read the full SKILL.md content
 3. If skill not found, warn and continue with agent's default behavior
 
