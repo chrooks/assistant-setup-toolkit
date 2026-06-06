@@ -44,3 +44,15 @@ hooks:
     matcher: "Edit|Write"
     scope: project
     targets: [claude-code, codex-cli]
+  # Session-done / needs-input notifier — macOS banner + Pushover push.
+  # Lets Chris run many windows/terminals and get pinged instead of
+  # manually checking which session has come back. Secrets stay in a
+  # private chmod-600 file (see Next Steps); never committed.
+  - file: claude-notify.sh
+    event: Stop
+    targets: [claude-code, codex-cli]
+    command: "bash {hook} done"
+  - file: claude-notify.sh
+    event: Notification
+    targets: [claude-code, codex-cli]
+    command: "bash {hook} needs-input"
