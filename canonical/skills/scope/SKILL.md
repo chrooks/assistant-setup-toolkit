@@ -6,7 +6,7 @@ user-invocable: true
 
 # Triage
 
-Size up a request before starting work. Present four options and let the user pick.
+Size up a request before starting work. Present three options and let the user pick.
 
 ## When to Use
 
