@@ -113,5 +113,53 @@ describe("payload", () => {
         true,
       );
     });
+
+    it("routes rules to codex-home for codex-cli", () => {
+      const result = buildAssistantPayloads({
+        targets: ["codex-cli"],
+        components: ["rules"],
+        externalFiles: [],
+        canonicalFiles: [],
+        projectionFiles: [
+          {
+            relativePath: "rules/python/database.md",
+            sourcePath: "/repo/.codex/rules/python/database.md",
+            component: "rules",
+            origin: "target-projection",
+            executable: false,
+          },
+        ],
+      });
+
+      const codexPayload = result.payloads.find((p) => p.homeId === "codex-home");
+      expect(codexPayload).toBeDefined();
+      expect(
+        codexPayload!.files.some((f) => f.relativePath === "rules/python/database.md"),
+      ).toBe(true);
+    });
+
+    it("routes rules to claude-home for claude-code", () => {
+      const result = buildAssistantPayloads({
+        targets: ["claude-code"],
+        components: ["rules"],
+        externalFiles: [],
+        canonicalFiles: [
+          {
+            relativePath: "rules/python/database.md",
+            sourcePath: "/repo/canonical/rules/python/database.md",
+            component: "rules",
+            origin: "canonical-source",
+            executable: false,
+          },
+        ],
+        projectionFiles: [],
+      });
+
+      const claudePayload = result.payloads.find((p) => p.homeId === "claude-home");
+      expect(claudePayload).toBeDefined();
+      expect(
+        claudePayload!.files.some((f) => f.relativePath === "rules/python/database.md"),
+      ).toBe(true);
+    });
   });
 });

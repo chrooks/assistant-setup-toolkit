@@ -79,6 +79,7 @@ async function discoverCanonicalFiles(
     hooks: "hooks",
     commands: "commands",
     skills: "skills",
+    rules: "rules",
   };
 
   // Check for top-level instruction files
@@ -324,7 +325,18 @@ export async function runSetupWizard(
       } catch {
         // canonical/hooks/ doesn't exist — skip
       }
-      const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles });
+      // Discover rule files under canonical/rules/ for projection to .codex/rules/
+      const ruleFiles: string[] = [];
+      const canonicalRulesDir = path.join(repoRoot, "canonical", "rules");
+      try {
+        const entries = await walkDir(canonicalRulesDir);
+        for (const entry of entries) {
+          ruleFiles.push(path.relative(canonicalRulesDir, entry.path));
+        }
+      } catch {
+        // canonical/rules/ doesn't exist — skip
+      }
+      const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles, ruleFiles });
       projectionMappings.push(...mappings);
 
       log("Target Projections:");
@@ -363,7 +375,9 @@ export async function runSetupWizard(
         ? "hooks"
         : m.target.includes("skills")
           ? "skills"
-          : "instructions";
+          : m.target.startsWith(".codex/rules/")
+            ? "rules"
+            : "instructions";
       return {
         relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
         sourcePath: path.join(repoRoot, m.target),

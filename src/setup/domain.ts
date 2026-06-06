@@ -27,6 +27,7 @@ export type ComponentKind =
   | "hooks"
   | "commands"
   | "skills"
+  | "rules"
   | "settings"
   | "manifests"
   | "mcp";
@@ -47,6 +48,7 @@ export const ALL_COMPONENT_KINDS: readonly ComponentKind[] = [
   "hooks",
   "commands",
   "skills",
+  "rules",
   "settings",
   "manifests",
   "mcp",
