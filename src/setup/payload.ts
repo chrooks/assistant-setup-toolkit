@@ -59,21 +59,22 @@ function routeFileToHome(
     return "claude-home";
   }
 
-  // Codex CLI routing: instructions, plans, and hooks to codex-home,
+  // Codex CLI routing: instructions, plans, hooks, and rules to codex-home,
   // skills to agents-home. Hooks land at ~/.codex/hooks/ alongside
-  // Codex's hooks.json config file.
+  // Codex's hooks.json config file; rules land at ~/.codex/rules/.
   if (target === "codex-cli") {
     if (
       file.component === "instructions" ||
       file.component === "plans" ||
-      file.component === "hooks"
+      file.component === "hooks" ||
+      file.component === "rules"
     ) {
       return "codex-home";
     }
     if (file.component === "skills") {
       return "agents-home";
     }
-    // Other component types (commands, agents, mcp, rules) don't have
+    // Other component types (commands, agents, mcp) don't have
     // a Codex equivalent yet
     return null;
   }

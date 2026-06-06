@@ -32,6 +32,8 @@ export interface ProjectionInput {
   readonly skillDirs: readonly SkillDirEntry[];
   /** Hook script filenames under canonical/hooks/ to project (e.g. ["lexicon-reminder.sh"]) */
   readonly hookFiles?: readonly string[];
+  /** Rule file paths under canonical/rules/ to project (e.g. ["common/coding-style.md", "python/database.md"]) */
+  readonly ruleFiles?: readonly string[];
 }
 
 /** A skill directory containing files to project. */
@@ -181,6 +183,17 @@ export function planCodexProjection(
       target: `.codex/hooks/${hookFile}`,
       isSkill: false,
       isHook: true,
+    });
+  }
+
+  // Map rule files to .codex/rules/. Left as markdown (isHook/isSkill false) so the
+  // Claude→Codex text rewrite fixes @import paths (~/.claude/rules → ~/.codex/rules).
+  for (const ruleFile of input.ruleFiles ?? []) {
+    mappings.push({
+      source: `rules/${ruleFile}`,
+      target: `.codex/rules/${ruleFile}`,
+      isSkill: false,
+      isHook: false,
     });
   }
 

@@ -23,6 +23,7 @@ describe("domain", () => {
         "hooks",
         "commands",
         "skills",
+        "rules",
         "settings",
         "manifests",
         "mcp",

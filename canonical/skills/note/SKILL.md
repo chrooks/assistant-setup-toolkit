@@ -1,3 +1,8 @@
+---
+name: note
+description: "Quick project-local scratchpad. Add, list, and clear zero-friction notes that live with the project. Use when the user invokes /note or wants a lightweight jot space that is not a task tracker."
+---
+
 # /note — Project Scratchpad
 
 Quick notes that live with the project. Zero friction. Not a task tracker, a scratchpad.

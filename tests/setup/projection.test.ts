@@ -121,6 +121,23 @@ describe("projection", () => {
       expect(plan[0].isSkill).toBe(true);
     });
 
+    it("maps rule files to .codex/rules/ (subject to text rewrite)", () => {
+      const plan = planCodexProjection({
+        claudeFiles: [],
+        skillDirs: [],
+        ruleFiles: ["common/coding-style.md", "python/database.md"],
+      });
+
+      expect(plan).toHaveLength(2);
+      const dbRule = plan.find((p) => p.source === "rules/python/database.md");
+      expect(dbRule).toBeDefined();
+      expect(dbRule!.target).toBe(".codex/rules/python/database.md");
+      // Rules are markdown — NOT flagged isHook/isSkill, so the .claude→.codex
+      // rewrite applies and fixes @import paths inside rule bodies.
+      expect(dbRule!.isHook).toBe(false);
+      expect(dbRule!.isSkill).toBe(false);
+    });
+
     it("skips commands (no Codex equivalent surface)", () => {
       // planCodexProjection has no commands input — commands are not projected
       const plan = planCodexProjection({

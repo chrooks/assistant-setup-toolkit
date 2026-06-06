@@ -12,8 +12,8 @@ describe("scope Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("name: scope");
-    expect(skill).toMatch(/\/plan.*\/grill-me.*\/to-prd.*\/execute/is);
-    expect(skill).toContain("4. /execute");
+    expect(skill).toMatch(/\/plan.*\/grill-me.*\/execute/is);
+    expect(skill).toContain("3. /execute");
     expect(skill).toMatch(/invoke the `execute` Skill/i);
     expect(skill).toContain("Right Skill, Right Job");
     expect(skill).not.toMatch(/\bTrivial\b/);
