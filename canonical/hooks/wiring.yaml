@@ -56,3 +56,8 @@ hooks:
     event: Notification
     targets: [claude-code, codex-cli]
     command: "bash {hook} needs-input"
+  # Stamps session activity so claude-notify.sh can stay quiet while you're
+  # actively working and only ping after real silence (quiet-debounce).
+  - file: notify-activity.sh
+    event: UserPromptSubmit
+    targets: [claude-code, codex-cli]
