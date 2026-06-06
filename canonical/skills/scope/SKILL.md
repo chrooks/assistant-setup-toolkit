@@ -1,6 +1,6 @@
 ---
 name: scope
-description: Size up a task and pick the right workflow — /plan, /grill-me, /to-prd, or /execute.
+description: Size up a task and pick the right workflow — /plan, /grill-me, or /execute.
 user-invocable: true
 ---
 
@@ -25,13 +25,12 @@ Read the user's ask. Identify:
 
 ### Step 2: Present the options
 
-Present exactly four options with a one-line rationale for each, tailored to the specific request:
+Present exactly three options with a one-line rationale for each, tailored to the specific request:
 
 ```
 1. /plan — [why this fits: concrete steps, enforcement mechanism, test strategy]
 2. /grill-me — [why this fits: fuzzy scope, unstated assumptions, needs sharpening]
-3. /to-prd — [why this fits: full product spec needed, multiple stakeholders]
-4. /execute — [why this fits: ready to do now using the right Skill workflow]
+3. /execute — [why this fits: ready to do now using the right Skill workflow]
 ```
 
 For **/execute**, state that you will invoke the `execute` Skill, which reads

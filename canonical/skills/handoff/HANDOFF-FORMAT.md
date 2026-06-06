@@ -66,17 +66,3 @@ Acknowledge the receipt of this handoff, explore the repo for relevant context, 
 ### Verification Baseline
 - List focused tests that should remain green before and after the next step.
 - Use repo-local `.venv` interpreter when that is the established environment.
-
-## Hybrid wrapper (when invoked by `/fork`)
-
-When `/fork` calls this skill, it wraps the output with path-reference headers:
-
-```markdown
-<!-- /fork hybrid handoff — read referenced files for full depth -->
-<!-- CONTEXT: CONTEXT.md -->
-<!-- PRD: docs/prd/<slug>.md (if exists) -->
-
-<handoff body>
-```
-
-The skill itself does not add these headers — `/fork` handles the wrapping in Step 8d.
