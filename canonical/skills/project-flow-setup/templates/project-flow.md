@@ -72,7 +72,6 @@ Then route to the selected workflow:
 /execute
 /plan
 /grill-me
-/to-prd
 ```
 
 Once the work has a clear plan, task list, or PRD:

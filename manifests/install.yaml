@@ -8,12 +8,15 @@ externalSources:
     name: Matt Pocock Skills
     kind: skill-pack
     url: https://github.com/mattpocock/skills
-    default: true
+    default: false
     targets:
       - claude-code
       - codex-cli
     notes:
       - Includes engineering and productivity skills.
+      - Disabled by default — the skills actually used (grill-with-docs,
+        improve-codebase-architecture, write-a-skill, etc.) are vendored into
+        canonical/skills. Re-enable to pull the full pack.
 
   - id: find-skills
     name: find-skills
@@ -56,9 +59,15 @@ externalSources:
     name: Everything Claude Code
     kind: plugin
     url: https://github.com/affaan-m/everything-claude-code
-    default: true
+    default: false
     targets:
       - claude-code
+    notes:
+      - Disabled by default — it installed ~270 skills, of which only a handful
+        were ever used. Those (configure-ecc, consult, deep-research, diagnose,
+        note, tdd, design-an-interface, make-interfaces-feel-better,
+        security-review, improve-codebase-architecture) are vendored into
+        canonical/skills. Re-enable to pull the full plugin.
 
   - id: codex-plugin-cc
     name: Codex for Claude Code
