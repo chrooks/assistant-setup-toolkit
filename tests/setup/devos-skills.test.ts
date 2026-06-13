@@ -36,4 +36,26 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/[Nn]ever record an acceptance criterion without its proof method/);
     });
   });
+
+  describe("grill-me", () => {
+    const skill = readSkill("grill-me");
+
+    it("keeps its slug and relentless-interview behavior", () => {
+      expect(skill).toMatch(/^name:\s*grill-me\s*$/m);
+      expect(skill).toMatch(/[Ii]nterview me relentlessly/);
+      expect(skill).toMatch(/one at a time/i);
+    });
+
+    it("teaches appending resolved decisions to the Decision Ledger", () => {
+      expect(skill).toMatch(/Decision Ledger/);
+      expect(skill).toMatch(/Meaningful Decision/);
+      expect(skill).toMatch(/rationale/);
+      expect(skill).toMatch(/[Aa]ppend as you go/);
+    });
+
+    it("hands off via next_action to plan or the implement stage", () => {
+      expect(skill).toMatch(/next_action/);
+      expect(skill).toMatch(/\/plan/);
+    });
+  });
 });

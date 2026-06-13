@@ -16,7 +16,7 @@ stage: scope
 grillable: null
 tier: null
 effort: null
-next_action: /grill 2
+next_action: /grill-me 2
 acceptance_criteria: []
 status: in_progress
 ---
@@ -83,7 +83,7 @@ describe("DevOS steering hook", () => {
     expect(payload.suppressOutput).toBe(true);
     expect(payload.additionalContext).toContain("dex-table-controls");
     expect(payload.additionalContext).toContain("stage=scope");
-    expect(payload.additionalContext).toContain("next=/grill 2");
+    expect(payload.additionalContext).toContain("next=/grill-me 2");
   });
 
   it("stays silent when no Throughline exists", () => {
