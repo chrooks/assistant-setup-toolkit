@@ -89,7 +89,7 @@ dispatched you — record the sizing instead of only presenting it:
 2. Under `## Decision Ledger`, list each Meaningful Decision you counted as an
    open item (the question, marked open). Grill resolves these later.
 3. Set `next_action`:
-   - `grillable: true` → `/grill <issue>`.
+   - `grillable: true` → `/grill-me <issue>`.
    - `grillable: false` and the work needs a plan → `/plan <issue>`.
    - `grillable: false` and the work is ready to build → the implement stage.
 4. **Skip-path only** (`grillable: false`, no grill or plan needed): write the
