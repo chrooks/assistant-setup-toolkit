@@ -34,6 +34,13 @@ hooks:
     #   matcher: "Bash"          # only honored where the event supports it
     #   timeoutSec: 30
     #   command: "bash {hook}"   # default is `bash {hook}` where {hook} is the absolute hook path
+  # DevOS steering — re-anchors an active run every turn so it survives
+  # compaction. Fires only when the current project has a Throughline with
+  # status: in_progress; otherwise prints nothing. Claude-code only, mirroring
+  # lexicon-reminder (Codex shows additionalContext as transcript noise).
+  - file: devos-steering.sh
+    event: UserPromptSubmit
+    targets: [claude-code]
   - file: strategic-compact.js
     event: PreToolUse
     matcher: "Edit|Write"
