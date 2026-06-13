@@ -1,6 +1,6 @@
 # Issue Tracker
 
-This repository treats GitHub issues as Issue records: the durable work items that `/to-issues`, `/roadmap`, `/execute`, and `/verification-loop` coordinate around.
+This repository treats GitHub issues as Issue records: the durable work items that `/to-issues`, `/roadmap`, `/implement`, and `/verification-loop` coordinate around.
 
 ## Issue Records
 

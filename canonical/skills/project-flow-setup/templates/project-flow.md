@@ -7,8 +7,8 @@ This repository uses a project-management and development loop built around repo
 - `/project-flow-setup` configures a repository for the workflow.
 - `/to-issues` creates, updates, and closes issue records.
 - `/roadmap` chooses, prioritizes, sequences, and reshapes work.
-- `/scope` decides whether to execute, plan, or grill.
-- `/execute` implements selected ready work.
+- `/scope` decides whether to implement, plan, or grill.
+- `/implement` implements selected ready work.
 - `/verification-loop` proves the work.
 - `/prep-pr` packages the final diff for review or PR.
 
@@ -47,7 +47,7 @@ Start by choosing the next ready issue record:
 Then run the implementation and proof loop:
 
 ```text
-/execute #issue
+/implement #issue
 /verification-loop
 /to-issues close #issue
 ```
@@ -69,7 +69,7 @@ For unclear ideas or broad requests:
 Then route to the selected workflow:
 
 ```text
-/execute
+/implement
 /plan
 /grill-me
 ```

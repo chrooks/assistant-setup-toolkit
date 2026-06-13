@@ -1,6 +1,6 @@
 ---
 name: scope
-description: Size up a task — count the open decisions, stamp whether it needs a grill, and set an effort tier — then pick the right workflow (/plan, /grill-me, or /execute). Records the sizing into the DevOS Throughline when one exists. Use for open-ended feature, change, or refactor requests, or as the DevOS scope stage.
+description: Size up a task — count the open decisions, stamp whether it needs a grill, and set an effort tier — then pick the right workflow (/plan, /grill-me, or /implement). Records the sizing into the DevOS Throughline when one exists. Use for open-ended feature, change, or refactor requests, or as the DevOS scope stage.
 user-invocable: true
 ---
 
@@ -61,10 +61,10 @@ Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, <N
 
 1. /plan — [why: concrete steps, enforcement, test strategy]
 2. /grill-me — [why: fuzzy scope, unstated assumptions, needs sharpening]
-3. /execute — [why: ready to do now using the right Skill workflow]
+3. /implement — [why: ready to do now using the right Skill workflow]
 ```
 
-For **/execute**, state that you will invoke the `execute` Skill, which reads
+For **/implement**, state that you will invoke the `implement` Skill, which reads
 the user-level `## Right Skill, Right Job` section and starts the selected
 workflow.
 
@@ -72,12 +72,12 @@ workflow.
 
 State which option you recommend and why, in one sentence. The verdict usually
 points the way: `grillable: true` favors `/grill-me`; a clean `grillable: false`
-favors `/execute`. Wait for the user to pick.
+favors `/implement`. Wait for the user to pick.
 
 ### Step 5: Execute
 
-Once the user picks, invoke the corresponding Skill. For `/execute`, invoke the
-`execute` Skill.
+Once the user picks, invoke the corresponding Skill. For `/implement`, invoke the
+`implement` Skill.
 
 ## DevOS: write the sizing into the Throughline
 
@@ -103,7 +103,7 @@ Then advance: set `stage` to the stage `next_action` points at.
 
 - Do not start implementing before the user picks (standalone) or before the
   Conductor advances (DevOS).
-- If the user says "just do it" or similar, treat it as `/execute`.
+- If the user says "just do it" or similar, treat it as `/implement`.
 - If the user already specified a workflow (e.g., typed `/plan`), do not triage — just run it.
 - Never record an acceptance criterion without its proof method.
 - Keep the presentation concise. No walls of text.

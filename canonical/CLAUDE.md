@@ -43,15 +43,15 @@
 - When writing complex features or significant refactors, or just generally need to plan something out, use an ExecPlan (as described in `~/.claude/PLAN.md`) as a source of record for that plan. Put that plan in `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`
 
 ## Workflow Triage
-- When the user gives an open-ended prompt, feature, change, or refactor request without specifying a workflow, use `/scope`. `/scope` decides whether to `/execute`, plan, or grill before starting work.
-- Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` decides whether to execute, plan, or grill.
+- When the user gives an open-ended prompt, feature, change, or refactor request without specifying a workflow, use `/scope`. `/scope` decides whether to `/implement`, plan, or grill before starting work.
+- Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` decides whether to implement, plan, or grill.
 
 ## Right Skill, Right Job
 ALWAYS:
 - Use `/project-flow-setup` when a repository lacks project-flow docs, issue-tracker guidance, triage labels, GitHub milestone setup, or GitHub Project setup. Bare `/project-flow-setup` should guide audit, docs, and apply phases with approval gates.
 - Use `/to-issues` to turn plans, tasks, TODOs, PRDs, or existing issue context into issue-tracker records or local TODO.md tasks. Use it when creating issues, creating sub-issues, rolling work into an existing issue, updating issue acceptance criteria, commenting with follow-up work, or closing an issue after verification.
 - Use `/roadmap` to zoom out across issue-tracker work and decide sequencing, priority, milestone fit, board status, blockers, and what to pick up next. Use it when there is no obvious next slice after finishing work, when a milestone or Kanban board needs reshaping, or when choosing between open issues.
-- Use `/execute` to implement a feature.
+- Use `/implement` to build a feature.
 - Use `/verification-loop` after implementing a feature.
 - Use `/commit` when it's time to commit work to version control.
 - Use `/diagnose` for fixing difficult bugs.

@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 import { rewriteContentForCodex } from "../../src/setup/projection.js";
 
 const repoRoot = process.cwd();
-const skillPath = path.join(repoRoot, "canonical", "skills", "execute", "SKILL.md");
+const skillPath = path.join(repoRoot, "canonical", "skills", "implement", "SKILL.md");
 
-describe("execute Skill", () => {
-  it("defines the /execute workflow around user-level skill guidance", async () => {
+describe("implement Skill", () => {
+  it("defines the /implement workflow around user-level skill guidance", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("name: execute");
+    expect(skill).toContain("name: implement");
     expect(skill).toContain("disable-model-invocation: false");
     expect(skill).toContain("Right Skill, Right Job");
     expect(skill).toContain("~/.claude/CLAUDE.md");

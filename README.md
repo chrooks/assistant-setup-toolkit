@@ -91,7 +91,7 @@ Both expand to a non-interactive Setup Wizard run with `--claude --codex --defau
 
 ## Project Flow Workflow
 
-See [docs/project-flow-how-to.md](docs/project-flow-how-to.md) for the `/project-flow-setup` workflow and the daily loop across `/scope`, `/to-issues`, `/roadmap`, `/execute`, `/verification-loop`, and `/prep-pr`.
+See [docs/project-flow-how-to.md](docs/project-flow-how-to.md) for the `/project-flow-setup` workflow and the daily loop across `/scope`, `/to-issues`, `/roadmap`, `/implement`, `/verification-loop`, and `/prep-pr`.
 
 ## Structure
 
