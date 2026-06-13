@@ -57,7 +57,7 @@ trees:
         next: execute
       - id: execute
         type: command
-        label: /execute #issue
+        label: /implement #issue
         next: verification_loop
       - id: verification_loop
         type: command
@@ -204,7 +204,7 @@ trees:
         next: execute
       - id: execute
         type: command
-        label: /execute
+        label: /implement
 
   - id: daily-work
     title: Daily Work
@@ -228,7 +228,7 @@ trees:
         next: start
       - id: execute
         type: command
-        label: /execute #issue
+        label: /implement #issue
         next: verify
       - id: verify
         type: command

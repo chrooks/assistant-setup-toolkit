@@ -22,7 +22,7 @@ describe("project-flow setup templates", () => {
       expect(text).toContain("/to-issues");
       expect(text).toContain("/roadmap");
       expect(text).toContain("/scope");
-      expect(text).toContain("/execute");
+      expect(text).toContain("/implement");
       expect(text).toContain("/verification-loop");
       expect(text).toContain("/prep-pr");
       expect(text).toContain("docs/agents/project-flow.md");

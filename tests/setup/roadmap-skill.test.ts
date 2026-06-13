@@ -24,7 +24,7 @@ describe("roadmap Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("`/to-issues` creates, updates, and closes issue records");
-    expect(skill).toContain("`/scope` decides whether to execute, plan, or grill");
+    expect(skill).toContain("`/scope` decides whether to implement, plan, or grill");
     expect(skill).toContain("Do not create new issue records");
   });
 

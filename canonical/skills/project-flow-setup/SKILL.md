@@ -14,8 +14,8 @@ disable-model-invocation: true
 - `/project-flow-setup` configures a repository for the workflow.
 - `/to-issues` creates, updates, and closes issue records.
 - `/roadmap` chooses, prioritizes, sequences, and reshapes work.
-- `/scope` decides whether to execute, plan, or grill.
-- `/execute` implements selected ready work.
+- `/scope` decides whether to implement, plan, or grill.
+- `/implement` implements selected ready work.
 - `/verification-loop` proves the work.
 - `/prep-pr` packages the final diff for review or PR.
 
@@ -147,4 +147,4 @@ Approval needed before running these commands.
 - Use repo-local `CONTEXT.md` Lexicon terms when present.
 - Prefer repo-local docs over defaults once they exist.
 - Keep GitHub operations approval-gated.
-- Keep this Skill setup-focused. Route operational work to `/to-issues`, `/roadmap`, `/scope`, `/execute`, `/verification-loop`, or `/prep-pr`.
+- Keep this Skill setup-focused. Route operational work to `/to-issues`, `/roadmap`, `/scope`, `/implement`, `/verification-loop`, or `/prep-pr`.

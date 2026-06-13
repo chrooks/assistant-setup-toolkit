@@ -13,7 +13,7 @@ Use this Skill to choose, prioritize, sequence, and reshape work. It answers "Wh
 
 - `/roadmap` chooses, prioritizes, sequences, and reshapes work.
 - `/to-issues` creates, updates, and closes issue records.
-- `/scope` decides whether to execute, plan, or grill.
+- `/scope` decides whether to implement, plan, or grill.
 
 Do not create new issue records from `/roadmap`. If new work needs to be captured, recommend `/to-issues` with the exact source or target issue.
 
@@ -66,7 +66,7 @@ Track useful metadata:
 - priority field or priority label
 - blocker and blocked-by links
 - recency and verification status
-- expected next workflow: `/execute`, `/scope`, `/to-issues update`, or `/to-issues close`
+- expected next workflow: `/implement`, `/scope`, `/to-issues update`, or `/to-issues close`
 
 ### 3. Rank next candidates
 
@@ -87,7 +87,7 @@ Answer with a short ranked list. For each candidate, include:
 
 - **Issue**: rich issue reference
 - **Why now**: priority, dependency, milestone, or risk reason
-- **Next workflow**: `/execute`, `/scope`, `/to-issues update`, or `/to-issues close`
+- **Next workflow**: `/implement`, `/scope`, `/to-issues update`, or `/to-issues close`
 - **Confidence**: high, medium, or low
 - **Caveat**: only if there is a real blocker or assumption
 
@@ -117,7 +117,7 @@ Do not mutate the issue tracker unless the user approves the proposed changes.
 Recommended next:
 - Issue: [#123 Short title](https://tracker/issue/123)
 - Why now: unblocked P1 work that continues the active milestone dependency chain.
-- Next workflow: `/execute #123`
+- Next workflow: `/implement #123`
 - Confidence: high
 ```
 
@@ -142,5 +142,5 @@ Proposed changes:
 - Keep recommendations grounded in visible issue records, milestones, Project fields, and blockers.
 - Do not create new issue records.
 - Do not close issue records. Route closures through `/to-issues close`.
-- Do not run implementation. Route ready work through `/execute`.
+- Do not run implementation. Route ready work through `/implement`.
 - Do not overfit to priority alone; include dependency and milestone context.

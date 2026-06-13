@@ -7,8 +7,8 @@ This guide explains how the project-management and development workflow fits tog
 - `/project-flow-setup` configures a repository for the workflow.
 - `/to-issues` creates, updates, and closes issue records.
 - `/roadmap` chooses, prioritizes, sequences, and reshapes work.
-- `/scope` decides whether to execute, plan, or grill.
-- `/execute` implements selected ready work.
+- `/scope` decides whether to implement, plan, or grill.
+- `/implement` implements selected ready work.
 - `/verification-loop` proves the work.
 - `/prep-pr` packages the final diff for review or PR.
 
@@ -26,7 +26,7 @@ flowchart TD
   router_state -->|Fuzzy idea| scope["/scope idea"]
   router_state -->|Plan or task list exists| to_issues["/to-issues source"]
   router_state -->|Need next issue record| roadmap["/roadmap next"]
-  router_state -->|Ready issue record selected| execute["/execute #issue"]
+  router_state -->|Ready issue record selected| execute["/implement #issue"]
   router_state -->|Diff is ready after verification| prep_pr["/prep-pr"]
 
   setup --> roadmap
@@ -81,7 +81,7 @@ flowchart TD
   scope_skill --> scope_choice{What does /scope return?}
   scope_choice -->|Needs questions| grill_skill["/grill-me"]
   scope_choice -->|Needs an ExecPlan| plan_skill["/plan"]
-  scope_choice -->|Ready work| execute_skill["/execute"]
+  scope_choice -->|Ready work| execute_skill["/implement"]
   grill_skill --> shaped{Plan or clear task list now exists?}
   plan_skill --> shaped
   shaped -->|Yes| issues_skill["/to-issues source"]
@@ -95,7 +95,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   daily_start["/roadmap next"] --> issue_ready{Is an issue record ready?}
-  issue_ready -->|Yes| daily_execute["/execute #issue"]
+  issue_ready -->|Yes| daily_execute["/implement #issue"]
   issue_ready -->|No, needs sequencing or reshaping| daily_roadmap["/roadmap"]
   daily_roadmap --> daily_start
   daily_execute --> daily_verify["/verification-loop"]
@@ -161,7 +161,7 @@ Then choose:
 ```text
 /grill-me
 /plan
-/execute
+/implement
 ```
 
 Once the work has a plan or clear task list:
@@ -185,7 +185,7 @@ It reads issues, milestones, Project status, blockers, and priority, then recomm
 Then run:
 
 ```text
-/execute #123
+/implement #123
 /verification-loop
 ```
 
@@ -217,7 +217,7 @@ Daily loop:
 
 ```text
 /roadmap next
-/execute #issue
+/implement #issue
 /verification-loop
 /to-issues close #issue
 /prep-pr

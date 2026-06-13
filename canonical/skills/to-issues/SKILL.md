@@ -19,7 +19,7 @@ In issue tracker mode, inspect `docs/agents/issue-tracker.md` and `docs/agents/t
 
 - `/to-issues` creates, updates, and closes issue records.
 - `/roadmap` chooses, prioritizes, sequences, and reshapes work.
-- `/scope` decides whether to execute, plan, or grill.
+- `/scope` decides whether to implement, plan, or grill.
 
 Do not use `/to-issues` to decide what work matters next. Use `/roadmap` for that.
 
