@@ -58,4 +58,33 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/\/plan/);
     });
   });
+
+  describe("plan", () => {
+    const skill = readSkill("plan");
+
+    it("is a user-invocable skill named plan", () => {
+      expect(skill).toMatch(/^name:\s*plan\s*$/m);
+      expect(skill).toMatch(/^user-invocable:\s*true\s*$/m);
+    });
+
+    it("references the ExecPlan format guide (PLAN.md) and its living sections", () => {
+      expect(skill).toMatch(/PLAN\.md/);
+      expect(skill).toMatch(/Progress/);
+      expect(skill).toMatch(/Decision Log/);
+      expect(skill).toMatch(/Outcomes & Retrospective/);
+    });
+
+    it("defines acceptance criteria with proof methods and writes them to the Throughline", () => {
+      expect(skill).toMatch(/acceptance_criteria/);
+      expect(skill).toMatch(/proof_method/);
+      expect(skill).toMatch(/[Nn]ever record an acceptance criterion without its proof method/);
+    });
+
+    it("does the walkthrough and gates on human approval", () => {
+      expect(skill).toMatch(/Plan Walkthrough/);
+      expect(skill).toMatch(/\/diagram/);
+      expect(skill).toMatch(/[Aa]pproval gate/);
+      expect(skill).toMatch(/[Nn]ever start implementing before the human approves/);
+    });
+  });
 });
