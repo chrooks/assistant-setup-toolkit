@@ -110,6 +110,22 @@ _Avoid_: tests, validation, audit
 A target-specific post-install checklist printed by the Setup Wizard for actions it cannot or should not automate.
 _Avoid_: instructions, summary, todo
 
+**Throughline**:
+A durable on-disk control file that records where a piece of work sits in its development lifecycle — its stage, next action, decisions, acceptance criteria, and proof — and survives conversation compaction. Authored as a DevOS component in `canonical/`; instances are created per run inside a target project.
+_Avoid_: spine, plan file, state file, tracking doc
+
+**Conductor**:
+The orchestrating role, invoked as `/dev`, that owns the Throughline: it creates or reads it, dispatches each stage's work, and writes results back. Lives as the `dev` Skill in the Canonical Assistant Source.
+_Avoid_: orchestrator, driver, controller, manager
+
+**Context Encapsulation**:
+Running a heavy stage inside a sub-agent with its own context window so the main conversation receives only a small structured result.
+_Avoid_: context firewall, sandboxing, isolation, offloading
+
+**Effort Tier**:
+A runtime-agnostic label (for example light or heavy) recorded in the Throughline that tells the Conductor how strong a model and how much effort to use when dispatching a work stage.
+_Avoid_: priority, difficulty, size, complexity level
+
 ## Relationships
 
 - The **Assistant Setup Toolkit** installs assistant-specific configuration into one or more **Assistant Homes**.
