@@ -87,4 +87,45 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/[Nn]ever start implementing before the human approves/);
     });
   });
+
+  describe("implement", () => {
+    const skill = readSkill("implement");
+
+    it("is renamed from execute and keeps the verify/review/commit chain", () => {
+      expect(skill).toMatch(/^name:\s*implement\s*$/m);
+      expect(skill).not.toMatch(/^name:\s*execute\s*$/m);
+      expect(skill).toMatch(/\/verification-loop/);
+      expect(skill).toMatch(/\/review-fanout/);
+      expect(skill).toMatch(/\/commit/);
+    });
+
+    it("teaches the Context-Encapsulated implement stage with a structured result", () => {
+      expect(skill).toMatch(/Context Encapsulation/);
+      expect(skill).toMatch(/files_changed/);
+      expect(skill).toMatch(/ac_status/);
+      expect(skill).toMatch(/suggested_next_action/);
+    });
+  });
+
+  describe("prove-it", () => {
+    const skill = readSkill("prove-it");
+
+    it("is a user-invocable skill named prove-it", () => {
+      expect(skill).toMatch(/^name:\s*prove-it\s*$/m);
+      expect(skill).toMatch(/^user-invocable:\s*true\s*$/m);
+    });
+
+    it("reads proof methods and writes a Proof Ledger with proposed statuses", () => {
+      expect(skill).toMatch(/proof_method/);
+      expect(skill).toMatch(/Proof Ledger/);
+      expect(skill).toMatch(/needs-human/);
+      expect(skill).toMatch(/[Pp]ropose;? .*never (render the final verdict|decide)/);
+    });
+
+    it("keeps the human as the final judge and avoids headless Chrome", () => {
+      expect(skill).toMatch(/human disposes/);
+      expect(skill).toMatch(/[Dd]o not commit/);
+      expect(skill).toMatch(/headless Google Chrome/);
+    });
+  });
 });
