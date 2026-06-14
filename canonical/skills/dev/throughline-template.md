@@ -42,6 +42,15 @@ shaped the way it is.
 Plan writes the human-facing walkthrough here: the approach, the acceptance
 criteria with their proof methods, and anything the human approved.
 
+## Work Log
+
+The Conductor writes the `files_changed` from each dispatched work sub-agent
+here — one dated line per implement or prove pass, listing the paths touched.
+This is the running record of what changed, kept separate from the proof
+evidence below. Example shape:
+
+- 2026-06-14 implement — src/table/controls.tsx, src/table/useSort.ts
+
 ## Proof Ledger
 
 prove-it writes one line per acceptance criterion: the id, the statement, a

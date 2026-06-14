@@ -97,18 +97,59 @@ Run the work for the current stage.
 
 - Dialogue stages — `kickoff`, `scope`, `grill`, `plan`, `assess` — run here in
   the main conversation, because they are cheap on context and need the human.
-- Work stages — `implement`, `prove`, deep research — are heavy on context.
-  They are meant to run under **Context Encapsulation**: a sub-agent with its
-  own context window that returns only a small structured result. Wiring that
-  dispatch is a later milestone; until then, run the matching stage skill and
-  treat its output as the result.
+- Work stages — `implement`, `prove`, deep research — are heavy on context, so
+  you dispatch them under **Context Encapsulation** (see below) instead of
+  running them inline.
+
+### Dispatching a work stage under Context Encapsulation
+
+When the current stage is a work stage (`implement` or `prove`), do not do the
+work in the main conversation. Spawn an Agent sub-agent so the heavy work runs
+in its own context window and the main conversation receives only a small
+result.
+
+1. **Pick the model from the tier.** Map the Throughline's `tier` to the
+   sub-agent model: `heavy → opus`, `light → sonnet`; drop a `light` stage to
+   `haiku` when its `effort` is `low`. A missing tier defaults to `sonnet`.
+2. **Spawn the Agent.** Invoke the matching stage skill (`/implement` or
+   `/prove-it`) inside the sub-agent, passing the Throughline path and the
+   `acceptance_criteria` as context. On Codex, pass the recorded `effort` as a
+   real runtime knob; on Claude Code, which has no per-sub-agent effort, fold
+   the effort into the sub-agent prompt as guidance.
+3. **Require a fenced JSON result.** The sub-agent returns only a fenced JSON
+   block of the shape:
+
+       ```json
+       {
+         "files_changed": ["path", ...],
+         "tests": "what ran and the outcome",
+         "artifacts": "evidence worth keeping",
+         "ac_status": {"ac1": "pass", "ac2": "needs-human", ...},
+         "suggested_next_action": "/dev prove 2"
+       }
+       ```
+
+   The sub-agent never edits the Throughline. You are the sole writer.
+
+### Applying the result (the write-back map)
+
+Parse the JSON and write it back with this fixed map:
+
+- `ac_status` → the frontmatter `acceptance_criteria[].status` for each id.
+- `tests` and `artifacts` → one evidence line per criterion in `## Proof Ledger`.
+- `files_changed` → a dated line in `## Work Log`.
+- `suggested_next_action` → the frontmatter `next_action` **only when applying
+  it would not cross the assess gate**. The prove stage proposes `assess`; set
+  `stage: assess` and `next_action: /dev assess` and stop for the human. Never
+  auto-run assess or close.
 
 ### Step 4 — Write the result back and advance
 
 When a stage finishes:
 
 1. Write the stage's output into the matching body section of the Throughline
-   (`## Decision Ledger`, `## Plan Walkthrough`, or `## Proof Ledger`).
+   (`## Decision Ledger`, `## Plan Walkthrough`, `## Work Log`, or
+   `## Proof Ledger`). For work stages, apply the write-back map above.
 2. Update the frontmatter: set `stage` to the next stage and `next_action` to
    the next command. Update `grillable`, `tier`, `effort`, or
    `acceptance_criteria` if this stage produced them.
@@ -123,6 +164,6 @@ fields that moved, preserve everything else, and keep the file valid.
 - The Throughline is the source of truth. When in doubt, re-read it rather than
   trusting your memory of the run.
 - Never advance past a stage that needs a human decision without the human.
-- Keep the main conversation lean; push heavy work behind Context Encapsulation
-  once that dispatch is wired.
+- Keep the main conversation lean; always push work stages behind Context
+  Encapsulation rather than running them inline.
 - Edit `canonical/` for any change to this skill; the live copy is a projection.

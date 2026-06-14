@@ -8,7 +8,58 @@ function readSkill(name: string): string {
   return readFileSync(path.join(repoRoot, "canonical", "skills", name, "SKILL.md"), "utf-8");
 }
 
+function readTemplate(): string {
+  return readFileSync(
+    path.join(repoRoot, "canonical", "skills", "dev", "throughline-template.md"),
+    "utf-8",
+  );
+}
+
 describe("DevOS-conformed stage skills", () => {
+  describe("dev (Conductor) — Context Encapsulation dispatch", () => {
+    const skill = readSkill("dev");
+
+    it("dispatches work stages as tier-tagged Agent sub-agents (ac-m5-1)", () => {
+      expect(skill).toMatch(/Context Encapsulation/);
+      expect(skill).toMatch(/heavy\s*→\s*opus/);
+      expect(skill).toMatch(/light\s*→\s*sonnet/);
+      expect(skill).toMatch(/haiku/);
+      expect(skill).toMatch(/[Ss]pawn .*Agent/);
+    });
+
+    it("requires a fenced JSON result and names itself sole writer (ac-m5-2)", () => {
+      expect(skill).toMatch(/fenced JSON/);
+      expect(skill).toMatch(/files_changed/);
+      expect(skill).toMatch(/ac_status/);
+      expect(skill).toMatch(/suggested_next_action/);
+      expect(skill).toMatch(/sole writer/);
+    });
+
+    it("documents the write-back map (ac-m5-3)", () => {
+      expect(skill).toMatch(/write-back map/);
+      expect(skill).toMatch(/acceptance_criteria\[\]\.status/);
+      expect(skill).toMatch(/## Proof Ledger/);
+      expect(skill).toMatch(/## Work Log/);
+    });
+
+    it("guards the assess gate against auto-advance (ac-m5-4)", () => {
+      expect(skill).toMatch(/assess gate/);
+      expect(skill).toMatch(/stop for the human/i);
+      expect(skill).toMatch(/[Nn]ever\s+auto-run assess or close/);
+    });
+  });
+
+  describe("throughline template — Work Log (ac-m5-7)", () => {
+    const template = readTemplate();
+
+    it("adds a Work Log section without dropping the others", () => {
+      expect(template).toMatch(/## Work Log/);
+      expect(template).toMatch(/## Decision Ledger/);
+      expect(template).toMatch(/## Plan Walkthrough/);
+      expect(template).toMatch(/## Proof Ledger/);
+    });
+  });
+
   describe("scope", () => {
     const skill = readSkill("scope");
 
@@ -105,6 +156,14 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/ac_status/);
       expect(skill).toMatch(/suggested_next_action/);
     });
+
+    it("returns a fenced JSON result and is honest about effort per runtime (ac-m5-2, ac-m5-5)", () => {
+      expect(skill).toMatch(/fenced JSON/);
+      expect(skill).toMatch(/heavy\s*→\s*opus/);
+      expect(skill).toMatch(/Codex/);
+      expect(skill).toMatch(/Claude\s+Code/);
+      expect(skill).toMatch(/[Ee]ffort\s+honesty/);
+    });
   });
 
   describe("prove-it", () => {
@@ -126,6 +185,14 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/human disposes/);
       expect(skill).toMatch(/[Dd]o not commit/);
       expect(skill).toMatch(/headless Google Chrome/);
+    });
+
+    it("returns a fenced JSON result and is honest about effort per runtime (ac-m5-2, ac-m5-5)", () => {
+      expect(skill).toMatch(/fenced JSON/);
+      expect(skill).toMatch(/heavy\s*→\s*opus/);
+      expect(skill).toMatch(/Codex/);
+      expect(skill).toMatch(/Claude\s+Code/);
+      expect(skill).toMatch(/[Ee]ffort\s+honesty/);
     });
   });
 });
