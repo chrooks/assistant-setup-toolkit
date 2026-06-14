@@ -73,11 +73,28 @@ assess, then close.
 
 The prove stage is heavy work, so the Conductor dispatches it under **Context
 Encapsulation** — a sub-agent with its own context window, at the Throughline's
-recorded tier. Return a structured result the Conductor writes back: at least
-`files_changed` (usually none), `tests` (what ran and how), `artifacts`
-(evidence), `ac_status` (proposed status per criterion), and
-`suggested_next_action` (the assess stage). The Conductor edits the Throughline
-and advances; you only produce the ledger and the result.
+recorded tier (`heavy → opus`, `light → sonnet`, dropping to `haiku` when a
+`light` stage is `effort: low`). Effort
+honesty: on Codex the Conductor sets `effort` as a real runtime knob; on Claude
+Code it folds `effort` into your prompt as guidance.
+
+Return the result as a single fenced JSON block — and nothing else outside it:
+
+    ```json
+    {
+      "files_changed": [],
+      "tests": "the proofs that ran and how",
+      "artifacts": "the evidence",
+      "ac_status": {"ac1": "pass", "ac2": "needs-human", ...},
+      "suggested_next_action": "/dev assess"
+    }
+    ```
+
+The Conductor (the sole writer of the Throughline) applies the write-back map —
+`ac_status` to the frontmatter statuses, `tests`/`artifacts` to the
+`## Proof Ledger`, `files_changed` to the `## Work Log` — then sets the assess
+gate and stops. You only produce the ledger and the JSON result; you never edit
+the Throughline.
 
 ## Rules
 

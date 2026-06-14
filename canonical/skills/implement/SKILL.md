@@ -50,8 +50,12 @@ When the DevOS Conductor dispatches the implement stage, this Skill is meant to
 run under **Context Encapsulation** — inside a sub-agent with its own context
 window — so the main conversation receives only a small structured result, not
 all the intermediate code. The Conductor dispatches it at the **Effort Tier**
-recorded in the Throughline (`tier` + `effort`); the sub-agent inherits that
-model strength and effort.
+recorded in the Throughline (`tier` + `effort`): `heavy → opus`, `light →
+sonnet`, dropping to `haiku` when a `light` stage is `effort: low`. Effort
+honesty: on Codex, `effort` is a real
+runtime knob the Conductor sets on the dispatch; on Claude Code, which has no
+per-sub-agent effort, the Conductor folds `effort` into the sub-agent prompt as
+guidance. The sub-agent inherits the model strength either way.
 
 Inside the sub-agent:
 
@@ -60,14 +64,25 @@ Inside the sub-agent:
 - Detect bug-fix versus feature and route to the matching worker Skill as above.
 - Do the work and the local checks.
 
-Return a structured result with at least these fields, which the Conductor
-writes back into the Throughline and uses to advance the run:
+Return the result as a single fenced JSON block — and nothing else outside it —
+with at least these fields, which the Conductor (the sole writer of the
+Throughline) writes back and uses to advance the run:
+
+    ```json
+    {
+      "files_changed": ["path", ...],
+      "tests": "what ran and the outcome",
+      "artifacts": "evidence worth keeping",
+      "ac_status": {"ac1": "pass", ...},
+      "suggested_next_action": "/dev prove <issue>"
+    }
+    ```
 
 - `files_changed` — paths touched.
 - `tests` — tests added or run, and their outcome.
 - `artifacts` — anything produced worth keeping (logs, screenshots).
 - `ac_status` — per acceptance criterion, a first-pass status.
-- `suggested_next_action` — normally the prove stage (`/prove-it <issue>`).
+- `suggested_next_action` — normally the prove stage (`/dev prove <issue>`).
 
 The Conductor — not this Skill — edits the Throughline frontmatter and advances
 the stage. Parallel implementations naturally coalesce at the prove stage.
