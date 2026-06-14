@@ -66,7 +66,7 @@ Apply the formats in [references/page-formats.md](./references/page-formats.md):
 1. **Summary page** — one page per source in `<wikiDir>/`. Create it, or revise it if this source was ingested before.
 2. **index.md** — add (or update) the catalog line for the summary page under the right category.
 3. **Entity & concept pages** — for each significant entity/concept, create its page if absent or fold the new facts into the existing one. Add `[[wikilinks]]` both directions (the new page links out; hub pages link back).
-4. **Contradictions** — where the source conflicts with an existing claim, don't silently overwrite. Flag it inline on the affected page with the date and both sources.
+4. **Contradictions & provenance** — where the source conflicts with an existing claim, don't silently overwrite. Flag it inline on the affected page with the date and both sources. When you write a claim that isn't stated directly in any one source but is your own synthesis across several, mark it `[inferred]` so it reads as a conclusion, not a quote. See [references/page-formats.md](./references/page-formats.md) ("Claim provenance").
 5. **log.md** — append one dated entry (see format reference).
 
 Prefer many small focused pages over few large ones. Reuse existing pages over creating near-duplicates — search the wiki first.
@@ -79,4 +79,4 @@ you flagged. Keep it to a short list so they can browse the results in Obsidian.
 ## Related operations
 
 - **query** — ask questions against the wiki; good answers get filed back as pages.
-- **lint** — periodic health check (contradictions, stale claims, orphans, gaps).
+- **lint** — periodic health check over the whole wiki: structural analysis (orphans, hubs, clusters via a bundled read-only script), contradictions, stale claims, gaps, and auto-suggested investigation questions filed to `questions.md`.

@@ -89,6 +89,27 @@ tags: [<area>]
 - [[Concept or Entity]]
 ```
 
+## Claim provenance
+
+Borrowed from Graphify's confidence-tagged edges. The point is honesty about *how* you
+know something — a fact pulled straight from a source is not the same as a conclusion you
+synthesized across two. Three levels:
+
+- **Stated** — said directly in one source. This is the default; **leave it unmarked**, the
+  inline `_([[Source]], date)_` citation already carries it. Don't clutter every line.
+- **Inferred** — not in any single source; you connected the dots across sources. Mark it so
+  future-you knows it's a synthesis, not a quote: append `[inferred]`.
+- **Ambiguous** — sources genuinely conflict or the claim is unclear. Use the contradiction
+  callout below; don't bury it in a fact line.
+
+```markdown
+- <directly-stated fact> — _([[Source Title]], <YYYY-MM-DD>)_
+- <synthesized conclusion> `[inferred]` — _(across [[Source A]], [[Source B]])_
+```
+
+Only reach for `[inferred]` when the distinction actually matters — a load-bearing claim
+the wiki now leans on. Trivia doesn't need it.
+
 ## index.md catalog line
 
 `index.md` is content-oriented — a catalog grouped by category (Sources, Entities,
