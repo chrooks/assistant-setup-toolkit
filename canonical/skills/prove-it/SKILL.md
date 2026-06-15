@@ -34,6 +34,10 @@ you never have to guess how to prove something — a UI change has a
 Playwright/DOM assertion, an endpoint has an integration test, a pure function
 has a unit test.
 
+On a **re-prove after an assess bounce**, do not re-run the whole ledger:
+re-check only the reopened (`status: pending`) criteria plus any the implement
+stage flagged as touched. The already-`pass` criteria stay as they are.
+
 ### Step 2 — Run each proof
 
 Execute the recorded proof method for each criterion and capture concrete

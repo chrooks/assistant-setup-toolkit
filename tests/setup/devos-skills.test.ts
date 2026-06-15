@@ -55,14 +55,48 @@ describe("DevOS-conformed stage skills", () => {
     });
   });
 
-  describe("throughline template — Work Log (ac-m5-7)", () => {
+  describe("dev (Conductor) — assess back-edge", () => {
+    const skill = readSkill("dev");
+
+    it("partial-reopens only the failed ACs on a bounce (ac-m6-1)", () => {
+      expect(skill).toMatch(/[Pp]artial reopen/);
+      expect(skill).toMatch(/only.*those ACs back to `status: pending`|only the `pending`/i);
+      expect(skill).toMatch(/[Nn]ever reopen the whole run/);
+    });
+
+    it("routes the back-edge to implement only, deferring diagnose (ac-m6-2)", () => {
+      expect(skill).toMatch(/back-edge always points at `implement`/);
+      expect(skill).toMatch(/[Dd]o not branch to `diagnose`/);
+    });
+
+    it("documents the soft loop guard at threshold 3 (ac-m6-3)", () => {
+      expect(skill).toMatch(/bounces.*reaches 3|threshold 3/i);
+      expect(skill).toMatch(/re-grill[\s\S]*re-scope[\s\S]*accept-with-caveat/);
+      expect(skill).toMatch(/soft stop, not a hard wall/);
+    });
+
+    it("keeps assess the single gate: pass→close, fail→reopen+stop (ac-m6-5)", () => {
+      expect(skill).toMatch(/[Aa]ll pass.*close/);
+      expect(skill).toMatch(/human disposes/);
+      expect(skill).toMatch(/[Dd]o not auto-dispatch/);
+      expect(skill).toMatch(/Increment the `bounces` counter/);
+    });
+  });
+
+  describe("throughline template — Work Log + Assessment Log", () => {
     const template = readTemplate();
 
-    it("adds a Work Log section without dropping the others", () => {
+    it("adds a Work Log section without dropping the others (ac-m5-7)", () => {
       expect(template).toMatch(/## Work Log/);
       expect(template).toMatch(/## Decision Ledger/);
       expect(template).toMatch(/## Plan Walkthrough/);
       expect(template).toMatch(/## Proof Ledger/);
+    });
+
+    it("bumps the contract to v2 with bounces and an Assessment Log (ac-m6-4)", () => {
+      expect(template).toMatch(/devos_version:\s*2/);
+      expect(template).toMatch(/^bounces:\s*0/m);
+      expect(template).toMatch(/## Assessment Log/);
     });
   });
 
@@ -170,6 +204,12 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/Claude\s+Code/);
       expect(skill).toMatch(/[Ee]ffort\s+honesty/);
     });
+
+    it("scopes re-entry work to the reopened ACs after a bounce (ac-m6-6)", () => {
+      expect(skill).toMatch(/re-entry after an assess bounce/);
+      expect(skill).toMatch(/work\s+only the `pending` ACs/);
+      expect(skill).toMatch(/flag any passed AC/);
+    });
   });
 
   describe("prove-it", () => {
@@ -199,6 +239,11 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/Codex/);
       expect(skill).toMatch(/Claude\s+Code/);
       expect(skill).toMatch(/[Ee]ffort\s+honesty/);
+    });
+
+    it("re-proves only reopened plus flagged ACs after a bounce (ac-m6-6)", () => {
+      expect(skill).toMatch(/re-prove after an assess bounce/);
+      expect(skill).toMatch(/reopened \(`status: pending`\) criteria plus any/);
     });
   });
 });

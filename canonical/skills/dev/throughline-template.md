@@ -14,7 +14,7 @@ required by any parser.
 ---
 
 ---
-devos_version: 1                 # template/contract version; bump only on a breaking field change
+devos_version: 2                 # template/contract version; bump only on a breaking field change
 project: <project-name>          # the target project directory name, e.g. chrooked-pokedex
 issue: <issue-number-or-null>    # tracker issue this work maps to, or null for ad-hoc work
 slug: <kebab-slug>               # short identifier; also names the file: <slug>-throughline.md
@@ -22,6 +22,7 @@ stage: kickoff                   # kickoff|scope|grill|plan|implement|prove|asse
 grillable: null                  # true|false|null — scope stamps this
 tier: null                       # light|heavy|null — scope emits this
 effort: null                     # low|medium|high|null — scope emits this
+bounces: 0                       # assess back-edge counter; soft threshold 3 → Conductor escalates
 next_action: /scope              # the explicit next command the Conductor should run
 acceptance_criteria: []          # filled at plan; each entry: {id, statement, proof_method, status}
                                  #   id: ac1, ac2, ...
@@ -58,3 +59,12 @@ proposed status, and the concrete evidence. The human renders the final verdict
 in the assess stage. Example shape:
 
 - ac1 search filters rows — PASS — playwright: typed "char", rows 1010 -> 6
+
+## Assessment Log
+
+The Conductor writes one dated entry per assessment verdict at the assess
+stage: which ACs the human passed, which bounced back, the human's reason, and
+the resulting `bounces` count. This is the durable trail the loop guard quotes
+when work gets stuck. Example shape:
+
+- 2026-06-15 assess — passed ac1, ac2; bounced ac3 ("sort wrong on ties") — bounces now 1
