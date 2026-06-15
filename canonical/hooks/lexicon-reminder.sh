@@ -12,20 +12,18 @@
 #     { "hooks": [ { "type": "command", "command": "bash ~/.claude/hooks/lexicon-reminder.sh" } ] }
 #   ] } }
 #
-# Wire it in ~/.codex/hooks.json (Codex CLI). Codex hooks are gated on
-# [features] codex_hooks = true in ~/.codex/config.toml — confirm that's set:
-#
-#   { "hooks": { "UserPromptSubmit": [
-#     { "hooks": [ { "type": "command", "command": "bash ~/.codex/hooks/lexicon-reminder.sh" } ] }
-#   ] } }
+# Codex CLI displays UserPromptSubmit additionalContext in the transcript, so
+# canonical/hooks/wiring.yaml intentionally does not wire this hook for Codex.
 #
 # Disable for a session: CLAUDE_LEXICON_REMINDER=0 in the environment.
-# Disable globally: touch ~/.claude/.lexicon-reminder.off
+# Disable globally: touch ~/.claude/.lexicon-reminder.off or ~/.codex/.lexicon-reminder.off
 
 set -euo pipefail
 
 # Guard: never block prompt submission on hook failure
 trap 'exit 0' ERR
+
+PAYLOAD="$(cat 2>/dev/null || true)"
 
 # Disable via env var
 if [ "${CLAUDE_LEXICON_REMINDER:-1}" = "0" ]; then
@@ -36,20 +34,38 @@ fi
 if [ -f "${HOME}/.claude/.lexicon-reminder.off" ]; then
   exit 0
 fi
+if [ -f "${HOME}/.codex/.lexicon-reminder.off" ]; then
+  exit 0
+fi
 
 # Skip if no Lexicon is configured (no global or project CONTEXT.md to enforce)
 HAS_LEXICON=0
 [ -f "${HOME}/.claude/CONTEXT.md" ] && HAS_LEXICON=1
+[ -f "${HOME}/.codex/CONTEXT.md" ] && HAS_LEXICON=1
 [ -f "$(pwd)/CONTEXT.md" ] && HAS_LEXICON=1
 if [ "$HAS_LEXICON" -eq 0 ]; then
   exit 0
 fi
 
-# Emit plain stdout. Both Claude Code and Codex UserPromptSubmit hooks accept
-# plain text on stdout and inject it as developer context for the upcoming turn.
-# This is intentional: Claude Code's structured output uses {"additionalContext": "..."}
-# (flat) and Codex uses {"hookSpecificOutput": {..., "additionalContext": "..."}} (nested).
-# Plain stdout sidesteps the shape difference and works on both surfaces.
-printf '%s\n' 'Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Speak in clean, colloquial prose — not dense, tech-y, or corporate — easy for anyone familiar with the terms to follow. Link every occurrence of every Lexicon term to its definition in the matching CONTEXT.md, e.g. [Seam](~/.claude/CONTEXT.md). Correct the user when they misuse a Lexicon term, use an _Avoid_ synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so the shared language becomes natural. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction. Communicate in lists and stacked short lines over paragraphs — Chris reads and retains in list form; in Markdown, end each line with two trailing spaces so the break renders. For comparative or multi-attribute data, prefer a table: reach for /table md to show a quick read-only Markdown table, or /table html for an interactive sort/filter/search table. When explaining structure or process — architecture, a pipeline, a user flow, a sequence — show a diagram instead of prose: /diagram md for an ASCII-plus-Mermaid sketch, or /diagram html for an interactive graph. Use the right one only when appropriate.'
+REMINDER='Lexicon reminder: use Lexicon terms strictly (see ~/.claude/CONTEXT.md or ~/.codex/CONTEXT.md, plus any project CONTEXT.md). Speak in clean, colloquial prose — not dense, tech-y, or corporate — easy for anyone familiar with the terms to follow. Link every occurrence of every Lexicon term to its definition in the matching CONTEXT.md, e.g. [Seam](~/.claude/CONTEXT.md). Correct the user when they misuse a Lexicon term, use an _Avoid_ synonym, or fail to use the established Lexicon term when one clearly applies. Keep corrections brief so the shared language becomes natural. ACTIVE EVERY RESPONSE, including after long sessions, tool use, and compaction. Communicate in lists and stacked short lines over paragraphs — Chris reads and retains in list form; in Markdown, end each line with two trailing spaces so the break renders. For comparative or multi-attribute data, prefer a table: reach for /table md for a quick read-only Markdown table, or /table html for an interactive sort/filter/search table. When explaining structure or process — architecture, a pipeline, a user flow, a sequence — show a diagram instead of prose: /diagram md for an ASCII-plus-Mermaid sketch, or /diagram html for an interactive graph. Use the right one only when appropriate.'
+
+json_string() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  printf '"%s"' "$value"
+}
+
+REMINDER_JSON="$(json_string "$REMINDER")"
+
+# Codex displays UserPromptSubmit additionalContext as hook context in the
+# transcript, so this hook stays quiet there. Claude Code keeps the flat
+# additionalContext shape.
+if printf '%s' "$PAYLOAD" | grep -q '"turn_id"[[:space:]]*:'; then
+  exit 0
+else
+  printf '{"suppressOutput":true,"additionalContext":%s}\n' "$REMINDER_JSON"
+fi
 
 exit 0
