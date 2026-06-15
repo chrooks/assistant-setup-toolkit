@@ -146,7 +146,7 @@ tests/setup/          # Test suite
 
 - Loads `wiring.yaml` (returns silently if absent — wiring is opt-in).
 - For each entry, idempotently merges a hook command into the right config file: `~/.claude/settings.json` for Claude Code, `~/.codex/hooks.json` for Codex CLI.
-- For Codex CLI, also asserts `[features] codex_hooks = true` in `~/.codex/config.toml` (Codex hooks are gated behind that flag).
+- For Codex CLI, also asserts `[features] hooks = true` in `~/.codex/config.toml` (Codex hooks are controlled by that flag).
 - For entries with `scope: project`, writes project config instead: `.claude/settings.json`, `.codex/hooks.json`, and `.codex/config.toml`.
 
 Idempotency is keyed on the rendered command string. Re-running the wizard never produces duplicate entries, and a hook wired manually before this manifest existed won't be re-added.

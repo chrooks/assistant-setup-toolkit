@@ -8,12 +8,12 @@
 # Assistant Home scope writes:
 #   - claude-code: ~/.claude/settings.json (under hooks.<event>)
 #   - codex-cli:   ~/.codex/hooks.json     (under hooks.<event>)
-#                  and asserts [features] codex_hooks = true in ~/.codex/config.toml
+#                  and asserts [features] hooks = true in ~/.codex/config.toml
 #
 # Project scope writes:
 #   - claude-code: <repo>/.claude/settings.json
 #   - codex-cli:   <repo>/.codex/hooks.json
-#                  and asserts [features] codex_hooks = true in <repo>/.codex/config.toml
+#                  and asserts [features] hooks = true in <repo>/.codex/config.toml
 #
 # Entries are keyed on the rendered command string for idempotency:
 # re-running the wizard never produces duplicate entries, and a hook

@@ -5,7 +5,7 @@
  * idempotent wiring plans that merge hook entries into Claude Code's
  * `~/.claude/settings.json` and Codex CLI's `~/.codex/hooks.json`. For
  * Codex targets the applier also asserts the feature flag
- * `[features] codex_hooks = true` in `~/.codex/config.toml`.
+ * `[features] hooks = true` in `~/.codex/config.toml`.
  *
  * Idempotency is keyed on the rendered command string. Re-running the
  * wizard never produces duplicate entries, and an entry wired by hand
@@ -66,6 +66,7 @@ export interface FeatureFlagAssertion {
   readonly section: string;
   readonly key: string;
   readonly value: boolean;
+  readonly deprecatedKeys?: readonly string[];
 }
 
 /** Per-target plan: one settings file plus optional feature-flag assertion. */
@@ -202,8 +203,9 @@ export function planHookWiring(
           ? {
               tomlPath: path.join(settingsRoot, "config.toml"),
               section: "features",
-              key: "codex_hooks",
+              key: "hooks",
               value: true,
+              deprecatedKeys: ["codex_hooks"],
             }
           : undefined;
       const planKey = `${target}\0${settingsPath}`;
@@ -268,16 +270,24 @@ export async function applyHookWiring(
 
   let added = 0;
   let alreadyPresent = 0;
+  let deduped = false;
 
   for (const action of plan.actions) {
     const eventGroups = hooks[action.event] ?? [];
-    if (commandAlreadyPresent(eventGroups, action.command)) {
+    const dedupeResult = dedupeEquivalentCommands(eventGroups);
+    const activeEventGroups = dedupeResult.groups;
+    if (dedupeResult.removed > 0) {
+      hooks[action.event] = activeEventGroups;
+      deduped = true;
+    }
+
+    if (commandAlreadyPresent(activeEventGroups, action.command)) {
       alreadyPresent += 1;
       continue;
     }
 
     const newGroup = buildMatcherGroup(action);
-    hooks[action.event] = [...eventGroups, newGroup];
+    hooks[action.event] = [...activeEventGroups, newGroup];
     added += 1;
   }
 
@@ -286,7 +296,7 @@ export async function applyHookWiring(
     flagAdded = await assertTomlFeatureFlag(plan.featureFlag, { dryRun });
   }
 
-  if (added > 0 && !dryRun) {
+  if ((added > 0 || deduped) && !dryRun) {
     const next: SettingsFile = { ...settings, hooks };
     await writeSettings(plan.settingsPath, next);
   }
@@ -355,6 +365,41 @@ function commandAlreadyPresent(
 }
 
 /**
+ * Drop duplicate hook commands within the same event and matcher.
+ * This cleans up older `~` + absolute-path duplicates without collapsing
+ * intentionally different matcher groups for the same command.
+ */
+function dedupeEquivalentCommands(groups: readonly MatcherGroup[]): {
+  readonly groups: MatcherGroup[];
+  readonly removed: number;
+} {
+  const seen = new Set<string>();
+  let removed = 0;
+  const dedupedGroups: MatcherGroup[] = [];
+
+  for (const group of groups) {
+    const nextHooks: HookCommand[] = [];
+    const matcher = group.matcher ?? "";
+
+    for (const hook of group.hooks) {
+      const key = `${matcher}\0${normalizeHookCommand(hook.command)}`;
+      if (seen.has(key)) {
+        removed += 1;
+        continue;
+      }
+      seen.add(key);
+      nextHooks.push(hook);
+    }
+
+    if (nextHooks.length > 0) {
+      dedupedGroups.push({ ...group, hooks: nextHooks });
+    }
+  }
+
+  return { groups: dedupedGroups, removed };
+}
+
+/**
  * Normalize a hook command for idempotency comparison.
  * Resolves `~` to `$HOME` so that `bash ~/.claude/hooks/foo.sh` and
  * `bash /Users/alice/.claude/hooks/foo.sh` are treated as the same hook.
@@ -386,10 +431,11 @@ function buildMatcherGroup(action: WiringAction): MatcherGroup {
  * Idempotently assert `[features] <key> = <value>` in a TOML file.
  *
  * Strategy:
- *   1. If a `<key> = ...` line already exists anywhere in the file → no-op.
- *   2. If a `[features]` section already exists → insert the line right
+ *   1. Remove deprecated aliases for this flag, if any.
+ *   2. If a `<key> = ...` line already exists anywhere in the file → normalize it.
+ *   3. If a `[features]` section already exists → insert the line right
  *      after that section header (before any subsequent `[other.section]`).
- *   3. Otherwise → append a new `[features]` block at the end.
+ *   4. Otherwise → append a new `[features]` block at the end.
  *
  * This avoids the "two `[features]` blocks" hazard that plain append would
  * cause when an unrelated `[features]` section already exists.
@@ -409,30 +455,49 @@ async function assertTomlFeatureFlag(
     }
   }
 
-  const keyLine = new RegExp(`^\\s*${escapeRegExp(flag.key)}\\s*=`, "m");
-  if (keyLine.test(original)) {
-    return false; // already present — no-op
+  let updated = original;
+  for (const deprecatedKey of flag.deprecatedKeys ?? []) {
+    const deprecatedLine = new RegExp(
+      `^\\s*${escapeRegExp(deprecatedKey)}\\s*=.*(?:\\r?\\n)?`,
+      "gm",
+    );
+    updated = updated.replace(deprecatedLine, "");
   }
 
   const newLine = `${flag.key} = ${JSON.stringify(flag.value)}`;
-  let updated: string;
+  const keyLine = new RegExp(
+    `^(\\s*)${escapeRegExp(flag.key)}\\s*=.*$`,
+    "m",
+  );
+  const keyMatch = keyLine.exec(updated);
+  if (keyMatch) {
+    updated = updated.replace(keyLine, `${keyMatch[1]}${newLine}`);
+    if (updated === original) {
+      return false;
+    }
+    if (!options.dryRun) {
+      await fs.mkdir(path.dirname(flag.tomlPath), { recursive: true });
+      await fs.writeFile(flag.tomlPath, updated, "utf-8");
+    }
+    return true;
+  }
 
   const sectionHeader = new RegExp(
     `^\\[${escapeRegExp(flag.section)}\\]\\s*$`,
     "m",
   );
-  const sectionMatch = sectionHeader.exec(original);
+  const sectionMatch = sectionHeader.exec(updated);
   if (sectionMatch) {
     // Insert the new line right after the section header line.
     const insertAt = sectionMatch.index + sectionMatch[0].length;
     updated =
-      original.slice(0, insertAt) +
+      updated.slice(0, insertAt) +
       "\n" +
       newLine +
-      original.slice(insertAt);
+      updated.slice(insertAt);
   } else {
     // Append a fresh block. Ensure exactly one blank line before the new block.
-    const trimmedTrailing = original.replace(/\s*$/, "");
+    const trimmedTrailing = updated.replace(/\s*$/, "");
     const prefix = trimmedTrailing.length === 0 ? "" : "\n\n";
     updated = `${trimmedTrailing}${prefix}[${flag.section}]\n${newLine}\n`;
   }
