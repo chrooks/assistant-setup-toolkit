@@ -100,6 +100,18 @@ describe("hook-wiring", () => {
       });
     });
 
+    it("keeps the repository lexicon reminder Claude-only", async () => {
+      const entries = await loadWiringManifest(
+        path.join(process.cwd(), "canonical", "hooks"),
+      );
+
+      expect(entries).toContainEqual({
+        file: "lexicon-reminder.sh",
+        event: "UserPromptSubmit",
+        targets: ["claude-code"],
+      });
+    });
+
     it("rejects a malformed manifest with a clear error mentioning the path", async () => {
       const dir = await makeTempDir("invalid");
       const yaml = ["version: 99", "hooks:", "  - notAField: bad", ""].join(
@@ -136,7 +148,7 @@ describe("hook-wiring", () => {
       expect(claudePlan.featureFlag).toBeUndefined();
     });
 
-    it("produces a Codex plan with the codex_hooks feature-flag assertion", () => {
+    it("produces a Codex plan with the hooks feature-flag assertion", () => {
       const plans = planHookWiring(entries, { "codex-cli": "/home/u/.codex" });
 
       expect(plans).toHaveLength(1);
@@ -145,8 +157,9 @@ describe("hook-wiring", () => {
       expect(codexPlan.featureFlag).toEqual({
         tomlPath: "/home/u/.codex/config.toml",
         section: "features",
-        key: "codex_hooks",
+        key: "hooks",
         value: true,
+        deprecatedKeys: ["codex_hooks"],
       });
     });
 
@@ -267,8 +280,9 @@ describe("hook-wiring", () => {
       expect(codexProjectPlan?.featureFlag).toEqual({
         tomlPath: "/repo/toolkit/.codex/config.toml",
         section: "features",
-        key: "codex_hooks",
+        key: "hooks",
         value: true,
+        deprecatedKeys: ["codex_hooks"],
       });
     });
 
@@ -335,6 +349,63 @@ describe("hook-wiring", () => {
       expect(written.hooks.UserPromptSubmit).toHaveLength(1);
     });
 
+    it("removes equivalent duplicate commands for the same event and matcher", async () => {
+      const home = process.env.HOME ?? os.homedir();
+
+      const codexPlan: WiringPlan = {
+        target: "codex-cli",
+        settingsPath: path.join(homeDir, "hooks.json"),
+        actions: [
+          {
+            target: "codex-cli",
+            settingsPath: path.join(homeDir, "hooks.json"),
+            event: "UserPromptSubmit",
+            command: `bash ${home}/.codex/hooks/lexicon-reminder.sh`,
+          },
+        ],
+      };
+      const initial = {
+        hooks: {
+          UserPromptSubmit: [
+            {
+              hooks: [
+                {
+                  type: "command",
+                  command: "bash ~/.codex/hooks/lexicon-reminder.sh",
+                },
+              ],
+            },
+            {
+              hooks: [
+                {
+                  type: "command",
+                  command: `bash ${home}/.codex/hooks/lexicon-reminder.sh`,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      await fs.writeFile(
+        codexPlan.settingsPath,
+        JSON.stringify(initial, null, 2),
+        "utf-8",
+      );
+
+      const result = await applyHookWiring(codexPlan);
+      expect(result.added).toBe(0);
+      expect(result.alreadyPresent).toBe(1);
+
+      const written = JSON.parse(
+        await fs.readFile(codexPlan.settingsPath, "utf-8"),
+      );
+      expect(written.hooks.UserPromptSubmit).toHaveLength(1);
+      expect(written.hooks.UserPromptSubmit[0].hooks).toHaveLength(1);
+      expect(written.hooks.UserPromptSubmit[0].hooks[0].command).toBe(
+        "bash ~/.codex/hooks/lexicon-reminder.sh",
+      );
+    });
+
     it("preserves unrelated existing hooks", async () => {
       // Pre-populate settings.json with a different SessionStart hook
       const initial = {
@@ -398,8 +469,9 @@ describe("hook-wiring", () => {
           featureFlag: {
             tomlPath: path.join(homeDir, "config.toml"),
             section: "features",
-            key: "codex_hooks",
+            key: "hooks",
             value: true,
+            deprecatedKeys: ["codex_hooks"],
           },
         };
       });
@@ -410,7 +482,7 @@ describe("hook-wiring", () => {
 
         const toml = await fs.readFile(codexPlan.featureFlag!.tomlPath, "utf-8");
         expect(toml).toMatch(/^\[features\]$/m);
-        expect(toml).toMatch(/^codex_hooks\s*=\s*true$/m);
+        expect(toml).toMatch(/^hooks\s*=\s*true$/m);
       });
 
       it("inserts under existing [features] without duplicating the section", async () => {
@@ -434,7 +506,7 @@ describe("hook-wiring", () => {
         const featuresHeaderCount = (toml.match(/^\[features\]$/gm) ?? [])
           .length;
         expect(featuresHeaderCount).toBe(1);
-        expect(toml).toMatch(/^codex_hooks\s*=\s*true$/m);
+        expect(toml).toMatch(/^hooks\s*=\s*true$/m);
         expect(toml).toMatch(/^some_other_flag\s*=\s*true$/m);
       });
 
@@ -445,8 +517,32 @@ describe("hook-wiring", () => {
         expect(second.flagAdded).toBe(false);
 
         const toml = await fs.readFile(codexPlan.featureFlag!.tomlPath, "utf-8");
-        const flagCount = (toml.match(/^codex_hooks\s*=/gm) ?? []).length;
+        const flagCount = (toml.match(/^hooks\s*=/gm) ?? []).length;
         expect(flagCount).toBe(1);
+      });
+
+      it("removes the deprecated codex_hooks alias when asserting hooks", async () => {
+        const initial = [
+          "model = \"gpt-5.5\"",
+          "",
+          "[features]",
+          "codex_hooks = true",
+          "memories = true",
+          "",
+        ].join("\n");
+        await fs.writeFile(
+          codexPlan.featureFlag!.tomlPath,
+          initial,
+          "utf-8",
+        );
+
+        const result = await applyHookWiring(codexPlan);
+        expect(result.flagAdded).toBe(true);
+
+        const toml = await fs.readFile(codexPlan.featureFlag!.tomlPath, "utf-8");
+        expect(toml).toMatch(/^hooks\s*=\s*true$/m);
+        expect(toml).not.toMatch(/^codex_hooks\s*=/m);
+        expect(toml).toMatch(/^memories\s*=\s*true$/m);
       });
     });
   });

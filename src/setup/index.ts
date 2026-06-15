@@ -530,7 +530,7 @@ export async function runSetupWizard(
               ? "would skip"
               : "already present";
             const flagSuffix = plan.featureFlag
-              ? ` (codex_hooks flag: ${
+              ? ` (${plan.featureFlag.key} flag: ${
                   result.flagAdded
                     ? profile.dryRun
                       ? "would set"
