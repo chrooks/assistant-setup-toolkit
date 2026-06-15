@@ -49,10 +49,10 @@ function writeThroughline(contents: string): void {
   fs.writeFileSync(path.join(dir, "dex-table-controls-throughline.md"), contents);
 }
 
-function runHook(input: unknown): HookResult {
+function runHook(input: unknown, extraEnv: Record<string, string> = {}): HookResult {
   const result = spawnSync("bash", [hookPath], {
     cwd: projectDir,
-    env: { ...process.env, HOME: homeDir },
+    env: { ...process.env, HOME: homeDir, ...extraEnv },
     input: JSON.stringify(input),
     encoding: "utf-8",
   });
@@ -61,6 +61,11 @@ function runHook(input: unknown): HookResult {
     stderr: result.stderr,
     status: result.status,
   };
+}
+
+function readDebugLog(): string {
+  const logPath = path.join(homeDir, ".claude", "devos-steering.log");
+  return fs.existsSync(logPath) ? fs.readFileSync(logPath, "utf-8") : "";
 }
 
 describe("DevOS steering hook", () => {
@@ -109,6 +114,40 @@ describe("DevOS steering hook", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toBe("");
+  });
+
+  it("writes a 'fired' breadcrumb when debug is on and a run is active", () => {
+    writeThroughline(ACTIVE_THROUGHLINE);
+
+    const result = runHook(
+      { session_id: "session-test", user_prompt: "hello" },
+      { CLAUDE_DEVOS_STEERING_DEBUG: "1" },
+    );
+
+    expect(result.status).toBe(0);
+    const log = readDebugLog();
+    expect(log).toContain("fired:");
+    expect(log).toContain("dex-table-controls");
+    expect(log).toContain("stage=scope");
+  });
+
+  it("writes a 'silent' breadcrumb when debug is on and no run is active", () => {
+    const result = runHook(
+      { session_id: "session-test", user_prompt: "hello" },
+      { CLAUDE_DEVOS_STEERING_DEBUG: "1" },
+    );
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe("");
+    expect(readDebugLog()).toContain("silent: no active throughline");
+  });
+
+  it("writes no breadcrumb when debug is off", () => {
+    writeThroughline(ACTIVE_THROUGHLINE);
+
+    runHook({ session_id: "session-test", user_prompt: "hello" });
+
+    expect(readDebugLog()).toBe("");
   });
 
   it("stays quiet for Codex UserPromptSubmit input even with an active run", () => {
