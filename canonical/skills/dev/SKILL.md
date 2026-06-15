@@ -40,7 +40,8 @@ Stages run in this order:
     kickoff -> scope -> grill -> plan -> implement -> prove -> assess -> close
 
 - `scope` may skip `grill` and `plan` when a task is already well-defined.
-- `assess` is the only stage that may loop backward (to `diagnose` or `implement`).
+- `assess` is the only stage that may loop backward — its back-edge points at
+  `implement` (see "The assess stage and the back-edge" below).
 - Everything else moves forward one stage at a time.
 
 ## The idempotency invariant
@@ -146,13 +147,46 @@ Parse the JSON and write it back with this fixed map:
   `stage: assess` and `next_action: /dev assess` and stop for the human. Never
   auto-run assess or close.
 
+### The assess stage and the back-edge
+
+`assess` is a dialogue stage you run in the main conversation — and the only
+stage that may send the run backward. The prove stage only *proposes* statuses;
+the human disposes here. Never auto-route on a proposed status.
+
+1. **Walk the human through the Proof Ledger.** Present each acceptance
+   criterion with its proposed status and evidence. The human accepts or
+   overrides each one. The verdict is theirs.
+2. **All pass → close.** If every AC lands `pass`, set `stage: close`,
+   `next_action: /dev close <issue>`, and proceed to close.
+3. **Any fail → the back-edge (partial reopen).** If any AC is judged `fail` or
+   needs-work:
+   - Flip **only** those ACs back to `status: pending`. Leave the passed ones
+     `pass` — never reopen the whole run.
+   - Increment the `bounces` counter by one.
+   - Append a dated entry to `## Assessment Log`: which ACs passed, which
+     bounced, the human's stated reason, and the new `bounces` count.
+   - Set `stage: implement` and `next_action: /dev implement <issue>`, then
+     **stop**. Do not auto-dispatch the next round — the human launches it, as
+     with every other hand-off.
+   - The back-edge always points at `implement`. Do not branch to `diagnose`
+     yourself: the implement stage already detects bug-fix vs. feature and pulls
+     in `/diagnose` or `/tdd` internally, so that judgment stays in one place.
+   - On re-entry, implement works only the reopened (`pending`) ACs; prove
+     re-checks those plus any the implementer flags as touched.
+4. **Loop guard (soft, threshold 3).** When `bounces` reaches 3 on the same
+   work, do **not** silently re-dispatch. Stop and surface the `## Assessment
+   Log` history, then offer the human three ways out: re-grill the approach,
+   re-scope the stuck AC, or accept-with-caveat. The human decides. This is a
+   soft stop, not a hard wall — the human may still choose to push another round.
+
 ### Step 4 — Write the result back and advance
 
 When a stage finishes:
 
 1. Write the stage's output into the matching body section of the Throughline
-   (`## Decision Ledger`, `## Plan Walkthrough`, `## Work Log`, or
-   `## Proof Ledger`). For work stages, apply the write-back map above.
+   (`## Decision Ledger`, `## Plan Walkthrough`, `## Work Log`,
+   `## Proof Ledger`, or `## Assessment Log`). For work stages, apply the
+   write-back map above; for assess, follow the back-edge rules above.
 2. Update the frontmatter: set `stage` to the next stage and `next_action` to
    the next command. Update `grillable`, `tier`, `effort`, or
    `acceptance_criteria` if this stage produced them.

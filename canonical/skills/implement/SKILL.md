@@ -60,7 +60,10 @@ guidance. The sub-agent inherits the model strength either way.
 Inside the sub-agent:
 
 - Read the Throughline's `acceptance_criteria` so the work targets exactly what
-  the prove stage will check.
+  the prove stage will check. On a **re-entry after an assess bounce**, only the
+  reopened criteria carry `status: pending` (the rest are already `pass`) — work
+  only the `pending` ACs, and flag any passed AC your fix might have touched so
+  prove re-checks it too.
 - Detect bug-fix versus feature and route to the matching worker Skill as above.
 - Do the work and the local checks.
 
