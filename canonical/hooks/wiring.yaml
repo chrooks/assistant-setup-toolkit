@@ -29,7 +29,7 @@ version: 1
 hooks:
   - file: lexicon-reminder.sh
     event: UserPromptSubmit
-    targets: [claude-code, codex-cli]
+    targets: [claude-code]
     # Optional fields you can add per entry:
     #   matcher: "Bash"          # only honored where the event supports it
     #   timeoutSec: 30
