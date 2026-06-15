@@ -27,6 +27,12 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/[Ss]pawn .*Agent/);
     });
 
+    it("sets the Agent model param from the tier, not just prompt text (ac-m5-1)", () => {
+      expect(skill).toMatch(/`model` parameter/);
+      expect(skill).toMatch(/[Dd]o not leave[\s\S]*?unset/);
+      expect(skill).toMatch(/inherits the[\s\S]*?main model/);
+    });
+
     it("requires a fenced JSON result and names itself sole writer (ac-m5-2)", () => {
       expect(skill).toMatch(/fenced JSON/);
       expect(skill).toMatch(/files_changed/);
