@@ -111,11 +111,14 @@ result.
 1. **Pick the model from the tier.** Map the Throughline's `tier` to the
    sub-agent model: `heavy → opus`, `light → sonnet`; drop a `light` stage to
    `haiku` when its `effort` is `low`. A missing tier defaults to `sonnet`.
-2. **Spawn the Agent.** Invoke the matching stage skill (`/implement` or
-   `/prove-it`) inside the sub-agent, passing the Throughline path and the
-   `acceptance_criteria` as context. On Codex, pass the recorded `effort` as a
-   real runtime knob; on Claude Code, which has no per-sub-agent effort, fold
-   the effort into the sub-agent prompt as guidance.
+2. **Spawn the Agent at that model.** Invoke the matching stage skill
+   (`/implement` or `/prove-it`) inside the sub-agent, and **set the Agent
+   tool's `model` parameter to the model you mapped in step 1** — do not leave
+   it unset and rely on prompt text, or the sub-agent silently inherits the
+   main model and the tier has no real effect. Pass the Throughline path and
+   the `acceptance_criteria` as context. On Codex, also pass the recorded
+   `effort` as a real runtime knob; on Claude Code, which has no per-sub-agent
+   effort, fold the effort into the sub-agent prompt as guidance.
 3. **Require a fenced JSON result.** The sub-agent returns only a fenced JSON
    block of the shape:
 
