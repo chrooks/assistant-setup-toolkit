@@ -141,6 +141,9 @@ If they accept, invoke `/review-fanout` with:
 - The verification evidence from this run
 - Any user-stated risk focus
 - Any files, behaviors, or assumptions that need extra challenge
+- A UI-touched signal or design brief when the change touches the UI, so
+  `/review-fanout` runs its design critique path. Forward the brief verbatim
+  when `/implement` (or this run's caller) passed one along.
 
 Paste the returned concern synthesis and next workflow recommendation into the
 verification report. If they decline, mark review fan-out as declined.
@@ -153,8 +156,12 @@ based on the concern shape:
   missing test coverage.
 - Offer `/diagnose` when the issue is a failing check, unclear root cause,
   regression, flaky behavior, or hard-to-reproduce bug.
+- Offer `/impeccable` (a refine command) when the concern is a design issue
+  surfaced by the design critique path — hierarchy, spacing, typography, color,
+  copy, or states.
 
-Do not start `/tdd` or `/diagnose` unless the user asks you to proceed.
+Do not start `/tdd`, `/diagnose`, or `/impeccable` unless the user asks you to
+proceed.
 
 ## Output Format
 
@@ -184,7 +191,7 @@ Review Fan-Out:
 [Asked / accepted / declined / skipped]
 
 Next Workflow:
-[/tdd recommended | /diagnose recommended | none]
+[/tdd recommended | /diagnose recommended | /impeccable recommended | none]
 
 Acceptance Criteria:
 1. [Concrete thing user can verify manually — e.g., "run X and see Y"]

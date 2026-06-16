@@ -141,6 +141,9 @@ Parse the JSON and write it back with this fixed map:
 
 - `ac_status` → the frontmatter `acceptance_criteria[].status` for each id.
 - `tests` and `artifacts` → one evidence line per criterion in `## Proof Ledger`.
+  For UI work, `artifacts` carries the design critique outcome (detector verdict
+  and any design concerns); preserve it in the ledger so a bounced design AC has
+  the evidence behind it.
 - `files_changed` → a dated line in `## Work Log`.
 - `suggested_next_action` → the frontmatter `next_action` **only when applying
   it would not cross the assess gate**. The prove stage proposes `assess`; set
