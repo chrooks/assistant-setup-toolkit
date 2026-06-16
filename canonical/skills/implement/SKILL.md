@@ -25,7 +25,9 @@ matching Skill workflow, and then starts that workflow.
    - Read `~/.codex/AGENTS.md` when running in Codex.
 2. Invoke the `## Right Skill, Right Job` section from that file.
 3. Choose the matching workflow:
-   - Use `/impeccable` for design/frontend work.
+   - Use `/impeccable` for design/frontend work. When you route here, keep the
+     design brief (the UI intent you handed to `/impeccable`) so you can forward
+     it downstream in step 7.
    - Use `/idea-to-design` for synthesizing ideas into concrete designs.
    - Use `/tdd` when implementing a feature, especially testable logic.
    - Use `/diagnose` for difficult bugs.
@@ -37,10 +39,14 @@ matching Skill workflow, and then starts that workflow.
 6. After implementation, run `/verification-loop` against the completed change
    set.
 7. After `/verification-loop`, run `/review-fanout` against the same diff scope
-   and include the verification evidence.
-8. If `/verification-loop` or `/review-fanout` finds actionable issues, use
-   `/tdd` to fix them. Add or update tests first when the issue is testable,
-   then rerun `/verification-loop` and `/review-fanout` for the repaired diff.
+   and include the verification evidence. When the change touched the UI — or you
+   routed to `/impeccable` in step 3 — forward the design brief so `/review-fanout`
+   runs its design critique path.
+8. If `/verification-loop` or `/review-fanout` finds actionable issues, fix them
+   forward by concern shape: `/tdd` for testable logic (add or update tests
+   first), `/diagnose` for a bug or failing check, and `/impeccable` (a refine
+   command) for a design concern from the design critique. Then rerun
+   `/verification-loop` and `/review-fanout` for the repaired diff.
 9. Use `/commit` only after verification and review fan-out are ready, or after
    the user explicitly accepts documented residual risk.
 
@@ -83,7 +89,9 @@ Throughline) writes back and uses to advance the run:
 
 - `files_changed` — paths touched.
 - `tests` — tests added or run, and their outcome.
-- `artifacts` — anything produced worth keeping (logs, screenshots).
+- `artifacts` — anything produced worth keeping (logs, screenshots). When the
+  change touched the UI, include the design critique outcome here (detector
+  verdict and any design concerns) so the Conductor can log it.
 - `ac_status` — per acceptance criterion, a first-pass status.
 - `suggested_next_action` — normally the prove stage (`/dev prove <issue>`).
 

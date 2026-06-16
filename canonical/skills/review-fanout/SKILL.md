@@ -29,6 +29,9 @@ Collect or infer:
   results when available
 - User-stated risk focus, if any
 - Any files, behaviors, or assumptions the user specifically wants challenged
+- Design context, if any: a UI-touched signal or design brief forwarded from
+  `/implement` or `/verification-loop` (e.g. the original `/impeccable` intent).
+  Treat it as a booster that turns the design path on — never the only trigger.
 
 If invoked from `/verification-loop`, reuse that Skill's diff scope and
 verification evidence instead of recomputing them unless the evidence is stale.
@@ -48,6 +51,19 @@ git ls-files --others --exclude-standard
 Review every untracked file directly, or use `git diff --no-index` against
 `/dev/null` for a patch-style view of a new single file.
 
+## Design Diff Detection
+
+After scoping the diff, decide whether the change touches the UI. Set
+`uiTouched` when either is true:
+
+- Any changed or untracked file matches a UI extension:
+  `.tsx`, `.jsx`, `.vue`, `.svelte`, `.astro`, `.html`, `.css`, `.scss`.
+- A design brief or UI-touched hint was forwarded from `/implement` or
+  `/verification-loop`.
+
+`uiTouched` gates the design review path below. When it is false, skip that path
+silently — it is not a finding.
+
 ## Review Paths
 
 Launch these paths concurrently when available:
@@ -57,11 +73,25 @@ Launch these paths concurrently when available:
   opportunities, locality, leverage, and testability.
 - `/codex:adversarial-review`, focused on challenging the implementation
   approach, design choices, tradeoffs, and assumptions.
+- **Design critique** — run only when `uiTouched` (see Design Diff Detection).
+  Run the lightweight deterministic detector over the changed markup:
+
+  ```bash
+  npx impeccable detect --json <changed .tsx/.jsx/.vue/.svelte/.astro/.html files or their dirs>
+  ```
+
+  Pass `--fast` when 200+ files are in scope. Exit `0` is clean, `2` means
+  findings — read the JSON either way. This path is source-only: never launch a
+  browser or headless Chrome. If only CSS/SCSS changed (no markup), the detector
+  has nothing to scan — skip it and note the style-only diff as residual risk.
+  If `npx impeccable` is unavailable, skip with the same note rule below.
 
 Rules:
 - Run available review paths in parallel where the assistant runtime supports
   it.
 - Keep every review path read-only. Do not apply patches during review fan-out.
+  The design critique detector is read-only; the matching `/impeccable` refine
+  commands run later, in fix-forward, never here.
 - Give every path the same diff scope, verification evidence, and risk focus.
 - If one path is unavailable, say which one was skipped and continue with the
   available reviewers.
@@ -72,6 +102,10 @@ Rules:
 
 Deduplicate overlapping findings and list only concerns that are concrete enough
 to act on. Prefer a short list of high-signal issues over exhaustive noise.
+
+Fold design-detector findings into the same concern list — do not report them as
+a separate review. Map each detector finding to a `Difficulty` and tag it as a
+design concern so fix-forward can route it to `/impeccable`.
 
 Use this exact shape for each synthesized concern:
 
@@ -98,8 +132,12 @@ After concern synthesis, offer the next workflow based on the concern shape:
   missing test coverage.
 - Offer `/diagnose` when the issue is a failing check, unclear root cause,
   regression, flaky behavior, or hard-to-reproduce bug.
+- Offer `/impeccable` (a refine command — `polish`, `layout`, `harden`,
+  `clarify`, etc.) when the concern is a design issue from the design critique:
+  hierarchy, spacing, typography, color, copy, states, or an AI-slop tell.
 
-Do not start `/tdd` or `/diagnose` unless the user asks you to proceed.
+Do not start `/tdd`, `/diagnose`, or `/impeccable` unless the user asks you to
+proceed.
 
 ## Output Format
 
@@ -114,6 +152,7 @@ Review Paths:
 - code-reviewer: [completed / skipped: reason]
 - /improve-codebase-architecture: [completed / skipped: reason]
 - /codex:adversarial-review: [completed / skipped: reason]
+- design critique (impeccable detect): [completed / skipped: not UI / unavailable]
 
 Concerns:
 - **Issue:** ...
@@ -124,5 +163,5 @@ Residual Risk:
 [Any unreviewed area, unavailable path, or unrun verification]
 
 Next Workflow:
-[/tdd recommended | /diagnose recommended | none]
+[/tdd recommended | /diagnose recommended | /impeccable recommended | none]
 ```
