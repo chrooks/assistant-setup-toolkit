@@ -87,7 +87,7 @@ npm run sync:watch
 
 Both expand to a non-interactive Setup Wizard run with `--claude --codex --default --no-fetch --yes`. `--no-fetch` skips External Source git clones since edits are local; `--yes` skips confirmation prompts. Skill Artifact ZIPs in `artifacts/` are rebuilt each run.
 
-`sync:watch` uses `chokidar-cli` against `canonical/**` and `manifests/**`. Run it in a background terminal during iteration; edits to `canonical/skills/explain/SKILL.md` (or any tracked file) trigger an immediate resync.
+`sync:watch` uses `chokidar-cli` against `canonical/**` and `manifests/**`. Run it in a background terminal during iteration; edits to `canonical/skills/wym/SKILL.md` (or any tracked file) trigger an immediate resync.
 
 ## Project Flow Workflow
 
