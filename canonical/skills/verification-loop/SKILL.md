@@ -107,10 +107,10 @@ Diff coverage rules:
 
 ## Explain-Style Code Report Offer
 
-After the core verification phases, ask the user whether they want an
-`/explain`-style code report for the code that was written.
+After the core verification phases, ask the user whether they want a
+`/wym`-style code report for the code that was written.
 
-If they accept, use the `/explain` Skill's three-layer shape and adapt it to the
+If they accept, use the `/wym` Skill's three-layer shape and adapt it to the
 diff:
 
 ```markdown
