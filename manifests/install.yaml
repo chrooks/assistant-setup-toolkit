@@ -15,8 +15,9 @@ externalSources:
     notes:
       - Includes engineering and productivity skills.
       - Disabled by default — the skills actually used (grill-with-docs,
-        improve-codebase-architecture, write-a-skill, etc.) are vendored into
-        canonical/skills. Re-enable to pull the full pack.
+        improve-codebase-architecture, write-a-skill, writing-great-skills,
+        teach, etc.) are vendored into canonical/skills. Re-enable to pull the
+        full pack.
 
   - id: find-skills
     name: find-skills
