@@ -56,7 +56,7 @@ describe("Lexicon reminder", () => {
     expect(hook).toContain("_Avoid_");
   });
 
-  it("nudges list- and table-first communication", async () => {
+  it("nudges list-first communication and routes visuals through /visualize", async () => {
     const instructions = await readFile(
       path.join(repoRoot, "canonical", "CLAUDE.md"),
       "utf-8",
@@ -66,18 +66,73 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
 
-    // The per-turn hook reminds about lists and routes quick tables/diagrams.
+    // The per-turn hook reminds about lists and routes visuals by concept-shape
+    // through the /visualize umbrella (which renders via /table and /diagram).
     expect(hook).toMatch(/list/i);
-    expect(hook).toContain("/table md");
-    expect(hook).toContain("/diagram md");
+    expect(hook).toContain("/visualize");
+    expect(hook).toContain("/table");
+    expect(hook).toContain("/diagram");
 
-    // The session-start instructions carry the durable list/table/diagram preference.
-    expect(instructions).toMatch(/List-, Table-, and Diagram-First Communication/i);
+    // The session-start instructions carry the durable visualize-by-shape preference,
+    // with /table and /diagram named as the concrete forms /visualize routes to.
+    expect(instructions).toMatch(/Visualize by Concept-Shape/i);
+    expect(instructions).toContain("/visualize");
     expect(instructions).toContain("/table md");
     expect(instructions).toContain("/table html");
     expect(instructions).toContain("/diagram md");
     expect(instructions).toContain("/diagram html");
     expect(instructions).toMatch(/two trailing spaces/i);
+  });
+
+  it("enforces the issue-reference link Contract in both surfaces", async () => {
+    const instructions = await readFile(
+      path.join(repoRoot, "canonical", "CLAUDE.md"),
+      "utf-8",
+    );
+    const hook = await readFile(
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      "utf-8",
+    );
+
+    expect(instructions).toMatch(/never a bare `?#5`?/i);
+    expect(hook).toMatch(/never a bare #5/i);
+  });
+
+  it("places the operative plain-English style rule last in the hook injection", async () => {
+    const hook = await readFile(
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      "utf-8",
+    );
+
+    const styleIdx = hook.indexOf("OPERATIVE STYLE RULE");
+    const visualizeIdx = hook.indexOf("/visualize");
+    const issueIdx = hook.indexOf("Issue references");
+    const lexiconIdx = hook.indexOf("Lexicon reminder:");
+
+    expect(styleIdx).toBeGreaterThan(-1);
+    // The operative style rule must sit after the Lexicon, issue-link, and
+    // visualize content so it lands at maximum recency before generation.
+    expect(styleIdx).toBeGreaterThan(visualizeIdx);
+    expect(styleIdx).toBeGreaterThan(issueIdx);
+    // ...and after the Lexicon segment too, so it follows ALL other named
+    // segments — not merely the issue + visualize ones.
+    expect(lexiconIdx).toBeGreaterThan(-1);
+    expect(styleIdx).toBeGreaterThan(lexiconIdx);
+
+    // End-anchored: the operative style rule must be LITERALLY the final
+    // segment of the REMINDER string. Extract the single-quoted REMINDER
+    // assignment from the hook and assert its trimmed tail is the style
+    // rule's closing phrase. Appending any new segment after it breaks this.
+    const reminderMatch = hook.match(/REMINDER='([\s\S]*?)'\n/);
+    expect(reminderMatch).not.toBeNull();
+    const reminder = reminderMatch![1].trim();
+
+    // The operative style rule is the LAST thing in the REMINDER...
+    expect(reminder.lastIndexOf("OPERATIVE STYLE RULE")).toBeGreaterThan(
+      reminder.indexOf("/visualize"),
+    );
+    // ...and the REMINDER ends with that rule's closing phrase verbatim.
+    expect(reminder.endsWith("code, commits, and PRs stay normal.")).toBe(true);
   });
 
   it("stays quiet for Codex UserPromptSubmit input", () => {
