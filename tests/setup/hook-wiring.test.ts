@@ -82,7 +82,6 @@ describe("hook-wiring", () => {
         event: "PreToolUse",
         matcher: "Edit|Write",
         targets: ["claude-code", "codex-cli"],
-        command: "node {hook}",
       });
     });
 
@@ -92,7 +91,7 @@ describe("hook-wiring", () => {
       );
 
       expect(entries).toContainEqual({
-        file: "canonical-sync.sh",
+        file: "canonical-sync.js",
         event: "PostToolUse",
         matcher: "Edit|Write",
         targets: ["claude-code", "codex-cli"],
@@ -106,7 +105,7 @@ describe("hook-wiring", () => {
       );
 
       expect(entries).toContainEqual({
-        file: "lexicon-reminder.sh",
+        file: "lexicon-reminder.js",
         event: "UserPromptSubmit",
         targets: ["claude-code"],
       });
@@ -126,7 +125,7 @@ describe("hook-wiring", () => {
   describe("planHookWiring", () => {
     const entries: WiringEntry[] = [
       {
-        file: "lexicon-reminder.sh",
+        file: "lexicon-reminder.js",
         event: "UserPromptSubmit",
         targets: ["claude-code", "codex-cli"],
       },
@@ -143,7 +142,7 @@ describe("hook-wiring", () => {
       expect(claudePlan.settingsPath).toBe("/home/u/.claude/settings.json");
       expect(claudePlan.actions).toHaveLength(1);
       expect(claudePlan.actions[0].command).toBe(
-        "bash /home/u/.claude/hooks/lexicon-reminder.sh",
+        "node /home/u/.claude/hooks/lexicon-reminder.js",
       );
       expect(claudePlan.featureFlag).toBeUndefined();
     });
@@ -188,6 +187,19 @@ describe("hook-wiring", () => {
       );
     });
 
+    it("renders Windows hook command paths with shell-safe forward slashes", () => {
+      // A Windows Assistant Home arrives with backslashes. The rendered command
+      // must use forward slashes so `node C:/Users/.../hook.js` resolves instead
+      // of the loader reading the backslash-mangled `C:Users...`.
+      const plans = planHookWiring(entries, {
+        "claude-code": "C:\\Users\\X278451\\.claude",
+      });
+
+      expect(plans[0].actions[0].command).toBe(
+        "node C:/Users/X278451/.claude/hooks/lexicon-reminder.js",
+      );
+    });
+
     it("plans strategic compact wiring for both assistant targets", () => {
       const strategicCompactEntries: WiringEntry[] = [
         {
@@ -222,12 +234,12 @@ describe("hook-wiring", () => {
     it("keeps project-scoped canonical sync out of user-level Assistant Homes", () => {
       const mixedEntries: WiringEntry[] = [
         {
-          file: "lexicon-reminder.sh",
+          file: "lexicon-reminder.js",
           event: "UserPromptSubmit",
           targets: ["claude-code", "codex-cli"],
         },
         {
-          file: "canonical-sync.sh",
+          file: "canonical-sync.js",
           event: "PostToolUse",
           matcher: "Edit|Write",
           targets: ["claude-code", "codex-cli"],
@@ -258,23 +270,23 @@ describe("hook-wiring", () => {
       );
 
       expect(claudeHomePlan?.actions.map((a) => a.command)).toEqual([
-        "bash /home/u/.claude/hooks/lexicon-reminder.sh",
+        "node /home/u/.claude/hooks/lexicon-reminder.js",
       ]);
       expect(claudeProjectPlan?.actions).toMatchObject([
         {
           event: "PostToolUse",
           matcher: "Edit|Write",
-          command: "bash /repo/toolkit/canonical/hooks/canonical-sync.sh",
+          command: "node /repo/toolkit/canonical/hooks/canonical-sync.js",
         },
       ]);
       expect(codexHomePlan?.actions.map((a) => a.command)).toEqual([
-        "bash /home/u/.codex/hooks/lexicon-reminder.sh",
+        "node /home/u/.codex/hooks/lexicon-reminder.js",
       ]);
       expect(codexProjectPlan?.actions).toMatchObject([
         {
           event: "PostToolUse",
           matcher: "Edit|Write",
-          command: "bash /repo/toolkit/canonical/hooks/canonical-sync.sh",
+          command: "node /repo/toolkit/canonical/hooks/canonical-sync.js",
         },
       ]);
       expect(codexProjectPlan?.featureFlag).toEqual({

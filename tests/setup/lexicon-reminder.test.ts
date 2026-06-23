@@ -6,7 +6,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
-const hookPath = path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh");
+const hookPath = path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.js");
 
 function runReminderHook(input: unknown): {
   stdout: string;
@@ -15,11 +15,12 @@ function runReminderHook(input: unknown): {
 } {
   const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "lexicon-reminder-"));
   try {
-    const result = spawnSync("bash", [hookPath], {
+    const result = spawnSync(process.execPath, [hookPath], {
       cwd: repoRoot,
       env: {
         ...process.env,
         HOME: tempHome,
+        USERPROFILE: tempHome,
         CLAUDE_LEXICON_REMINDER: "1",
       },
       input: JSON.stringify(input),
@@ -43,7 +44,7 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
     const hook = await readFile(
-      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.js"),
       "utf-8",
     );
 
@@ -62,7 +63,7 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
     const hook = await readFile(
-      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.js"),
       "utf-8",
     );
 
@@ -90,7 +91,7 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
     const hook = await readFile(
-      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.js"),
       "utf-8",
     );
 
@@ -100,7 +101,7 @@ describe("Lexicon reminder", () => {
 
   it("places the operative plain-English style rule last in the hook injection", async () => {
     const hook = await readFile(
-      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.sh"),
+      path.join(repoRoot, "canonical", "hooks", "lexicon-reminder.js"),
       "utf-8",
     );
 
@@ -123,7 +124,7 @@ describe("Lexicon reminder", () => {
     // segment of the REMINDER string. Extract the single-quoted REMINDER
     // assignment from the hook and assert its trimmed tail is the style
     // rule's closing phrase. Appending any new segment after it breaks this.
-    const reminderMatch = hook.match(/REMINDER='([\s\S]*?)'\n/);
+    const reminderMatch = hook.match(/const REMINDER =\s*"([\s\S]*?)";/);
     expect(reminderMatch).not.toBeNull();
     const reminder = reminderMatch![1].trim();
 

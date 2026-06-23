@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
-const hookPath = path.join(repoRoot, "canonical", "hooks", "devos-steering.sh");
+const hookPath = path.join(repoRoot, "canonical", "hooks", "devos-steering.js");
 
 const ACTIVE_THROUGHLINE = `---
 devos_version: 1
@@ -50,9 +50,9 @@ function writeThroughline(contents: string): void {
 }
 
 function runHook(input: unknown, extraEnv: Record<string, string> = {}): HookResult {
-  const result = spawnSync("bash", [hookPath], {
+  const result = spawnSync(process.execPath, [hookPath], {
     cwd: projectDir,
-    env: { ...process.env, HOME: homeDir, ...extraEnv },
+    env: { ...process.env, HOME: homeDir, USERPROFILE: homeDir, ...extraEnv },
     input: JSON.stringify(input),
     encoding: "utf-8",
   });

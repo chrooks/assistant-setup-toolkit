@@ -34,7 +34,7 @@ const WiringEntrySchema = z.object({
   scope: WiringScopeSchema.optional(),
   matcher: z.string().optional(),
   timeoutSec: z.number().int().positive().optional(),
-  /** Optional command template. `{hook}` and `{project}` are replaced with absolute paths. Defaults to `bash {hook}`. */
+  /** Optional command template. `{hook}` and `{project}` are replaced with absolute paths. Defaults to `node {hook}`. */
   command: z.string().optional(),
 });
 
@@ -180,14 +180,15 @@ export function planHookWiring(
         scope === "project" || entry.command?.includes("{project}") === true
           ? getProjectRoot(options.projectRoot)
           : "";
-      const hookAbsPath =
+      const hookAbsPath = toHookCommandPath(
         scope === "project"
           ? path.join(projectRoot, "canonical", "hooks", entry.file)
-          : path.join(home, "hooks", entry.file);
-      const commandTemplate = entry.command ?? "bash {hook}";
+          : path.join(home, "hooks", entry.file),
+      );
+      const commandTemplate = entry.command ?? "node {hook}";
       const renderedCommand = commandTemplate
         .replace(/\{hook\}/g, hookAbsPath)
-        .replace(/\{project\}/g, projectRoot);
+        .replace(/\{project\}/g, toHookCommandPath(projectRoot));
 
       const action: WiringAction = {
         target,
@@ -401,13 +402,21 @@ function dedupeEquivalentCommands(groups: readonly MatcherGroup[]): {
 
 /**
  * Normalize a hook command for idempotency comparison.
- * Resolves `~` to `$HOME` so that `bash ~/.claude/hooks/foo.sh` and
- * `bash /Users/alice/.claude/hooks/foo.sh` are treated as the same hook.
+ * Forward-slashes the command and collapses `$HOME` to `~` so that
+ * `node ~/.claude/hooks/foo.js`, `node /Users/alice/.claude/hooks/foo.js`, and
+ * the backslash form a Windows home produces are all treated as the same hook.
+ * Forward-slashing first is what lets the home match: rendered paths use
+ * forward slashes (see toHookCommandPath) while HOME on Windows uses
+ * backslashes, so the home must be slashed too or the replace never matches.
  */
 function normalizeHookCommand(command: string): string {
-  const home = process.env.HOME ?? process.env.USERPROFILE ?? "";
-  if (!home) return command;
-  return command.replace(home, "~");
+  const slashed = command.replace(/\\/g, "/");
+  const home = (process.env.HOME ?? process.env.USERPROFILE ?? "").replace(
+    /\\/g,
+    "/",
+  );
+  if (!home) return slashed;
+  return slashed.replace(home, "~");
 }
 
 /** Convert a planned WiringAction into the matcher-group shape settings.json expects. */
@@ -527,6 +536,18 @@ function getMessage(error: unknown): string {
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Render a filesystem path as a shell-safe hook command argument.
+ *
+ * On Windows `path.join` yields backslashes, which the assistant's shell
+ * mangles when it runs `node C:\Users\...\hook.js` (the loader reads
+ * `C:Users...`). Forward slashes resolve correctly on Windows, Mac, and Linux
+ * alike, so every rendered hook path uses them.
+ */
+function toHookCommandPath(p: string): string {
+  return p.replace(/\\/g, "/");
 }
 
 function getProjectSettingsRoot(
