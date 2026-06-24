@@ -28,6 +28,7 @@ export type ComponentKind =
   | "commands"
   | "skills"
   | "rules"
+  | "config"
   | "settings"
   | "manifests"
   | "mcp";
@@ -49,6 +50,7 @@ export const ALL_COMPONENT_KINDS: readonly ComponentKind[] = [
   "commands",
   "skills",
   "rules",
+  "config",
   "settings",
   "manifests",
   "mcp",

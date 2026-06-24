@@ -138,6 +138,40 @@ describe("projection", () => {
       expect(dbRule!.isSkill).toBe(false);
     });
 
+    it("maps config files to the .codex/ ROOT verbatim with isConfig=true", () => {
+      const plan = planCodexProjection({
+        claudeFiles: [],
+        skillDirs: [],
+        configFiles: [
+          "knowledge-config.example.json",
+          "secrets-pushover.example.env",
+        ],
+      });
+
+      expect(plan).toHaveLength(2);
+
+      const knowledge = plan.find(
+        (m) => m.source === "config/knowledge-config.example.json",
+      );
+      expect(knowledge).toBeDefined();
+      // Flattened to the home root — NO config/ segment in the target, since
+      // consumers read ~/.codex/knowledge-config.json directly.
+      expect(knowledge!.target).toBe(".codex/knowledge-config.example.json");
+      // Verbatim copy — JSON/env data must not be run through the text rewrite.
+      expect(knowledge!.isConfig).toBe(true);
+      expect(knowledge!.isHook).toBe(false);
+      expect(knowledge!.isSkill).toBe(false);
+    });
+
+    it("treats configFiles as optional — omitting it produces no config mappings", () => {
+      const plan = planCodexProjection({
+        claudeFiles: ["CLAUDE.md"],
+        skillDirs: [],
+      });
+
+      expect(plan.every((m) => !m.isConfig)).toBe(true);
+    });
+
     it("skips commands (no Codex equivalent surface)", () => {
       // planCodexProjection has no commands input — commands are not projected
       const plan = planCodexProjection({

@@ -22,6 +22,13 @@ export interface ProjectionMapping {
    * avoid mangling shell logic that may legitimately reference either path.
    */
   readonly isHook: boolean;
+  /**
+   * Whether this file is a config file (e.g. knowledge-config.example.json).
+   * Config files are copied verbatim — they are JSON/env data, not prose, so
+   * the Claude→Codex text rewrites are skipped. They also flatten to the home
+   * root rather than a config/ subdirectory.
+   */
+  readonly isConfig: boolean;
 }
 
 /** Input describing the Canonical Assistant Source structure for projection planning. */
@@ -34,6 +41,8 @@ export interface ProjectionInput {
   readonly hookFiles?: readonly string[];
   /** Rule file paths under canonical/rules/ to project (e.g. ["common/coding-style.md", "python/database.md"]) */
   readonly ruleFiles?: readonly string[];
+  /** Config filenames under canonical/config/ to project (e.g. ["knowledge-config.example.json"]) */
+  readonly configFiles?: readonly string[];
 }
 
 /** A skill directory containing files to project. */
@@ -160,6 +169,7 @@ export function planCodexProjection(
         target,
         isSkill: false,
         isHook: false,
+        isConfig: false,
       });
     }
   }
@@ -172,6 +182,7 @@ export function planCodexProjection(
         target: `.agents/skills/${skillDir.name}/${file}`,
         isSkill: file === "SKILL.md",
         isHook: false,
+        isConfig: false,
       });
     }
   }
@@ -183,6 +194,7 @@ export function planCodexProjection(
       target: `.codex/hooks/${hookFile}`,
       isSkill: false,
       isHook: true,
+      isConfig: false,
     });
   }
 
@@ -194,6 +206,20 @@ export function planCodexProjection(
       target: `.codex/rules/${ruleFile}`,
       isSkill: false,
       isHook: false,
+      isConfig: false,
+    });
+  }
+
+  // Map config files to the .codex/ ROOT (flattened, no config/ segment) and
+  // copy verbatim — consumers read e.g. ~/.codex/knowledge-config.json, and the
+  // JSON/env payload must not be mangled by the Claude→Codex text rewrite.
+  for (const configFile of input.configFiles ?? []) {
+    mappings.push({
+      source: `config/${configFile}`,
+      target: `.codex/${configFile}`,
+      isSkill: false,
+      isHook: false,
+      isConfig: true,
     });
   }
 

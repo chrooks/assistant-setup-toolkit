@@ -15,3 +15,8 @@ feature_requests/
 
 # Personal self-profile: local-only, generated from "Chris's Brain" via /sync-self.
 canonical/PROFILE.md
+
+# Filled-in config: only the *.example.* templates under canonical/config/ are
+# tracked. The real files hold personal absolute paths / secrets — keep local.
+canonical/knowledge-config.json
+secrets-pushover.env
