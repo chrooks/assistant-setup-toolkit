@@ -161,5 +161,58 @@ describe("payload", () => {
         claudePayload!.files.some((f) => f.relativePath === "rules/python/database.md"),
       ).toBe(true);
     });
+
+    it("routes config to the codex-home ROOT for codex-cli", () => {
+      const result = buildAssistantPayloads({
+        targets: ["codex-cli"],
+        components: ["config"],
+        externalFiles: [],
+        canonicalFiles: [],
+        projectionFiles: [
+          {
+            relativePath: "knowledge-config.example.json",
+            sourcePath: "/repo/.codex/knowledge-config.example.json",
+            component: "config",
+            origin: "target-projection",
+            executable: false,
+          },
+        ],
+      });
+
+      const codexPayload = result.payloads.find((p) => p.homeId === "codex-home");
+      expect(codexPayload).toBeDefined();
+      // Lands at the home root — no config/ path segment.
+      expect(
+        codexPayload!.files.some(
+          (f) => f.relativePath === "knowledge-config.example.json",
+        ),
+      ).toBe(true);
+    });
+
+    it("routes config to the claude-home ROOT for claude-code", () => {
+      const result = buildAssistantPayloads({
+        targets: ["claude-code"],
+        components: ["config"],
+        externalFiles: [],
+        canonicalFiles: [
+          {
+            relativePath: "knowledge-config.example.json",
+            sourcePath: "/repo/canonical/config/knowledge-config.example.json",
+            component: "config",
+            origin: "canonical-source",
+            executable: false,
+          },
+        ],
+        projectionFiles: [],
+      });
+
+      const claudePayload = result.payloads.find((p) => p.homeId === "claude-home");
+      expect(claudePayload).toBeDefined();
+      expect(
+        claudePayload!.files.some(
+          (f) => f.relativePath === "knowledge-config.example.json",
+        ),
+      ).toBe(true);
+    });
   });
 });

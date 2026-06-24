@@ -80,7 +80,14 @@ async function discoverCanonicalFiles(
     commands: "commands",
     skills: "skills",
     rules: "rules",
+    config: "config",
   };
+
+  // Config files (e.g. knowledge-config.example.json) are read by skills/hooks
+  // at the Assistant Home ROOT (~/.claude/knowledge-config.json), not in a
+  // subdirectory. So canonical/config/<file> flattens to <file> on projection —
+  // the "config" dir is a source grouping, not a target path segment.
+  const flattenToRoot = new Set(["config"]);
 
   // Check for top-level instruction files
   for (const [filename, component] of [
@@ -110,7 +117,10 @@ async function discoverCanonicalFiles(
       await fs.access(dirPath);
       const entries = await walkDir(dirPath);
       for (const entry of entries) {
-        const relativePath = path.join(dirName, path.relative(dirPath, entry.path));
+        const within = path.relative(dirPath, entry.path);
+        const relativePath = flattenToRoot.has(dirName)
+          ? within
+          : path.join(dirName, within);
         files.push({
           relativePath,
           sourcePath: entry.path,
@@ -336,7 +346,19 @@ export async function runSetupWizard(
       } catch {
         // canonical/rules/ doesn't exist — skip
       }
-      const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles, ruleFiles });
+      // Discover config files under canonical/config/ for verbatim projection
+      // to the .codex/ root (e.g. knowledge-config.example.json).
+      const configFiles: string[] = [];
+      const canonicalConfigDir = path.join(repoRoot, "canonical", "config");
+      try {
+        const entries = await fs.readdir(canonicalConfigDir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isFile()) configFiles.push(entry.name);
+        }
+      } catch {
+        // canonical/config/ doesn't exist — skip
+      }
+      const mappings = planCodexProjection({ claudeFiles, skillDirs, hookFiles, ruleFiles, configFiles });
       projectionMappings.push(...mappings);
 
       log("Target Projections:");
@@ -352,7 +374,7 @@ export async function runSetupWizard(
         const sourcePath = path.join(repoRoot, "canonical", mapping.source);
         const targetPath = path.join(repoRoot, mapping.target);
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
-        if (mapping.isHook) {
+        if (mapping.isHook || mapping.isConfig) {
           await fs.copyFile(sourcePath, targetPath);
         } else {
           const sourceContent = await fs.readFile(sourcePath, "utf-8");
@@ -373,11 +395,13 @@ export async function runSetupWizard(
     const projectionFiles: PayloadFile[] = projectionMappings.map((m) => {
       const component: ComponentKind = m.isHook
         ? "hooks"
-        : m.target.includes("skills")
-          ? "skills"
-          : m.target.startsWith(".codex/rules/")
-            ? "rules"
-            : "instructions";
+        : m.isConfig
+          ? "config"
+          : m.target.includes("skills")
+            ? "skills"
+            : m.target.startsWith(".codex/rules/")
+              ? "rules"
+              : "instructions";
       return {
         relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
         sourcePath: path.join(repoRoot, m.target),

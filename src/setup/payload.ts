@@ -67,7 +67,8 @@ function routeFileToHome(
       file.component === "instructions" ||
       file.component === "plans" ||
       file.component === "hooks" ||
-      file.component === "rules"
+      file.component === "rules" ||
+      file.component === "config"
     ) {
       return "codex-home";
     }

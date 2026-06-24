@@ -1,0 +1,8 @@
+{
+  "vaultPath": "/path/to/your/Obsidian/vault",
+  "rawDir": "raw-sources",
+  "wikiDir": "wiki",
+  "learningRoot": "/path/to/your/learning/root",
+  "projectsIndex": "/path/to/your/repos/PROJECTS.md",
+  "profileTarget": "/path/to/your/toolkit/canonical/PROFILE.md"
+}
