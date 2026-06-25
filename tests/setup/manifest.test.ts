@@ -158,8 +158,8 @@ externalSources:
       const manifest = parseInstallationManifestYaml(yamlText, "manifests/install.yaml");
 
       expect(manifest.version).toBe(1);
-      // Should contain all 8 sources from PLUGINS.md
-      expect(manifest.externalSources).toHaveLength(8);
+      // Should contain all 9 sources from PLUGINS.md
+      expect(manifest.externalSources).toHaveLength(9);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
@@ -167,6 +167,7 @@ externalSources:
       expect(ids).toContain("find-skills");
       expect(ids).toContain("impeccable");
       expect(ids).toContain("caveman");
+      expect(ids).toContain("ponytail");
       expect(ids).toContain("everything-claude-code");
       expect(ids).toContain("codex-plugin-cc");
       expect(ids).toContain("playwright-mcp");
@@ -180,6 +181,13 @@ externalSources:
       ]);
       expect(caveman.installCommands?.["codex-cli"]).toEqual([
         "npx skills add JuliusBrussee/caveman -a codex",
+      ]);
+
+      const ponytail = manifest.externalSources.find((s) => s.id === "ponytail")!;
+      expect(ponytail.kind).toBe("plugin");
+      expect(ponytail.installCommands?.["claude-code"]).toEqual([
+        "claude plugin marketplace add DietrichGebert/ponytail",
+        "claude plugin install ponytail@ponytail",
       ]);
 
       // MCP servers require confirmation
