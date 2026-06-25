@@ -2,6 +2,7 @@
 
 - Impeccable Skill:         https://github.com/pbakaus/impeccable (npx skills add pbakaus/impeccable)
 - Caveman:                  https://github.com/JuliusBrussee/caveman/tree/main
+- Ponytail:                  https://github.com/DietrichGebert/ponytail
 - Everything Claude Code:   https://github.com/affaan-m/everything-claude-code
 Not a Plugin per se
 - Matt Pockock Skills:      https://github.com/mattpocock/skills 

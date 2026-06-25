@@ -56,6 +56,29 @@ externalSources:
     notes:
       - Native plugin install commands from the Caveman README Install section.
 
+  - id: ponytail
+    name: Ponytail
+    kind: plugin
+    url: https://github.com/DietrichGebert/ponytail
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    installCommands:
+      claude-code:
+        - claude plugin marketplace add DietrichGebert/ponytail
+        - claude plugin install ponytail@ponytail
+      codex-cli:
+        - codex plugin marketplace add DietrichGebert/ponytail
+    notes:
+      - Decision-ladder plugin that pushes agents to write minimal code
+        (commands /ponytail-review and /ponytail-audit).
+      - Requires Node.js on PATH for lifecycle hooks; the core skill works
+        without it. No API keys or secrets.
+      - Claude Code needs the two install commands sent as separate prompts.
+      - Codex install finishes interactively under /plugins after the
+        marketplace add.
+
   - id: everything-claude-code
     name: Everything Claude Code
     kind: plugin
