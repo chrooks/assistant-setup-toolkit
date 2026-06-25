@@ -23,6 +23,6 @@ Default decision rules:
 - Use a Skill for one reusable workflow or reusable reference guidance.
 - Once the decision lands on "make it a Skill", apply the `writing-great-skills` craft reference to the body and `write-skill` for the authoring + install mechanics.
 - Use a Plugin for bundled multi-component distribution.
-- Use a hook script for event-triggered side effects.
+- Use a hook script for event-triggered side effects. Write hooks as Node scripts (`.js` under `canonical/hooks/`), not bash — keeps them cross-platform and consistent with the existing toolkit hooks.
 - Use an MCP Server for live external tool or data access.
 - Use Next Steps for actions the Setup Wizard should surface but not run.
