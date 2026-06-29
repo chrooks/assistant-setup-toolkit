@@ -43,7 +43,7 @@ matching Skill workflow, and then starts that workflow.
    routed to `/impeccable` in step 3 — forward the design brief so `/review-fanout`
    runs its design critique path.
 8. If `/verification-loop` or `/review-fanout` finds actionable issues, fix them
-   forward by concern shape: `/tdd` for testable logic (add or update tests
+   forward by concern shape: use `/tdd` for testable logic (add or update tests
    first), `/diagnose` for a bug or failing check, and `/impeccable` (a refine
    command) for a design concern from the design critique. Then rerun
    `/verification-loop` and `/review-fanout` for the repaired diff.
