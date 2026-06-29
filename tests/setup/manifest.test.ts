@@ -158,8 +158,8 @@ externalSources:
       const manifest = parseInstallationManifestYaml(yamlText, "manifests/install.yaml");
 
       expect(manifest.version).toBe(1);
-      // Should contain all 9 sources from PLUGINS.md
-      expect(manifest.externalSources).toHaveLength(9);
+      // Should contain all 10 sources from PLUGINS.md
+      expect(manifest.externalSources).toHaveLength(10);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
