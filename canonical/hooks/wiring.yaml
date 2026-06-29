@@ -73,3 +73,11 @@ hooks:
   - file: notify-activity.js
     event: UserPromptSubmit
     targets: [claude-code, codex-cli]
+  # Recall quiz on cold repo re-open. Offers a /quiz-me on this repo's previous
+  # conversation when the last session here ended >6h ago; silent otherwise.
+  # Claude-only: it reads the per-project transcript dir, which is Claude-side;
+  # Codex SessionStart has no equivalent, so the hook is not wired there.
+  - file: quiz-me.js
+    event: SessionStart
+    targets: [claude-code]
+    command: "node {hook}"
