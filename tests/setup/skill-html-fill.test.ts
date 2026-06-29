@@ -60,3 +60,32 @@ describe("diagram build script", () => {
     expect(html).toContain("<\\/script><b>x</b>"); // escaped form present
   });
 });
+
+describe("figure build script", () => {
+  const script = "canonical/skills/figure/scripts/build-figure.py";
+
+  it("neutralizes </script> in the injected spec (data included)", () => {
+    const html = runFill(script, {
+      title: "F",
+      type: "bar",
+      x: "k",
+      y: "v",
+      data: [{ k: TORTURE, v: 1 }],
+    });
+    expect(html).not.toContain("/*__FIGURE_SPEC__*/{}"); // placeholder filled
+    expect(html).not.toContain("</script><b>x</b>"); // raw script-close is gone
+    expect(html).toContain("<\\/script><b>x</b>"); // escaped form present
+  });
+
+  it("HTML-escapes the title (it lands in <title>/<h1>)", () => {
+    const html = runFill(script, {
+      title: "<img src=x onerror=alert(1)>",
+      type: "bar",
+      x: "k",
+      y: "v",
+      data: [],
+    });
+    expect(html).not.toContain("<img src=x onerror=alert(1)>");
+    expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
+  });
+});
