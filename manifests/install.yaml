@@ -39,6 +39,28 @@ externalSources:
     notes:
       - Install via `npx skills add pbakaus/impeccable`.
 
+  - id: agent-native-visual-plans
+    name: Agent-Native Visual Plans
+    kind: skill
+    url: https://github.com/BuilderIO/skills
+    default: false
+    targets:
+      - claude-code
+      - codex-cli
+    installCommands:
+      claude-code:
+        - npx @agent-native/core@latest skills add visual-plan
+      codex-cli:
+        - npx @agent-native/core@latest skills add visual-plan -a codex
+    notes:
+      - Provides /visual-plan and /visual-recap (one command installs both).
+      - Disabled by default — both skills are vendored into canonical/skills,
+        so they install via the normal projection. Re-enable to pull fresh from
+        upstream instead.
+      - The markdown skills work standalone; the shareable review-link surface
+        needs the Agent-Native plan service (VS Code extension or @agent-native
+        MCP). See each skill's references/connection.md.
+
   - id: caveman
     name: Caveman
     kind: plugin

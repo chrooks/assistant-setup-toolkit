@@ -172,6 +172,7 @@ externalSources:
       expect(ids).toContain("codex-plugin-cc");
       expect(ids).toContain("playwright-mcp");
       expect(ids).toContain("context7");
+      expect(ids).toContain("agent-native-visual-plans");
 
       const caveman = manifest.externalSources.find((s) => s.id === "caveman")!;
       expect(caveman.kind).toBe("plugin");
