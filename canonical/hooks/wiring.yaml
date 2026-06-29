@@ -47,6 +47,14 @@ hooks:
   - file: devos-steering.js
     event: UserPromptSubmit
     targets: [claude-code]
+  # Quick-recap completion-status nudge — re-injects every turn so the
+  # 🟢/🟡/🔴 status-line convention survives long sessions and compaction.
+  # Only work-completing turns get a line; Q&A skips it. Full rules live in
+  # canonical/CLAUDE.md. Claude-only, mirroring lexicon-reminder (Codex shows
+  # additionalContext as transcript noise).
+  - file: quick-recap-reminder.sh
+    event: UserPromptSubmit
+    targets: [claude-code]
   - file: strategic-compact.js
     event: PreToolUse
     matcher: "Edit|Write"
