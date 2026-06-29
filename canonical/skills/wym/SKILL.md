@@ -1,13 +1,13 @@
 ---
 name: wym
-description: "wym (\"what you mean?\") explains a concept in a caveman sandwich: a one-line intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway. The visual is a caveman ASCII diagram by default, or a /table / /diagram when the concept's shape fits those better (form choice deferred to ~/.claude/rules/common/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time."
+description: "wym (\"what you mean?\") explains a concept in a sandwich: a one-line plain-English intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway. The visual is a caveman ASCII diagram by default, or a /table / /diagram when the concept's shape fits those better (form choice deferred to ~/.claude/rules/common/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time."
 argument-hint: "<concept>"
 ---
 
-# /wym — Caveman Sandwich Concept Explainer
+# /wym — Sandwich Concept Explainer
 
-Explains any concept as a caveman sandwich: a one-line **intro** that frames the concept on
-top, human language and a best-fit **visual** in the middle, and a caveman **TLDR** on the
+Explains any concept as a sandwich: a one-line plain-English **intro** that frames the concept
+on top, human language and a best-fit **visual** in the middle, and a caveman **TLDR** on the
 bottom as the compressed takeaway the reader keeps. No prompts, immediate output.
 ("wym" = *what you mean?*)
 
@@ -23,7 +23,7 @@ Always this structure, always all four parts in this order:
 ## [Concept], explained
 
 ### Intro
-[One-line caveman frame that SETS UP the concept — what we are about to unpack, not a verdict]
+[One plain-English sentence that SETS UP the concept — what we are about to unpack, not a verdict. Closest-to-human framing, NOT caveman.]
 
 ### Human
 [1-2 paragraph human-readable explanation, optionally with analogy]
@@ -37,11 +37,10 @@ Always this structure, always all four parts in this order:
 
 ## Layer Rules
 
-### Intro (top bread — caveman, the frame)
-- Invoke `/caveman full` conventions for this layer.
-- 1 sentence, no articles, no filler, no hedging.
-- **Sets up** the concept — names what we are about to unpack. It is a frame, NOT a verdict.
-- Do not resolve or conclude here; the conclusion is the TLDR at the bottom.
+### Intro (top bread — plain English, the frame)
+- Plain, close-to-human language. NOT caveman — save the word-economy for the TLDR.
+- 1 full sentence that **sets up** the concept — names what we are about to unpack. A frame, NOT a verdict.
+- Explain the concept as plainly as possible; do not resolve or conclude here (that is the TLDR's job at the bottom).
 
 ### Human (filling — normal prose)
 - 1-2 paragraphs max.
@@ -88,7 +87,7 @@ limit, light expertise taper). Do not restate that cheat sheet here.
 ## Lineup Combinations, explained
 
 ### Intro
-Team got more than 5 players. Engine must pick which 5 play together.
+A Team often has more than 5 players, so the engine has to decide which 5 belong on the court together.
 
 ### Human
 In Cornerstone, a Lineup is exactly 5 players on the court together — the atomic
