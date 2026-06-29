@@ -13,7 +13,8 @@ decorative one only costs attention. Match the form to the concept's shape, then
 
 | Concept shape | Best form |
 |---|---|
-| Multi-attribute comparison (options × dimensions) | **Table** — `/table` |
+| Multi-attribute comparison (options × dimensions), or looking up exact values | **Table** — `/table` |
+| Quantitative *shape* — a trend over time, magnitude comparison, ranking, distribution, correlation | **Chart** — `/figure` |
 | Process / pipeline / linear steps | **Numbered list** (linear) or **flowchart** (branches/loops) — `/diagram` |
 | Architecture / how parts connect | **Node-and-edge diagram** — `/diagram` |
 | State machine / lifecycle | **State diagram** — `/diagram` |

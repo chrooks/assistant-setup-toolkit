@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>__FIGURE_TITLE__</title>
+<style>
+  :root {
+    --bg: oklch(98% 0.004 250);
+    --surface: oklch(100% 0 0);
+    --text: oklch(22% 0.01 260);
+    --subtle: oklch(50% 0.02 260);
+    --line: oklch(90% 0.01 260);
+    --accent: #7c3aed;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 13px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text); background: var(--bg);
+    padding: clamp(0.75rem, 0.5rem + 1.5vw, 2rem);
+  }
+  h1 { margin: 0 0 0.15rem; font-size: clamp(1.3rem, 1.1rem + 1vw, 1.9rem); letter-spacing: -0.02em; }
+  #subtitle { color: var(--subtle); font-size: 0.82rem; margin-bottom: 1rem; }
+  #figure {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1rem 1.1rem; overflow-x: auto;
+  }
+  #figure figure { margin: 0; }
+  #error { display: none; color: #dc2626; font-size: 0.85rem; padding: 1rem; }
+  #error.show { display: block; }
+  .swatches { font: inherit; }
+</style>
+</head>
+<body>
+  <h1>__FIGURE_TITLE__</h1>
+  <div id="subtitle"></div>
+  <div id="figure"></div>
+  <div id="error"></div>
+
+<!-- Observable Plot is D3 (same author) — the concise grammar layer over D3 scales/axes. -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/dist/plot.umd.min.js"></script>
+<script>
+  // ===== Injected by the /figure skill =====
+  const SPEC = /*__FIGURE_SPEC__*/{};
+
+  // Map a JSON-friendly high-level spec → Observable Plot marks (no functions cross the JSON line).
+  // High-level shape: { type, data, x, y, series?, options? }
+  //   type: bar | barh | line | area | dot | scatter
+  // Raw escape hatch: { plot: { ...PlotOptions, marks:[{mark,data,options}] } } for power use.
+  function highLevelMarks(s) {
+    const data = s.data || [];
+    const { x, y, series } = s;
+    const color = series ? { stroke: series, fill: series } : {};
+    switch (s.type) {
+      case "bar":     return [Plot.barY(data, { x, y, fill: series, tip: true }), Plot.ruleY([0])];
+      case "barh":    return [Plot.barX(data, { x: y, y: x, fill: series, tip: true }), Plot.ruleX([0])];
+      case "area":    return [Plot.areaY(data, { x, y, fill: series, fillOpacity: series ? 0.7 : 0.25 }), Plot.lineY(data, { x, y, stroke: series }), Plot.ruleY([0])];
+      case "line":    return [Plot.lineY(data, { x, y, stroke: series, tip: true }), Plot.ruleY([0])];
+      case "dot":
+      case "scatter": return [Plot.dot(data, { x, y, stroke: series || "currentColor", fill: series, tip: true })];
+      default: throw new Error("Unknown figure type: " + s.type + " (use bar|barh|line|area|dot|scatter, or a raw { plot } spec).");
+    }
+  }
+
+  // Hydrate the raw-Plot escape hatch: { marks:[{mark:'barY', data, options}] }.
+  function rawMarks(plotSpec) {
+    return (plotSpec.marks || []).map((m) => {
+      const fn = Plot[m.mark];
+      if (typeof fn !== "function") throw new Error("Unknown Plot mark: " + m.mark);
+      return fn(m.data || [], m.options || {});
+    });
+  }
+
+  function build() {
+    const base = {
+      width: SPEC.width || 720,
+      color: { legend: !!SPEC.series || undefined },
+      style: { background: "transparent", color: "var(--text)", fontSize: "12px" },
+      ...(SPEC.options || {}),
+    };
+    if (SPEC.plot) {
+      return Plot.plot({ ...base, ...SPEC.plot, marks: rawMarks(SPEC.plot) });
+    }
+    return Plot.plot({ ...base, marks: highLevelMarks(SPEC) });
+  }
+
+  try {
+    document.getElementById("subtitle").textContent = SPEC.subtitle || "";
+    document.getElementById("figure").append(build());
+  } catch (err) {
+    const e = document.getElementById("error");
+    e.textContent = String(err && err.message ? err.message : err);
+    e.classList.add("show");
+  }
+</script>
+</body>
+</html>

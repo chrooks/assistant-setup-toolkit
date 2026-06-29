@@ -1,6 +1,6 @@
 ---
 name: visualize
-description: "Pick the best-fit visual for a concept's shape and render it — the umbrella router over /table, /diagram, and inline ASCII/tree. Use when a concept has a shape a visual carries (a comparison, a process, an architecture, a state machine, a hierarchy), when the user invokes /visualize, says 'visualize this' / 'show me this', or asks for the best way to picture something. Routes the form choice through the shared visual-picker rule; it does not re-derive the cheat sheet."
+description: "Pick the best-fit visual for a concept's shape and render it — the umbrella router over /table, /diagram, /figure, and inline ASCII/tree. Use when a concept has a shape a visual carries (a comparison, a process, an architecture, a state machine, a hierarchy, a number-story), when the user invokes /visualize, says 'visualize this' / 'show me this', or asks for the best way to picture something. Routes the form choice through the shared visual-picker rule; it does not re-derive the cheat sheet."
 argument-hint: "<concept or data to visualize>"
 ---
 
@@ -25,7 +25,8 @@ No confirmation prompts. `/visualize X` → pick the form, render it immediately
    match the concept's shape to a form in its cheat sheet. (Do not re-derive the table here;
    that rule owns it.)
 2. **Render with the form's skill:**
-   - Comparison / multi-attribute → **`/table`** (`md` for a quick read-only table, `html` for sort/filter/search).
+   - Comparison / multi-attribute, or looking up exact values → **`/table`** (`md` for a quick read-only table, `html` for sort/filter/search).
+   - Quantitative shape — trend, magnitude comparison, ranking, distribution, correlation → **`/figure`** (`md` for inline ASCII bars, `html` for an interactive D3 chart).
    - Architecture, pipeline, user flow, sequence, state machine → **`/diagram`** (`md` for ASCII + Mermaid, `html` for an interactive graph).
    - Hierarchy / part-whole, or a short parallel/sequential set → an **inline ASCII tree or list** (no separate file).
    - Genuine narrative, nuance, or "why" → **prose** — say so and skip the visual.
@@ -39,5 +40,5 @@ When the concept has no visual-carrying shape, render nothing and explain in pro
 
 ## Relationship to the other visual skills
 
-- `/table` and `/diagram` are the concrete renderers `/visualize` routes to — call them directly when the form is already obvious.
+- `/table`, `/figure`, and `/diagram` are the concrete renderers `/visualize` routes to — call them directly when the form is already obvious.
 - `/wym` and `/walkthrough` defer the same "which form" decision to the same shared rule, so a concept is visualized the same way wherever it surfaces.
