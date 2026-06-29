@@ -31,6 +31,17 @@ Reach for the best-fit visual when a concept has a **shape a visual carries** �
   - `/diagram` — architecture, a pipeline, a user flow, a sequence, a state machine (`/diagram md` for an ASCII-plus-Mermaid sketch, `/diagram html` for an interactive graph).
 - The visual must be **representational, not decorative**. **Skip visuals for nuance, narrative, or "why"** — those are prose. Taper visuals as Chris owns a topic (lean on them when the material is new).
 
+## Completion Status (Quick Recap)
+End every turn that **completes a unit of work** with a single status line, so completion state is obvious at a glance.
+
+- **Scope: work-completing turns only.** A turn that lands edits, commits, file/config changes, or a built/wired feature gets a line. Pure Q&A, explanation, or a question back to me gets **no** line.
+- **One line, three colors:**
+  - `🟢` — the requested work is finished.
+  - `🟡` — non-routine follow-up remains; name the pending item.
+  - `🔴` — blocked on my input; name what you need.
+- **Form:** under 100 characters, written from my perspective (finished / pending a specific step / blocked). Put it at the **very end** — no `---`, no spacer, nothing after it.
+- **ACTIVE EVERY RESPONSE.** This does not decay across long sessions, tool use, or compaction. The `quick-recap-reminder.sh` hook re-injects the recency nudge each turn; these are the full rules.
+
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
 - If a `<CURRENT_PROJECT_DIR>/CONTEXT.md` file exists, treat it as the source of truth for the project's Lexicon. We may not always have a project-level `CONTEXT.md` — when absent, fall back to the global Lexicon only.
