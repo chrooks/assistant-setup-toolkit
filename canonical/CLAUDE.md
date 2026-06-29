@@ -40,7 +40,7 @@ End every turn that **completes a unit of work** with a single status line, so c
   - `🟡` — non-routine follow-up remains; name the pending item.
   - `🔴` — blocked on my input; name what you need.
 - **Form:** under 100 characters, written from my perspective (finished / pending a specific step / blocked). Put it at the **very end** — no `---`, no spacer, nothing after it.
-- **ACTIVE EVERY RESPONSE.** This does not decay across long sessions, tool use, or compaction. The `quick-recap-reminder.sh` hook re-injects the recency nudge each turn; these are the full rules.
+- **ACTIVE EVERY RESPONSE.** This does not decay across long sessions, tool use, or compaction. The `quick-recap-reminder.js` hook re-injects the recency nudge each turn; these are the full rules.
 
 ## Lexicon Usage
 - If an Assistant Home `CONTEXT.md` exists, treat it as the global Lexicon for Development Conversations.
