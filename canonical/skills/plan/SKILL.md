@@ -75,7 +75,19 @@ Present the plan as a walkthrough, not a wall of text:
 - The acceptance criteria, each beside its proof method (a `/table md` table
   reads well here).
 
-### Step 5 — Approval gate
+### Step 5 — Offer a visual plan
+
+After the walkthrough, propose rendering it as a visual plan with `/visual-plan`
+— the richer review surface (inline diagrams, file-by-file map, annotated code,
+wireframe/prototype canvas, commentable open questions) backed by the Plan MCP.
+
+Offer it; don't force it. Reach for it when the work is UI-heavy, multi-file,
+ambiguous, risky, or long-running, or when the human needs to compare and
+approve a direction before code. Skip it for trivial, well-specified work whose
+diff fits in one sentence. `/visual-plan` reuses this ExecPlan as its source, so
+it builds the surface from the plan instead of starting over.
+
+### Step 6 — Approval gate
 
 Ask the human to approve, tweak, or reject. Do not start implementing until
 they approve. This is the human-in-the-loop gate.

@@ -156,6 +156,14 @@ Parse the JSON and write it back with this fixed map:
 stage that may send the run backward. The prove stage only *proposes* statuses;
 the human disposes here. Never auto-route on a proposed status.
 
+**Offer a visual recap (after prove, before the verdict).** The proofs have run;
+the diff exists. Propose rendering the landed change as a visual recap with
+`/visual-recap` — a high-altitude review surface (file map, schema/API change
+summaries, annotated diffs, diagrams) the human reads to assess, instead of the
+raw diff. Offer it; don't force it. Reach for it when the change is multi-file or
+touches schema, API contracts, or architecture; skip it for a small, single-file
+diff. This is the mirror of the `/visual-plan` offer at the plan stage.
+
 1. **Walk the human through the Proof Ledger.** Present each acceptance
    criterion with its proposed status and evidence. The human accepts or
    overrides each one. The verdict is theirs.

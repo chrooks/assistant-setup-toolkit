@@ -74,6 +74,16 @@ Before creating or updating a PR:
    - Summary
    - Verification
    - Review-fanout status when available
+   - Visual recap link when generated (below)
+
+## Visual Recap
+
+Offer to render the diff as a visual recap with `/visual-recap` — a high-altitude
+review surface (file map, schema/API change summaries, annotated diffs, diagrams)
+with a shareable link, which is exactly what `/visual-recap` is built for. Offer
+it; don't force it. Reach for it when the diff is multi-file or touches schema,
+API contracts, or architecture; skip it for a small, single-file PR. When
+generated, add the link to the PR body and the final response.
 
 ## Review-fanout
 
@@ -155,6 +165,7 @@ Return exactly this Markdown shape (omit empty bullets, do not add prose around 
 
 ```md
 - **PR:** <url>
+- **Visual recap:** <url | omit if not generated>
 - **Review-fanout comment:** <url>
 - **Fix-forward commits:** <sha1>, <sha2>
 - **Verification:** <one-line summary of runs + pass/fail>
