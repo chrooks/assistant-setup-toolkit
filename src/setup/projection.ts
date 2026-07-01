@@ -58,6 +58,7 @@ const FILE_MAP: Record<string, string> = {
   "CLAUDE.md": ".codex/AGENTS.md",
   "PLAN.md": ".codex/PLAN.md",
   "CONTEXT.md": ".codex/CONTEXT.md",
+  "PROFILE.md": ".codex/PROFILE.md",
 };
 
 // -- Text rewriting --

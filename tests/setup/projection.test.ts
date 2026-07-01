@@ -109,6 +109,17 @@ describe("projection", () => {
       expect(plan[0].target).toBe(".codex/CONTEXT.md");
     });
 
+    it("maps PROFILE.md to .codex/PROFILE.md", () => {
+      const plan = planCodexProjection({
+        claudeFiles: ["PROFILE.md"],
+        skillDirs: [],
+      });
+
+      expect(plan).toHaveLength(1);
+      expect(plan[0].source).toBe("PROFILE.md");
+      expect(plan[0].target).toBe(".codex/PROFILE.md");
+    });
+
     it("maps skill directories to .agents/skills/", () => {
       const plan = planCodexProjection({
         claudeFiles: [],
