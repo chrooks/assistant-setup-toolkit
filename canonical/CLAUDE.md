@@ -55,6 +55,12 @@ End every turn that **completes a unit of work** with a single status line, so c
 ### Active Lexicon (global)
 @~/.claude/CONTEXT.md
 
+## Profile
+- A distilled profile of who I am — loaded every session. Reason from it the way you use the Lexicon.
+- Local-only and may be absent; treat a missing import as a harmless no-op.
+
+@~/.claude/PROFILE.md
+
 ## Ground Answers in Truth
 - If a question asks something specific, and you're not sure of the exact answer, ground your answer in truth by doing a web search, or checking Context7 MCP for reliable sources of truth.
   - Good examples include:

@@ -93,6 +93,7 @@ async function discoverCanonicalFiles(
   for (const [filename, component] of [
     ["CLAUDE.md", "instructions"],
     ["CONTEXT.md", "instructions"],
+    ["PROFILE.md", "instructions"],
     ["PLAN.md", "plans"],
   ] as const) {
     const filePath = path.join(canonicalDir, filename);
@@ -315,7 +316,7 @@ export async function runSetupWizard(
     if (hasCodex) {
       // Discover what's in canonical/ for projection planning
       const claudeFiles: string[] = [];
-      for (const name of ["CLAUDE.md", "CONTEXT.md", "PLAN.md"]) {
+      for (const name of ["CLAUDE.md", "CONTEXT.md", "PROFILE.md", "PLAN.md"]) {
         try {
           await fs.access(path.join(repoRoot, "canonical", name));
           claudeFiles.push(name);
