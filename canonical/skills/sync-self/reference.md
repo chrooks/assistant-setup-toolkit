@@ -10,8 +10,8 @@ Under `<vaultPath>/<wikiDir>/`:
 
 - `chris.md`
 - `chris-trajectory.md`
-- `chris-learning-goals.md`
-- `chris-values.md`
+- `learning-goals.md`
+- `values.md`
 
 ## The allow-list is the binding guard
 

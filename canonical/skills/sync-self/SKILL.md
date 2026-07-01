@@ -34,8 +34,8 @@ Read exactly these four pages under `<vaultPath>/<wikiDir>/` and nothing else:
 
 - `chris.md` — identity, day job (generalized), background
 - `chris-trajectory.md` — North Star, sequence, builder-with-range
-- `chris-learning-goals.md` — what he's learning, recurring interests
-- `chris-values.md` — values and the design ethos (points at the Lexicon)
+- `learning-goals.md` — what he's learning, recurring interests
+- `values.md` — values and the design ethos (points at the Lexicon)
 
 **The allow-list is the binding guard.** Read those four files and nothing else — whatever
 lives outside them is out of scope no matter where it sits. Two reinforcing rules:
