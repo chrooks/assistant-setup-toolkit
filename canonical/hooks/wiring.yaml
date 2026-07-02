@@ -89,3 +89,11 @@ hooks:
     event: SessionStart
     targets: [claude-code]
     command: "node {hook}"
+  # Tells the assistant what machine it's actually on (hostname, OS, remote
+  # SSH or not) every session — informational only, no config, no off-switch.
+  # Claude-only, mirroring devos-steering.js/quick-recap-reminder.js (Codex
+  # shows additionalContext as transcript noise).
+  - file: environment-context.js
+    event: SessionStart
+    targets: [claude-code]
+    command: "node {hook}"
