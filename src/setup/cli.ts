@@ -11,7 +11,12 @@ import type {
   WriteBehavior,
   SetupProfile,
 } from "./domain.js";
-import { ALL_COMPONENT_KINDS } from "./domain.js";
+import {
+  ALL_COMPONENT_KINDS,
+  VISUAL_PLANS_VARIANT_KEY,
+  VISUAL_PLANS_VARIANTS,
+} from "./domain.js";
+import type { VisualPlansVariant } from "./domain.js";
 
 /** Result of attempting to parse CLI flags. */
 export type ParseResult =
@@ -34,6 +39,8 @@ export interface PartialFlags {
    * `[]` means `--no-sources` was passed (skip all External Sources).
    */
   readonly selectedExternalSourceIds?: readonly string[];
+  /** Optional `--visual-plans <value>` Variant, validated against the union. */
+  readonly visualPlansVariant?: VisualPlansVariant;
 }
 
 /**
@@ -86,8 +93,36 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
     }
   }
 
+  // Parse `--visual-plans <value>`. A bad or missing value warns; it forces
+  // interactive only when the run isn't already pinned non-interactive
+  // (--yes/--sync must never hang a CI/non-TTY run on a typo). An unset
+  // Variant is rehydrated later from the Install Receipt.
+  let visualPlansVariant: VisualPlansVariant | undefined;
+  let visualPlansInvalid = false;
+  {
+    const argvList = [...argv];
+    const idx = argvList.indexOf("--visual-plans");
+    if (idx !== -1) {
+      const raw = idx + 1 < argvList.length ? argvList[idx + 1].trim() : "";
+      if ((VISUAL_PLANS_VARIANTS as readonly string[]).includes(raw)) {
+        visualPlansVariant = raw as VisualPlansVariant;
+      } else {
+        visualPlansInvalid = true;
+        const shown = raw === "" || raw.startsWith("--") ? "(missing)" : raw;
+        console.warn(
+          `Invalid --visual-plans value ${shown} — expected one of: ${VISUAL_PLANS_VARIANTS.join(", ")}.`,
+        );
+      }
+    }
+  }
+  const forceInteractiveForVariant = visualPlansInvalid && !yes;
+
   // If we have targets + mode, we can build a complete profile
-  if (targets.length > 0 && (hasDefault || hasCustom)) {
+  if (
+    targets.length > 0 &&
+    (hasDefault || hasCustom) &&
+    !forceInteractiveForVariant
+  ) {
     const mode: SetupMode = hasCustom ? "custom" : "default";
     let writeBehavior: WriteBehavior = "safe-merge";
     if (overwrite) writeBehavior = "overwrite";
@@ -106,6 +141,11 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
         yes,
         quiet,
         selectedExternalSourceIds,
+        // Unset (no flag / bad value under --yes) stays undefined so the
+        // Install Receipt's recorded Variant can rehydrate it downstream.
+        variants: visualPlansVariant
+          ? { [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant }
+          : undefined,
       },
     };
   }
@@ -123,6 +163,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
       yes,
       quiet,
       selectedExternalSourceIds,
+      visualPlansVariant,
     },
   };
 }

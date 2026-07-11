@@ -11,8 +11,19 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { tryParseCliFlags } from "./cli.js";
 import { runInteractivePrompts } from "./prompts.js";
-import { resolveAssistantHomes } from "./domain.js";
-import type { AssistantTargetId, AssistantHomeId, PayloadFile, ComponentKind } from "./domain.js";
+import {
+  resolveAssistantHomes,
+  resolveVisualPlansVariant,
+  VISUAL_PLANS_SKILL_NAMES,
+  VISUAL_PLANS_VARIANT_KEY,
+} from "./domain.js";
+import type {
+  AssistantTargetId,
+  AssistantHomeId,
+  PayloadFile,
+  ComponentKind,
+  SetupProfile,
+} from "./domain.js";
 import { loadInstallationManifest } from "./manifest.js";
 import type { ExternalSource } from "./manifest.js";
 import { resolveAssistantHomePath, resolveReceiptPath } from "./paths.js";
@@ -27,9 +38,10 @@ import {
   buildStandardNextSteps,
   formatNextStepsSection,
   planInstallCommandNextSteps,
+  planVisualPlansNextSteps,
 } from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
-import { applyWritePlan } from "./apply.js";
+import { applyWritePlan, readInstallReceipt } from "./apply.js";
 import {
   loadWiringManifest,
   planHookWiring,
@@ -218,7 +230,7 @@ export async function runSetupWizard(
       manifest = { version: 1 as const, externalSources: [] };
     }
 
-    let profile;
+    let profile: SetupProfile;
     if (parseResult.kind === "profile") {
       profile = parseResult.profile;
     } else {
@@ -419,6 +431,27 @@ export async function runSetupWizard(
     log("  - External Sources prepared first");
     log("  - Canonical Assistant Source applied last; local files win conflicts");
 
+    // Rehydrate an unset visual-plans Variant from the machine's Install
+    // Receipt so --sync/--yes re-runs preserve the recorded choice instead of
+    // resetting it (a `none` box must stay `none`). Default applies only when
+    // no receipt carries a prior value.
+    if (profile.variants?.[VISUAL_PLANS_VARIANT_KEY] === undefined) {
+      for (const homeId of resolveAssistantHomes(profile.targets)) {
+        const receipt = await readInstallReceipt(
+          resolveAssistantHomePath(homeId),
+        );
+        const prior = receipt?.setupProfile.variants?.[VISUAL_PLANS_VARIANT_KEY];
+        if (prior) {
+          profile = {
+            ...profile,
+            variants: { ...profile.variants, [VISUAL_PLANS_VARIANT_KEY]: prior },
+          };
+          log(`Visual plans Variant (from Install Receipt): ${prior}`);
+          break;
+        }
+      }
+    }
+
     // Build Assistant Payloads — external files come from the fetcher above
     // (empty array on dry-run or when no sources were selected).
     const payloadResult = buildAssistantPayloads({
@@ -427,6 +460,7 @@ export async function runSetupWizard(
       externalFiles,
       canonicalFiles,
       projectionFiles,
+      variants: profile.variants,
     });
 
     // Report conflicts if any
@@ -497,6 +531,7 @@ export async function runSetupWizard(
           mode: profile.mode,
           components: [...profile.components],
           writeBehavior: profile.writeBehavior,
+          variants: profile.variants,
         });
 
         totalWritten += result.filesWritten;
@@ -571,8 +606,13 @@ export async function runSetupWizard(
       }
     }
 
-    // Skill Artifact generation — plan and create ZIPs for desktop/web upload
-    const skillDirs = await discoverSkillDirs(repoRoot);
+    // Skill Artifact generation — plan and create ZIPs for desktop/web upload.
+    // The visual-plans Variant governs artifacts the same way as the payload.
+    const skillDirs = (await discoverSkillDirs(repoRoot)).filter(
+      (dir) =>
+        resolveVisualPlansVariant(profile) !== "none" ||
+        !(VISUAL_PLANS_SKILL_NAMES as readonly string[]).includes(dir.name),
+    );
     const artifactsDir = path.join(repoRoot, "artifacts");
     const plannedArtifacts = planSkillArtifacts({ skillDirs, artifactsDir });
     let hasSkillArtifacts = false;
@@ -614,10 +654,15 @@ export async function runSetupWizard(
     });
     const mcpSteps = planMcpNextSteps(manifest.externalSources);
     const standardSteps = buildStandardNextSteps(hasSkillArtifacts);
+    const visualPlansSteps = planVisualPlansNextSteps(
+      resolveVisualPlansVariant(profile),
+      profile.targets,
+    );
     const allNextSteps: NextStep[] = [
       ...installCommandSteps,
       ...standardSteps,
       ...mcpSteps,
+      ...visualPlansSteps,
     ];
     for (const line of formatNextStepsSection(allNextSteps)) {
       log(line);

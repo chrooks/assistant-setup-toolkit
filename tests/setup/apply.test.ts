@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { applyWritePlan } from "../../src/setup/apply.js";
+import { applyWritePlan, readInstallReceipt } from "../../src/setup/apply.js";
 import type { WritePlan } from "../../src/setup/write-plan.js";
 
 // Temporary directories for source files and target home
@@ -225,6 +225,7 @@ describe("apply", () => {
         mode: "default",
         components: ["instructions"],
         writeBehavior: "safe-merge",
+        variants: { "visual-plans": "self-hosted" },
       });
 
       // Receipt should exist
@@ -235,6 +236,19 @@ describe("apply", () => {
       expect(receipt.toolkit).toBe("code-assistant-context");
       expect(receipt.assistantTarget).toBe("claude-code");
       expect(receipt.files).toContain("CLAUDE.md");
+      expect(receipt.setupProfile.variants).toEqual({
+        "visual-plans": "self-hosted",
+      });
+
+      // Rehydration: the recorded Variant reads back for the next run
+      const readBack = await readInstallReceipt(homeDir);
+      expect(readBack?.setupProfile.variants?.["visual-plans"]).toBe(
+        "self-hosted",
+      );
+    });
+
+    it("readInstallReceipt returns null when no receipt exists", async () => {
+      expect(await readInstallReceipt(homeDir)).toBeNull();
     });
 
     it("creates nested directories for deep file paths", async () => {

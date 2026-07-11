@@ -13,8 +13,13 @@ import type {
   WriteBehavior,
   ComponentKind,
   SetupProfile,
+  VisualPlansVariant,
 } from "./domain.js";
-import { ALL_COMPONENT_KINDS } from "./domain.js";
+import {
+  ALL_COMPONENT_KINDS,
+  DEFAULT_VISUAL_PLANS_VARIANT,
+  VISUAL_PLANS_VARIANT_KEY,
+} from "./domain.js";
 import type { PartialFlags } from "./cli.js";
 import type { ExternalSource } from "./manifest.js";
 
@@ -48,6 +53,11 @@ export async function runInteractivePrompts(
       yes: true,
       quiet: partial.quiet,
       selectedExternalSourceIds: [],
+      // Unset stays undefined — Quick Sync preserves the machine's recorded
+      // Variant via Install Receipt rehydration rather than resetting it.
+      variants: partial.visualPlansVariant
+        ? { [VISUAL_PLANS_VARIANT_KEY]: partial.visualPlansVariant }
+        : undefined,
     };
   }
 
@@ -93,6 +103,10 @@ export async function runInteractivePrompts(
     writeBehavior = await promptWriteBehavior();
   }
 
+  // Step 4.5: Visual-plans Variant (skip if provided via --visual-plans)
+  const visualPlansVariant =
+    partial.visualPlansVariant ?? (await promptVisualPlansVariant());
+
   // Step 5: Dry-run toggle (skip if already set via flag)
   let dryRun = partial.dryRun;
   if (!dryRun) {
@@ -111,6 +125,7 @@ export async function runInteractivePrompts(
     yes: partial.yes,
     quiet: partial.quiet,
     selectedExternalSourceIds,
+    variants: { [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant },
   };
 
   if (!partial.yes) {
@@ -124,6 +139,28 @@ export async function runInteractivePrompts(
 }
 
 // -- Individual prompt functions --
+
+/** Prompt for the visual-plans Variant (see docs/adr/0001). */
+async function promptVisualPlansVariant(): Promise<VisualPlansVariant> {
+  return select<VisualPlansVariant>({
+    message: "Visual plans backend (/visual-plan, /visual-recap):",
+    choices: [
+      {
+        name: "Self-hosted — Plan app on hestia via MCP (personal devices)",
+        value: "self-hosted",
+      },
+      {
+        name: "Local files — MDX + CLI bridge, no MCP (work laptop)",
+        value: "local-files",
+      },
+      {
+        name: "None — skip the visual-plan skills on this machine",
+        value: "none",
+      },
+    ],
+    default: DEFAULT_VISUAL_PLANS_VARIANT,
+  });
+}
 
 /** Prompt user to choose Quick Sync or Full Setup. */
 async function promptOperation(): Promise<"sync" | "setup"> {

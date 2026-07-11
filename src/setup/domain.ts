@@ -33,6 +33,41 @@ export type ComponentKind =
   | "manifests"
   | "mcp";
 
+/** A per-machine flavor choice for the visual-plan/visual-recap backend. */
+export type VisualPlansVariant = "local-files" | "self-hosted" | "none";
+
+/** The Variant key for the visual-plans flavor in SetupProfile.variants. */
+export const VISUAL_PLANS_VARIANT_KEY = "visual-plans";
+
+/** All valid visual-plans Variant values, for flag/prompt validation. */
+export const VISUAL_PLANS_VARIANTS: readonly VisualPlansVariant[] = [
+  "local-files",
+  "self-hosted",
+  "none",
+] as const;
+
+/** Non-interactive default: every non-work machine is a personal machine. */
+export const DEFAULT_VISUAL_PLANS_VARIANT: VisualPlansVariant = "self-hosted";
+
+/** Origin of the self-hosted Plan app (hearth deploy on hestia). */
+export const SELF_HOSTED_PLAN_URL = "https://plan.hestia.chrooks.com";
+
+/** The skill directories the visual-plans Variant governs. */
+export const VISUAL_PLANS_SKILL_NAMES = ["visual-plan", "visual-recap"] as const;
+
+/**
+ * Resolve the visual-plans Variant from a profile's variants map,
+ * falling back to the non-interactive default for unset/unknown values.
+ */
+export function resolveVisualPlansVariant(profile: {
+  readonly variants?: Readonly<Record<string, string>>;
+}): VisualPlansVariant {
+  const raw = profile.variants?.[VISUAL_PLANS_VARIANT_KEY];
+  return VISUAL_PLANS_VARIANTS.includes(raw as VisualPlansVariant)
+    ? (raw as VisualPlansVariant)
+    : DEFAULT_VISUAL_PLANS_VARIANT;
+}
+
 /** The kind of thing an External Source provides. */
 export type ExternalSourceKind =
   | "skill"
@@ -75,6 +110,12 @@ export interface SetupProfile {
    * `[]` = explicitly install no External Sources.
    */
   readonly selectedExternalSourceIds?: readonly string[];
+  /**
+   * Per-machine Variant choices, keyed by Variant name (e.g. "visual-plans").
+   * Plain data so a future per-device preset system can absorb it unchanged.
+   * `undefined` = no Variant chosen (interactive flows should ask).
+   */
+  readonly variants?: Readonly<Record<string, string>>;
 }
 
 /** Where a payload file came from — used for precedence and conflict reporting. */
@@ -106,7 +147,10 @@ export interface InstallReceipt {
   readonly installedAt: string;
   readonly assistantTarget: AssistantTargetId;
   readonly assistantHome: string;
-  readonly setupProfile: Pick<SetupProfile, "mode" | "components" | "writeBehavior">;
+  readonly setupProfile: Pick<
+    SetupProfile,
+    "mode" | "components" | "writeBehavior" | "variants"
+  >;
   readonly files: readonly string[];
 }
 

@@ -9,7 +9,28 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { WritePlan } from "./write-plan.js";
-import type { AssistantTargetId, ComponentKind, WriteBehavior } from "./domain.js";
+import type {
+  AssistantTargetId,
+  ComponentKind,
+  InstallReceipt,
+  WriteBehavior,
+} from "./domain.js";
+import { resolveReceiptPath } from "./paths.js";
+
+/**
+ * Read the Install Receipt from an Assistant Home, or null when absent or
+ * unreadable. Used to rehydrate per-machine Variant choices on re-runs.
+ */
+export async function readInstallReceipt(
+  assistantHome: string,
+): Promise<InstallReceipt | null> {
+  try {
+    const raw = await fs.readFile(resolveReceiptPath(assistantHome), "utf-8");
+    return JSON.parse(raw) as InstallReceipt;
+  } catch {
+    return null;
+  }
+}
 
 // -- Types --
 
@@ -19,6 +40,8 @@ export interface ApplyReceiptOptions {
   readonly mode: "default" | "custom";
   readonly components: readonly ComponentKind[];
   readonly writeBehavior: WriteBehavior;
+  /** Per-machine Variant choices recorded for future runs (see domain.ts). */
+  readonly variants?: Readonly<Record<string, string>>;
 }
 
 /** Result of applying a write plan. */
@@ -163,15 +186,12 @@ export async function applyWritePlan(
         mode: receiptOptions.mode,
         components: receiptOptions.components,
         writeBehavior: receiptOptions.writeBehavior,
+        variants: receiptOptions.variants,
       },
       files: writtenFiles,
     };
 
-    const receiptPath = path.join(
-      plan.assistantHome,
-      ".assistant-setup-toolkit",
-      "receipt.json",
-    );
+    const receiptPath = resolveReceiptPath(plan.assistantHome);
     await fs.mkdir(path.dirname(receiptPath), { recursive: true });
     await fs.writeFile(receiptPath, JSON.stringify(receipt, null, 2) + "\n", "utf-8");
   }

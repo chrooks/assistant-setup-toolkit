@@ -214,5 +214,51 @@ describe("payload", () => {
         ),
       ).toBe(true);
     });
+
+    it("excludes visual-plan skills when the visual-plans Variant is none", () => {
+      const skill = (relativePath: string): PayloadFile => ({
+        relativePath,
+        sourcePath: `/repo/canonical/${relativePath}`,
+        component: "skills",
+        origin: "canonical-source",
+        executable: false,
+      });
+      const result = buildAssistantPayloads({
+        targets: ["claude-code"],
+        components: ["skills"],
+        externalFiles: [],
+        canonicalFiles: [
+          skill("skills/visual-plan/SKILL.md"),
+          skill("skills/visual-recap/SKILL.md"),
+          skill("skills/visualize/SKILL.md"),
+        ],
+        projectionFiles: [],
+        variants: { "visual-plans": "none" },
+      });
+
+      const files = result.payloads[0].files.map((f) => f.relativePath);
+      expect(files).toEqual(["skills/visualize/SKILL.md"]);
+    });
+
+    it("includes visual-plan skills for the self-hosted Variant", () => {
+      const result = buildAssistantPayloads({
+        targets: ["claude-code"],
+        components: ["skills"],
+        externalFiles: [],
+        canonicalFiles: [
+          {
+            relativePath: "skills/visual-plan/SKILL.md",
+            sourcePath: "/repo/canonical/skills/visual-plan/SKILL.md",
+            component: "skills",
+            origin: "canonical-source",
+            executable: false,
+          },
+        ],
+        projectionFiles: [],
+        variants: { "visual-plans": "self-hosted" },
+      });
+
+      expect(result.payloads[0].files).toHaveLength(1);
+    });
   });
 });

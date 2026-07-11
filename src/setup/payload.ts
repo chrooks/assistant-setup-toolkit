@@ -15,7 +15,16 @@ import type {
   AssistantPayload,
   PayloadFileOrigin,
 } from "./domain.js";
-import { resolveAssistantHomes } from "./domain.js";
+import {
+  resolveAssistantHomes,
+  VISUAL_PLANS_SKILL_NAMES,
+  VISUAL_PLANS_VARIANT_KEY,
+} from "./domain.js";
+
+/** Payload path prefixes governed by the visual-plans Variant. */
+const VISUAL_PLANS_SKILL_PREFIXES = VISUAL_PLANS_SKILL_NAMES.map(
+  (name) => `skills/${name}/`,
+);
 
 // -- Types --
 
@@ -29,6 +38,8 @@ export interface BuildPayloadInput {
   readonly canonicalFiles: readonly PayloadFile[];
   /** Files from Target Projections (.codex/, .agents/). */
   readonly projectionFiles: readonly PayloadFile[];
+  /** Per-machine Variant choices from the SetupProfile (see domain.ts). */
+  readonly variants?: Readonly<Record<string, string>>;
 }
 
 /** A recorded conflict where two sources provided the same relative path. */
@@ -102,6 +113,14 @@ export function buildAssistantPayloads(
 ): BuildPayloadResult {
   const conflicts: PayloadConflict[] = [];
 
+  // Variant gate: `visual-plans: none` drops both skill directories from
+  // every source layer before routing.
+  const excludeVisualPlans =
+    input.variants?.[VISUAL_PLANS_VARIANT_KEY] === "none";
+  const isIncluded = (file: PayloadFile): boolean =>
+    !excludeVisualPlans ||
+    !VISUAL_PLANS_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p));
+
   // Build a merged file map per home: external first, then local overwrites
   const homeFileMaps = new Map<AssistantHomeId, Map<string, PayloadFile>>();
 
@@ -126,6 +145,7 @@ export function buildAssistantPayloads(
     // Step 1: Layer external files first
     for (const file of input.externalFiles) {
       if (!input.components.includes(file.component)) continue;
+      if (!isIncluded(file)) continue;
       const homeId = routeFileToHome(file, target);
       if (!homeId) continue;
 
@@ -139,6 +159,7 @@ export function buildAssistantPayloads(
 
     for (const file of localFiles) {
       if (!input.components.includes(file.component)) continue;
+      if (!isIncluded(file)) continue;
       const homeId = routeFileToHome(file, target);
       if (!homeId) continue;
 

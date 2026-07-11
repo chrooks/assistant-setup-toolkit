@@ -90,5 +90,53 @@ describe("cli", () => {
       const profile = parseCliFlags(["--claude", "--default"]);
       expect(profile.selectedExternalSourceIds).toBeUndefined();
     });
+
+    it("leaves variants unset when --visual-plans absent (receipt rehydrates later)", () => {
+      const profile = parseCliFlags(["--claude", "--default", "--yes"]);
+      expect(profile.variants?.["visual-plans"]).toBeUndefined();
+    });
+
+    it("falls back to interactive on an unknown --visual-plans value", () => {
+      expect(() =>
+        parseCliFlags(["--claude", "--default", "--visual-plans", "hosted"]),
+      ).toThrow();
+    });
+
+    it("stays non-interactive on an unknown value under --yes (warn + unset)", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--yes",
+        "--visual-plans",
+        "hosted",
+      ]);
+      expect(profile.variants?.["visual-plans"]).toBeUndefined();
+    });
+
+    it("does not swallow a following flag as the --visual-plans value", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--visual-plans",
+        "--yes",
+      ]);
+      expect(profile.yes).toBe(true);
+      expect(profile.variants?.["visual-plans"]).toBeUndefined();
+    });
+
+    it("stays non-interactive under --sync with a trailing bare --visual-plans", () => {
+      const profile = parseCliFlags(["--sync", "--visual-plans"]);
+      expect(profile.variants?.["visual-plans"]).toBeUndefined();
+    });
+
+    it("parses --visual-plans <value> into profile.variants", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--visual-plans",
+        "local-files",
+      ]);
+      expect(profile.variants?.["visual-plans"]).toBe("local-files");
+    });
   });
 });

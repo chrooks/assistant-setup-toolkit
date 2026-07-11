@@ -5,7 +5,8 @@
  * automate: manual desktop uploads, MCP Server secrets, etc.
  */
 
-import type { AssistantTargetId } from "./domain.js";
+import type { AssistantTargetId, VisualPlansVariant } from "./domain.js";
+import { SELF_HOSTED_PLAN_URL } from "./domain.js";
 import type { ExternalSource } from "./manifest.js";
 
 /** The kind of Next Step — determines how it's presented. */
@@ -78,6 +79,43 @@ export function planInstallCommandNextSteps(
   }
 
   return steps;
+}
+
+/**
+ * Build Next Steps for the visual-plans Variant. MCP registration and env
+ * vars are surfaced, never executed, matching the toolkit's MCP posture.
+ */
+export function planVisualPlansNextSteps(
+  variant: VisualPlansVariant,
+  targets: readonly AssistantTargetId[],
+): readonly NextStep[] {
+  if (variant === "none") return [];
+
+  if (variant === "self-hosted") {
+    const steps: NextStep[] = [];
+    if (targets.includes("claude-code")) {
+      steps.push({
+        kind: "manual-action",
+        description: `Register the self-hosted Plan MCP for Claude Code: claude mcp add --transport http plan ${SELF_HOSTED_PLAN_URL}/_agent-native/mcp`,
+      });
+    }
+    if (targets.includes("codex-cli")) {
+      steps.push({
+        kind: "manual-action",
+        description: `Register the self-hosted Plan MCP for Codex CLI: add an mcp_servers entry for ${SELF_HOSTED_PLAN_URL}/_agent-native/mcp to ~/.codex/config.toml`,
+      });
+    }
+    return steps;
+  }
+
+  // local-files: no MCP entry at all — the skills' privacy mode takes over.
+  return [
+    {
+      kind: "manual-action",
+      description:
+        "Enable visual-plans local-files mode (no MCP): set AGENT_NATIVE_PLANS_MODE=local-files persistently (shell profile or Claude settings env). See canonical/skills/visual-plan/references/local-files.md for the authoring flow.",
+    },
+  ];
 }
 
 /**

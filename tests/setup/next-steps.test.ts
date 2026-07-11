@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   formatNextStepsSection,
   planInstallCommandNextSteps,
+  planVisualPlansNextSteps,
 } from "../../src/setup/next-steps.js";
 import type { ExternalSource } from "../../src/setup/manifest.js";
 
@@ -80,6 +81,29 @@ describe("next-steps", () => {
         "  1. Run the native install command.",
         "========================================",
       ]);
+    });
+  });
+
+  describe("planVisualPlansNextSteps", () => {
+    it("self-hosted emits the exact claude mcp add command for claude-code", () => {
+      const steps = planVisualPlansNextSteps("self-hosted", ["claude-code"]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain(
+        "claude mcp add --transport http plan https://plan.hestia.chrooks.com/_agent-native/mcp",
+      );
+    });
+
+    it("local-files emits the env-var step and no MCP command", () => {
+      const steps = planVisualPlansNextSteps("local-files", ["claude-code"]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain(
+        "AGENT_NATIVE_PLANS_MODE=local-files",
+      );
+      expect(steps[0].description).not.toContain("mcp add");
+    });
+
+    it("none emits no steps", () => {
+      expect(planVisualPlansNextSteps("none", ["claude-code"])).toEqual([]);
     });
   });
 });
