@@ -91,8 +91,13 @@ Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` 
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `consult` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
 
-## Agent-Native Visual Plans — hosted mode
-`/visual-plan` and `/visual-recap` run in hosted mode (deliberate choice). Do not use local-files serving: Chris works over VS Code Remote, and a `127.0.0.1` bridge on the host is unreachable from his PC's browser. Publish via the `plan` MCP tools and hand back the plain `plan.agent-native.com` URL. If the CLI is ever needed, it requires Node 22 (`source ~/.nvm/nvm.sh && nvm use 22`).
+## Agent-Native Visual Plans — two Variants, never Builder-hosted
+`/visual-plan` and `/visual-recap` never publish to Builder's hosted `plan.agent-native.com` database. Each machine carries one Variant, chosen at Setup Wizard time (`--visual-plans`, recorded in the Install Receipt; design record: toolkit `docs/adr/0001-visual-plans-two-variants.md`). Detect which applies from the machine itself:
+
+- **`plan` MCP entry present (self-hosted — personal devices):** publish via the `plan` MCP tools as the skills describe, and hand back the `https://plan.hestia.chrooks.com` URL the tools return. This is Chris's own instance on hestia (hearth runbook 13); comments/feedback loop works normally.
+- **No `plan` MCP entry / `AGENT_NATIVE_PLANS_MODE=local-files` (work laptop):** use the skills' local-files privacy mode — author the MDX folder, validate/preview with `npx @agent-native/core@latest plan local check|serve|verify`. Never register an MCP server on this machine. If the company proxy blocks the hosted viewer page that the local bridge uses, fall back to running the Plan app locally (`create --standalone --template plan`, `pnpm dev`, `PLAN_LOCAL_DIR` → `/local-plans/<slug>`).
+
+The CLI requires Node 22 (`source ~/.nvm/nvm.sh && nvm use 22`).
 
 ## Input format: voice dictation
 

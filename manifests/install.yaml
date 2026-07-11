@@ -56,10 +56,14 @@ externalSources:
       - Provides /visual-plan and /visual-recap (one command installs both).
       - Disabled by default — both skills are vendored into canonical/skills,
         so they install via the normal projection. Re-enable to pull fresh from
-        upstream instead.
-      - The markdown skills work standalone; the shareable review-link surface
-        needs the Agent-Native plan service (VS Code extension or @agent-native
-        MCP). See each skill's references/connection.md.
+        upstream instead. Keep the vendored copies byte-identical to upstream
+        (ADR-0001); flavor behavior lives in the visual-plans Variant, not in
+        skill edits.
+      - The review surface is chosen per machine by the visual-plans Variant
+        (--visual-plans local-files | self-hosted | none). self-hosted uses
+        Chris's Plan app at https://plan.hestia.chrooks.com (hearth runbook 13);
+        local-files uses the skills' no-MCP privacy mode. Never the Builder
+        hosted database.
 
   - id: caveman
     name: Caveman
