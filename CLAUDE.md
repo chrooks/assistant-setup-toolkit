@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run setup                                 # Full interactive — prompts for everything
 npm run setup -- --claude                     # Partial — prompts for mode + behavior
 npm run setup -- --claude --codex --default   # Fully flag-driven, no prompts
+npm run setup -- --claude --default --preset work   # Machine-class Preset (manifests/presets.yaml, ADR-0002)
 
 # Dev commands
 npm test                                      # Run all tests (vitest run)

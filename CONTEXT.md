@@ -127,8 +127,12 @@ A runtime-agnostic label (for example light or heavy) recorded in the Throughlin
 _Avoid_: priority, difficulty, size, complexity level
 
 **Variant**:
-A per-machine flavor choice for a Toolkit Component, recorded as plain data on the Setup Profile (for example `visual-plans: local-files | self-hosted | none`) so a future preset system can absorb it without migration.
+A per-machine flavor choice for a Toolkit Component, recorded as plain data on the Setup Profile (for example `visual-plans: local-files | self-hosted | none`). A Preset may pre-answer a Variant.
 _Avoid_: flavor, mode, edition
+
+**Preset**:
+A named, repo-declared partial Setup Profile in `manifests/presets.yaml`, keyed by machine class (for example work, personal, hestia), that pre-answers Setup Wizard questions. The Install Receipt remembers only the Preset name; contents always re-resolve from the repo, and explicit CLI flags win as one-off overrides.
+_Avoid_: profile, device config, machine template
 
 ## Relationships
 
