@@ -86,6 +86,7 @@ ALWAYS:
 - Use `/verification-loop` after implementing a feature.
 - Use `/commit` when it's time to commit work to version control.
 - Use `/diagnose` for fixing difficult bugs.
+- Use `/impeccable` for any frontend/UI design, implementation, or review work — do not wait to be routed there.
 Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` to choose the best, most relevant Skill for the task.
 
 ## Assistant Extension Guidance
@@ -191,6 +192,10 @@ For language-specific rules, import them in the project-level CLAUDE.md:
 @~/.claude/rules/common/security.md
 @~/.claude/rules/common/agents.md
 @~/.claude/rules/common/development-workflow.md
+
+Machine-scoped rule (ADR-0003) — installed only where the Preset's `machine` Variant matches; a missing import is a harmless no-op:
+
+@~/.claude/rules/machine.md
 
 ## MCP Tool Use
 

@@ -81,6 +81,10 @@ Use these agents for code review:
 6. Use appropriate agent for detailed review
 ```
 
+## UI Verification
+
+A UI change is not done until it has been **observed in the running app** — Playwright MCP, `/run`, or a screenshot — before reporting done. "Tests pass" is not "renders correctly"; unverified UI work is the top source of "I don't see it" round-trips.
+
 ## Common Issues to Catch
 
 ### Security

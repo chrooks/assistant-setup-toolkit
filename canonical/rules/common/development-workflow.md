@@ -42,3 +42,11 @@ The Feature Implementation Workflow describes the development pipeline: research
    - Resolve any merge conflicts
    - Ensure branch is up to date with target branch
    - Only request review after these checks pass
+
+## Close the Loop
+
+After completing a unit of work, proactively do (or offer in one line) the capture pass — do not wait to be asked:
+
+- **Tracker**: update the issue being worked, create issues for side ideas, close what's verified (`/to-issues`).
+- **Docs**: update runbooks/docs in docs repos when the work changed how something operates.
+- **Memory**: save non-obvious learnings that will matter next session.

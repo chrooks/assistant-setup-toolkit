@@ -15,6 +15,11 @@ Chris works solo in almost every repo. **Default: commit directly to `main`. No 
 
 Do NOT nudge Chris toward branches or PRs outside these cases.
 
+## Push Discipline
+
+- **Push after every commit by default** — Chris works across multiple devices; an unpushed commit is invisible on the next machine.
+- When Chris says he is **switching computers**: commit, push, and leave a durable pointer to the next piece of work (a note on the relevant tracker issue, or `/handoff`) so the other machine's session can pick up cold.
+
 ## Commit Message Format
 ```
 <type>: <description>
