@@ -91,6 +91,9 @@ Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` 
 ## Assistant Extension Guidance
 - When creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Installation Manifest entries, or Setup Wizard extension behavior, consult the `consult` Skill first. It maps local `claude-howto` examples to this repo's decision rules.
 
+## Agent-Native Visual Plans — hosted mode
+`/visual-plan` and `/visual-recap` run in hosted mode (deliberate choice). Do not use local-files serving: Chris works over VS Code Remote, and a `127.0.0.1` bridge on the host is unreachable from his PC's browser. Publish via the `plan` MCP tools and hand back the plain `plan.agent-native.com` URL. If the CLI is ever needed, it requires Node 22 (`source ~/.nvm/nvm.sh && nvm use 22`).
+
 ## Input format: voice dictation
 
 Sometimes, my messages to you come from voice transcription, not typed input. Interpret *intent*, not the literal token stream.
