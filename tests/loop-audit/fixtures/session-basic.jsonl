@@ -1,0 +1,4 @@
+{"type":"queue-operation","operation":"enqueue","timestamp":"2026-06-12T14:32:50.870Z","sessionId":"fix-basic"}
+{"type":"user","isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"always end files with a newline"}]},"timestamp":"2026-06-12T14:32:50.914Z","cwd":"/home/x/proj","sessionId":"fix-basic","gitBranch":"main"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"done"}]},"timestamp":"2026-06-12T14:33:00.000Z","sessionId":"fix-basic"}
+{"type":"user","isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"no, use the shared helper instead"}]},"timestamp":"2026-06-12T14:34:00.000Z","cwd":"/home/x/proj","sessionId":"fix-basic","gitBranch":"main"}

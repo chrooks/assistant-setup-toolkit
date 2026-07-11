@@ -1,0 +1,5 @@
+{"type":"user","isSidechain":true,"message":{"role":"user","content":[{"type":"text","text":"subagent prompt"}]},"timestamp":"2026-06-12T15:00:00.000Z","sessionId":"fix-noise"}
+{"type":"user","isSidechain":false,"message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ok"}]},"timestamp":"2026-06-12T15:00:01.000Z","sessionId":"fix-noise"}
+{"type":"user","isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"<command-message>commit</command-message>\n<command-name>/commit</command-name>"}]},"timestamp":"2026-06-12T15:00:02.000Z","sessionId":"fix-noise"}
+{"type":"user","isSidechain":false,"message":{"role":"user","content":[{"type":"text","text":"real guidance in a noisy session"}]},"timestamp":"2026-06-12T15:00:03.000Z","cwd":"/home/x/other","sessionId":"fix-noise","gitBranch":"dev"}
+not even json
