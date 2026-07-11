@@ -226,6 +226,7 @@ describe("apply", () => {
         components: ["instructions"],
         writeBehavior: "safe-merge",
         variants: { "visual-plans": "self-hosted" },
+        preset: "personal",
       });
 
       // Receipt should exist
@@ -240,11 +241,12 @@ describe("apply", () => {
         "visual-plans": "self-hosted",
       });
 
-      // Rehydration: the recorded Variant reads back for the next run
+      // Rehydration: the recorded Variant and Preset read back for later runs
       const readBack = await readInstallReceipt(homeDir);
       expect(readBack?.setupProfile.variants?.["visual-plans"]).toBe(
         "self-hosted",
       );
+      expect(readBack?.setupProfile.preset).toBe("personal");
     });
 
     it("readInstallReceipt returns null when no receipt exists", async () => {

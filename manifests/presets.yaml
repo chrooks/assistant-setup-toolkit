@@ -1,0 +1,19 @@
+# Presets for the Assistant Setup Toolkit (ADR-0002).
+# A Preset is a named, repo-declared partial Setup Profile keyed by machine
+# class. Machines remember only the Preset NAME (in the Install Receipt);
+# contents re-resolve from this file every run — edit here, sync everywhere.
+# Allowed fields per preset: targets, components, selectedExternalSourceIds,
+# variants, writeBehavior. Run flags (--dry-run, --yes, ...) never belong here.
+
+version: 1
+presets:
+  work:
+    variants:
+      visual-plans: local-files
+    selectedExternalSourceIds: []
+  personal:
+    variants:
+      visual-plans: self-hosted
+  hestia:
+    variants:
+      visual-plans: self-hosted

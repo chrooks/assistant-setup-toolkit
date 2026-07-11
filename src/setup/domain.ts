@@ -52,6 +52,18 @@ export const DEFAULT_VISUAL_PLANS_VARIANT: VisualPlansVariant = "self-hosted";
 /** Origin of the self-hosted Plan app (hearth deploy on hestia). */
 export const SELF_HOSTED_PLAN_URL = "https://plan.hestia.chrooks.com";
 
+/**
+ * A named, repo-declared partial Setup Profile (ADR-0002).
+ * Exactly the five identity fields, all optional; run ephemera are excluded.
+ */
+export interface Preset {
+  readonly targets?: readonly AssistantTargetId[];
+  readonly components?: readonly ComponentKind[];
+  readonly selectedExternalSourceIds?: readonly string[];
+  readonly variants?: Readonly<Record<string, string>>;
+  readonly writeBehavior?: WriteBehavior;
+}
+
 /** The skill directories the visual-plans Variant governs. */
 export const VISUAL_PLANS_SKILL_NAMES = ["visual-plan", "visual-recap"] as const;
 
@@ -116,6 +128,13 @@ export interface SetupProfile {
    * `undefined` = no Variant chosen (interactive flows should ask).
    */
   readonly variants?: Readonly<Record<string, string>>;
+  /** Name of the Preset chosen for this run (`--preset`, receipt, or prompt). */
+  readonly presetName?: string;
+  /**
+   * True when targets came from actual --claude/--codex flags (explicit,
+   * beats a Preset) rather than a sync/interactive default.
+   */
+  readonly targetsExplicit?: boolean;
 }
 
 /** Where a payload file came from — used for precedence and conflict reporting. */
@@ -150,7 +169,10 @@ export interface InstallReceipt {
   readonly setupProfile: Pick<
     SetupProfile,
     "mode" | "components" | "writeBehavior" | "variants"
-  >;
+  > & {
+    /** The Preset name this machine chose — rehydrated on later runs. */
+    readonly preset?: string;
+  };
   readonly files: readonly string[];
 }
 

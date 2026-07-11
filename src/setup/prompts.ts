@@ -22,6 +22,8 @@ import {
 } from "./domain.js";
 import type { PartialFlags } from "./cli.js";
 import type { ExternalSource } from "./manifest.js";
+import type { Preset } from "./domain.js";
+import { resolvePresetIntoProfile } from "./presets.js";
 
 /**
  * Run the full interactive prompt flow, returning a complete SetupProfile.
@@ -30,6 +32,8 @@ import type { ExternalSource } from "./manifest.js";
 export async function runInteractivePrompts(
   partial: PartialFlags,
   externalSources: readonly ExternalSource[] = [],
+  presets: Readonly<Record<string, Preset>> = {},
+  effectivePresetName?: string,
 ): Promise<SetupProfile> {
   console.log("\nAssistant Setup Toolkit Setup Wizard\n");
 
@@ -42,7 +46,7 @@ export async function runInteractivePrompts(
       partial.targets.length > 0
         ? [...partial.targets]
         : ["claude-code", "codex-cli"];
-    return {
+    const syncProfile: SetupProfile = {
       mode: "default",
       targets: syncTargets,
       components: [...ALL_COMPONENT_KINDS],
@@ -58,33 +62,69 @@ export async function runInteractivePrompts(
       variants: partial.visualPlansVariant
         ? { [VISUAL_PLANS_VARIANT_KEY]: partial.visualPlansVariant }
         : undefined,
+      presetName: effectivePresetName,
     };
+    // Quick Sync walks the ladder too: the machine's Preset (flag or
+    // receipt-remembered) fills what the sync defaults don't own. Sync's
+    // overwrite behavior and both-targets default are deliberate, so they
+    // stay explicit.
+    if (effectivePresetName) {
+      // Sync's overwrite behavior is deliberate; targets are explicit only
+      // when the user actually passed --claude/--codex.
+      const explicit = new Set<"targets" | "writeBehavior">(["writeBehavior"]);
+      if (partial.targets.length > 0) explicit.add("targets");
+      return {
+        ...resolvePresetIntoProfile(
+          syncProfile,
+          presets[effectivePresetName],
+          explicit,
+        ),
+        presetName: effectivePresetName,
+      };
+    }
+    return syncProfile;
   }
 
-  // Step 1: Select Assistant Targets (skip if already provided via flags)
+  // Preset selection (ladder rung 2): flag/receipt name wins; otherwise ask
+  // when the repo defines Presets. Fields the Preset defines skip prompts.
+  let presetName = effectivePresetName;
+  if (!presetName && Object.keys(presets).length > 0) {
+    presetName = await promptPreset(Object.keys(presets));
+  }
+  const preset: Preset | undefined = presetName
+    ? presets[presetName]
+    : undefined;
+
+  // Step 1: Select Assistant Targets (flags → Preset → prompt)
   let targets: AssistantTargetId[];
   if (partial.targets.length > 0) {
     targets = [...partial.targets];
     console.log(`Assistant Targets (from flags): ${targets.join(", ")}`);
+  } else if (preset?.targets) {
+    targets = [...preset.targets];
+    console.log(`Assistant Targets (from Preset): ${targets.join(", ")}`);
   } else {
     targets = await promptAssistantTargets();
   }
 
-  // Step 2: Select Setup Mode
-  const mode = await promptSetupMode();
-
-  // Step 3: Select Toolkit Components (only for Custom Install)
+  // Steps 2-3: Setup Mode + Components. A Preset that names components IS a
+  // custom selection, so both prompts are skipped.
+  let mode: SetupMode;
   let components: ComponentKind[];
-  if (mode === "custom") {
-    components = await promptComponents();
+  if (preset?.components) {
+    mode = "custom";
+    components = [...preset.components];
+    console.log(`Toolkit Components (from Preset): ${components.join(", ")}`);
   } else {
-    components = [...ALL_COMPONENT_KINDS];
+    mode = await promptSetupMode();
+    components =
+      mode === "custom" ? await promptComponents() : [...ALL_COMPONENT_KINDS];
   }
 
   // Step 3.5: Select External Sources (skip if --sources/--no-sources given,
   // or if --no-fetch was set, or if the manifest has nothing to offer).
   let selectedExternalSourceIds: readonly string[] | undefined =
-    partial.selectedExternalSourceIds;
+    partial.selectedExternalSourceIds ?? preset?.selectedExternalSourceIds;
   if (
     selectedExternalSourceIds === undefined &&
     !partial.noFetch &&
@@ -93,19 +133,26 @@ export async function runInteractivePrompts(
     selectedExternalSourceIds = await promptExternalSources(externalSources);
   }
 
-  // Step 4: Select write behavior (skip if provided via flags)
+  // Step 4: Select write behavior (flags → Preset → prompt)
   let writeBehavior: WriteBehavior;
   if (partial.overwrite) {
     writeBehavior = "overwrite";
   } else if (partial.prune) {
     writeBehavior = "prune";
+  } else if (preset?.writeBehavior) {
+    writeBehavior = preset.writeBehavior;
   } else {
     writeBehavior = await promptWriteBehavior();
   }
 
-  // Step 4.5: Visual-plans Variant (skip if provided via --visual-plans)
+  // Step 4.5: Visual-plans Variant (flags → Preset → prompt)
+  const presetVariant = preset?.variants?.[VISUAL_PLANS_VARIANT_KEY] as
+    | VisualPlansVariant
+    | undefined;
   const visualPlansVariant =
-    partial.visualPlansVariant ?? (await promptVisualPlansVariant());
+    partial.visualPlansVariant ??
+    presetVariant ??
+    (await promptVisualPlansVariant());
 
   // Step 5: Dry-run toggle (skip if already set via flag)
   let dryRun = partial.dryRun;
@@ -125,7 +172,8 @@ export async function runInteractivePrompts(
     yes: partial.yes,
     quiet: partial.quiet,
     selectedExternalSourceIds,
-    variants: { [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant },
+    variants: { ...preset?.variants, [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant },
+    presetName,
   };
 
   if (!partial.yes) {
@@ -139,6 +187,17 @@ export async function runInteractivePrompts(
 }
 
 // -- Individual prompt functions --
+
+/** Prompt for this machine's Preset (see docs/adr/0002). */
+async function promptPreset(names: readonly string[]): Promise<string | undefined> {
+  return select<string | undefined>({
+    message: "Which Preset is this machine? (manifests/presets.yaml)",
+    choices: [
+      ...names.map((name) => ({ name, value: name as string | undefined })),
+      { name: "none — answer each question individually", value: undefined },
+    ],
+  });
+}
 
 /** Prompt for the visual-plans Variant (see docs/adr/0001). */
 async function promptVisualPlansVariant(): Promise<VisualPlansVariant> {

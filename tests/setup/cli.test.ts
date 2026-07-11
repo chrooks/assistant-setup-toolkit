@@ -129,6 +129,32 @@ describe("cli", () => {
       expect(profile.variants?.["visual-plans"]).toBeUndefined();
     });
 
+    it("parses --preset <name> into profile.presetName", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--preset",
+        "work",
+      ]);
+      expect(profile.presetName).toBe("work");
+    });
+
+    it("ignores a bare trailing --preset under --yes (warn + unset)", () => {
+      const profile = parseCliFlags(["--sync", "--preset"]);
+      expect(profile.presetName).toBeUndefined();
+    });
+
+    it("does not swallow a following flag as the --preset value", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--preset",
+        "--yes",
+      ]);
+      expect(profile.yes).toBe(true);
+      expect(profile.presetName).toBeUndefined();
+    });
+
     it("parses --visual-plans <value> into profile.variants", () => {
       const profile = parseCliFlags([
         "--claude",

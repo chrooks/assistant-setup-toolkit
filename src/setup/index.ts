@@ -43,6 +43,13 @@ import {
 import type { NextStep } from "./next-steps.js";
 import { applyWritePlan, readInstallReceipt } from "./apply.js";
 import {
+  loadPresets,
+  resolvePresetIntoProfile,
+  resolvePresetName,
+  stickyReceiptVariants,
+} from "./presets.js";
+import type { ExplicitField } from "./presets.js";
+import {
   loadWiringManifest,
   planHookWiring,
   applyHookWiring,
@@ -230,14 +237,78 @@ export async function runSetupWizard(
       manifest = { version: 1 as const, externalSources: [] };
     }
 
+    // Presets (ADR-0002): load the repo's Presets and the machine's
+    // remembered Preset name (Install Receipt) before profile resolution so
+    // both non-interactive and interactive paths can walk the ladder.
+    const presets = await loadPresets(
+      path.join(repoRoot, "manifests", "presets.yaml"),
+    );
+    let rememberedPresetName: string | undefined;
+    let priorReceiptVariants: Readonly<Record<string, string>> | undefined;
+    for (const homeId of ["claude-home", "codex-home"] as const) {
+      const receipt = await readInstallReceipt(resolveAssistantHomePath(homeId));
+      if (receipt?.setupProfile.variants && !priorReceiptVariants) {
+        priorReceiptVariants = receipt.setupProfile.variants;
+      }
+      if (receipt?.setupProfile.preset) {
+        rememberedPresetName = receipt.setupProfile.preset;
+        break;
+      }
+    }
+
+    // Validate flag/receipt Preset names early — an unknown name must fail
+    // loudly (listing available Presets), never silently fall to defaults.
+    const flagPresetName =
+      parseResult.kind === "profile"
+        ? parseResult.profile.presetName
+        : parseResult.partial.presetName;
+    const effectivePresetName = resolvePresetName(
+      presets,
+      flagPresetName,
+      rememberedPresetName,
+    );
+    // Variant keys set by one-off CLI flags this run (ADR-0002: never sticky).
+    const flagVariantKeys =
+      parseResult.kind === "profile"
+        ? Object.keys(parseResult.profile.variants ?? {})
+        : parseResult.partial.visualPlansVariant
+          ? [VISUAL_PLANS_VARIANT_KEY]
+          : [];
+    if (effectivePresetName && effectivePresetName === rememberedPresetName && !flagPresetName) {
+      console.log(`Preset (from Install Receipt): ${effectivePresetName}`);
+    }
+
     let profile: SetupProfile;
     if (parseResult.kind === "profile") {
       profile = parseResult.profile;
+      if (effectivePresetName) {
+        // Flags win where actually given: targets only when --claude/--codex
+        // were passed (a --sync default is not explicit), writeBehavior only
+        // via --overwrite/--prune.
+        const preset = presets[effectivePresetName];
+        const explicit = new Set<ExplicitField>();
+        if (profile.targetsExplicit) explicit.add("targets");
+        if (profile.writeBehavior !== "safe-merge") explicit.add("writeBehavior");
+        const applied = resolvePresetIntoProfile(profile, preset, explicit);
+        profile = {
+          ...applied,
+          // A Preset naming components IS a custom selection (matches the
+          // interactive path), so the receipt/label don't lie.
+          mode:
+            preset.components && !explicit.has("components")
+              ? "custom"
+              : applied.mode,
+          presetName: effectivePresetName,
+        };
+      }
     } else {
-      // Interactive mode — prompt for missing selections, including External Sources
+      // Interactive mode — prompt for missing selections; the Preset answers
+      // its fields and the remaining prompts fill the gaps (ladder rung 3).
       profile = await runInteractivePrompts(
         parseResult.partial,
         manifest.externalSources,
+        presets,
+        effectivePresetName,
       );
     }
 
@@ -531,7 +602,14 @@ export async function runSetupWizard(
           mode: profile.mode,
           components: [...profile.components],
           writeBehavior: profile.writeBehavior,
-          variants: profile.variants,
+          // Flag-sourced variant values are one-off: the receipt keeps the
+          // prior sticky value (or none), so the next run isn't polluted.
+          variants: stickyReceiptVariants(
+            profile.variants,
+            flagVariantKeys,
+            priorReceiptVariants,
+          ),
+          preset: profile.presetName,
         });
 
         totalWritten += result.filesWritten;

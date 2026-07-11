@@ -42,6 +42,8 @@ export interface ApplyReceiptOptions {
   readonly writeBehavior: WriteBehavior;
   /** Per-machine Variant choices recorded for future runs (see domain.ts). */
   readonly variants?: Readonly<Record<string, string>>;
+  /** The Preset name this machine chose — rehydrated on later runs. */
+  readonly preset?: string;
 }
 
 /** Result of applying a write plan. */
@@ -187,6 +189,7 @@ export async function applyWritePlan(
         components: receiptOptions.components,
         writeBehavior: receiptOptions.writeBehavior,
         variants: receiptOptions.variants,
+        preset: receiptOptions.preset,
       },
       files: writtenFiles,
     };

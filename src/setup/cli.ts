@@ -41,6 +41,8 @@ export interface PartialFlags {
   readonly selectedExternalSourceIds?: readonly string[];
   /** Optional `--visual-plans <value>` Variant, validated against the union. */
   readonly visualPlansVariant?: VisualPlansVariant;
+  /** Optional `--preset <name>` — validated against presets.yaml downstream. */
+  readonly presetName?: string;
 }
 
 /**
@@ -54,6 +56,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
   const targets: AssistantTargetId[] = [];
   if (flags.has("--claude")) targets.push("claude-code");
   if (flags.has("--codex")) targets.push("codex-cli");
+  const targetsExplicit = targets.length > 0;
 
   // `--sync` = quick "git pull"-style re-projection: both targets, all
   // components, default mode, overwrite, skip fetch + confirmation. Other
@@ -115,7 +118,27 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
       }
     }
   }
-  const forceInteractiveForVariant = visualPlansInvalid && !yes;
+  // Parse `--preset <name>`. Name validity against presets.yaml is checked
+  // downstream (cli stays IO-free); here we only reject a missing/flag-like
+  // token, with the same non-interactive-safe posture as --visual-plans.
+  let presetName: string | undefined;
+  let presetInvalid = false;
+  {
+    const argvList = [...argv];
+    const idx = argvList.indexOf("--preset");
+    if (idx !== -1) {
+      const raw = idx + 1 < argvList.length ? argvList[idx + 1].trim() : "";
+      if (raw !== "" && !raw.startsWith("--")) {
+        presetName = raw;
+      } else {
+        presetInvalid = true;
+        console.warn("--preset requires a preset name (see manifests/presets.yaml).");
+      }
+    }
+  }
+
+  const forceInteractiveForVariant =
+    (visualPlansInvalid || presetInvalid) && !yes;
 
   // If we have targets + mode, we can build a complete profile
   if (
@@ -146,6 +169,8 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
         variants: visualPlansVariant
           ? { [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant }
           : undefined,
+        presetName,
+        targetsExplicit,
       },
     };
   }
@@ -164,6 +189,7 @@ export function tryParseCliFlags(argv: readonly string[]): ParseResult {
       quiet,
       selectedExternalSourceIds,
       visualPlansVariant,
+      presetName,
     },
   };
 }
