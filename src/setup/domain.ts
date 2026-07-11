@@ -53,6 +53,16 @@ export const DEFAULT_VISUAL_PLANS_VARIANT: VisualPlansVariant = "self-hosted";
 export const SELF_HOSTED_PLAN_URL = "https://plan.hestia.chrooks.com";
 
 /**
+ * The Variant key naming which machine class this install is (ADR-0003).
+ * Gates machine-scoped rules: canonical/rules/machines/<name>.md ships only
+ * where variants.machine === name.
+ */
+export const MACHINE_VARIANT_KEY = "machine";
+
+/** Fixed install path for the (single) matching machine rule. */
+export const MACHINE_RULE_INSTALL_PATH = "rules/machine.md";
+
+/**
  * A named, repo-declared partial Setup Profile (ADR-0002).
  * Exactly the five identity fields, all optional; run ephemera are excluded.
  */

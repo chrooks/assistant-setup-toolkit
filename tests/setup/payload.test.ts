@@ -260,5 +260,51 @@ describe("payload", () => {
 
       expect(result.payloads[0].files).toHaveLength(1);
     });
+
+    describe("machine-scoped rules (machine Variant)", () => {
+      const rule = (relativePath: string): PayloadFile => ({
+        relativePath,
+        sourcePath: `/repo/canonical/${relativePath}`,
+        component: "rules",
+        origin: "canonical-source",
+        executable: false,
+      });
+      const canonicalFiles = [
+        rule("rules/common/coding-style.md"),
+        rule("rules/machines/hestia.md"),
+        rule("rules/machines/work.md"),
+      ];
+
+      it("installs only the matching machine rule, at the fixed rules/machine.md path", () => {
+        const result = buildAssistantPayloads({
+          targets: ["claude-code"],
+          components: ["rules"],
+          externalFiles: [],
+          canonicalFiles,
+          projectionFiles: [],
+          variants: { machine: "hestia" },
+        });
+
+        const files = result.payloads[0].files.map((f) => f.relativePath).sort();
+        expect(files).toEqual(["rules/common/coding-style.md", "rules/machine.md"]);
+        const machineRule = result.payloads[0].files.find(
+          (f) => f.relativePath === "rules/machine.md",
+        );
+        expect(machineRule!.sourcePath).toBe("/repo/canonical/rules/machines/hestia.md");
+      });
+
+      it("drops every machine rule when no machine Variant is set", () => {
+        const result = buildAssistantPayloads({
+          targets: ["claude-code"],
+          components: ["rules"],
+          externalFiles: [],
+          canonicalFiles,
+          projectionFiles: [],
+        });
+
+        const files = result.payloads[0].files.map((f) => f.relativePath);
+        expect(files).toEqual(["rules/common/coding-style.md"]);
+      });
+    });
   });
 });

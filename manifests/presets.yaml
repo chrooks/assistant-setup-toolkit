@@ -17,3 +17,5 @@ presets:
   hestia:
     variants:
       visual-plans: self-hosted
+      # ADR-0003: installs canonical/rules/machines/hestia.md as rules/machine.md
+      machine: hestia

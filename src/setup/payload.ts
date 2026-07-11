@@ -17,6 +17,8 @@ import type {
 } from "./domain.js";
 import {
   resolveAssistantHomes,
+  MACHINE_RULE_INSTALL_PATH,
+  MACHINE_VARIANT_KEY,
   VISUAL_PLANS_SKILL_NAMES,
   VISUAL_PLANS_VARIANT_KEY,
 } from "./domain.js";
@@ -121,6 +123,19 @@ export function buildAssistantPayloads(
     !excludeVisualPlans ||
     !VISUAL_PLANS_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p));
 
+  // Machine gate (ADR-0003): rules/machines/<name>.md ships only to the
+  // machine whose `machine` Variant matches, installed at the fixed path
+  // rules/machine.md so CLAUDE.md can import it unconditionally (a missing
+  // import is a harmless no-op on machines without one).
+  const machine = input.variants?.[MACHINE_VARIANT_KEY];
+  const gateFile = (file: PayloadFile): PayloadFile | null => {
+    if (!isIncluded(file)) return null;
+    const match = file.relativePath.match(/^rules\/machines\/(.+)\.md$/);
+    if (!match) return file;
+    if (match[1] !== machine) return null;
+    return { ...file, relativePath: MACHINE_RULE_INSTALL_PATH };
+  };
+
   // Build a merged file map per home: external first, then local overwrites
   const homeFileMaps = new Map<AssistantHomeId, Map<string, PayloadFile>>();
 
@@ -143,9 +158,10 @@ export function buildAssistantPayloads(
   // For each target, route files to the appropriate home
   for (const target of input.targets) {
     // Step 1: Layer external files first
-    for (const file of input.externalFiles) {
-      if (!input.components.includes(file.component)) continue;
-      if (!isIncluded(file)) continue;
+    for (const rawFile of input.externalFiles) {
+      if (!input.components.includes(rawFile.component)) continue;
+      const file = gateFile(rawFile);
+      if (!file) continue;
       const homeId = routeFileToHome(file, target);
       if (!homeId) continue;
 
@@ -157,9 +173,10 @@ export function buildAssistantPayloads(
     const localFiles =
       target === "codex-cli" ? input.projectionFiles : input.canonicalFiles;
 
-    for (const file of localFiles) {
-      if (!input.components.includes(file.component)) continue;
-      if (!isIncluded(file)) continue;
+    for (const rawFile of localFiles) {
+      if (!input.components.includes(rawFile.component)) continue;
+      const file = gateFile(rawFile);
+      if (!file) continue;
       const homeId = routeFileToHome(file, target);
       if (!homeId) continue;
 
