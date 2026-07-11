@@ -126,6 +126,10 @@ _Avoid_: context firewall, sandboxing, isolation, offloading
 A runtime-agnostic label (for example light or heavy) recorded in the Throughline that tells the Conductor how strong a model and how much effort to use when dispatching a work stage.
 _Avoid_: priority, difficulty, size, complexity level
 
+**Variant**:
+A per-machine flavor choice for a Toolkit Component, recorded as plain data on the Setup Profile (for example `visual-plans: local-files | self-hosted | none`) so a future preset system can absorb it without migration.
+_Avoid_: flavor, mode, edition
+
 ## Relationships
 
 - The **Assistant Setup Toolkit** installs assistant-specific configuration into one or more **Assistant Homes**.
