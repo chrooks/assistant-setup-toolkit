@@ -145,9 +145,9 @@ Codex CLI consumes only the open Agent Skills standard. Claude Code extensions a
 ## Setup Wizard interaction
 
 - **Create / update in canonical** → `npm run sync` (default mode, overwrite, no fetch).
-- **Rename in canonical** → `npm run setup -- --claude --codex --default --prune --yes`. Prune removes stale projected copies of the old folder.
+- **Rename in canonical** → `npm run setup -- --claude --codex --default --write prune --yes`. Prune removes stale projected copies of the old folder.
 - **Dry run** to inspect projection before writing → add `--dry-run`.
-- Skill Artifacts: wizard plans `artifacts/<name>.zip` automatically for manual upload to Claude.ai / desktop.
+- Skill Artifacts: add `--artifacts` to build `artifacts/<name>.zip` (off by default) for manual upload to Claude.ai / desktop.
 
 ## Verification
 

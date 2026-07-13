@@ -156,8 +156,7 @@ _Avoid_: profile, device config, machine template
 - The **Setup Wizard** backs up Assistant Homes before writing to them.
 - The **Setup Wizard** can run in dry-run mode without writing.
 - The **Setup Wizard** uses **Safe Merge** by default.
-- `--overwrite` selects **Overwrite Install**.
-- `--prune` selects **Prune Install**.
+- `--write overwrite` selects **Overwrite Install**; `--write prune` selects **Prune Install**. One `--write <behavior>` flag replaced the old `--overwrite`/`--prune` pair.
 - **Safe Merge**, **Overwrite Install**, and **Prune Install** all create backups before writing.
 - **Prune Install** only removes toolkit-owned files, proven by an install receipt from a previous install.
 - The **Setup Wizard** writes an **Install Receipt** after a successful non-dry-run install.
@@ -165,7 +164,7 @@ _Avoid_: profile, device config, machine template
 - Toolkit-owned files are files previously written by the **Setup Wizard** and recorded in an **Install Receipt**.
 - A **Skill Artifact** is derived from a **Skill**.
 - A **Skill Artifact** is not the canonical source of a **Skill**.
-- The **Setup Wizard** may generate **Skill Artifacts** even when it cannot automate desktop app installation.
+- The **Setup Wizard** generates **Skill Artifacts** only when `--artifacts` is passed; generation is off by default and uses JSZip (no platform `zip` binary).
 - `artifacts/<skill-name>.zip` is a **Skill Artifact**.
 - `canonical/` is the **Canonical Assistant Source** for shared assistant instructions and skills.
 - `.codex/` and `.agents/` are **Target Projections** for Codex CLI.

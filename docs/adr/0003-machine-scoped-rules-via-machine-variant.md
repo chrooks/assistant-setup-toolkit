@@ -27,9 +27,14 @@ select components and Variants, not individual rule files.
 
 ## Consequences
 
-- One rule file per machine class, versioned with the repo, selected by the
-  same Preset the machine already remembers. Editing it updates that class on
-  next sync.
+- One rule file per machine class, selected by the same Preset the machine
+  already remembers. Editing it updates that class on next sync.
+- **Amended 2026-07-13:** machine rule files are local-only and gitignored
+  (`canonical/rules/machines/*.md`), no longer versioned with the repo. They
+  describe a real box — services, paths, network details — and the repo is
+  public; the original file was purged from git history. The Setup Wizard
+  reads them from disk, so the Variant mechanism is unchanged, but each
+  machine's rule file must be created or copied onto that machine by hand.
 - Only one machine rule can be active per install (fixed target path) — by
   design; a machine is one class. Shared content belongs in `rules/common/`.
 - Renaming a machine class means renaming the file and the Variant value

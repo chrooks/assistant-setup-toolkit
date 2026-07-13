@@ -94,7 +94,7 @@ For `project` and `user` scopes, write to **both** Assistant Target paths so the
 4. Grep refs across `canonical/`, `.claude/`, `.codex/`, `manifests/`, and update.
 5. If canonical → run Setup Wizard with **prune** to remove stale projected copies:
    ```bash
-   cd "$TOOLKIT_PATH" && npm run setup -- --claude --codex --default --prune --yes
+   cd "$TOOLKIT_PATH" && npm run setup -- --claude --codex --default --write prune --yes
    ```
    (`npm run sync` uses overwrite, which leaves the stale `<old>/` directory behind.)
 
@@ -160,5 +160,5 @@ Several frontmatter fields are Claude-Code-specific and ignored by Codex project
 - [ ] Body checked against `writing-great-skills` failure modes (no premature-completion, duplication, sediment, sprawl, no-op)
 - [ ] Codex-only path tested with `name` + `description` + body alone
 - [ ] Correct target paths written per scope
-- [ ] Wizard ran: `npm run sync` (create/update) or `--prune` (rename)
+- [ ] Wizard ran: `npm run sync` (create/update) or `--write prune` (rename)
 - [ ] Rename: all references updated
