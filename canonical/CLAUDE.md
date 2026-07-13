@@ -91,7 +91,7 @@ Messages may arrive via voice transcription — interpret intent, not the litera
 @~/.claude/rules/common/git-workflow.md
 @~/.claude/rules/common/development-workflow.md
 
-Machine-scoped rule (ADR-0003) — installed only where the Preset's `machine` Variant matches; a missing import is a harmless no-op:
+Machine context (ADR-0003) — **hard operational constraints for THIS machine**: network/proxy posture, secrets handling, service discipline. Read it before any infra, network, or URL action, and treat its values as machine-local secrets — never copy them into repos, commits, or anything that leaves the machine. A missing import is a harmless no-op:
 
 @~/.claude/rules/machine.md
 
