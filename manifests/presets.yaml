@@ -10,6 +10,9 @@ presets:
   work:
     variants:
       visual-plans: local-files
+      # ADR-0003: installs canonical/rules/machines/work.md as rules/machine.md.
+      # That file is gitignored — author it on the work laptop itself.
+      machine: work
     selectedExternalSourceIds: []
   personal:
     variants:
