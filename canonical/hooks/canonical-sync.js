@@ -76,7 +76,8 @@ function main() {
         "--default",
         "--no-fetch",
         "--quiet",
-        "--overwrite",
+        "--write",
+        "overwrite",
       ],
       { cwd: REPO_ROOT, stdio: "ignore", shell: process.platform === "win32" },
     );
