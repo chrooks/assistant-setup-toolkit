@@ -20,3 +20,6 @@ canonical/PROFILE.md
 # tracked. The real files hold personal absolute paths / secrets — keep local.
 canonical/knowledge-config.json
 secrets-pushover.env
+
+# Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
+canonical/rules/machines/*.md
