@@ -19,7 +19,8 @@ instead of (or alongside) prose. One skill, one model, two fidelities — same p
 ```
 
 You may name a `kind` after the mode: `flow` (default), `architecture`, `sequence`,
-`state`, `er`, `mindmap`. The kind drives layout and node vocabulary, not a separate tool.
+`state`, `er`, `mindmap`, `roadmap`. The kind drives layout and node vocabulary, not a
+separate tool.
 
 ## The Diagram Model (one source, two renders)
 
@@ -87,9 +88,13 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 
 1. **Shape the model** into `nodes` and `edges` arrays (same shape as above). Node `group`
    controls the detail-panel tag; `description` powers hover + click.
-2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options"? }`.
-   `kind` is one of flow/architecture/sequence/state/er/mindmap (drives layout — hierarchical
-   for flow/architecture/sequence/state, physics for er/mindmap).
+2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options" }`.
+   **Default to free 2D dragging**: set
+   `"options": { "layout": { "hierarchical": { "enabled": false } }, "physics": false }`
+   and give every node pinned `x`/`y` coordinates (a rough grid is fine — Chris drags
+   nodes where he wants them, and free layout keeps them where he put them). Only fall
+   back to the kind-driven auto layout (omit `options` and coordinates) when hand-placing
+   is genuinely impractical, e.g. a big auto-generated graph nobody will rearrange.
 3. **Run the fill script** (it lives in `scripts/` next to this SKILL.md; `templates/` and
    `vendor/` are its siblings):
    ```bash
@@ -108,6 +113,34 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 - Do not add other libraries — vis-network is vendored on purpose for offline use.
 - The detail panel reads `description` and `meta`, so write those for the nodes/edges that
   carry the teaching value, not just labels.
+
+## Living Diagrams (committed model, update-on-change)
+
+Some diagrams are not one-off explanations but durable project surfaces — a roadmap, an
+architecture map that tracks reality. For those:
+
+- **Commit the model** in the project (e.g. `docs/roadmap/<name>-model.json`), not in
+  `.diagram-exports/`. The JSON model is the source of truth; the HTML is a build product
+  regenerated next to it with `build-diagram.py <model>.json <out>.html`.
+- **Update loop**: whenever the underlying facts change (an issue closes, a component
+  lands), edit the model and rebuild in the same pass — a stale living diagram is worse
+  than none. Note the update trigger in the project's CLAUDE.md or memory so future
+  sessions keep it current.
+- Living diagrams always use the free-layout default above — pinned coordinates are what
+  make hand-arranged positions survive rebuilds.
+
+### `roadmap` kind
+
+For issue/milestone maps (the twn.com pattern). Conventions:
+
+- **Nodes** = issues; `label` leads with a state emoji: `✅` closed, `🧍` waiting on a
+  human, `🧊` icebox, none = open. Include the issue number and milestone in the label
+  (`"✅ #8 Music page\n(M2)"`); put `milestone` and `state` in `meta`.
+- **Groups** by workstream (pages, infra, tooling, blocked-on-human, icebox) so colors
+  carry meaning.
+- **Edges** = dependencies, pointing blocker → blocked, with `description` saying what
+  the dependency actually is.
+- **Layout**: cluster columns by milestone along x, workstreams along y.
 
 ## Behavior
 
