@@ -74,6 +74,22 @@ describe("projection", () => {
 
       expect(result).toContain('description: "Already quoted"');
     });
+
+    it("leaves block-scalar descriptions alone", () => {
+      const input = [
+        "---",
+        "description: >-",
+        "  Turn text plans into visual plans with diagrams",
+        "  and file maps.",
+        "---",
+        "Body.",
+      ].join("\n");
+
+      const result = rewriteContentForCodex(input, true);
+
+      expect(result).toContain("description: >-");
+      expect(result).not.toContain('">-"');
+    });
   });
 
   describe("planCodexProjection", () => {

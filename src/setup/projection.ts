@@ -159,8 +159,10 @@ function sanitizeSkillFrontmatter(content: string): string {
       const key = match[1];
       const value = match[2];
 
-      // Already quoted — leave alone
-      if (/^\s*["']/.test(value)) return line;
+      // Already quoted, or a block scalar (>- / |) whose value lives on the
+      // following indented lines — both are valid YAML already. Quoting a
+      // block-scalar indicator turns it into the literal string ">-".
+      if (/^\s*["'>|]/.test(value)) return line;
 
       // Quote the value, escaping backslashes and double quotes
       const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
