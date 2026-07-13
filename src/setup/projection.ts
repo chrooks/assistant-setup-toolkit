@@ -105,6 +105,33 @@ export function rewriteContentForCodex(
 }
 
 /**
+ * Inline `@~/.claude/<path>` import lines with the content of canonical/<path>.
+ *
+ * Claude Code resolves `@` imports at load time; Codex CLI has no import
+ * mechanism and reads AGENTS.md literally — so a projected import line is inert
+ * text and the rule never becomes active. Inlining makes the content actually load.
+ *
+ * `readSource` returns canonical file content for a canonical-relative path, or
+ * undefined if absent (e.g. the machine-Variant rule) — those lines are dropped.
+ * Run this on canonical content BEFORE rewriteContentForCodex.
+ */
+export function inlineCanonicalImports(
+  content: string,
+  readSource: (relativePath: string) => string | undefined,
+): string {
+  return content
+    .split("\n")
+    .map((line) => {
+      const match = line.match(/^@~\/\.claude\/(\S+)\s*$/);
+      if (!match) return line;
+      // ponytail: one level, no recursion — canonical imports are flat today.
+      const imported = readSource(match[1]);
+      return imported === undefined ? "" : imported.trimEnd();
+    })
+    .join("\n");
+}
+
+/**
  * Ensure description and argument-hint values in YAML frontmatter are quoted.
  */
 function sanitizeSkillFrontmatter(content: string): string {

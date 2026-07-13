@@ -1,3 +1,4 @@
+import { inlineCanonicalImports } from "../../src/setup/projection.js";
 import { describe, it, expect } from "vitest";
 import {
   rewriteContentForCodex,
@@ -246,5 +247,19 @@ describe("projection", () => {
 
       expect(plan.every((m) => m.isHook === false)).toBe(true);
     });
+  });
+});
+
+describe("inlineCanonicalImports", () => {
+  it("replaces import lines with canonical content and drops absent ones", () => {
+    const sources: Record<string, string> = {
+      "rules/common/coding-style.md": "# Coding Style\nBe immutable.\n",
+    };
+    const result = inlineCanonicalImports(
+      "## Rules\n\n@~/.claude/rules/common/coding-style.md\n\n@~/.claude/rules/machine.md\n",
+      (rel) => sources[rel],
+    );
+    expect(result).toContain("Be immutable.");
+    expect(result).not.toContain("@~/.claude");
   });
 });
