@@ -56,6 +56,7 @@ export async function runInteractivePrompts(
       symlink: partial.symlink,
       yes: true,
       quiet: partial.quiet,
+      artifacts: partial.artifacts,
       selectedExternalSourceIds: [],
       // Unset stays undefined — Quick Sync preserves the machine's recorded
       // Variant via Install Receipt rehydration rather than resetting it.
@@ -135,10 +136,10 @@ export async function runInteractivePrompts(
 
   // Step 4: Select write behavior (flags → Preset → prompt)
   let writeBehavior: WriteBehavior;
-  if (partial.overwrite) {
-    writeBehavior = "overwrite";
-  } else if (partial.prune) {
-    writeBehavior = "prune";
+  if (partial.writeBehavior !== "safe-merge") {
+    // An explicit --write wins; "safe-merge" is indistinguishable from unset,
+    // so it falls through to the Preset and then the prompt.
+    writeBehavior = partial.writeBehavior;
   } else if (preset?.writeBehavior) {
     writeBehavior = preset.writeBehavior;
   } else {
@@ -171,6 +172,7 @@ export async function runInteractivePrompts(
     symlink: partial.symlink,
     yes: partial.yes,
     quiet: partial.quiet,
+    artifacts: partial.artifacts,
     selectedExternalSourceIds,
     variants: { ...preset?.variants, [VISUAL_PLANS_VARIANT_KEY]: visualPlansVariant },
     presetName,

@@ -20,6 +20,7 @@ const BASE_PROFILE: SetupProfile = {
   symlink: false,
   yes: true,
   quiet: false,
+  artifacts: false,
 };
 
 const VALID_YAML = `

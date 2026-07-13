@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseCliFlags } from "../../src/setup/cli.js";
+import { parseCliFlags, tryParseCliFlags } from "../../src/setup/cli.js";
 
 describe("cli", () => {
   describe("parseCliFlags", () => {
@@ -18,25 +18,30 @@ describe("cli", () => {
       expect(profile.fetch).toBe(true);
     });
 
-    it("parses --claude --overwrite as overwrite behavior", () => {
-      const profile = parseCliFlags(["--claude", "--default", "--overwrite"]);
-
-      expect(profile.writeBehavior).toBe("overwrite");
+    it("defaults writeBehavior to safe-merge when --write is absent", () => {
+      const profile = parseCliFlags(["--claude", "--default"]);
+      expect(profile.writeBehavior).toBe("safe-merge");
     });
 
-    it("parses --prune as prune behavior", () => {
-      const profile = parseCliFlags(["--claude", "--default", "--prune"]);
+    it("parses --write overwrite and --write prune", () => {
+      expect(
+        parseCliFlags(["--claude", "--default", "--write", "overwrite"])
+          .writeBehavior,
+      ).toBe("overwrite");
+      expect(
+        parseCliFlags(["--claude", "--default", "--write", "prune"])
+          .writeBehavior,
+      ).toBe("prune");
+    });
 
-      expect(profile.writeBehavior).toBe("prune");
+    it("rejects an unknown --write value instead of silently defaulting", () => {
+      expect(() =>
+        parseCliFlags(["--claude", "--default", "--write", "clobber"]),
+      ).toThrow(/Invalid --write value/);
     });
 
     it("parses --no-fetch to disable fetching", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--no-fetch",
-      ]);
-
+      const profile = parseCliFlags(["--claude", "--default", "--no-fetch"]);
       expect(profile.fetch).toBe(false);
     });
 
@@ -52,6 +57,13 @@ describe("cli", () => {
       expect(profile.yes).toBe(true);
     });
 
+    it("leaves artifacts off unless --artifacts is passed", () => {
+      expect(parseCliFlags(["--claude", "--default"]).artifacts).toBe(false);
+      expect(
+        parseCliFlags(["--claude", "--default", "--artifacts"]).artifacts,
+      ).toBe(true);
+    });
+
     it("throws when no target is specified", () => {
       expect(() => parseCliFlags(["--default"])).toThrow(
         /at least one Assistant Target/,
@@ -59,8 +71,12 @@ describe("cli", () => {
     });
 
     it("throws when neither --default nor --custom is specified in non-interactive mode", () => {
-      expect(() => parseCliFlags(["--claude"])).toThrow(
-        /--default or --custom/,
+      expect(() => parseCliFlags(["--claude"])).toThrow(/--default or --custom/);
+    });
+
+    it("rejects --default and --custom together", () => {
+      expect(() => parseCliFlags(["--claude", "--default", "--custom"])).toThrow(
+        /not both/,
       );
     });
 
@@ -78,11 +94,7 @@ describe("cli", () => {
     });
 
     it("parses --no-sources into an empty selectedExternalSourceIds", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--no-sources",
-      ]);
+      const profile = parseCliFlags(["--claude", "--default", "--no-sources"]);
       expect(profile.selectedExternalSourceIds).toEqual([]);
     });
 
@@ -96,37 +108,20 @@ describe("cli", () => {
       expect(profile.variants?.["visual-plans"]).toBeUndefined();
     });
 
-    it("falls back to interactive on an unknown --visual-plans value", () => {
+    it("parses --visual-plans <value> into profile.variants", () => {
+      const profile = parseCliFlags([
+        "--claude",
+        "--default",
+        "--visual-plans",
+        "local-files",
+      ]);
+      expect(profile.variants?.["visual-plans"]).toBe("local-files");
+    });
+
+    it("rejects an unknown --visual-plans value", () => {
       expect(() =>
         parseCliFlags(["--claude", "--default", "--visual-plans", "hosted"]),
-      ).toThrow();
-    });
-
-    it("stays non-interactive on an unknown value under --yes (warn + unset)", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--yes",
-        "--visual-plans",
-        "hosted",
-      ]);
-      expect(profile.variants?.["visual-plans"]).toBeUndefined();
-    });
-
-    it("does not swallow a following flag as the --visual-plans value", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--visual-plans",
-        "--yes",
-      ]);
-      expect(profile.yes).toBe(true);
-      expect(profile.variants?.["visual-plans"]).toBeUndefined();
-    });
-
-    it("stays non-interactive under --sync with a trailing bare --visual-plans", () => {
-      const profile = parseCliFlags(["--sync", "--visual-plans"]);
-      expect(profile.variants?.["visual-plans"]).toBeUndefined();
+      ).toThrow(/Invalid --visual-plans value/);
     });
 
     it("parses --preset <name> into profile.presetName", () => {
@@ -139,30 +134,49 @@ describe("cli", () => {
       expect(profile.presetName).toBe("work");
     });
 
-    it("ignores a bare trailing --preset under --yes (warn + unset)", () => {
-      const profile = parseCliFlags(["--sync", "--preset"]);
-      expect(profile.presetName).toBeUndefined();
-    });
-
-    it("does not swallow a following flag as the --preset value", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--preset",
-        "--yes",
-      ]);
+    it("expands --sync into both targets, default mode, overwrite, no fetch, yes", () => {
+      const profile = parseCliFlags(["--sync"]);
+      expect(profile.targets).toEqual(["claude-code", "codex-cli"]);
+      expect(profile.mode).toBe("default");
+      expect(profile.writeBehavior).toBe("overwrite");
+      expect(profile.fetch).toBe(false);
       expect(profile.yes).toBe(true);
-      expect(profile.presetName).toBeUndefined();
     });
 
-    it("parses --visual-plans <value> into profile.variants", () => {
-      const profile = parseCliFlags([
-        "--claude",
-        "--default",
-        "--visual-plans",
-        "local-files",
-      ]);
-      expect(profile.variants?.["visual-plans"]).toBe("local-files");
+    it("lets an explicit target narrow --sync", () => {
+      const profile = parseCliFlags(["--sync", "--claude"]);
+      expect(profile.targets).toEqual(["claude-code"]);
+    });
+  });
+
+  describe("tryParseCliFlags", () => {
+    // The whole point of the parseArgs rewrite: a typo used to be silently
+    // dropped, and the run would fall through to interactive prompts with no
+    // explanation of why the flags "didn't work".
+    it("errors on an unknown flag instead of silently ignoring it", () => {
+      const result = tryParseCliFlags(["--claude", "--defualt"]);
+      expect(result.kind).toBe("error");
+      if (result.kind === "error") {
+        expect(result.message).toMatch(/defualt/);
+      }
+    });
+
+    it("errors when a value flag is missing its value", () => {
+      const result = tryParseCliFlags(["--claude", "--default", "--preset"]);
+      expect(result.kind).toBe("error");
+    });
+
+    it("returns help text for --help", () => {
+      const result = tryParseCliFlags(["--help"]);
+      expect(result.kind).toBe("help");
+      if (result.kind === "help") {
+        expect(result.text).toMatch(/Usage: npm run setup/);
+      }
+    });
+
+    it("asks for interactive prompts when target and mode are absent", () => {
+      const result = tryParseCliFlags([]);
+      expect(result.kind).toBe("interactive");
     });
   });
 });
