@@ -314,6 +314,97 @@ describe("hook-wiring", () => {
     });
   });
 
+  describe("variant gating", () => {
+    const gatedEntries: WiringEntry[] = [
+      {
+        file: "proxy-guard.js",
+        event: "PreToolUse",
+        matcher: "Bash",
+        targets: ["claude-code"],
+        variants: { machine: "work" },
+      },
+    ];
+
+    it("parses a manifest entry with a variants gate", async () => {
+      const dir = await makeTempDir("variants");
+      const yaml = [
+        "version: 1",
+        "hooks:",
+        "  - file: proxy-guard.js",
+        "    event: PreToolUse",
+        "    matcher: Bash",
+        "    targets: [claude-code]",
+        "    variants:",
+        "      machine: work",
+        "",
+      ].join("\n");
+      await fs.writeFile(path.join(dir, "wiring.yaml"), yaml, "utf-8");
+
+      const entries = await loadWiringManifest(dir);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].variants).toEqual({ machine: "work" });
+    });
+
+    it("wires a gated entry when the run's variants match", () => {
+      const plans = planHookWiring(
+        gatedEntries,
+        { "claude-code": "/home/u/.claude" },
+        { variants: { machine: "work", "visual-plans": "local-files" } },
+      );
+      expect(plans).toHaveLength(1);
+      expect(plans[0].actions[0].command).toBe(
+        "node /home/u/.claude/hooks/proxy-guard.js",
+      );
+    });
+
+    it("skips a gated entry when the variant value differs", () => {
+      const plans = planHookWiring(
+        gatedEntries,
+        { "claude-code": "/home/u/.claude" },
+        { variants: { machine: "hestia" } },
+      );
+      expect(plans).toHaveLength(0);
+    });
+
+    it("skips a gated entry when the run has no variants at all", () => {
+      const plans = planHookWiring(gatedEntries, {
+        "claude-code": "/home/u/.claude",
+      });
+      expect(plans).toHaveLength(0);
+    });
+
+    it("requires every pair of a multi-key gate to match", () => {
+      const multiGated: WiringEntry[] = [
+        {
+          ...gatedEntries[0],
+          variants: { machine: "work", "visual-plans": "self-hosted" },
+        },
+      ];
+      const plans = planHookWiring(
+        multiGated,
+        { "claude-code": "/home/u/.claude" },
+        { variants: { machine: "work", "visual-plans": "local-files" } },
+      );
+      expect(plans).toHaveLength(0);
+    });
+
+    it("leaves ungated entries unaffected by the run's variants", () => {
+      const ungated: WiringEntry[] = [
+        {
+          file: "lexicon-reminder.js",
+          event: "UserPromptSubmit",
+          targets: ["claude-code"],
+        },
+      ];
+      const plans = planHookWiring(
+        ungated,
+        { "claude-code": "/home/u/.claude" },
+        { variants: { machine: "hestia" } },
+      );
+      expect(plans).toHaveLength(1);
+    });
+  });
+
   describe("applyHookWiring", () => {
     let homeDir: string;
     let plan: WiringPlan;

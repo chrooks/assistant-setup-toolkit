@@ -36,6 +36,8 @@ const WiringEntrySchema = z.object({
   timeoutSec: z.number().int().positive().optional(),
   /** Optional command template. `{hook}` and `{project}` are replaced with absolute paths. Defaults to `node {hook}`. */
   command: z.string().optional(),
+  /** Optional Variant gate: the entry applies only when every pair matches the run's resolved variants (e.g. `machine: work`). */
+  variants: z.record(z.string(), z.string()).optional(),
 });
 
 /** Full wiring manifest envelope. */
@@ -88,6 +90,8 @@ export interface ApplyWiringResult {
 
 export interface PlanHookWiringOptions {
   readonly projectRoot?: string;
+  /** The run's resolved Variant map (SetupProfile.variants). Entries carrying a `variants` gate are skipped unless every pair matches. */
+  readonly variants?: Readonly<Record<string, string>>;
 }
 
 // -- Loader --
@@ -163,6 +167,7 @@ export function planHookWiring(
   >();
 
   for (const entry of entries) {
+    if (!variantGateSatisfied(entry.variants, options.variants)) continue;
     for (const target of entry.targets) {
       const home = assistantHomeByTarget[target];
       if (!home) continue; // target not selected this run
@@ -519,6 +524,15 @@ async function assertTomlFeatureFlag(
 }
 
 // -- Small helpers --
+
+/** True when the entry has no Variant gate, or every required pair matches the run's variants. */
+function variantGateSatisfied(
+  required: Readonly<Record<string, string>> | undefined,
+  actual: Readonly<Record<string, string>> | undefined,
+): boolean {
+  if (!required) return true;
+  return Object.entries(required).every(([key, value]) => actual?.[key] === value);
+}
 
 function isErrnoNotFound(error: unknown): boolean {
   return (

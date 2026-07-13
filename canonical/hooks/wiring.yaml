@@ -40,6 +40,8 @@ hooks:
     #   matcher: "Bash"          # only honored where the event supports it
     #   timeoutSec: 30
     #   command: "node {hook}"   # default is `node {hook}` where {hook} is the absolute hook path
+    #   variants:                # Variant gate — entry wires only when every pair
+    #     machine: work          # matches the run's resolved variants (preset/flags)
   # DevOS steering — re-anchors an active run every turn so it survives
   # compaction. Fires only when the current project has a Throughline with
   # status: in_progress; otherwise prints nothing. Claude-code only, mirroring
@@ -97,3 +99,16 @@ hooks:
     event: SessionStart
     targets: [claude-code]
     command: "node {hook}"
+  # Proxy credential guard — blocks Bash commands that would print proxy
+  # secrets (env/printenv/set dumps, echoed *_PROXY vars, curl -v, git config
+  # proxy reads). The script ships to every machine but wires only where the
+  # machine Variant is `work` (the credential-bearing corporate proxy box);
+  # it also self-gates at runtime, exiting 0 instantly when no *_PROXY env
+  # var carries a value. Converts machine.md's advisory secret rule into a
+  # deterministic block.
+  - file: proxy-guard.js
+    event: PreToolUse
+    matcher: "Bash"
+    targets: [claude-code, codex-cli]
+    variants:
+      machine: work

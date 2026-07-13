@@ -747,6 +747,7 @@ export async function runSetupWizard(
 
         const wiringPlans = planHookWiring(wiringEntries, homesByTarget, {
           projectRoot: repoRoot,
+          variants: profile.variants,
         });
         if (wiringPlans.length > 0) {
           log("Hook Wiring:");
