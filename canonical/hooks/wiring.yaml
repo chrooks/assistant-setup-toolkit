@@ -106,9 +106,11 @@ hooks:
   # it also self-gates at runtime, exiting 0 instantly when no *_PROXY env
   # var carries a value. Converts machine.md's advisory secret rule into a
   # deterministic block.
+  # Matcher covers both harnesses' shell-tool names (Claude: Bash; Codex:
+  # shell/local_shell); the script re-checks tool_name and fails open.
   - file: proxy-guard.js
     event: PreToolUse
-    matcher: "Bash"
+    matcher: "Bash|shell|local_shell"
     targets: [claude-code, codex-cli]
     variants:
       machine: work

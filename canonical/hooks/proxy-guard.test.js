@@ -72,8 +72,20 @@ check("git config user.name allowed", run("git config user.name", PROXY_ENV).sta
   check("stderr offers the presence-check alternative", res.stderr.includes('[ -n "$HTTPS_PROXY" ]'));
 }
 
-// (g) fail open on non-Bash tools and malformed payloads
-check("non-Bash tool allowed", run("printenv", PROXY_ENV, "Edit").status === 0);
+// (g) Codex-shaped payloads: shell tool names and argv arrays
+check("codex local_shell blocked", run("printenv", PROXY_ENV, "local_shell").status === 2);
+check("codex shell blocked", run("echo $HTTPS_PROXY", PROXY_ENV, "shell").status === 2);
+{
+  const input = JSON.stringify({
+    tool_name: "local_shell",
+    tool_input: { command: ["bash", "-lc", "printenv HTTPS_PROXY"] },
+  });
+  const res = spawnSync("node", [HOOK], { input, env: PROXY_ENV, encoding: "utf8" });
+  check("argv-array command blocked", res.status === 2);
+}
+
+// (h) fail open on non-shell tools and malformed payloads
+check("non-shell tool allowed", run("printenv", PROXY_ENV, "Edit").status === 0);
 {
   const res = spawnSync("node", [HOOK], { input: "not json", env: PROXY_ENV, encoding: "utf8" });
   check("malformed stdin fails open", res.status === 0);

@@ -61,8 +61,15 @@ function main() {
   } catch {
     process.exit(0); // fail open: nothing to judge
   }
-  if (payload?.tool_name !== "Bash") process.exit(0);
-  const command = payload?.tool_input?.command;
+  // Claude Code names the shell tool "Bash"; Codex-style runtimes use
+  // "shell"/"local_shell" and may pass argv arrays instead of one string.
+  if (!/^(bash|shell|local_shell)$/i.test(String(payload?.tool_name ?? ""))) {
+    process.exit(0);
+  }
+  const rawCommand = payload?.tool_input?.command;
+  const command = Array.isArray(rawCommand)
+    ? rawCommand.join(" ")
+    : rawCommand;
   if (typeof command !== "string" || command.length === 0) process.exit(0);
   if (!proxyVarsPresent(process.env)) process.exit(0);
 
