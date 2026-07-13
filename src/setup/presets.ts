@@ -150,6 +150,108 @@ export function resolvePresetName(
 /** SetupProfile fields whose flag-built values may just be defaults. */
 export type ExplicitField = "targets" | "components" | "writeBehavior";
 
+/** One line of "what this Preset actually changed about the run". */
+export interface PresetEffect {
+  /** The Preset field this came from, e.g. "variants.machine". */
+  readonly field: string;
+  /** What the run ended up doing, in plain terms. */
+  readonly effect: string;
+  /** True when a CLI flag beat the Preset's value for this field. */
+  readonly overridden: boolean;
+}
+
+/**
+ * Spell out what a Preset did to this run.
+ *
+ * Compares the Preset's declared fields against the RESOLVED profile, so it
+ * reports the same truth whichever path built that profile (flags or prompts),
+ * and marks any field a flag overrode. Naming a Preset is otherwise an act of
+ * faith — the run says "preset hestia" and never says what that bought you.
+ *
+ * Pure: takes the resolved profile, returns lines.
+ */
+export function describePresetEffects(
+  profile: SetupProfile,
+  preset: Preset,
+): readonly PresetEffect[] {
+  const effects: PresetEffect[] = [];
+
+  if (preset.targets) {
+    const got = [...profile.targets].sort().join(", ");
+    const want = [...preset.targets].sort().join(", ");
+    effects.push({
+      field: "targets",
+      effect: got,
+      overridden: got !== want,
+    });
+  }
+
+  if (preset.components) {
+    const got = [...profile.components].sort().join(", ");
+    const want = [...preset.components].sort().join(", ");
+    effects.push({
+      field: "components",
+      effect: `${profile.components.length} component(s)`,
+      overridden: got !== want,
+    });
+  }
+
+  if (preset.writeBehavior) {
+    effects.push({
+      field: "writeBehavior",
+      effect: profile.writeBehavior,
+      overridden: profile.writeBehavior !== preset.writeBehavior,
+    });
+  }
+
+  if (preset.selectedExternalSourceIds) {
+    const got = profile.selectedExternalSourceIds;
+    const want = preset.selectedExternalSourceIds;
+    effects.push({
+      field: "selectedExternalSourceIds",
+      effect:
+        got === undefined
+          ? "manifest defaults"
+          : got.length === 0
+            ? "no External Sources"
+            : got.join(", "),
+      overridden:
+        got === undefined ||
+        got.length !== want.length ||
+        got.some((id, i) => id !== want[i]),
+    });
+  }
+
+  for (const [key, value] of Object.entries(preset.variants ?? {})) {
+    const actual = profile.variants?.[key];
+    effects.push({
+      field: `variants.${key}`,
+      effect: `${actual ?? "(unset)"}${describeVariant(key, actual)}`,
+      overridden: actual !== value,
+    });
+  }
+
+  return effects;
+}
+
+/**
+ * Translate a Variant value into its visible consequence. A bare
+ * `machine=hestia` says nothing about what changed; "installs rules/machine.md"
+ * does. Unknown Variants get no gloss rather than a wrong one.
+ */
+function describeVariant(key: string, value: string | undefined): string {
+  if (value === undefined) return "";
+  if (key === "machine") {
+    return ` — installs rules/machine.md from canonical/rules/machines/${value}.md`;
+  }
+  if (key === "visual-plans") {
+    if (value === "none") return " — visual-plan/visual-recap skills excluded";
+    if (value === "self-hosted") return " — visual-plan/visual-recap via the Plan MCP";
+    if (value === "local-files") return " — visual-plan/visual-recap write local MDX (no MCP)";
+  }
+  return "";
+}
+
 /**
  * Apply a Preset to a flag-built profile: each Preset field fills a gap the
  * flags left. Flags always win (rung 1 of the ladder beats rung 2), so the

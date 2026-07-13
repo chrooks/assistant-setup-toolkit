@@ -46,6 +46,7 @@ import {
   loadPresets,
   resolvePresetIntoProfile,
   resolvePresetName,
+  describePresetEffects,
   stickyReceiptVariants,
 } from "./presets.js";
 import type { ExplicitField } from "./presets.js";
@@ -356,7 +357,24 @@ export async function runSetupWizard(
           `${targetLabel(t)} -> ${resolveAssistantHomes([t]).map(homeLabel).join(", ")}`,
       )
       .join("; ");
-    summary(`Targets: ${targetSummary}\n`);
+    summary(`Targets: ${targetSummary}`);
+
+    // Say what naming a Preset actually bought this run. Without this the run
+    // announces "preset hestia" and never explains what changed because of it.
+    if (profile.presetName && presets[profile.presetName]) {
+      const effects = describePresetEffects(
+        profile,
+        presets[profile.presetName],
+      );
+      const source = flagPresetName ? "--preset" : "Install Receipt";
+      summary(`Preset: ${profile.presetName} (from ${source})`);
+      for (const e of effects) {
+        summary(
+          `    ${e.field} = ${e.effect}${e.overridden ? "   [overridden by flag]" : ""}`,
+        );
+      }
+    }
+    summary("");
 
     log("Assistant Targets:");
     for (const target of profile.targets) {

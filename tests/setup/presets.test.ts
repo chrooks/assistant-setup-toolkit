@@ -5,6 +5,7 @@ import {
   parsePresetsYaml,
   resolvePresetIntoProfile,
   resolvePresetName,
+  describePresetEffects,
   stickyReceiptVariants,
 } from "../../src/setup/presets.js";
 import type { SetupProfile, Preset } from "../../src/setup/domain.js";
@@ -165,6 +166,75 @@ describe("presets", () => {
       ]);
       expect(seeded.work.variants?.["visual-plans"]).toBe("local-files");
       expect(seeded.personal.variants?.["visual-plans"]).toBe("self-hosted");
+    });
+  });
+
+  describe("describePresetEffects", () => {
+    it("reports each Variant with its visible consequence", () => {
+      const preset: Preset = {
+        variants: { "visual-plans": "self-hosted", machine: "hestia" },
+      };
+      const profile: SetupProfile = {
+        ...BASE_PROFILE,
+        variants: { "visual-plans": "self-hosted", machine: "hestia" },
+      };
+
+      const effects = describePresetEffects(profile, preset);
+
+      expect(effects).toHaveLength(2);
+      expect(effects[0]).toMatchObject({
+        field: "variants.visual-plans",
+        overridden: false,
+      });
+      expect(effects[1].field).toBe("variants.machine");
+      // The gloss is the point — "machine = hestia" alone says nothing.
+      expect(effects[1].effect).toContain("rules/machine.md");
+    });
+
+    it("marks a field a flag overrode", () => {
+      const preset: Preset = { variants: { "visual-plans": "self-hosted" } };
+      const profile: SetupProfile = {
+        ...BASE_PROFILE,
+        variants: { "visual-plans": "none" },
+      };
+
+      const [effect] = describePresetEffects(profile, preset);
+
+      expect(effect.overridden).toBe(true);
+      expect(effect.effect).toContain("none");
+    });
+
+    it("renders an empty source list as 'no External Sources'", () => {
+      const preset: Preset = { selectedExternalSourceIds: [] };
+      const profile: SetupProfile = {
+        ...BASE_PROFILE,
+        selectedExternalSourceIds: [],
+      };
+
+      const [effect] = describePresetEffects(profile, preset);
+
+      expect(effect).toMatchObject({
+        field: "selectedExternalSourceIds",
+        effect: "no External Sources",
+        overridden: false,
+      });
+    });
+
+    it("reports nothing for a Preset that declares nothing", () => {
+      expect(describePresetEffects(BASE_PROFILE, {})).toEqual([]);
+    });
+
+    it("reports writeBehavior as overridden when the profile diverges", () => {
+      const preset: Preset = { writeBehavior: "overwrite" };
+      const profile: SetupProfile = { ...BASE_PROFILE, writeBehavior: "prune" };
+
+      const [effect] = describePresetEffects(profile, preset);
+
+      expect(effect).toMatchObject({
+        field: "writeBehavior",
+        effect: "prune",
+        overridden: true,
+      });
     });
   });
 });

@@ -88,12 +88,18 @@ The console shows a per-step summary; the full narration goes to a run log under
 ```
 Setup Wizard — dry-run · Default Install · Safe Merge · preset hestia
 Targets: Claude Code -> ~/.claude
+Preset: hestia (from Install Receipt)
+    variants.visual-plans = self-hosted — visual-plan/visual-recap via the Plan MCP
+    variants.machine = hestia — installs rules/machine.md from canonical/rules/machines/hestia.md
+
   Sources    0 to fetch, 8 skipped, 2 manual (MCP)
   Writes     0 would write, 163 would skip, 0 would remove
   Hooks      0 would add, 10 already present
   Artifacts  skipped (pass --artifacts to build ZIPs)
   Verify     5/5 checks passed
 ```
+
+When a Preset is active, the run names it, says whether it came from `--preset` or the machine's Install Receipt, and lists what it changed — each Variant with its actual consequence, not just its value. A field a CLI flag overrode is marked `[overridden by flag]`.
 
 ### Skill Artifacts are opt-in
 
