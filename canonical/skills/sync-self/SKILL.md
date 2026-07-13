@@ -54,7 +54,9 @@ If an allowed page mentions sensitive detail inline, do not carry it forward. Se
 
 Produce a candidate profile in the same shape as the current `profileTarget`:
 **Who he is · North Star and trajectory · How he works and learns · Values and how to advise
-him · How to communicate with him.**
+him.** No communication-style section — CLAUDE.md and the Lexicon already govern style
+always-on; duplicating them here pays the tokens twice. No interest/rabbit-hole
+inventories — that's biographical trivia by the standard below.
 
 Apply the redaction rules from `reference.md`. In particular: **no employer name, no specific
 company name** anywhere; no health, financial, family, faith, or taste detail; and reference

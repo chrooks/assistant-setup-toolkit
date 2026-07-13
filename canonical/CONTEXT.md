@@ -137,13 +137,10 @@ _AKA_: thread
 
 ## Relationships
 
-- The **Lexicon** is installed into one or more **Assistant Homes**.
-- The **Lexicon** is separate from a project-specific `CONTEXT.md`.
-- The **Lexicon** includes conversation-shaping engineering terms, not plain technology names.
-- HCI terms in the **Lexicon** should preserve prior-art meanings unless a project-specific `CONTEXT.md` narrows them.
-- Chris-specific design terms such as **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, and **Software as Education** should be used when they clarify design intent.
-- The **Lexicon** should align terms with established industry usage instead of inventing private meanings.
-- The **Lexicon** should stay lean because it is intended to live in the assistant's context window.
+- The **Lexicon** holds conversation-shaping engineering terms, not plain technology names.
+- Terms align with established industry usage; HCI terms preserve prior-art meanings unless a project `CONTEXT.md` narrows them.
+- Chris-specific design terms — **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, **Software as Education** — should be used when they clarify design intent.
+- The **Lexicon** stays lean because it lives in the assistant's context window.
 
 ## Example dialogue
 
@@ -153,6 +150,4 @@ _AKA_: thread
 ## Flagged ambiguities
 
 - "Target Home Directory" was used to mean **Assistant Home** — resolved: use **Assistant Home** for user-level install destinations owned by, or discovered by, an assistant.
-- "technological terms" could mean technology names or engineering conversation terms — resolved: include conversation-shaping terms such as **Seam**, **Boundary**, **Vertical Slice**, and **Layer**; exclude plain technology names such as React, FastAPI, PostgreSQL, Vitest, and Supabase.
-- "my house style" could mean private definitions that differ from industry usage — resolved: prefer industry-standard meanings so the Lexicon reinforces clearer industry tech-speak.
-- "teaching glossary" could mean long explanations, examples, and common misuses for every term — resolved: default each term to a concise definition and `_Avoid_` line; use `## Flagged ambiguities` only when a misuse is important enough to preserve.
+- A flag lives here only until its resolution is absorbed into a term's definition or the sections above — then it is deleted. This section records live resolutions, not history.
