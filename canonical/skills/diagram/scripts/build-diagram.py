@@ -60,6 +60,7 @@ def build(model: dict) -> str:
         .replace("/*__DIAGRAM_NODES__*/[]", js_safe(json.dumps(model.get("nodes", []))))
         .replace("/*__DIAGRAM_EDGES__*/[]", js_safe(json.dumps(model.get("edges", []))))
         .replace("/*__DIAGRAM_OPTIONS__*/{}", js_safe(json.dumps(model.get("options", {}))))
+        .replace("/*__DIAGRAM_ZONES__*/[]", js_safe(json.dumps(model.get("zones", []))))
         .replace("/*__VIS_NETWORK_JS__*/", js_safe(vis_js))
         .replace("/*__VIS_NETWORK_CSS__*/", vis_css)
     )

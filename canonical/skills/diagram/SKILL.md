@@ -88,7 +88,13 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 
 1. **Shape the model** into `nodes` and `edges` arrays (same shape as above). Node `group`
    controls the detail-panel tag; `description` powers hover + click.
-2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options" }`.
+2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options", "zones" }`.
+   `zones` (optional) draws labeled background bands behind the graph — Chris conceives
+   software in layers, so **default to zones for `architecture` kind**: horizontal bands
+   stacked top→bottom (Client → Frontend → API → Services → Data), externals in a side
+   band. Shape: `[{ "label": "Frontend", "x0": -760, "y0": -480, "x1": 560, "y1": -330,
+   "color": "rgba(79,70,229,0.05)" }]` (canvas coords; place nodes inside their band;
+   keep runtime data flow and deploy-time concerns in separate bands, not mixed edges).
    **Default to free 2D dragging**: set
    `"options": { "layout": { "hierarchical": { "enabled": false } }, "physics": false }`
    and give every node pinned `x`/`y` coordinates (a rough grid is fine — Chris drags

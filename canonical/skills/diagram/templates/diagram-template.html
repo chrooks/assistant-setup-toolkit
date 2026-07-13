@@ -60,6 +60,9 @@
   const RAW_NODES = /*__DIAGRAM_NODES__*/[];
   const RAW_EDGES = /*__DIAGRAM_EDGES__*/[];
   const OPTION_OVERRIDES = /*__DIAGRAM_OPTIONS__*/{};
+  // Optional layer/zone bands drawn behind the graph (canvas coordinates):
+  // [{ label, x0, y0, x1, y1, color?, labelColor? }]
+  const ZONES = /*__DIAGRAM_ZONES__*/[];
 
   const ACCENT = "#7c3aed";
   // Hover tooltip = the node/edge description (plain text).
@@ -115,6 +118,26 @@
 
   const container = document.getElementById("net");
   const network = new vis.Network(container, { nodes, edges }, options);
+
+  if (ZONES.length) {
+    network.on("beforeDrawing", (ctx) => {
+      for (const z of ZONES) {
+        ctx.fillStyle = z.color || "rgba(124, 58, 237, 0.05)";
+        ctx.strokeStyle = "rgba(124, 58, 237, 0.15)";
+        ctx.lineWidth = 1;
+        const w = z.x1 - z.x0, h = z.y1 - z.y0;
+        ctx.beginPath();
+        ctx.roundRect(z.x0, z.y0, w, h, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = z.labelColor || "rgba(91, 85, 112, 0.65)";
+        ctx.font = "700 15px ui-sans-serif, system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(z.label.toUpperCase(), z.x0 + 14, z.y0 + 10);
+      }
+    });
+  }
 
   document.getElementById("sub").textContent = `${RAW_NODES.length} nodes · ${RAW_EDGES.length} edges · ${DIAGRAM_KIND}`;
 
