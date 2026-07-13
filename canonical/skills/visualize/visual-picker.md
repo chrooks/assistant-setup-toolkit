@@ -1,5 +1,4 @@
-> This file extends [common/patterns.md](./patterns.md) with the single source of truth for
-> choosing the best-fit visual. The `/visualize` skill, the `/wym` Visual layer, and the
+> The single source of truth for choosing the best-fit visual. The `/visualize` skill, the `/wym` Visual layer, and the
 > Communication Style guidance all defer the "which form" decision here — do not duplicate
 > this cheat sheet elsewhere.
 

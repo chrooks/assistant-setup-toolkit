@@ -1,4 +1,14 @@
-> This file extends [common/hooks.md](../common/hooks.md) with web-specific hook recommendations.
+---
+paths:
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.html"
+  - "**/*.vue"
+  - "**/*.svelte"
+---
+> Web-specific Claude Code hook recommendations.
 
 # Web Hooks
 

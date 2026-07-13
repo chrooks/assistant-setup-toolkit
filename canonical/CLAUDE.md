@@ -25,7 +25,7 @@ This governs explanatory prose only. **Code, commits, and PRs stay normal** — 
 ### Visualize by Concept-Shape
 Reach for the best-fit visual when a concept has a **shape a visual carries** — not because Chris is "a visual learner." Words + a *relevant* visual help everyone; a decorative one only costs attention.
 
-- Route through the `/visualize` skill — it is the umbrella that picks the best-fit form for the concept's shape (comparison → table, process → numbered list/flowchart, architecture → diagram, state → state diagram, hierarchy → tree, parallel points → list), then renders it via `/table` or `/diagram`. The shared picker lives at `~/.claude/rules/common/visual-picker.md`.
+- Route through the `/visualize` skill — it is the umbrella that picks the best-fit form for the concept's shape (comparison → table, process → numbered list/flowchart, architecture → diagram, state → state diagram, hierarchy → tree, parallel points → list), then renders it via `/table` or `/diagram`. The shared picker lives at `~/.claude/skills/visualize/visual-picker.md`.
 - The two concrete forms it routes to:
   - `/table` — comparative or multi-attribute data (`/table md` for a quick read-only table, `/table html` for an interactive sort/filter/search table).
   - `/diagram` — architecture, a pipeline, a user flow, a sequence, a state machine (`/diagram md` for an ASCII-plus-Mermaid sketch, `/diagram html` for an interactive graph).
@@ -87,6 +87,7 @@ ALWAYS:
 - Use `/commit` when it's time to commit work to version control.
 - Use `/diagnose` for fixing difficult bugs.
 - Use `/impeccable` for any frontend/UI design, implementation, or review work — do not wait to be routed there.
+- Use `/security-review` before committing changes that touch auth, user input, payments, or secrets — fix CRITICAL findings before continuing and rotate any exposed secrets.
 Otherwise, iff no other Skill has been invoked for a request, use `/find-skill` to choose the best, most relevant Skill for the task.
 
 ## Assistant Extension Guidance
@@ -189,8 +190,6 @@ For language-specific rules, import them in the project-level CLAUDE.md:
 
 @~/.claude/rules/common/coding-style.md
 @~/.claude/rules/common/git-workflow.md
-@~/.claude/rules/common/security.md
-@~/.claude/rules/common/agents.md
 @~/.claude/rules/common/development-workflow.md
 
 Machine-scoped rule (ADR-0003) — installed only where the Preset's `machine` Variant matches; a missing import is a harmless no-op:

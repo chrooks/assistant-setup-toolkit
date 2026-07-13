@@ -21,7 +21,7 @@ No confirmation prompts. `/visualize X` → pick the form, render it immediately
 ## How It Routes
 
 1. **Read the shape.** Consult the single source of truth —
-   [`~/.claude/rules/common/visual-picker.md`](~/.claude/rules/common/visual-picker.md) —
+   [`~/.claude/skills/visualize/visual-picker.md`](~/.claude/skills/visualize/visual-picker.md) —
    match the concept's shape to a form in its cheat sheet. (Do not re-derive the table here;
    that rule owns it.)
 2. **Render with the form's skill:**

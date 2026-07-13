@@ -1,4 +1,14 @@
-> This file extends [common/patterns.md](../common/patterns.md) with web-specific patterns.
+---
+paths:
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.html"
+  - "**/*.vue"
+  - "**/*.svelte"
+---
+> Web-specific patterns.
 
 # Web Patterns
 

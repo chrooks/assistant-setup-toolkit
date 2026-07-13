@@ -1,4 +1,12 @@
-> This file extends [common/coding-style.md](../common/coding-style.md) with PostgreSQL/Supabase database rules.
+---
+paths:
+  - "**/*.sql"
+  - "**/migrations/**"
+  - "**/supabase/**"
+  - "**/prisma/**"
+  - "**/drizzle/**"
+---
+> This file extends [common/coding-style.md](./coding-style.md) with PostgreSQL/Supabase database rules.
 > Distilled from the ECC `postgres-patterns` skill (credit: Supabase team, MIT). Applies whenever
 > writing SQL, migrations, schemas, or RLS against a PostgreSQL/Supabase database.
 

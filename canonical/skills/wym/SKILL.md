@@ -1,6 +1,6 @@
 ---
 name: wym
-description: "wym (\"what you mean?\") explains a concept in a sandwich: a one-line plain-English intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway. The visual is a caveman ASCII diagram by default, or a /table / /diagram when the concept's shape fits those better (form choice deferred to ~/.claude/rules/common/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time."
+description: "wym (\"what you mean?\") explains a concept in a sandwich: a one-line plain-English intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway. The visual is a caveman ASCII diagram by default, or a /table / /diagram when the concept's shape fits those better (form choice deferred to ~/.claude/skills/visualize/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time."
 argument-hint: "<concept>"
 ---
 
@@ -52,7 +52,7 @@ Always this structure, always all four parts in this order:
 ### Visual (filling — pick the form via the shared rule)
 This is the visual aid. Pick the single best-fit form for the concept's shape; do not stack
 forms. **Defer the "which form" decision to the shared picker** —
-[`~/.claude/rules/common/visual-picker.md`](~/.claude/rules/common/visual-picker.md) — and
+[`~/.claude/skills/visualize/visual-picker.md`](~/.claude/skills/visualize/visual-picker.md) — and
 honor its guardrails (representational not decorative, integrate labels, ~2-sentence-cell
 limit, light expertise taper). Do not restate that cheat sheet here.
 
