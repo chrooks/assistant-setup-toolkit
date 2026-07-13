@@ -60,18 +60,44 @@ npm run setup -- --claude --default --no-sources
 
 | Flag | Description |
 |------|-------------|
+Run `npm run setup -- --help` for this table at the terminal. Unknown flags are a hard error, so a typo tells you rather than silently dropping into prompts.
+
+| Flag | Description |
+|------|-------------|
 | `--claude` | Select Claude Code as an Assistant Target |
 | `--codex` | Select Codex CLI as an Assistant Target |
 | `--default` | Default Install — all Toolkit Components, Safe Merge |
 | `--custom` | Custom Install — choose components interactively |
+| `--write <behavior>` | `safe-merge` (default), `overwrite`, or `prune` |
 | `--dry-run` | Preview planned writes without changing anything |
-| `--overwrite` | Overwrite Install — replace conflicting payload files |
-| `--prune` | Prune Install — remove stale toolkit-owned files |
 | `--symlink` | Use symlinks where supported |
 | `--sources <ids>` | Comma-separated External Source IDs to install |
 | `--no-sources` | Skip all External Sources |
 | `--no-fetch` | Skip External Source fetching entirely |
+| `--preset <name>` | Apply a Preset from `manifests/presets.yaml` |
+| `--visual-plans <v>` | `local-files`, `self-hosted`, or `none` |
+| `--artifacts` | Build Skill Artifact ZIPs (off by default — see below) |
 | `--yes` | Skip confirmation prompts |
+| `--quiet` | Print errors only |
+| `--help` | Show the flag reference |
+
+### Run output
+
+The console shows a per-step summary; the full narration goes to a run log under `.setup/logs/`, linked in the footer. The 10 newest logs are kept.
+
+```
+Setup Wizard — dry-run · Default Install · Safe Merge · preset hestia
+Targets: Claude Code -> ~/.claude
+  Sources    0 to fetch, 8 skipped, 2 manual (MCP)
+  Writes     0 would write, 163 would skip, 0 would remove
+  Hooks      0 would add, 10 already present
+  Artifacts  skipped (pass --artifacts to build ZIPs)
+  Verify     5/5 checks passed
+```
+
+### Skill Artifacts are opt-in
+
+`--artifacts` builds one ZIP per skill under `artifacts/` for manual upload to desktop or web assistants. It is **off by default**: an ordinary install writes straight into an Assistant Home and never uploads a ZIP anywhere, so building ~50 archives every run was pure cost. ZIPs are written with JSZip, so no platform `zip` binary is required.
 
 ## Iteration Loop (resync after edits)
 
@@ -85,7 +111,7 @@ npm run sync
 npm run sync:watch
 ```
 
-Both expand to a non-interactive Setup Wizard run with `--claude --codex --default --no-fetch --yes`. `--no-fetch` skips External Source git clones since edits are local; `--yes` skips confirmation prompts. Skill Artifact ZIPs in `artifacts/` are rebuilt each run.
+Both expand to a non-interactive Setup Wizard run with `--claude --codex --default --write overwrite --no-fetch --yes`. `--no-fetch` skips External Source git clones since edits are local; `--yes` skips confirmation prompts. Skill Artifact ZIPs are **not** rebuilt — add `--artifacts` when you actually need them.
 
 `sync:watch` uses `chokidar-cli` against `canonical/**` and `manifests/**`. Run it in a background terminal during iteration; edits to `canonical/skills/wym/SKILL.md` (or any tracked file) trigger an immediate resync.
 

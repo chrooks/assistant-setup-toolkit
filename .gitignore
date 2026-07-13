@@ -23,3 +23,6 @@ secrets-pushover.env
 
 # Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
 canonical/rules/machines/*.md
+
+# Setup Wizard run logs (see reporter.ts) — local diagnostics, not source.
+.setup/

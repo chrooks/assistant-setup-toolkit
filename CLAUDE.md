@@ -7,9 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Setup Wizard — three modes
 npm run setup                                 # Full interactive — prompts for everything
+npm run setup -- --help                       # Flag reference
 npm run setup -- --claude                     # Partial — prompts for mode + behavior
 npm run setup -- --claude --codex --default   # Fully flag-driven, no prompts
 npm run setup -- --claude --default --preset work   # Machine-class Preset (manifests/presets.yaml, ADR-0002)
+npm run setup -- --claude --default --write overwrite  # safe-merge (default) | overwrite | prune
+npm run setup -- --claude --default --artifacts        # Also build Skill Artifact ZIPs (off by default)
 
 # Dev commands
 npm test                                      # Run all tests (vitest run)
@@ -38,7 +41,9 @@ cli.ts → manifest.ts → payload.ts → write-plan.ts → apply.ts
 4. **write-plan.ts** — Produces a `WritePlan` (copy/overwrite/skip/remove actions) without touching the filesystem
 5. **apply.ts** — Executes the plan against the filesystem (deferred; dry-run prints the plan)
 
-Supporting modules: `domain.ts` (types), `paths.ts` (home resolution), `projection.ts` (target projection generation), `receipts.ts` (install receipt tracking), `artifacts.ts` (skill ZIP planning), `external-sources.ts` (fetch planning), `mcp.ts` (MCP server config), `next-steps.ts` (post-install checklist), `verify.ts` (post-install verification).
+Supporting modules: `domain.ts` (types), `paths.ts` (home resolution), `projection.ts` (target projection generation), `receipts.ts` (install receipt tracking), `artifacts.ts` (skill ZIP planning/creation via JSZip), `external-sources.ts` (fetch planning), `mcp.ts` (MCP server config), `next-steps.ts` (post-install checklist), `verify.ts` (post-install verification), `reporter.ts` (console summary vs. run log).
+
+Output goes through `reporter.ts`: `detail()` writes to the run log under `.setup/logs/` only, `summary()` also prints to the console. When adding output, default to `detail()` — the console is a glance surface, and the log is where the full narration belongs.
 
 ### Domain Model
 
@@ -56,7 +61,8 @@ Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`
 | `tests/setup/` | Vitest tests mirroring `src/setup/` by filename |
 | `scripts/` | Setup Wizard entry point (`setup.ts`) and skill packaging helper (`get-skills.sh`) |
 | `manifests/` | YAML Installation Manifests listing External Sources |
-| `artifacts/` | Generated Skill Artifacts (ZIPs for manual upload); gitignored |
+| `artifacts/` | Generated Skill Artifacts (ZIPs for manual upload, `--artifacts`); gitignored |
+| `.setup/logs/` | Setup Wizard run logs — full narration the console summarizes; gitignored |
 | `feature_requests/` | ExecPlan docs, PRDs, and design questions for features |
 
 ## Skill Packaging Helper

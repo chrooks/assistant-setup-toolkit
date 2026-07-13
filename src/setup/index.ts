@@ -27,7 +27,7 @@ import type {
 import { loadInstallationManifest } from "./manifest.js";
 import type { ExternalSource } from "./manifest.js";
 import { resolveAssistantHomePath, resolveReceiptPath } from "./paths.js";
-import { planCodexProjection, rewriteContentForCodex } from "./projection.js";
+import { planCodexProjection, rewriteContentForCodex, inlineCanonicalImports } from "./projection.js";
 import type { ProjectionMapping } from "./projection.js";
 import { buildAssistantPayloads } from "./payload.js";
 import { planWrites } from "./write-plan.js";
@@ -56,6 +56,8 @@ import {
 } from "./hook-wiring.js";
 import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
 import type { PlannedArtifact } from "./artifacts.js";
+import { createReporter } from "./reporter.js";
+import type { Reporter } from "./reporter.js";
 import { planExternalFetches } from "./external-sources.js";
 import { fetchPlannedSources } from "./external-fetcher.js";
 import os from "node:os";
@@ -220,9 +222,21 @@ export async function runSetupWizard(
   argv: string[],
   _env?: Partial<NodeJS.ProcessEnv>,
 ): Promise<number> {
+  // Created once the profile is known (it needs `quiet`); closed in the outer
+  // `finally` so even a crashed run leaves its log behind.
+  let reporter: Reporter | null = null;
   try {
     // Parse CLI flags — fall through to interactive prompts if insufficient
     const parseResult = tryParseCliFlags(argv);
+    if (parseResult.kind === "help") {
+      console.log(parseResult.text);
+      return 0;
+    }
+    if (parseResult.kind === "error") {
+      console.error(`Error: ${parseResult.message}`);
+      console.error("\nRun with --help to see the available flags.");
+      return 1;
+    }
     const repoRoot = findRepoRoot();
 
     // Load Installation Manifest early so the interactive prompt can offer
@@ -274,9 +288,6 @@ export async function runSetupWizard(
         : parseResult.partial.visualPlansVariant
           ? [VISUAL_PLANS_VARIANT_KEY]
           : [];
-    if (effectivePresetName && effectivePresetName === rememberedPresetName && !flagPresetName) {
-      console.log(`Preset (from Install Receipt): ${effectivePresetName}`);
-    }
 
     let profile: SetupProfile;
     if (parseResult.kind === "profile") {
@@ -312,24 +323,45 @@ export async function runSetupWizard(
       );
     }
 
-    // Quiet mode suppresses informational output; errors always print.
-    const log = profile.quiet
-      ? (..._args: unknown[]) => {}
-      : (...args: unknown[]) => console.log(...args);
+    // Two channels (see reporter.ts): `log` is the full narration and lands in
+    // the run log file; `summary` is the short version a human reads at a
+    // glance. Every pre-existing log(...) call is detail by default — the
+    // console only gets what the summary lines below opt into.
+    reporter = createReporter({
+      quiet: profile.quiet,
+      logDir: path.join(repoRoot, ".setup", "logs"),
+      now: new Date(),
+    });
+    const log = reporter.detail;
+    const summary = reporter.summary;
 
-    // Print header
-    log("\nAssistant Setup Toolkit Setup Wizard");
-    log(`Mode: ${profile.dryRun ? "dry-run" : "live"}`);
-    log(`Setup Profile: ${profile.mode === "default" ? "Default Install" : "Custom Install"}`);
-    log(`Write behavior: ${profile.writeBehavior === "safe-merge" ? "Safe Merge" : profile.writeBehavior === "overwrite" ? "Overwrite Install" : "Prune Install"}`);
+    // Header — one line instead of four.
+    const behaviorLabel =
+      profile.writeBehavior === "safe-merge"
+        ? "Safe Merge"
+        : profile.writeBehavior === "overwrite"
+          ? "Overwrite"
+          : "Prune";
+    const presetLabel = profile.presetName ? ` · preset ${profile.presetName}` : "";
+    summary(
+      `\nSetup Wizard — ${profile.dryRun ? "dry-run" : "live"} · ${
+        profile.mode === "default" ? "Default Install" : "Custom Install"
+      } · ${behaviorLabel}${presetLabel}`,
+    );
 
-    // Print Assistant Targets and Homes
     const homes = resolveAssistantHomes(profile.targets);
+    const targetSummary = profile.targets
+      .map(
+        (t) =>
+          `${targetLabel(t)} -> ${resolveAssistantHomes([t]).map(homeLabel).join(", ")}`,
+      )
+      .join("; ");
+    summary(`Targets: ${targetSummary}\n`);
+
     log("Assistant Targets:");
     for (const target of profile.targets) {
       const targetHomes = resolveAssistantHomes([target]);
-      const homeLabels = targetHomes.map(homeLabel).join(", ");
-      log(`  - ${targetLabel(target)} -> ${homeLabels}`);
+      log(`  - ${targetLabel(target)} -> ${targetHomes.map(homeLabel).join(", ")}`);
     }
 
     // Plan External Source fetches based on profile + manifest. Selection comes
@@ -343,6 +375,15 @@ export async function runSetupWizard(
     });
     const mcpSources = manifest.externalSources.filter(
       (s) => s.kind === "mcp-server",
+    );
+
+    const mcpSkipCount = fetchPlan.skipped.filter((s) =>
+      mcpSources.some((m) => m.id === s.id),
+    ).length;
+    summary(
+      `  Sources    ${fetchPlan.planned.length} to fetch, ${
+        fetchPlan.skipped.length - mcpSkipCount
+      } skipped, ${mcpSkipCount} manual (MCP)`,
     );
 
     log("Fetch Step:");
@@ -461,7 +502,19 @@ export async function runSetupWizard(
         if (mapping.isHook || mapping.isConfig) {
           await fs.copyFile(sourcePath, targetPath);
         } else {
-          const sourceContent = await fs.readFile(sourcePath, "utf-8");
+          let sourceContent = await fs.readFile(sourcePath, "utf-8");
+          if (mapping.source === "CLAUDE.md") {
+            // Codex has no @import — inline the imported rules so they actually load.
+            const imports = new Map<string, string>();
+            for (const rel of sourceContent.matchAll(/^@~\/\.claude\/(\S+)\s*$/gm)) {
+              try {
+                imports.set(rel[1], await fs.readFile(path.join(repoRoot, "canonical", rel[1]), "utf-8"));
+              } catch {
+                // absent (e.g. machine-Variant rule) — drop the line
+              }
+            }
+            sourceContent = inlineCanonicalImports(sourceContent, (rel) => imports.get(rel));
+          }
           const rewritten = rewriteContentForCodex(sourceContent, mapping.isSkill);
           await fs.writeFile(targetPath, rewritten, "utf-8");
         }
@@ -583,6 +636,18 @@ export async function runSetupWizard(
       }
     }
 
+    if (profile.dryRun) {
+      // One line across every Assistant Home — a per-home breakdown without the
+      // home named reads as three contradictory totals. The log has the detail.
+      const counts = { copy: 0, overwrite: 0, remove: 0, skip: 0 };
+      for (const plan of writePlans) {
+        for (const action of plan.actions) counts[action.action] += 1;
+      }
+      summary(
+        `  Writes     ${counts.copy + counts.overwrite} would write, ${counts.skip} would skip, ${counts.remove} would remove`,
+      );
+    }
+
     // Apply write plans (live mode) or skip (dry-run)
     if (!profile.dryRun) {
       log("Applying writes...");
@@ -626,11 +691,14 @@ export async function runSetupWizard(
       }
 
       log(`  ${totalWritten} file(s) written, ${totalSkipped} skipped, ${totalRemoved} removed`);
+      summary(
+        `  Writes     ${totalWritten} written, ${totalSkipped} skipped, ${totalRemoved} removed`,
+      );
 
       if (allErrors.length > 0) {
-        console.error("Errors during apply:");
+        reporter.error(`Errors during apply (${allErrors.length}):`);
         for (const err of allErrors) {
-          console.error(`  ${err.home}/${err.relativePath}: ${err.message}`);
+          reporter.error(`  ${err.home}/${err.relativePath}: ${err.message}`);
         }
         return 1;
       }
@@ -659,6 +727,8 @@ export async function runSetupWizard(
         });
         if (wiringPlans.length > 0) {
           log("Hook Wiring:");
+          let hooksAdded = 0;
+          let hooksPresent = 0;
           for (const plan of wiringPlans) {
             const result = await applyHookWiring(plan, {
               dryRun: profile.dryRun,
@@ -679,7 +749,12 @@ export async function runSetupWizard(
             log(
               `  [${plan.target}] ${result.added} ${verbAdd}, ${result.alreadyPresent} ${verbSkip}${flagSuffix}`,
             );
+            hooksAdded += result.added;
+            hooksPresent += result.alreadyPresent;
           }
+          summary(
+            `  Hooks      ${hooksAdded} ${profile.dryRun ? "would add" : "added"}, ${hooksPresent} already present`,
+          );
         }
       }
     }
@@ -695,12 +770,17 @@ export async function runSetupWizard(
     const plannedArtifacts = planSkillArtifacts({ skillDirs, artifactsDir });
     let hasSkillArtifacts = false;
 
-    if (plannedArtifacts.length > 0) {
+    // Opt-in (--artifacts): most runs install straight into an Assistant Home
+    // and never upload a ZIP anywhere, so building ~50 of them is pure cost.
+    if (!profile.artifacts) {
+      summary(`  Artifacts  skipped (pass --artifacts to build ZIPs)`);
+    } else if (plannedArtifacts.length > 0) {
       if (profile.dryRun) {
         log("Skill Artifacts (dry-run):");
         for (const artifact of plannedArtifacts) {
           log(`  [planned] ${artifact.skillName}.zip (${artifact.sourceFiles.length} file(s))`);
         }
+        summary(`  Artifacts  ${plannedArtifacts.length} planned`);
         hasSkillArtifacts = true;
       } else {
         log("Skill Artifacts:");
@@ -710,9 +790,16 @@ export async function runSetupWizard(
           log(`  [created] ${path.basename(zipPath)}`);
         }
         for (const err of artifactResult.errors) {
-          console.error(`  [error] ${err.skillName}: ${err.message}`);
+          reporter.error(`  [artifact error] ${err.skillName}: ${err.message}`);
         }
 
+        summary(
+          `  Artifacts  ${artifactResult.created.length} built${
+            artifactResult.errors.length > 0
+              ? `, ${artifactResult.errors.length} failed`
+              : ""
+          } -> artifacts/`,
+        );
         hasSkillArtifacts = artifactResult.created.length > 0;
       }
     }
@@ -723,6 +810,13 @@ export async function runSetupWizard(
     for (const line of formatVerificationResult(verificationResult)) {
       log(line);
     }
+    const checks = verificationResult.checks;
+    const passed = checks.filter((c) => c.passed).length;
+    summary(
+      `  Verify     ${passed}/${checks.length} checks passed${
+        passed < checks.length ? " — see log" : ""
+      }`,
+    );
 
     // Next Steps
     const installCommandSteps = planInstallCommandNextSteps({
@@ -742,16 +836,18 @@ export async function runSetupWizard(
       ...mcpSteps,
       ...visualPlansSteps,
     ];
+    // Next Steps stay on the console: they are the one part of the run that
+    // asks the human to go do something.
     for (const line of formatNextStepsSection(allNextSteps)) {
-      log(line);
+      summary(line);
     }
 
     // Footer
-    if (profile.dryRun) {
-      log("\nDry-run complete. No files were written.");
-    } else {
-      log("\nSetup complete.");
-    }
+    summary(
+      profile.dryRun
+        ? "\nDry-run complete. No files were written."
+        : "\nSetup complete.",
+    );
 
     return 0;
     } finally {
@@ -762,7 +858,16 @@ export async function runSetupWizard(
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`Error: ${message}`);
+    if (reporter) reporter.error(`Error: ${message}`);
+    else console.error(`Error: ${message}`);
     return 1;
+  } finally {
+    if (reporter) {
+      const logPath = await reporter.close();
+      // The pointer to the detail. Quiet mode stays quiet.
+      if (logPath && !argv.includes("--quiet")) {
+        console.log(`Full log: ${path.relative(process.cwd(), logPath)}`);
+      }
+    }
   }
 }
