@@ -12,15 +12,25 @@ import type { NextStep } from "./next-steps.js";
 /**
  * Plan Next Steps for MCP Server External Sources.
  * Produces confirmation and secret-required steps without executing anything.
+ *
+ * Only *selected* MCP Servers produce Next Steps. `selectedIds` mirrors the
+ * fetch-planning gate: when provided it is the explicit user picks; when
+ * omitted, eligibility falls back to `source.default`.
  */
 export function planMcpNextSteps(
   sources: readonly ExternalSource[],
+  selectedIds?: readonly string[],
 ): readonly NextStep[] {
   const steps: NextStep[] = [];
 
   for (const source of sources) {
     // Only process MCP server sources
     if (source.kind !== "mcp-server") continue;
+
+    const isSelected = selectedIds
+      ? selectedIds.includes(source.id)
+      : source.default === true;
+    if (!isSelected) continue;
 
     // Sources with required secrets get a secret step
     if (source.requiredSecrets && source.requiredSecrets.length > 0) {

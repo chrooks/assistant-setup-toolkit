@@ -18,7 +18,7 @@ describe("mcp", () => {
         },
       ];
 
-      const steps = planMcpNextSteps(sources);
+      const steps = planMcpNextSteps(sources, ["context7"]);
 
       expect(steps).toHaveLength(1);
       expect(steps[0].description).toContain("CONTEXT7_API_KEY");
@@ -38,11 +38,29 @@ describe("mcp", () => {
         },
       ];
 
-      const steps = planMcpNextSteps(sources);
+      const steps = planMcpNextSteps(sources, ["playwright-mcp"]);
 
       expect(steps).toHaveLength(1);
       expect(steps[0].description).toContain("Playwright MCP");
       expect(steps[0].kind).toBe("mcp-confirmation");
+    });
+
+    it("skips MCP sources the user did not select", () => {
+      const sources: ExternalSource[] = [
+        {
+          id: "playwright-mcp",
+          name: "Playwright MCP",
+          kind: "mcp-server",
+          url: "https://github.com/microsoft/playwright-mcp",
+          default: false,
+          targets: ["claude-code"],
+          requiresConfirmation: true,
+        },
+      ];
+
+      expect(planMcpNextSteps(sources, [])).toHaveLength(0);
+      // No explicit selection: fall back to the `default` flag.
+      expect(planMcpNextSteps(sources)).toHaveLength(0);
     });
 
     it("skips non-MCP sources", () => {

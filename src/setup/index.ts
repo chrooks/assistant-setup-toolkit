@@ -391,8 +391,13 @@ export async function runSetupWizard(
       fetch: profile.fetch,
       selectedIds: profile.selectedExternalSourceIds,
     });
+    // Only selected MCP sources count as "manual" — unselected ones are just skipped.
     const mcpSources = manifest.externalSources.filter(
-      (s) => s.kind === "mcp-server",
+      (s) =>
+        s.kind === "mcp-server" &&
+        (profile.selectedExternalSourceIds
+          ? profile.selectedExternalSourceIds.includes(s.id)
+          : s.default === true),
     );
 
     const mcpSkipCount = fetchPlan.skipped.filter((s) =>
@@ -842,7 +847,10 @@ export async function runSetupWizard(
       selectedSourceIds: fetchPlan.planned.map((source) => source.id),
       targets: profile.targets,
     });
-    const mcpSteps = planMcpNextSteps(manifest.externalSources);
+    const mcpSteps = planMcpNextSteps(
+      manifest.externalSources,
+      profile.selectedExternalSourceIds,
+    );
     const standardSteps = buildStandardNextSteps(hasSkillArtifacts);
     const visualPlansSteps = planVisualPlansNextSteps(
       resolveVisualPlansVariant(profile),
