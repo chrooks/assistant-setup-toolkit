@@ -3,15 +3,17 @@
  *
  * Skill Artifacts are ZIP packages of skills prepared for manual
  * upload to desktop or web assistants. Planning is pure; ZIP creation
- * shells out to the platform `zip` command (macOS/Linux).
+ * uses JSZip so the wizard carries no dependency on a platform `zip`
+ * binary (which is not installed everywhere).
+ *
+ * Generation is opt-in — see `SetupProfile.artifacts` / `--artifacts`.
+ * Most runs never need the ZIPs, and building ~50 of them dominated both
+ * the wall-clock and the console output of an ordinary install.
  */
 
 import path from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import fs from "node:fs/promises";
-
-const execFileAsync = promisify(execFile);
+import JSZip from "jszip";
 
 /** A planned Skill Artifact. */
 export interface PlannedArtifact {
@@ -59,14 +61,12 @@ export interface CreateArtifactsResult {
 /**
  * Create ZIP Skill Artifacts on disk from a plan.
  *
- * For each planned artifact:
- *   1. Ensures the artifacts output directory exists
- *   2. Creates a staging directory <artifactsDir>/<skillName>/
- *   3. Copies source files into the staging directory
- *   4. Runs `zip -qr <skillName>.zip <skillName>/` from the artifacts directory
- *   5. Removes the staging directory
+ * For each planned artifact, reads the skill's source files and writes them
+ * into a ZIP rooted at `<skillName>/`, matching the layout desktop and web
+ * assistants expect on upload. Nested paths within a skill are preserved.
  *
- * Returns which ZIPs were created and any errors encountered.
+ * Returns which ZIPs were created and any errors encountered. One skill
+ * failing (e.g. a missing source file) never aborts the rest.
  */
 export async function createSkillArtifacts(
   artifacts: readonly PlannedArtifact[],
@@ -76,36 +76,23 @@ export async function createSkillArtifacts(
 
   for (const artifact of artifacts) {
     try {
-      const artifactsDir = path.dirname(artifact.zipPath);
-      const stagingDir = path.join(artifactsDir, artifact.skillName);
+      const zip = new JSZip();
 
-      // Ensure artifacts output directory exists
-      await fs.mkdir(artifactsDir, { recursive: true });
-
-      // Create staging directory and copy source files into it
-      await fs.mkdir(stagingDir, { recursive: true });
       for (const file of artifact.sourceFiles) {
-        const src = path.join(artifact.sourceDir, file);
-        const dest = path.join(stagingDir, file);
-        // Preserve nested directory structure within the skill
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.copyFile(src, dest);
+        const contents = await fs.readFile(path.join(artifact.sourceDir, file));
+        // Always POSIX separators inside the archive — a ZIP written on
+        // Windows with backslashes unpacks as one literally-named file.
+        const entry = `${artifact.skillName}/${file.split(path.sep).join("/")}`;
+        zip.file(entry, contents);
       }
 
-      // Remove existing ZIP if present (zip command appends by default)
-      try {
-        await fs.unlink(artifact.zipPath);
-      } catch {
-        // ZIP doesn't exist yet — that's fine
-      }
-
-      // Create ZIP from the staging directory
-      await execFileAsync("zip", ["-qr", `${artifact.skillName}.zip`, `${artifact.skillName}/`], {
-        cwd: artifactsDir,
+      const buffer = await zip.generateAsync({
+        type: "nodebuffer",
+        compression: "DEFLATE",
       });
 
-      // Clean up staging directory
-      await fs.rm(stagingDir, { recursive: true, force: true });
+      await fs.mkdir(path.dirname(artifact.zipPath), { recursive: true });
+      await fs.writeFile(artifact.zipPath, buffer);
 
       created.push(artifact.zipPath);
     } catch (err: unknown) {

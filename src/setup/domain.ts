@@ -127,6 +127,12 @@ export interface SetupProfile {
   readonly yes: boolean;
   readonly quiet: boolean;
   /**
+   * Build Skill Artifact ZIPs for manual desktop/web upload (`--artifacts`).
+   * Off by default: an ordinary install never uploads them, and building ~50
+   * ZIPs is the slowest, noisiest step in the run.
+   */
+  readonly artifacts: boolean;
+  /**
    * IDs of External Sources the user picked for this run.
    * `undefined` = use manifest defaults (preserves non-interactive behavior).
    * `[]` = explicitly install no External Sources.
@@ -212,6 +218,7 @@ export function createDefaultSetupProfile(
     symlink: false,
     yes: false,
     quiet: false,
+    artifacts: false,
   };
 }
 
