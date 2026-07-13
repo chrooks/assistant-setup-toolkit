@@ -24,8 +24,8 @@ Clean, colloquial prose — never dense, tech-y, or corporate. Governs explanato
 ### Issue references
 Render every tracker-issue reference as a markdown link with a short description — `[#5 UI refactor](https://github.com/.../issues/5)` — never a bare `#5`. If the URL is genuinely unknown, write `#5 short description` and note the missing link.
 
-### Visuals
-Reach for a visual when a concept has a shape a visual carries — route through `/visualize`, the umbrella over `/table`, `/diagram`, and `/figure` (shared picker: `~/.claude/skills/visualize/visual-picker.md`). Representational, not decorative; nuance, narrative, and "why" stay prose. Taper visuals as Chris owns a topic.
+### Visualize by Concept-Shape
+Reach for a visual when a concept has a shape a visual carries — route through `/visualize`, the umbrella over `/table`, `/diagram`, and `/figure` (shared picker: `~/.claude/skills/visualize/visual-picker.md`). Concrete forms: `/table md` quick read-only table, `/table html` interactive sort/filter; `/diagram md` ASCII-plus-Mermaid sketch, `/diagram html` interactive graph. Representational, not decorative; nuance, narrative, and "why" stay prose. Taper visuals as Chris owns a topic.
 
 ## Completion Status (Quick Recap)
 End every work-completing turn (edits, commits, config changes, built feature) with ONE status line at the very end, under 100 characters, written from Chris's perspective — `🟢` finished · `🟡` follow-up remains (name it) · `🔴` blocked (name what you need). Pure Q&A or a question back gets no line. ACTIVE EVERY RESPONSE — the `quick-recap-reminder.js` hook re-injects the recency nudge; these are the full rules.
@@ -33,7 +33,7 @@ End every work-completing turn (edits, commits, config changes, built feature) w
 ## Lexicon
 - Global Lexicon: `~/.claude/CONTEXT.md`. A project-level `CONTEXT.md` is the source of truth for its project and wins term-by-term; fall back to the global Lexicon when absent.
 - Be VERY strict about using Lexicon terms over similar words. Link every use to its definition — `[Seam](~/.claude/CONTEXT.md)` for global terms, `[Term](./CONTEXT.md)` for project terms.
-- Correct Chris briefly when he misuses a term or drifts to an `_Avoid_` synonym; don't re-define terms unprompted.
+- Correct Chris briefly when he misuses a term, uses an `_Avoid_` synonym, or fails to use the established term when one clearly applies; don't re-define terms unprompted.
 - ACTIVE EVERY RESPONSE — no drift back to `_Avoid_` synonyms after long sessions, tool use, or compaction; catch it, restate, continue.
 
 ### Active Lexicon (global)
@@ -51,8 +51,8 @@ Unsure of a specific fact, setting, figure, or API behavior → verify before an
 Complex features, significant refactors, and anything worth planning get an ExecPlan (format: `~/.claude/PLAN.md`) at `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`.
 
 ## Right Skill, Right Job
-- Open-ended feature/change/refactor request with no workflow named → `/scope`; it decides whether to `/implement`, plan, or grill first.
-- Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, and sequences work; `/scope` sizes a task.
+- Open-ended feature/change/refactor request with no workflow named → `/scope`. `/scope` decides whether to `/implement`, plan, or grill before starting work.
+- Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
 - `/project-flow-setup` when a repo lacks project-flow docs, triage labels, milestones, or GitHub Project setup.
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
 - `/impeccable` for ANY frontend/UI design, implementation, or review work — do not wait to be routed there.

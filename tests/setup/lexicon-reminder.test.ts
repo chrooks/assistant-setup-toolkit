@@ -51,7 +51,7 @@ describe("Lexicon reminder", () => {
     expect(instructions).not.toMatch(/define each term on first use/i);
     expect(hook).not.toMatch(/define each term on first use/i);
     expect(instructions).toMatch(/correct .*misuse/i);
-    expect(instructions).toMatch(/fail to use/i);
+    expect(instructions).toMatch(/fails? to use/i);
     expect(hook).toMatch(/correct .*misuse/i);
     expect(hook).toMatch(/fail to use/i);
     expect(hook).toContain("_Avoid_");
