@@ -14,6 +14,8 @@ import { runInteractivePrompts } from "./prompts.js";
 import {
   resolveAssistantHomes,
   resolveVisualPlansVariant,
+  MACHINE_RULE_INSTALL_PATH,
+  MACHINE_VARIANT_KEY,
   VISUAL_PLANS_SKILL_NAMES,
   VISUAL_PLANS_VARIANT_KEY,
 } from "./domain.js";
@@ -538,12 +540,19 @@ export async function runSetupWizard(
           let sourceContent = await fs.readFile(sourcePath, "utf-8");
           if (mapping.source === "CLAUDE.md") {
             // Codex has no @import — inline the imported rules so they actually load.
+            // ADR-0003: the machine rule is imported at its fixed install path but
+            // lives at rules/machines/<name>.md in canonical — resolve via the Variant.
+            const machine = profile.variants?.[MACHINE_VARIANT_KEY];
             const imports = new Map<string, string>();
             for (const rel of sourceContent.matchAll(/^@~\/\.claude\/(\S+)\s*$/gm)) {
+              const canonicalRel =
+                rel[1] === MACHINE_RULE_INSTALL_PATH && machine
+                  ? `rules/machines/${machine}.md`
+                  : rel[1];
               try {
-                imports.set(rel[1], await fs.readFile(path.join(repoRoot, "canonical", rel[1]), "utf-8"));
+                imports.set(rel[1], await fs.readFile(path.join(repoRoot, "canonical", canonicalRel), "utf-8"));
               } catch {
-                // absent (e.g. machine-Variant rule) — drop the line
+                // absent (e.g. no machine Variant on this box) — drop the line
               }
             }
             sourceContent = inlineCanonicalImports(sourceContent, (rel) => imports.get(rel));
