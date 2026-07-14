@@ -1,5 +1,6 @@
+# Machine-local project config written by hook wiring (absolute paths).
 .codex/
-.agents/
+# Claude Code project config is local except deliberately tracked skills.
 .claude/
 prompts/
 .DS_Store

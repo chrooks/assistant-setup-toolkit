@@ -36,9 +36,9 @@ Use Next Steps for actions the Setup Wizard should surface but not run. Native p
 
 ## Implementation Guidance
 
-For distributable assistant configuration, start in the Canonical Assistant Source. Edit `canonical/` first, then verify Target Projections through the Setup Wizard path. Do not edit generated `.codex/` or `.agents/` files as the source of truth.
+For distributable assistant configuration, start in the Canonical Assistant Source. Edit `canonical/` first, then verify Target Projections through the Setup Wizard path. Do not edit generated projection files under `.setup/projections/` as the source of truth.
 
-For project-scoped Codex guidance in this repository, use `.Codex/skills/<name>/SKILL.md`. Keep it separate from distributable Skill work unless the user explicitly asks to promote it into the Canonical Assistant Source.
+For project-scoped Codex guidance in this repository, use `.agents/skills/<name>/SKILL.md`. Keep it separate from distributable Skill work unless the user explicitly asks to promote it into the Canonical Assistant Source.
 
 For Skill work:
 
@@ -76,7 +76,7 @@ For a Skill:
 
 - `SKILL.md` has a clear description and valid frontmatter.
 - Supporting files are referenced by relative path.
-- Project-scoped Skill work lands under `.Codex/skills/<name>/` for this repo.
+- Project-scoped Skill work lands under `.agents/skills/<name>/` for this repo.
 - Distributable Skill work lands under `canonical/skills/<name>/` only when explicitly requested.
 
 For a Plugin:

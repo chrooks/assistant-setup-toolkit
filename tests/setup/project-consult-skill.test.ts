@@ -3,10 +3,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
-const skillPath = path.join(repoRoot, ".Codex", "skills", "consult", "SKILL.md");
+const skillPath = path.join(repoRoot, ".agents", "skills", "consult", "SKILL.md");
 const referencePath = path.join(
   repoRoot,
-  ".Codex",
+  ".agents",
   "skills",
   "consult",
   "references",
@@ -28,8 +28,10 @@ describe("project-scoped consult Skill", () => {
   it("keeps project-scoped guidance separate from generated projections", async () => {
     const reference = await readFile(referencePath, "utf-8");
 
-    expect(reference).toContain(".Codex/skills/<name>/SKILL.md");
-    expect(reference).toContain("Project-scoped Skill work lands under `.Codex/skills/<name>/`");
-    expect(reference).toContain("Do not edit generated `.codex/` or `.agents/` files");
+    expect(reference).toContain(".agents/skills/<name>/SKILL.md");
+    expect(reference).toContain("Project-scoped Skill work lands under `.agents/skills/<name>/`");
+    expect(reference).toContain(
+      "Do not edit generated projection files under `.setup/projections/`",
+    );
   });
 });
