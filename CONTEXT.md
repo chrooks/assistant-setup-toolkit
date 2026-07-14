@@ -166,7 +166,7 @@ _Avoid_: profile, device config, machine template
 - The **Setup Wizard** generates **Skill Artifacts** only when `--artifacts` is passed; generation is off by default and uses JSZip (no platform `zip` binary).
 - `artifacts/<skill-name>.zip` is a **Skill Artifact**.
 - `canonical/` is the **Canonical Assistant Source** for shared assistant instructions and skills.
-- `.codex/` and `.agents/` are **Target Projections** for Codex CLI.
+- **Target Projections** for Codex CLI are staged under `.setup/projections/` (gitignored); repo-root `.codex/` holds only project-scoped Codex config written by hook wiring.
 - **Target Projections** are derived from the **Canonical Assistant Source**.
 - The **Setup Wizard** regenerates **Target Projections** before installing Codex payloads to avoid drift.
 - Changes should be made in the **Canonical Assistant Source** unless a target-specific override is intentionally needed.
@@ -202,4 +202,4 @@ _Avoid_: profile, device config, machine template
 - `~/.agents` is not branded as Codex, but Codex discovers agent skills from it; resolved: define **Assistant Home** as any user-level install destination owned by, or discovered by, an assistant.
 - "plugin" and "skill" were both used for GitHub repos; resolved: a **Skill** is rooted at `SKILL.md`, while a **Plugin** is an extension package or manifest that may bundle skills.
 - "overwrite" could mean replacing conflicts or wiping an Assistant Home; resolved: **Overwrite Install** replaces payload conflicts only, while **Prune Install** removes only toolkit-owned files tracked by an install receipt.
-- ".codex" and ".agents" could drift from ".claude"; resolved: `.claude/` is the **Canonical Assistant Source**, and Codex files are **Target Projections**.
+- ".codex" and ".agents" could drift from ".claude"; resolved: `canonical/` is the **Canonical Assistant Source**, and Codex files are **Target Projections** regenerated from it.

@@ -148,7 +148,7 @@ tests/setup/          # Test suite
 
 ### Canonical Assistant Source
 
-`canonical/` is the single source of truth for distributable content. Codex CLI files (`.codex/`, `.agents/`) are Target Projections regenerated from `canonical/` before Codex installs. Edit `canonical/` for distributable content — never edit Target Projections directly. `.claude/` is reserved for repo-local Claude Code project config (project-scoped skills, rules).
+`canonical/` is the single source of truth for distributable content. Codex CLI Target Projections are regenerated from `canonical/` into the gitignored `.setup/projections/` staging area before Codex installs. Edit `canonical/` for distributable content — never edit Target Projections directly. `.claude/` is reserved for repo-local Claude Code project config (project-scoped skills, rules); repo-root `.codex/` holds only project-scoped Codex config written by hook wiring.
 
 ### Installation Manifest
 

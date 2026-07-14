@@ -65,6 +65,14 @@ import os from "node:os";
 
 // -- Helpers --
 
+/**
+ * Where regenerated Codex Target Projections are staged (relative to repo
+ * root) before installing to ~/.codex and ~/.agents. Lives under the
+ * gitignored wizard scratch area — repo-root .codex/ is reserved for real
+ * project-scoped Codex config, and .Codex/ for project skills.
+ */
+const PROJECTION_STAGING_DIR = path.join(".setup", "projections");
+
 /** Resolve the repo root from the current working directory. */
 function findRepoRoot(): string {
   return process.cwd();
@@ -511,16 +519,18 @@ export async function runSetupWizard(
 
       log("Target Projections:");
       for (const mapping of mappings) {
-        log(`  - regenerate ${mapping.target} from canonical/${mapping.source}`);
+        log(`  - regenerate ${PROJECTION_STAGING_DIR}/${mapping.target} from canonical/${mapping.source}`);
       }
 
-      // Actually regenerate Target Projections in-repo before using as payload sources.
-      // Read each canonical/ source, rewrite content for Codex (markdown only),
-      // write to .codex/.agents/. Hook scripts are copied verbatim — text rewrites
-      // could mangle shell logic that legitimately references either path.
+      // Regenerate Target Projections in the staging dir before using as payload
+      // sources. Read each canonical/ source, rewrite content for Codex (markdown
+      // only), write under .setup/projections/. Hook scripts are copied verbatim —
+      // text rewrites could mangle shell logic that legitimately references either
+      // path. Repo-root .codex/ is NOT staging: it holds real project-scoped Codex
+      // config (hooks.json, config.toml) written by hook wiring.
       for (const mapping of mappings) {
         const sourcePath = path.join(repoRoot, "canonical", mapping.source);
-        const targetPath = path.join(repoRoot, mapping.target);
+        const targetPath = path.join(repoRoot, PROJECTION_STAGING_DIR, mapping.target);
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
         if (mapping.isHook || mapping.isConfig) {
           await fs.copyFile(sourcePath, targetPath);
@@ -564,7 +574,7 @@ export async function runSetupWizard(
               : "instructions";
       return {
         relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
-        sourcePath: path.join(repoRoot, m.target),
+        sourcePath: path.join(repoRoot, PROJECTION_STAGING_DIR, m.target),
         component,
         origin: "target-projection" as const,
         // Hook scripts must keep their executable bit when projected. fs.copyFile
