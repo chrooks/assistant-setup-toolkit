@@ -150,7 +150,6 @@ _Avoid_: profile, device config, machine template
 - A GitHub repository can be a plugin source, a skill source, or both; the manifest decides how the wizard treats it.
 - Zipped skill artifacts are for manual desktop upload, not the canonical source of a **Skill**.
 - The **Installation Manifest** can include skill sources, plugin sources, MCP server sources, target compatibility, default selection, and install notes.
-- `PLUGINS.md` is currently a human checklist; it should become or be paired with an **Installation Manifest** before plugin installation is automated.
 - The **Setup Wizard** reads the **Installation Manifest**.
 - The **Setup Wizard** builds an **Assistant Payload** for each selected **Assistant Target**.
 - The **Setup Wizard** backs up Assistant Homes before writing to them.
