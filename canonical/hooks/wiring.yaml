@@ -99,6 +99,15 @@ hooks:
     event: SessionStart
     targets: [claude-code]
     command: "node {hook}"
+  # Living-diagram upkeep — after a `git commit` in a repo carrying
+  # docs/roadmap/*-model.json models, reminds the assistant to update them
+  # when the commit touched source but neither model. Self-gates: silent in
+  # repos without models. Claude-only, mirroring lexicon-reminder (Codex
+  # shows additionalContext as transcript noise).
+  - file: diagram-upkeep.js
+    event: PostToolUse
+    matcher: "Bash"
+    targets: [claude-code]
   # Proxy credential guard — blocks Bash commands that would print proxy
   # secrets (env/printenv/set dumps, echoed *_PROXY vars, curl -v, git config
   # proxy reads). The script ships to every machine but wires only where the

@@ -20,6 +20,7 @@ Clean, colloquial prose — never dense, tech-y, or corporate. Governs explanato
 - **Cut filler** (legit technical uses survive): *leverage, utilize, robust, seamless, synergy, delve, foster, facilitate, holistic, streamline; just, really, basically, simply*.
 - **Reread once and tighten** any substantive explanation.
 - **Precision and the Lexicon ALWAYS win.** Plainness shapes connective prose; it never blunts the idea. If a new technical term is unavoidable, define it inline in one short clause, then use it.
+- **Plain-English first on completion.** Every work-completion report — including subagent result relays — opens with a short what-shipped summary in plain English before any detail; never pass raw agent output through. Case: "simplify this for my human brain" ×7 in one Cornerstone cycle (2026-07 loop audit).
 
 ### Issue references
 Render every tracker-issue reference as a markdown link with a short description — `[#5 UI refactor](https://github.com/.../issues/5)` — never a bare `#5`. If the URL is genuinely unknown, write `#5 short description` and note the missing link.
@@ -29,6 +30,9 @@ Reach for a visual when a concept has a shape a visual carries — route through
 
 ## Completion Status (Quick Recap)
 End every work-completing turn (edits, commits, config changes, built feature) with ONE status line at the very end, under 100 characters, written from Chris's perspective — `🟢` finished · `🟡` follow-up remains (name it) · `🔴` blocked (name what you need). Pure Q&A or a question back gets no line. ACTIVE EVERY RESPONSE — the `quick-recap-reminder.js` hook re-injects the recency nudge; these are the full rules.
+
+## Default and Proceed
+Reversible choice + clear recommendation → state the pick in one line and proceed. Ask only for significant design decisions, irreversible actions (schema, releases, prod, deletes), or genuine 50/50s. After proof passes, commit-push-close is the default, not a prompt. Case: ~60 bare "A"/"Agreed" approval turns in one Cornerstone cycle; "approve, drop hitl" (2026-07 loop audit).
 
 ## Lexicon
 - Global Lexicon: `~/.claude/CONTEXT.md`. A project-level `CONTEXT.md` is the source of truth for its project and wins term-by-term; fall back to the global Lexicon when absent.

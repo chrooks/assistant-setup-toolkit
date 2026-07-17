@@ -41,6 +41,15 @@ The Feature Implementation Workflow describes the development pipeline: research
    - Ensure branch is up to date with target branch
    - Only request review after these checks pass
 
+## Proof Before Done
+
+Work that changes runtime behavior is done only when the affected flow has been driven for real — UI changes get driven in a browser (`/verify`; Playwright screenshot or assertion). A compile, lint, or unit-test pass is not proof.
+
+- Applies equally to subagent-returned work: never relay an agent's "done" without driving the flow first.
+- Lead the completion report with the proof, then the change detail.
+
+Case: ~12 "I don't see it / still broken" corrections in one Cornerstone cycle (2026-07 loop audit).
+
 ## Close the Loop
 
 After completing a unit of work, proactively do (or offer in one line) the capture pass — do not wait to be asked:
