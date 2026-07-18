@@ -163,6 +163,21 @@ based on the concern shape:
 Do not start `/tdd`, `/diagnose`, or `/impeccable` unless the user asks you to
 proceed.
 
+## Red Flags — You're About to Skip Verification
+
+Each of these thoughts is a signal to run the phases, not skip them:
+
+- "The diff is obviously correct" → obvious diffs break sibling callers; run
+  the phases.
+- "Tests passed, so it's verified" → tests are one phase of six — diff review
+  and the security pass still apply.
+- "I already know what changed" → the diff always knows more; Phase 6 anyway
+  (untracked files hide there).
+- "Verification would just repeat the last run" → it's cheap when nothing
+  changed and decisive when something did.
+- "The user is waiting — report now, verify later" → an unverified "done"
+  costs a correction turn later (Proof Before Done).
+
 ## Output Format
 
 After running the selected phases, produce a verification report:

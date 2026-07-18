@@ -54,6 +54,13 @@ Author or update `feature_requests/<slug>-plan.md` per the format above. Break
 the work into independently verifiable milestones. Record the design choices
 you make in its Decision Log.
 
+Within each milestone, decompose the work into tasks sized **2–5 minutes** for
+a competent agent. Each task names its **exact file paths** and ends with a
+**one-line verification step** — a command to run or a thing to observe. A task
+that cannot name its files is not ready: split it, or send the open question
+back to design. Small tasks make sub-agent dispatch cheap to review and hard
+to misinterpret.
+
 ### Step 3 — Define acceptance criteria with proof methods
 
 For each user-visible behavior, write an acceptance criterion as a concrete,

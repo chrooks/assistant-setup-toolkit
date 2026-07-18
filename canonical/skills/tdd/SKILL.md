@@ -107,3 +107,17 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 [ ] Code is minimal for this test
 [ ] No speculative features added
 ```
+
+## Red Flags — You're About to Skip TDD
+
+Each of these thoughts is a signal to stop, not a reason to proceed:
+
+- "This change is too small to test" → small change, small test — write it.
+- "I'll write the test after" → after never comes; test-after verifies what you
+  built, not what was needed.
+- "It compiles / lints clean, so it works" → compilers check shape, not
+  behavior. Get a failing test first.
+- "The test passed on its first run" → then it tests existing behavior — fix
+  the test until it fails before the change.
+- "Skip TDD just this once" → that's rationalization; the exception becomes
+  the habit.

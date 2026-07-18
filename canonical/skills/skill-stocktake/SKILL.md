@@ -29,6 +29,7 @@ then projects to all targets. To audit a different tree, set `SKILL_STOCKTAKE_GL
 |------|---------|---------|
 | Quick Scan | `results.json` exists (default) | 5–10 min |
 | Full Stocktake | `results.json` absent, or `/skill-stocktake full` | 20–30 min |
+| Scenario Test | `/skill-stocktake test <skill> [scenario]` | 2–5 min |
 
 **Results cache:** `~/.claude/skills/skill-stocktake/results.json`
 
@@ -46,6 +47,27 @@ Re-evaluate only skills that have changed since the last run (5–10 min).
 6. Output only the diff
 7. Run: `bash ~/.claude/skills/skill-stocktake/scripts/save-results.sh \
          ~/.claude/skills/skill-stocktake/results.json <<< "$EVAL_RESULTS"`
+
+## Scenario Test Mode
+
+Test whether a skill actually *fires and is followed*, instead of judging its
+text. (Pattern harvested from the Superpowers plugin's `writing-skills`.)
+
+1. Resolve the target skill's canonical file
+   (`…/toolkit/canonical/skills/<skill>/SKILL.md`); outside the toolkit, use the
+   live `~/.claude/skills/` copy.
+2. If no scenario was given, derive ONE realistic user request from the skill's
+   `description` — a message that *should* trigger it, without naming it.
+3. Spawn a fresh subagent (Agent tool, general-purpose). Give it the scenario as
+   the user request plus the skill inventory (name + description lines) as its
+   available skills. Never name the target skill in the prompt.
+4. Grade two binary verdicts from the transcript:
+   - **FIRE** — did the subagent choose the target skill unprompted?
+   - **FOLLOW** — did its output honor the skill's core rules? Spot-check 2–3
+     load-bearing rules, not the whole body.
+5. Report both verdicts with one line of evidence each.
+   - FIRE=no → the defect is the `description` (triggers live there).
+   - FOLLOW=no → the defect is the body; name the ignored rule.
 
 ## Full Stocktake Flow
 

@@ -36,9 +36,12 @@ matching Skill workflow, and then starts that workflow.
 4. State the selected workflow in one short sentence.
 5. Start the selected workflow immediately unless it requires a user decision
    point.
-6. After implementation, run `/verification-loop` against the completed change
-   set.
-7. After `/verification-loop`, run `/review-fanout` against the same diff scope
+6. **Stage 1 — spec compliance.** Before any quality review, check the
+   completed work against the plan and acceptance criteria: did it build the
+   *right thing*? A Stage 1 miss loops straight back to the worker Skill in
+   step 3 — do not spend quality review on the wrong thing.
+7. **Stage 2 — quality.** Next run `/verification-loop` against the completed
+   change set, then run `/review-fanout` against the same diff scope
    and include the verification evidence. When the change touched the UI — or you
    routed to `/impeccable` in step 3 — forward the design brief so `/review-fanout`
    runs its design critique path.
@@ -72,6 +75,10 @@ Inside the sub-agent:
   prove re-checks it too.
 - Detect bug-fix versus feature and route to the matching worker Skill as above.
 - Do the work and the local checks.
+- Review in two stages before returning: **spec compliance** against the
+  `acceptance_criteria` first ("right thing"), quality second ("built well").
+  Fix a spec miss before producing the result JSON — a wrong-thing result wastes
+  a full Conductor round-trip.
 
 Return the result as a single fenced JSON block — and nothing else outside it —
 with at least these fields, which the Conductor (the sole writer of the
