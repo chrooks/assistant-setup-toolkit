@@ -57,6 +57,15 @@ hooks:
   - file: quick-recap-reminder.js
     event: UserPromptSubmit
     targets: [claude-code]
+  # Ship-mode anti-drift guard. The hook owns the mode's on/off state itself
+  # (~/.claude/.ship-mode.on, toggled by phrases in the prompt) rather than
+  # trusting the model to maintain a flag — the model forgetting the mode is
+  # precisely the drift being guarded against. Silent unless the mode is on.
+  # Claude-only, mirroring lexicon-reminder (Codex shows additionalContext as
+  # transcript noise).
+  - file: ship-mode-reminder.js
+    event: UserPromptSubmit
+    targets: [claude-code]
   - file: strategic-compact.js
     event: PreToolUse
     matcher: "Edit|Write"
