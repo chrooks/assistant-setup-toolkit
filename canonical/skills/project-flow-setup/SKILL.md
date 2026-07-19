@@ -1,6 +1,6 @@
 ---
 name: project-flow-setup
-description: Configure a repository for the project-flow workflow by auditing repo-local docs and GitHub setup, writing workflow docs from templates, and proposing approval-gated issue, milestone, label, and Project setup. Use when adopting /to-issues and /roadmap or when project-flow docs are missing.
+description: Configure a repository for the project-flow workflow by auditing repo-local docs and GitHub setup, writing workflow docs from templates, and applying issue, milestone, label, and Project setup. Use when adopting /to-issues and /roadmap or when project-flow docs are missing.
 argument-hint: "[audit|docs|apply] [repo]"
 disable-model-invocation: true
 ---
@@ -25,10 +25,10 @@ Do not use this Skill to decide the next work item, create issue records from pr
 
 Parse arguments positionally.
 
-- Bare `/project-flow-setup` -> guided setup. Audit first, summarize missing pieces, offer docs, offer GitHub setup, wait for approval before each write or mutation, then recommend the next workflow command.
+- Bare `/project-flow-setup` -> guided setup. Audit, then write the missing docs and apply the missing GitHub setup, then recommend the next workflow command.
 - `/project-flow-setup audit [repo]` -> read-only inspection and report.
-- `/project-flow-setup docs [repo]` -> write or update repo-local workflow docs from bundled templates after approval.
-- `/project-flow-setup apply [repo]` -> inspect GitHub setup, propose issue labels, milestones, and Project field changes, then wait for approval before applying them.
+- `/project-flow-setup docs [repo]` -> write or update repo-local workflow docs from bundled templates.
+- `/project-flow-setup apply [repo]` -> inspect GitHub setup, then create the missing labels, milestones, and Project fields. See the Approval Boundary in Apply Mode.
 
 If no repo is provided, use the current working directory.
 
@@ -54,10 +54,10 @@ Bare `/project-flow-setup` is the guided setup path.
 
 1. Audit repo-local docs and GitHub setup.
 2. Summarize what exists and what is missing.
-3. If docs are missing, ask whether to write `docs/agents/project-flow.md`, `docs/agents/issue-tracker.md`, and `docs/agents/triage-labels.md`.
-4. If the repo is GitHub-backed, ask whether to inspect labels, milestones, and Projects.
-5. Propose GitHub setup changes as commands or explicit actions.
-6. Do not mutate GitHub or local files without explicit approval.
+3. Write any missing `docs/agents/` file from the templates.
+4. If the repo is GitHub-backed, inspect labels, milestones, and Projects.
+5. Apply the missing GitHub setup per the Approval Boundary in Apply Mode.
+6. Report what was done and what still needs the human.
 7. End with the next useful workflow command: usually `/roadmap next`, `/to-issues <source>`, or `/scope <idea>`.
 
 ## Audit Mode
@@ -80,11 +80,13 @@ If `gh project` reports missing scope, tell the user to run:
 gh auth refresh -s project
 ```
 
+Always name `project`, never `read:project`. `read:project` lists Projects but cannot create one or set its fields, so recommending it costs a second round trip — the exact human interruption this Skill exists to avoid.
+
 Audit mode must not write files and must not mutate GitHub.
 
 ## Docs Mode
 
-Write repo-local docs from the bundled templates after approval.
+Write repo-local docs from the bundled templates.
 
 Use this mapping:
 
@@ -114,11 +116,27 @@ Size: XS, S, M, L
 Mode: AFK, HITL
 ```
 
-GitHub Project field mutation requires Project IDs, item IDs, and field IDs. Prefer reporting the exact discovered IDs and proposed commands before asking for approval.
+GitHub Project field mutation requires Project IDs, item IDs, and field IDs. Discover the IDs and apply the field changes; report the IDs used.
 
 Do not assume a stable native `gh` sub-issue command. Prefer native sub-issues only if the project guidance provides a proven command. Otherwise use normal issue records with a `Parent` section and a parent issue comment.
 
-Do not mutate GitHub without explicit approval.
+### Label taxonomy reconciliation
+
+Reconcile labels without asking. The `type:` prefixed family is the taxonomy the Skills read; GitHub's stock labels are not.
+
+1. Create every missing label from `templates/triage-labels.md`.
+2. Migrate stock labels onto their `type:` equivalent, then delete the stock label — `enhancement` → `type:feature`, `bug` → `type:bug`, `documentation` → `type:docs`. Migrate across `--state all` so closed issues keep their taxonomy.
+3. Delete the remaining unused GitHub defaults (`good first issue`, `help wanted`, `invalid`, `question`, `wontfix`, `duplicate`) unless issues currently carry them.
+
+A label carrying no issues is a free delete. One that does gets migrated first. Neither is a question worth asking.
+
+### Approval boundary
+
+Setting up project flow is plumbing, not a design decision. Run it to completion.
+
+**Apply without asking:** creating labels, writing `docs/agents/` files, label reconciliation above, creating a Project or its fields, adding milestones the user named.
+
+**Stop and ask:** deleting a label that still carries issues and has no `type:` equivalent, closing or deleting issue records, anything touching a remote other than `origin`, and any command needing an auth scope the token lacks — surface the exact `gh auth refresh -s <scope>` line, since only the human can run it.
 
 ## Output Shape
 
@@ -131,20 +149,22 @@ Project-flow setup read:
 - Recommended next: /project-flow-setup docs
 ```
 
-For apply mode, respond with:
+For apply mode, report what was done, not what is proposed:
 
 ```text
-Proposed GitHub changes:
-- Create missing labels: type:feature, type:bug, needs-scope
-- Create or update Project fields: Status, Priority, Size, Mode
-- Add starter milestones only if the user names them
-
-Approval needed before running these commands.
+Project-flow setup applied:
+- Labels: created type:feature, type:bug, needs-scope; migrated 10 issues off `enhancement`; deleted 9 stock labels
+- Project fields: Status, Priority, Size, Mode created
+- Milestones: none (none named)
+- Needs you: gh auth refresh -s read:project
+- Recommended next: /roadmap next
 ```
+
+List anything the human must run under a `Needs you:` line. Keep it to commands only they can execute.
 
 ## Rules
 
 - Use repo-local `CONTEXT.md` Lexicon terms when present.
 - Prefer repo-local docs over defaults once they exist.
-- Keep GitHub operations approval-gated.
+- Run setup to completion; gate only what the Approval Boundary names.
 - Keep this Skill setup-focused. Route operational work to `/to-issues`, `/roadmap`, `/scope`, `/implement`, `/verification-loop`, or `/prep-pr`.

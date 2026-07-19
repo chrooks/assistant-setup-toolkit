@@ -32,9 +32,13 @@ describe("project-flow-setup Skill", () => {
     expect(skill).toContain("`/project-flow-setup` configures a repository");
     expect(skill).toContain("`/to-issues` creates, updates, and closes issue records");
     expect(skill).toContain("`/roadmap` chooses, prioritizes, sequences, and reshapes work");
-    expect(skill).toContain("Do not mutate GitHub");
-    expect(skill).toContain("without explicit approval");
+    // Setup is plumbing: it runs to completion. Only lossy actions gate.
+    expect(skill).toContain("### Approval boundary");
+    expect(skill).toContain("**Apply without asking:**");
+    expect(skill).toContain("**Stop and ask:**");
     expect(skill).toContain("gh auth refresh -s project");
+    // `read:project` cannot create a Project — recommending it costs a round trip.
+    expect(skill).toContain("Always name `project`, never `read:project`");
   });
 
   it("references bundled templates for repo-local docs", async () => {
