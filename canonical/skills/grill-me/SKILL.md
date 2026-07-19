@@ -3,11 +3,26 @@ name: grill-me
 description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Records each resolved decision into the DevOS Throughline's Decision Ledger when one exists. Use when the user wants to stress-test a plan, get grilled on their design, mentions "grill me", or as the DevOS grill stage.
 ---
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions. For each question, provide your recommended answer.
 
-Ask the questions one at a time.
+If a question can be answered by exploring the codebase, explore the codebase instead. This is the single highest-leverage rule here — a question you could have answered yourself costs the human a round trip and returns nothing.
 
-If a question can be answered by exploring the codebase, explore the codebase instead.
+## Ask in rounds
+
+Ask in **dependency-ordered rounds**, not one question at a time.
+
+A round is every open question whose answer does not depend on another open question. Ask those together, take one reply covering all of them, then build the next round from what those answers unlocked.
+
+- Number questions continuously across the whole session — Q1–Q4 in round one, Q5–Q7 in round two — so replies can address them by number and out of order.
+- Never put two questions in the same round when one's answer would change the other's framing. That dependency is exactly what rounds preserve and a flat question-dump destroys.
+- Later rounds build on earlier answers. Do not restate resolved ground.
+- Keep each question short. A round is read all at once, so length compounds — four terse questions land, four paragraphs do not.
+- Give your recommended answer for every question. Most rounds should be answerable with "yes to all but Q3."
+- Three to five questions per round is the working range. Past that, split the round.
+
+**Why:** one-at-a-time ends every session with a run of questions that are all agreements — "agree, agree, agree" — each costing a full model round trip. Rounds collapse those into one reply. The tradeoff is more reading per round, which terse questions pay down.
+
+The dependency ordering is what makes this safe. Dumping every question at once is faster still and produces incoherent answers, because half the questions are premature.
 
 ## DevOS: record decisions into the Throughline
 

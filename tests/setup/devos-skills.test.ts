@@ -134,7 +134,10 @@ describe("DevOS-conformed stage skills", () => {
     it("keeps its slug and relentless-interview behavior", () => {
       expect(skill).toMatch(/^name:\s*grill-me\s*$/m);
       expect(skill).toMatch(/[Ii]nterview me relentlessly/);
-      expect(skill).toMatch(/one at a time/i);
+      // Rounds, not one-at-a-time: batch independent questions, take one reply,
+      // build the next round from it. Dependency ordering is what keeps it safe.
+      expect(skill).toMatch(/dependency-ordered rounds/i);
+      expect(skill).toMatch(/not one question at a time/i);
     });
 
     it("teaches appending resolved decisions to the Decision Ledger", () => {
