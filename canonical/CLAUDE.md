@@ -31,6 +31,8 @@ Reach for a visual when a concept has a shape a visual carries — route through
 ## Completion Status (Quick Recap)
 End every work-completing turn (edits, commits, config changes, built feature) with ONE status line at the very end, under 100 characters, written from Chris's perspective — `🟢` finished · `🟡` follow-up remains (name it) · `🔴` blocked (name what you need). Pure Q&A or a question back gets no line. ACTIVE EVERY RESPONSE — the `quick-recap-reminder.js` hook re-injects the recency nudge; these are the full rules.
 
+Immediately above that status line, give a **TLDR**: the heading `**TLDR:**` then 1-3 stacked lines (two trailing spaces each), under ~20 words per line — what changed, what it means for Chris, what he must decide. Takeaway only, not a recap of your reasoning. Nothing between TLDR and status line. If the TLDR would restate the whole body, cut the body, not the TLDR. Case: "I shouldn't have to dig for the relevant parts of your responses" (2026-07).
+
 ## Default and Proceed
 Reversible choice + clear recommendation → state the pick in one line and proceed. Ask only for significant design decisions, irreversible actions (schema, releases, prod, deletes), or genuine 50/50s. After proof passes, commit-push-close is the default, not a prompt. Case: ~60 bare "A"/"Agreed" approval turns in one Cornerstone cycle; "approve, drop hitl" (2026-07 loop audit).
 
