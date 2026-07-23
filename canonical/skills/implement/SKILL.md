@@ -60,7 +60,7 @@ run under **Context Encapsulation** — inside a sub-agent with its own context
 window — so the main conversation receives only a small structured result, not
 all the intermediate code. The Conductor dispatches it at the **Effort Tier**
 recorded in the Throughline (`tier` + `effort`): `heavy → opus`, `light →
-sonnet`, dropping to `haiku` when a `light` stage is `effort: low`. Effort
+sonnet`, with **Sonnet 5 as the floor** — never below it. Effort
 honesty: on Codex, `effort` is a real
 runtime knob the Conductor sets on the dispatch; on Claude Code, which has no
 per-sub-agent effort, the Conductor folds `effort` into the sub-agent prompt as

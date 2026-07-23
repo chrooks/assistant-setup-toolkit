@@ -238,6 +238,11 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/\/commit/);
     });
 
+    it("floors the tier at Sonnet 5 with no haiku", () => {
+      expect(skill).toMatch(/Sonnet 5 as the floor/);
+      expect(skill).not.toMatch(/haiku/i);
+    });
+
     it("teaches the Context-Encapsulated implement stage with a structured result", () => {
       expect(skill).toMatch(/Context Encapsulation/);
       expect(skill).toMatch(/files_changed/);
@@ -266,6 +271,11 @@ describe("DevOS-conformed stage skills", () => {
     it("is a user-invocable skill named prove-it", () => {
       expect(skill).toMatch(/^name:\s*prove-it\s*$/m);
       expect(skill).toMatch(/^user-invocable:\s*true\s*$/m);
+    });
+
+    it("floors the tier at Sonnet 5 with no haiku", () => {
+      expect(skill).toMatch(/Sonnet 5 as the floor/);
+      expect(skill).not.toMatch(/haiku/i);
     });
 
     it("reads proof methods and writes a Proof Ledger with proposed statuses", () => {

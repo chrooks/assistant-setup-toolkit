@@ -77,8 +77,8 @@ assess, then close.
 
 The prove stage is heavy work, so the Conductor dispatches it under **Context
 Encapsulation** — a sub-agent with its own context window, at the Throughline's
-recorded tier (`heavy → opus`, `light → sonnet`, dropping to `haiku` when a
-`light` stage is `effort: low`). Effort
+recorded tier (`heavy → opus`, `light → sonnet`, with **Sonnet 5 as the floor** —
+never below it). Effort
 honesty: on Codex the Conductor sets `effort` as a real runtime knob; on Claude
 Code it folds `effort` into your prompt as guidance.
 
