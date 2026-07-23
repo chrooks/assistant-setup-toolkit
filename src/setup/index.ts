@@ -200,26 +200,47 @@ export async function discoverSkillDirs(
   const skillsDir = path.join(repoRoot, "canonical", "skills");
   const result: Array<{ name: string; files: string[]; sourceDir: string }> = [];
 
+  const addSkill = async (name: string, skillPath: string) => {
+    const skillFiles = (await walkDir(skillPath))
+      .map((file) => path.relative(skillPath, file.path))
+      .filter((file) => !file.split(path.sep).some((part) => part.startsWith(".")))
+      .sort();
+    result.push({ name, files: skillFiles, sourceDir: skillPath });
+  };
+
   try {
     const entries = await fs.readdir(skillsDir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
-      // machines/ holds machine-scoped skills (skills/machines/<machine>/<skill>/),
-      // gated into the payload by the machine Variant, not a skill itself. Codex
-      // projection and Artifact ZIPs don't yet cover them — Claude Code installs
-      // them via canonicalFiles. Skip so it isn't minted as a bogus "machines" skill.
-      if (entry.name === "machines") continue;
 
-      const skillPath = path.join(skillsDir, entry.name);
-      const skillFiles = (await walkDir(skillPath))
-        .map((file) => path.relative(skillPath, file.path))
-        .filter((file) => !file.split(path.sep).some((part) => part.startsWith(".")))
-        .sort();
-      result.push({
-        name: entry.name,
-        files: skillFiles,
-        sourceDir: skillPath,
-      });
+      // machines/<machine>/<skill>/ holds machine-scoped skills, gated into the
+      // payload by the machine Variant (see payload.ts gateFile), not a skill
+      // itself. Recurse one level deeper so each is discovered under its
+      // machines/<machine>/ name — the gate strips that prefix at build time,
+      // same as it already does for canonicalFiles.
+      if (entry.name === "machines") {
+        const machinesDir = path.join(skillsDir, entry.name);
+        const machineEntries = await fs
+          .readdir(machinesDir, { withFileTypes: true })
+          .catch(() => []);
+        for (const machineEntry of machineEntries) {
+          if (!machineEntry.isDirectory()) continue;
+          const machineDir = path.join(machinesDir, machineEntry.name);
+          const skillEntries = await fs
+            .readdir(machineDir, { withFileTypes: true })
+            .catch(() => []);
+          for (const skillEntry of skillEntries) {
+            if (!skillEntry.isDirectory()) continue;
+            await addSkill(
+              `machines/${machineEntry.name}/${skillEntry.name}`,
+              path.join(machineDir, skillEntry.name),
+            );
+          }
+        }
+        continue;
+      }
+
+      await addSkill(entry.name, path.join(skillsDir, entry.name));
     }
   } catch {
     // No skills directory
@@ -809,10 +830,14 @@ export async function runSetupWizard(
 
     // Skill Artifact generation — plan and create ZIPs for desktop/web upload.
     // The visual-plans Variant governs artifacts the same way as the payload.
+    // Machine-scoped skills (machines/<machine>/<skill>) are excluded — ZIP
+    // upload is a manual, machine-agnostic flow and doesn't need per-machine
+    // gating; add it if that's ever actually wanted.
     const skillDirs = (await discoverSkillDirs(repoRoot)).filter(
       (dir) =>
-        resolveVisualPlansVariant(profile) !== "none" ||
-        !(VISUAL_PLANS_SKILL_NAMES as readonly string[]).includes(dir.name),
+        !dir.name.startsWith("machines/") &&
+        (resolveVisualPlansVariant(profile) !== "none" ||
+          !(VISUAL_PLANS_SKILL_NAMES as readonly string[]).includes(dir.name)),
     );
     const artifactsDir = path.join(repoRoot, "artifacts");
     const plannedArtifacts = planSkillArtifacts({ skillDirs, artifactsDir });

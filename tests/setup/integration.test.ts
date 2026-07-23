@@ -8,6 +8,7 @@ import { resolveAssistantHomePath, resolveReceiptPath } from "../../src/setup/pa
 import { buildAssistantPayloads } from "../../src/setup/payload.js";
 import { planWrites } from "../../src/setup/write-plan.js";
 import { planCodexProjection } from "../../src/setup/projection.js";
+import { discoverSkillDirs } from "../../src/setup/index.js";
 
 // Temporary directory for fake homes — cleaned up after each test
 let tmpDir: string;
@@ -145,6 +146,69 @@ describe("integration", () => {
       const agentsPayload = result.payloads.find((p) => p.homeId === "agents-home")!;
       const agentsPaths = agentsPayload.files.map((f) => f.relativePath);
       expect(agentsPaths).toContain("skills/commit/SKILL.md");
+    });
+
+    it("discovers machine-scoped skills nested under skills/machines/<machine>/<skill>/", async () => {
+      await writeFile("canonical/skills/commit/SKILL.md", "# Commit");
+      await writeFile("canonical/skills/machines/hestia/deploy/SKILL.md", "# Deploy");
+      // A machine dir with no skill subdirectories yet (e.g. work/ holding only
+      // a .gitkeep so it survives on clone) must not blow up discovery.
+      await writeFile("canonical/skills/machines/work/.gitkeep", "");
+
+      const skillDirs = await discoverSkillDirs(tmpDir);
+      const names = skillDirs.map((d) => d.name).sort();
+
+      expect(names).toEqual(["commit", "machines/hestia/deploy"]);
+      const deploy = skillDirs.find((d) => d.name === "machines/hestia/deploy")!;
+      expect(deploy.files).toEqual(["SKILL.md"]);
+    });
+
+    it("projects a machine-scoped skill to Codex and gates it by the machine Variant", () => {
+      const projectionMappings = planCodexProjection({
+        claudeFiles: [],
+        skillDirs: [{ name: "machines/hestia/deploy", files: ["SKILL.md"] }],
+      });
+
+      expect(projectionMappings).toHaveLength(1);
+      expect(projectionMappings[0].target).toBe(
+        ".agents/skills/machines/hestia/deploy/SKILL.md",
+      );
+
+      // Mirror index.ts's projectionFiles transform: strip the .codex/.agents
+      // prefix, tag component "skills".
+      const projectionFiles: PayloadFile[] = projectionMappings.map((m) => ({
+        relativePath: m.target.replace(/^\.(codex|agents)\//, ""),
+        sourcePath: `/repo/.setup/projections/${m.target}`,
+        component: "skills",
+        origin: "target-projection",
+        executable: false,
+      }));
+
+      const matching = buildAssistantPayloads({
+        targets: ["codex-cli"],
+        components: ["skills"],
+        externalFiles: [],
+        canonicalFiles: [],
+        projectionFiles,
+        variants: { machine: "hestia" },
+      });
+      const matchingPaths = matching.payloads
+        .find((p) => p.homeId === "agents-home")!
+        .files.map((f) => f.relativePath);
+      expect(matchingPaths).toEqual(["skills/deploy/SKILL.md"]);
+
+      const otherMachine = buildAssistantPayloads({
+        targets: ["codex-cli"],
+        components: ["skills"],
+        externalFiles: [],
+        canonicalFiles: [],
+        projectionFiles,
+        variants: { machine: "work" },
+      });
+      const otherPaths = otherMachine.payloads
+        .find((p) => p.homeId === "agents-home")!
+        .files.map((f) => f.relativePath);
+      expect(otherPaths).toEqual([]);
     });
   });
 
