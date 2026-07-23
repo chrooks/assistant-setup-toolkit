@@ -130,6 +130,18 @@ export function buildAssistantPayloads(
   const machine = input.variants?.[MACHINE_VARIANT_KEY];
   const gateFile = (file: PayloadFile): PayloadFile | null => {
     if (!isIncluded(file)) return null;
+
+    // Machine-scoped skills mirror the machine rule gate: a skill under
+    // skills/machines/<machine>/<skill>/... ships only to the matching machine,
+    // installed at skills/<skill>/... with the machines/<machine>/ prefix
+    // stripped. Lets a machine carry skills the others never see (and, when the
+    // dir is gitignored, skills that never enter version control at all).
+    const skillMatch = file.relativePath.match(/^skills\/machines\/([^/]+)\/(.+)$/);
+    if (skillMatch) {
+      if (skillMatch[1] !== machine) return null;
+      return { ...file, relativePath: `skills/${skillMatch[2]}` };
+    }
+
     const match = file.relativePath.match(/^rules\/machines\/(.+)\.md$/);
     if (!match) return file;
     if (match[1] !== machine) return null;

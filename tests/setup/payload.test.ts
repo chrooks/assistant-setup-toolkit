@@ -306,5 +306,53 @@ describe("payload", () => {
         expect(files).toEqual(["rules/common/coding-style.md"]);
       });
     });
+
+    describe("machine-scoped skills (machine Variant)", () => {
+      const skill = (relativePath: string): PayloadFile => ({
+        relativePath,
+        sourcePath: `/repo/canonical/${relativePath}`,
+        component: "skills",
+        origin: "canonical-source",
+        executable: false,
+      });
+      const canonicalFiles = [
+        skill("skills/commit/SKILL.md"),
+        skill("skills/machines/work/timesheet/SKILL.md"),
+        skill("skills/machines/hestia/deploy/SKILL.md"),
+      ];
+
+      it("installs only the matching machine's skills, with the prefix stripped", () => {
+        const result = buildAssistantPayloads({
+          targets: ["claude-code"],
+          components: ["skills"],
+          externalFiles: [],
+          canonicalFiles,
+          projectionFiles: [],
+          variants: { machine: "work" },
+        });
+
+        const files = result.payloads[0].files.map((f) => f.relativePath).sort();
+        expect(files).toEqual(["skills/commit/SKILL.md", "skills/timesheet/SKILL.md"]);
+        const installed = result.payloads[0].files.find(
+          (f) => f.relativePath === "skills/timesheet/SKILL.md",
+        );
+        expect(installed!.sourcePath).toBe(
+          "/repo/canonical/skills/machines/work/timesheet/SKILL.md",
+        );
+      });
+
+      it("drops every machine skill when no machine Variant is set", () => {
+        const result = buildAssistantPayloads({
+          targets: ["claude-code"],
+          components: ["skills"],
+          externalFiles: [],
+          canonicalFiles,
+          projectionFiles: [],
+        });
+
+        const files = result.payloads[0].files.map((f) => f.relativePath);
+        expect(files).toEqual(["skills/commit/SKILL.md"]);
+      });
+    });
   });
 });

@@ -22,3 +22,8 @@ presets:
       visual-plans: self-hosted
       # ADR-0003: installs canonical/rules/machines/hestia.md as rules/machine.md
       machine: hestia
+  mac:
+    variants:
+      visual-plans: self-hosted
+      # machine Variant also gates skills/machines/mac/<skill>/ into the payload.
+      machine: mac

@@ -161,6 +161,7 @@ describe("presets", () => {
       );
       expect(Object.keys(seeded).sort()).toEqual([
         "hestia",
+        "mac",
         "personal",
         "work",
       ]);

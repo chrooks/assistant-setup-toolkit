@@ -204,6 +204,11 @@ export async function discoverSkillDirs(
     const entries = await fs.readdir(skillsDir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
+      // machines/ holds machine-scoped skills (skills/machines/<machine>/<skill>/),
+      // gated into the payload by the machine Variant, not a skill itself. Codex
+      // projection and Artifact ZIPs don't yet cover them — Claude Code installs
+      // them via canonicalFiles. Skip so it isn't minted as a bogus "machines" skill.
+      if (entry.name === "machines") continue;
 
       const skillPath = path.join(skillsDir, entry.name);
       const skillFiles = (await walkDir(skillPath))
