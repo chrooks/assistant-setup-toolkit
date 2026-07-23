@@ -222,13 +222,17 @@ in its own context window and the main conversation receives only a small
 result.
 
 1. **Pick the model from the tier.** Map the Throughline's `tier` to the
-   sub-agent model: `heavy → opus`, `light → sonnet`; drop a `light` stage to
-   `haiku` when its `effort` is `low`. A missing tier defaults to `sonnet`.
+   sub-agent model: `heavy → opus`, `light → sonnet`. **Sonnet 5 is the floor** —
+   never dispatch a work stage below it. A missing tier defaults to `sonnet`.
+   **State the choice** in one line before dispatching — "tier: heavy →
+   dispatching implement on opus" — so the reasoning is legible in the transcript
+   and the dispatch stays auditable.
 2. **Spawn the Agent at that model.** Invoke the matching stage skill
-   (`/implement` or `/prove-it`) inside the sub-agent, and **set the Agent
-   tool's `model` parameter to the model you mapped in step 1** — do not leave
-   it unset and rely on prompt text, or the sub-agent silently inherits the
-   main model and the tier has no real effect. Pass the Throughline path and
+   (`/implement` or `/prove-it`) inside the sub-agent, and **always set the Agent
+   tool's `model` parameter to the model you mapped in step 1** — leaving it
+   unset is a defect, not a shortcut: the sub-agent then silently inherits the
+   main model and the tier has no real effect. If you cannot determine the tier,
+   default to `sonnet` explicitly rather than passing no model at all. Pass the Throughline path and
    the `acceptance_criteria` as context. On Codex, also pass the recorded
    `effort` as a real runtime knob; on Claude Code, which has no per-sub-agent
    effort, fold the effort into the sub-agent prompt as guidance.

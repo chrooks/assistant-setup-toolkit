@@ -23,13 +23,13 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/Context Encapsulation/);
       expect(skill).toMatch(/heavy\s*→\s*opus/);
       expect(skill).toMatch(/light\s*→\s*sonnet/);
-      expect(skill).toMatch(/haiku/);
+      expect(skill).toMatch(/Sonnet 5 is the floor/);
       expect(skill).toMatch(/[Ss]pawn .*Agent/);
     });
 
     it("sets the Agent model param from the tier, not just prompt text (ac-m5-1)", () => {
       expect(skill).toMatch(/`model` parameter/);
-      expect(skill).toMatch(/[Dd]o not leave[\s\S]*?unset/);
+      expect(skill).toMatch(/unset is a defect/);
       expect(skill).toMatch(/inherits the[\s\S]*?main model/);
     });
 
@@ -100,6 +100,16 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/\/impeccable/);
       expect(skill).toMatch(/\/design-audit/);
       expect(skill).toMatch(/[Bb]ackend-only work skips/);
+    });
+
+    it("floors the work-stage model at Sonnet 5 and drops the haiku rule", () => {
+      expect(skill).toMatch(/heavy → opus/);
+      expect(skill).toMatch(/light → sonnet/);
+      expect(skill).toMatch(/Sonnet 5 is the floor/);
+      expect(skill).not.toMatch(/haiku/i);
+      // unset model is a defect, and the dispatch states its tier→model choice
+      expect(skill).toMatch(/unset is a defect/);
+      expect(skill).toMatch(/State the choice/);
     });
 
     it("proposes parallel-vs-serial batches on multi-issue runs", () => {
