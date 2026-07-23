@@ -99,6 +99,20 @@ dispatched you — record the sizing instead of only presenting it:
 
 Then advance: set `stage` to the stage `next_action` points at.
 
+**Declare the route; don't offer a menu.** In DevOS mode you already hold the
+verdict — so state the call in one line and proceed, rather than presenting the
+three options and waiting. The grill/no-grill judgment needs domain knowledge the
+human often doesn't have; owning it is the point. Shape:
+
+    grillable:false, 1 open decision (cache TTL) → going straight to /plan.
+    Say "grill" to open the decisions first.
+
+Name the decisions you're skipping so the human can veto a specific one. Only
+fall back to the three-option presentation (Step 3) when there is no Throughline
+— the standalone path. When `autonomy: afk`, don't even pause for the veto on a
+clean `grillable:false`: state the route and advance; only a `grillable:true`
+with a decision you can't resolve is a genuine stop.
+
 ## Rules
 
 - Do not start implementing before the user picks (standalone) or before the

@@ -19,6 +19,7 @@ project: <project-name>          # the target project directory name, e.g. chroo
 issue: <issue-number-or-null>    # tracker issue this work maps to, or null for ad-hoc work
 slug: <kebab-slug>               # short identifier; also names the file: <slug>-throughline.md
 stage: kickoff                   # kickoff|scope|grill|plan|implement|prove|assess|close
+autonomy: gated                  # gated|afk — gated stops at every gate; afk auto-advances mechanical gates, halts only at a design decision, assess, or failure
 grillable: null                  # true|false|null — scope stamps this
 tier: null                       # light|heavy|null — scope emits this
 effort: null                     # low|medium|high|null — scope emits this

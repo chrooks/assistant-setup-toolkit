@@ -81,6 +81,41 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/[Dd]o not auto-dispatch/);
       expect(skill).toMatch(/Increment the `bounces` counter/);
     });
+
+    it("defines the afk autonomy mode and its three halt conditions", () => {
+      expect(skill).toMatch(/Autonomy: gated vs\. afk/);
+      expect(skill).toMatch(/mechanical gate/i);
+      expect(skill).toMatch(/scope . grill . plan . implement . prove/);
+      // the three human "bother me" conditions
+      expect(skill).toMatch(/genuine design decision/i);
+      expect(skill).toMatch(/assess.*always a human stop|always human stops/i);
+      expect(skill).toMatch(/[Uu]nexpected failure/);
+      // afk never crosses the assess/close gate
+      expect(skill).toMatch(/never crosses the assess gate|never auto-runs `close`/);
+    });
+
+    it("threads design through the lifecycle for user-facing Surfaces", () => {
+      expect(skill).toMatch(/design is a first-class thread/i);
+      expect(skill).toMatch(/user-facing \*\*Surface\*\*|user-facing Surface/);
+      expect(skill).toMatch(/\/impeccable/);
+      expect(skill).toMatch(/\/design-audit/);
+      expect(skill).toMatch(/[Bb]ackend-only work skips/);
+    });
+
+    it("proposes parallel-vs-serial batches on multi-issue runs", () => {
+      expect(skill).toMatch(/Multi-issue runs/);
+      expect(skill).toMatch(/disjoint paths|disjoint files/);
+      expect(skill).toMatch(/own Throughline/);
+    });
+  });
+
+  describe("throughline template — autonomy field", () => {
+    const template = readTemplate();
+
+    it("carries an autonomy field defaulting to gated", () => {
+      expect(template).toMatch(/autonomy: gated/);
+      expect(template).toMatch(/gated\|afk/);
+    });
   });
 
   describe("throughline template — Work Log + Assessment Log", () => {
