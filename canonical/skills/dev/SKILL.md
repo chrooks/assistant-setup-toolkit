@@ -196,7 +196,11 @@ human in one short line before doing anything.
 Run the work for the current stage.
 
 - Dialogue stages — `kickoff`, `scope`, `grill`, `plan`, `assess` — run here in
-  the main conversation, because they are cheap on context and need the human.
+  the main conversation because they need the human. These are the **plan/think**
+  role (planning and context-gathering) — the frontier reasoning model earns its
+  cost here, so a real `/dev` run should be driven on that model (Fable 5 /
+  GPT-5.6 Sol; see [`model-resolution.md`](model-resolution.md)), which they
+  inherit from the main loop.
 - Work stages — `implement`, `prove`, deep research — are heavy on context, so
   you dispatch them under **Context Encapsulation** (see below) instead of
   running them inline.
@@ -221,21 +225,20 @@ work in the main conversation. Spawn an Agent sub-agent so the heavy work runs
 in its own context window and the main conversation receives only a small
 result.
 
-1. **Pick the model from the tier.** Map the Throughline's `tier` to the
-   sub-agent model: `heavy → opus`, `light → sonnet`. **Sonnet 5 is the floor** —
-   never dispatch a work stage below it. A missing tier defaults to `sonnet`.
-   **State the choice** in one line before dispatching — "tier: heavy →
-   dispatching implement on opus" — so the reasoning is legible in the transcript
-   and the dispatch stays auditable.
+1. **Resolve the model from the tier.** Map the Throughline's `tier` to a
+   concrete model via [`model-resolution.md`](model-resolution.md) — the shared,
+   runtime-agnostic table (Claude Code and Codex columns). Work stages resolve to
+   **build-heavy** (`tier: heavy`) or **build-light** (`tier: light`, the floor);
+   a missing tier defaults to the floor. **Never inline a vendor model name
+   here** — it drifts. **State the choice** in one line before dispatching, e.g.
+   "tier: heavy → build-heavy → opus".
 2. **Spawn the Agent at that model.** Invoke the matching stage skill
    (`/implement` or `/prove-it`) inside the sub-agent, and **always set the Agent
-   tool's `model` parameter to the model you mapped in step 1** — leaving it
-   unset is a defect, not a shortcut: the sub-agent then silently inherits the
-   main model and the tier has no real effect. If you cannot determine the tier,
-   default to `sonnet` explicitly rather than passing no model at all. Pass the Throughline path and
-   the `acceptance_criteria` as context. On Codex, also pass the recorded
-   `effort` as a real runtime knob; on Claude Code, which has no per-sub-agent
-   effort, fold the effort into the sub-agent prompt as guidance.
+   tool's `model` parameter to the resolved model** — leaving it unset is a
+   defect: the sub-agent then silently inherits the main model and the tier has
+   no real effect. Pass the Throughline path and the `acceptance_criteria` as
+   context. Handle `effort` per the resolution table: on Codex a real runtime
+   knob, on Claude Code folded into the sub-agent prompt as guidance.
 3. **Require a fenced JSON result.** The sub-agent returns only a fenced JSON
    block of the shape:
 

@@ -15,21 +15,28 @@ function readTemplate(): string {
   );
 }
 
+function readModelResolution(): string {
+  return readFileSync(
+    path.join(repoRoot, "canonical", "skills", "dev", "model-resolution.md"),
+    "utf-8",
+  );
+}
+
 describe("DevOS-conformed stage skills", () => {
   describe("dev (Conductor) — Context Encapsulation dispatch", () => {
     const skill = readSkill("dev");
 
     it("dispatches work stages as tier-tagged Agent sub-agents (ac-m5-1)", () => {
       expect(skill).toMatch(/Context Encapsulation/);
-      expect(skill).toMatch(/heavy\s*→\s*opus/);
-      expect(skill).toMatch(/light\s*→\s*sonnet/);
-      expect(skill).toMatch(/Sonnet 5 is the floor/);
+      expect(skill).toMatch(/build-heavy/);
+      expect(skill).toMatch(/build-light/);
+      expect(skill).toMatch(/model-resolution\.md/);
       expect(skill).toMatch(/[Ss]pawn .*Agent/);
     });
 
     it("sets the Agent model param from the tier, not just prompt text (ac-m5-1)", () => {
       expect(skill).toMatch(/`model` parameter/);
-      expect(skill).toMatch(/unset is a defect/);
+      expect(skill).toMatch(/unset is a[\s\S]*?defect/);
       expect(skill).toMatch(/inherits the[\s\S]*?main model/);
     });
 
@@ -102,13 +109,10 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/[Bb]ackend-only work skips/);
     });
 
-    it("floors the work-stage model at Sonnet 5 and drops the haiku rule", () => {
-      expect(skill).toMatch(/heavy → opus/);
-      expect(skill).toMatch(/light → sonnet/);
-      expect(skill).toMatch(/Sonnet 5 is the floor/);
+    it("resolves the model via the shared table, inlines no vendor name, and states the choice", () => {
+      expect(skill).toMatch(/model-resolution\.md/);
       expect(skill).not.toMatch(/haiku/i);
-      // unset model is a defect, and the dispatch states its tier→model choice
-      expect(skill).toMatch(/unset is a defect/);
+      expect(skill).toMatch(/unset is a[\s\S]*?defect/);
       expect(skill).toMatch(/State the choice/);
     });
 
@@ -116,6 +120,36 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/Multi-issue runs/);
       expect(skill).toMatch(/disjoint paths|disjoint files/);
       expect(skill).toMatch(/own Throughline/);
+    });
+  });
+
+  describe("model-resolution — runtime-agnostic tier table", () => {
+    const table = readModelResolution();
+
+    it("is runtime-agnostic: capability roles, both runtime columns", () => {
+      expect(table).toMatch(/plan\/think/);
+      expect(table).toMatch(/build-heavy/);
+      expect(table).toMatch(/build-light/);
+      expect(table).toMatch(/Claude Code/);
+      expect(table).toMatch(/Codex/);
+    });
+
+    it("puts the frontier reasoning model on plan/think for both runtimes", () => {
+      expect(table).toMatch(/fable/i);
+      expect(table).toMatch(/Sol/);
+      expect(table).toMatch(/plan.*context-gathering|planning and information/i);
+    });
+
+    it("floors work stages at the workhorse tier and bans the cheap tier", () => {
+      expect(table).toMatch(/build-light.*floor|floor.*build-light/i);
+      expect(table).toMatch(/sonnet/i);
+      expect(table).toMatch(/Terra/);
+      expect(table).toMatch(/never.*Haiku|Haiku.*Luna|~~/i);
+    });
+
+    it("keeps effort a real knob on Codex and prompt-folded on Claude Code", () => {
+      expect(table).toMatch(/Codex.*effort.*real|effort.*real dispatch knob/i);
+      expect(table).toMatch(/Claude Code.*fold|fold.*prompt/i);
     });
   });
 
@@ -238,8 +272,10 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/\/commit/);
     });
 
-    it("floors the tier at Sonnet 5 with no haiku", () => {
-      expect(skill).toMatch(/Sonnet 5 as the floor/);
+    it("resolves the model via the shared table with no inline vendor name", () => {
+      expect(skill).toMatch(/model-resolution\.md/);
+      expect(skill).toMatch(/build-heavy/);
+      expect(skill).toMatch(/build-light/);
       expect(skill).not.toMatch(/haiku/i);
     });
 
@@ -252,7 +288,7 @@ describe("DevOS-conformed stage skills", () => {
 
     it("returns a fenced JSON result and is honest about effort per runtime (ac-m5-2, ac-m5-5)", () => {
       expect(skill).toMatch(/fenced JSON/);
-      expect(skill).toMatch(/heavy\s*→\s*opus/);
+      expect(skill).toMatch(/model-resolution\.md/);
       expect(skill).toMatch(/Codex/);
       expect(skill).toMatch(/Claude\s+Code/);
       expect(skill).toMatch(/[Ee]ffort\s+honesty/);
@@ -273,8 +309,10 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/^user-invocable:\s*true\s*$/m);
     });
 
-    it("floors the tier at Sonnet 5 with no haiku", () => {
-      expect(skill).toMatch(/Sonnet 5 as the floor/);
+    it("resolves the model via the shared table with no inline vendor name", () => {
+      expect(skill).toMatch(/model-resolution\.md/);
+      expect(skill).toMatch(/build-heavy/);
+      expect(skill).toMatch(/build-light/);
       expect(skill).not.toMatch(/haiku/i);
     });
 
@@ -293,7 +331,7 @@ describe("DevOS-conformed stage skills", () => {
 
     it("returns a fenced JSON result and is honest about effort per runtime (ac-m5-2, ac-m5-5)", () => {
       expect(skill).toMatch(/fenced JSON/);
-      expect(skill).toMatch(/heavy\s*→\s*opus/);
+      expect(skill).toMatch(/model-resolution\.md/);
       expect(skill).toMatch(/Codex/);
       expect(skill).toMatch(/Claude\s+Code/);
       expect(skill).toMatch(/[Ee]ffort\s+honesty/);

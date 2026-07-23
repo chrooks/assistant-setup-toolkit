@@ -76,9 +76,11 @@ assess, then close.
 ## DevOS: the prove stage
 
 The prove stage is heavy work, so the Conductor dispatches it under **Context
-Encapsulation** — a sub-agent with its own context window, at the Throughline's
-recorded tier (`heavy → opus`, `light → sonnet`, with **Sonnet 5 as the floor** —
-never below it). Effort
+Encapsulation** — a sub-agent with its own context window, at the model resolved
+from the Throughline's `tier` via the shared runtime-agnostic table
+([`../dev/model-resolution.md`](../dev/model-resolution.md)): `tier: heavy` →
+**build-heavy**, `tier: light` → **build-light** (the floor — each runtime's
+workhorse, never the cheap tier). Effort
 honesty: on Codex the Conductor sets `effort` as a real runtime knob; on Claude
 Code it folds `effort` into your prompt as guidance.
 

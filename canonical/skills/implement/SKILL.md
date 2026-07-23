@@ -58,9 +58,11 @@ matching Skill workflow, and then starts that workflow.
 When the DevOS Conductor dispatches the implement stage, this Skill is meant to
 run under **Context Encapsulation** — inside a sub-agent with its own context
 window — so the main conversation receives only a small structured result, not
-all the intermediate code. The Conductor dispatches it at the **Effort Tier**
-recorded in the Throughline (`tier` + `effort`): `heavy → opus`, `light →
-sonnet`, with **Sonnet 5 as the floor** — never below it. Effort
+all the intermediate code. The Conductor resolves the dispatch model from the
+Throughline's `tier` via the shared runtime-agnostic table
+([`../dev/model-resolution.md`](../dev/model-resolution.md)): `tier: heavy` →
+**build-heavy**, `tier: light` → **build-light** (the floor — each runtime's
+workhorse, never the cheap tier). Effort
 honesty: on Codex, `effort` is a real
 runtime knob the Conductor sets on the dispatch; on Claude Code, which has no
 per-sub-agent effort, the Conductor folds `effort` into the sub-agent prompt as
