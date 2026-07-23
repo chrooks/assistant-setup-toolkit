@@ -130,6 +130,11 @@ _Avoid_: tutorial, explanation, learning app
 Testing an Interface with a real non-technical user as a forcing function for clear Signifiers and Progressive Disclosure.
 _Avoid_: user test, usability test, beginner test
 
+**Nick Test**:
+Testing an Interface with a capable-but-investment-averse user as a forcing function for immediate utility and zero required onboarding — value must land before the user invests effort. The complement to the **Mom Test**: Mom checks whether it can be *learned*, Nick checks whether it is worth the *bother*.
+_Avoid_: user test, engagement test, friction test
+_AKA_: Nick
+
 **Conversation Thread**:
 A distinct topical branch within a conversation that can continue, fork, or rejoin other branches.
 _Avoid_: tangent, topic, branch

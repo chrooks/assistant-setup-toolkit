@@ -1,6 +1,6 @@
 ---
 name: design-audit
-description: Audit an existing product flow, Interface, or UI Surface against Chris's design ethos plus HCI/UX principles. Use when reviewing product design, Cornerstone flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test evidence.
+description: Audit an existing product flow, Interface, or UI Surface against Chris's design ethos plus HCI/UX principles. Use when reviewing product design, Cornerstone flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test / Nick Test evidence.
 argument-hint: "<flow, Surface, screenshot, or repo path>"
 user-invocable: true
 ---
@@ -40,7 +40,11 @@ Support general Interface and Surface audits, plus these Cornerstone Touchpoints
 5. Run the Mom Test lens:
    - Convert claims and prompts into behavior-based questions.
    - Note where the current design asks for opinions, compliments, predictions, or hypotheticals instead of evidence.
-6. Produce fixes:
+6. Run the Nick Test lens (the complement to the Mom Test):
+   - Trace the path from first contact to first real payoff. Flag every step of required onboarding, reading, or setup that stands before value.
+   - Flag Honest Signifier breaks where the first-run promise implies instant utility the flow does not yet deliver.
+   - Ask: would a capable-but-investment-averse user reach value before deciding it is not worth the bother? Name where they would bail.
+7. Produce fixes:
    - Rank fixes by user impact, confidence, and implementation effort.
    - Separate copy-only, layout, interaction, state-handling, and deeper product-model fixes.
    - When ready for UI/frontend implementation, hand off to `/impeccable` with the ranked fixes and evidence.
@@ -56,12 +60,13 @@ Return concise sections:
 - **Transparent Friction Opportunities**: where intentional pause or explanation would improve trust.
 - **Design Boundary Violations**: where the Interface overpromises, hides uncertainty, or weakens agency.
 - **Mom Test Notes**: better evidence-seeking questions and what they would reveal.
+- **Nick Test Notes**: time-to-first-value along the flow, required onboarding before payoff, and where an investment-averse user would bail.
 - **Ranked Fixes**: highest-leverage changes first, with rationale.
 - **Handoff**: `/impeccable` brief when UI/frontend work is ready.
 
 ## Rules
 
-- Use Lexicon terms exactly: Tool, Skill, Interface, Surface, Affordance, Signifier, Honest Signifier, Transparent Friction, Progressive Disclosure, Design Boundary, Partnership Model, Software as Education, Mom Test, Touchpoint, Feedback, Hierarchy, Information Architecture, Error State, Empty State.
+- Use Lexicon terms exactly: Tool, Skill, Interface, Surface, Affordance, Signifier, Honest Signifier, Transparent Friction, Progressive Disclosure, Design Boundary, Partnership Model, Software as Education, Mom Test, Nick Test, Touchpoint, Feedback, Hierarchy, Information Architecture, Error State, Empty State.
 - Do not invent screenshots, analytics, or user research. Mark assumptions clearly.
 - Prefer concrete observations over taste statements.
 - Keep questions singular and answerable.
