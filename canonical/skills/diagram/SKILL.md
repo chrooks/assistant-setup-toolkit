@@ -58,7 +58,7 @@ Do BOTH, every time:
    chat. Use box-drawing characters; keep it scannable. Conventions:
    - Boxes: `┌─┐ │ │ └─┘`  · Flows: `──▶`  `──┤`  · Trees: `├──` `└──`
    - Lead each box with the node label; keep it to the essential nodes if the graph is large.
-2. **Write the Mermaid source** to `<cwd>/.diagram-exports/<slug>.mmd`, generated from the
+2. **Write the Mermaid source** to `<cwd>/.exports/diagram/<slug>.mmd`, generated from the
    model by `kind`:
    - `flow` / `architecture` → `flowchart TD` (or `LR`): `cli["cli.ts"] --> manifest["manifest.ts"]`
    - `sequence` → `sequenceDiagram` with `A->>B: label`
@@ -71,8 +71,9 @@ Do BOTH, every time:
    or the browser renderer fails, skip the picture, keep the `.mmd`, and tell Chris it is
    ready to preview (VSCode Markdown Preview Enhanced / Mermaid Chart render it).
 
-`.diagram-exports/` is generated output — mention it can be gitignored if the project
-does not already ignore it.
+`.exports/` is the shared generated-output root for visual skills (`table/`,
+`diagram/`, `figure/`). If the project does not ignore it, add `.exports/` to its
+`.gitignore` — one entry covers every visual skill.
 
 ## `html` Mode — Interactive Graph
 
@@ -107,7 +108,7 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
    python3 scripts/build-diagram.py model.json     # or: build-diagram.py model.json out.html
    ```
    It fills the template, inlines `vendor/vis-network.min.{js,css}`, escapes `</script>` in
-   the data and the lib, HTML-escapes the title, writes to `<cwd>/.diagram-exports/<slug>.html`,
+   the data and the lib, HTML-escapes the title, writes to `<cwd>/.exports/diagram/<slug>.html`,
    and prints the absolute path.
 4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
    and report it.
@@ -126,7 +127,7 @@ Some diagrams are not one-off explanations but durable project surfaces — a ro
 architecture map that tracks reality. For those:
 
 - **Commit the model** in the project (e.g. `docs/roadmap/<name>-model.json`), not in
-  `.diagram-exports/`. The JSON model is the source of truth; the HTML is a build product
+  `.exports/diagram/`. The JSON model is the source of truth; the HTML is a build product
   regenerated next to it with `build-diagram.py <model>.json <out>.html`.
 - **Update loop**: whenever the underlying facts change (an issue closes, a component
   lands), edit the model and rebuild in the same pass — a stale living diagram is worse

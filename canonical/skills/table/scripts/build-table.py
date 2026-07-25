@@ -75,7 +75,7 @@ def main(argv: list) -> int:
     out = (
         Path(argv[2])
         if len(argv) > 2
-        else Path.cwd() / ".table-exports" / f"{slugify(str(spec.get('title', 'table')))}.html"
+        else Path.cwd() / ".exports" / "table" / f"{slugify(str(spec.get('title', 'table')))}.html"
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html)

@@ -20,6 +20,9 @@ once after pulling.** Delete this file when every machine has migrated.
   `LEXICON.md`, legacy `CONTEXT.md` still honored).
 - `/handoff` writes files only when needed, to `.claude/handoffs/`
   (`.codex/handoffs/` on Codex) — `.cowork/` is gone.
+- Visual-skill output consolidated: `.table-exports/`, `.diagram-exports/`, and
+  `.figure-exports/` → **`.exports/<kind>/`**. One `.gitignore` entry
+  (`.exports/`) now covers every visual skill, in any repo.
 
 ## Per-machine steps after `git pull`
 
@@ -49,7 +52,18 @@ once after pulling.** Delete this file when every machine has migrated.
    rm -f ~/.claude/CONTEXT.md ~/.codex/CONTEXT.md
    ```
 
-4. **Optional, per repo, whenever convenient:** migrate `feature_requests/`
+4. **Any repo with old export dirs** (they are generated output — deleting is
+   also fine):
+
+   ```bash
+   for k in table diagram figure; do
+     [ -d ".$k-exports" ] && mkdir -p .exports && mv ".$k-exports" ".exports/$k"
+   done
+   ```
+
+   Then replace the three `.gitignore` lines with the single entry `.exports/`.
+
+5. **Optional, per repo, whenever convenient:** migrate `feature_requests/`
    docs into `.tasks/<slug>/` folders (`<file>-plan.md` → `<slug>/plan.md`,
    `<file>-throughline.md` → `<slug>/throughline.md`) and add `.tasks/` to the
    repo's `.gitignore`. Active runs keep working either way via the hook's

@@ -1,7 +1,9 @@
 {
-  "name": "code-assistant-context",
+  "name": "assistant-setup-toolkit",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "description": "Canonical Assistant Source and Setup Wizard that configure Claude Code and Codex CLI consistently across machines.",
   "type": "module",
   "scripts": {
     "setup": "tsx scripts/setup.ts",

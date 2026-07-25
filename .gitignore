@@ -8,10 +8,11 @@ dist/
 artifacts/
 tests/.tmp/
 .setup/
-.table-exports/
-.diagram-exports/
 .DS_Store
 .mcp.json
+
+# Generated output from the visual skills (/table, /diagram, /figure).
+.exports/
 
 # Per-work-item docs (Throughline + ExecPlan + related): local working state.
 .tasks/

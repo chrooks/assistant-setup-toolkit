@@ -102,14 +102,16 @@ itself from CDN. It gives axes, a color legend, and hover tooltips for free.
    python3 scripts/build-figure.py spec.json     # or: build-figure.py spec.json out.html
    ```
    It injects the spec, escapes `</script>` in the data, HTML-escapes the title, writes to
-   `<cwd>/.figure-exports/<slug>.html`, and prints the absolute path.
+   `<cwd>/.exports/figure/<slug>.html`, and prints the absolute path.
 4. **Open** the printed path: `xdg-open "<path>"` on Linux (`open` macOS, `start` Windows), and report it.
 
 ### Notes
 
 - Use the script, not a hand-rolled fill — it is the tested path
   (`tests/setup/skill-html-fill.test.ts`) that guarantees the `</script>` escaping.
-- `.figure-exports/` is generated output — mention it can be gitignored.
+- `.exports/` is the shared generated-output root for visual skills (`table/`,
+  `diagram/`, `figure/`). If the project does not ignore it, add `.exports/` to
+  its `.gitignore` — one entry covers every visual skill.
 - Plot is loaded from CDN (needs internet when opening). To vendor it offline, drop the UMD
   bundles into a `vendor/` sibling and inline them like `/diagram` — add that only if you
   actually need offline figures.

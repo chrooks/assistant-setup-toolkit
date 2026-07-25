@@ -90,7 +90,7 @@ hostile value cannot break the page, HTML-escapes the title, and writes a self-c
    python3 scripts/build-table.py spec.json        # or: build-table.py spec.json out.html
    ```
    It fills the template, escapes `</script>`/`<!--` in the data, HTML-escapes the title,
-   writes to `<cwd>/.table-exports/<slug>.html`, and prints the absolute path.
+   writes to `<cwd>/.exports/table/<slug>.html`, and prints the absolute path.
 4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
    and report it so Chris can find, move, or re-open it.
 
@@ -99,8 +99,9 @@ hostile value cannot break the page, HTML-escapes the title, and writes a self-c
 - The template handles its own sort/filter/search/column-toggle — do not add libraries.
 - Use the script, not a hand-rolled fill: it is the tested path
   (`tests/setup/skill-html-fill.test.ts`) that guarantees the `</script>` escaping.
-- `.table-exports/` is a generated-output dir — mention it can be gitignored if the
-  project does not already ignore it.
+- `.exports/` is the shared generated-output root for visual skills (`table/`,
+  `diagram/`, `figure/`). If the project does not ignore it, add `.exports/` to
+  its `.gitignore` — one entry covers every visual skill.
 
 ## Behavior
 
