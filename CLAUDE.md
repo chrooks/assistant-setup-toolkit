@@ -64,7 +64,7 @@ Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`
 | `manifests/` | YAML Installation Manifests listing External Sources |
 | `artifacts/` | Generated Skill Artifacts (ZIPs for manual upload, `--artifacts`); gitignored |
 | `.setup/logs/` | Setup Wizard run logs — full narration the console summarizes; gitignored |
-| `feature_requests/` | ExecPlan docs, PRDs, and design questions for features |
+| `.tasks/` | Per-work-item docs — one gitignored `<issue#>-<slug>/` folder holding the Throughline, ExecPlan, and related docs |
 
 ## Skill Packaging Helper
 

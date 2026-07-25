@@ -194,4 +194,4 @@ npm test             # Run all tests
 npm test -- domain   # Run specific test file
 ```
 
-See `CONTEXT.md` for the project Lexicon and `feature_requests/installation-wizard-plan.md` for the ExecPlan.
+See `CONTEXT.md` for the project Lexicon and `.tasks/installation-wizard/plan.md` for the ExecPlan.

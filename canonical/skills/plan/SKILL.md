@@ -21,7 +21,7 @@ an explicit approval gate before any code is written.
 
 1. Read the inputs: the ask/issue, and — if a Throughline exists — its resolved
    `## Decision Ledger`.
-2. Write an ExecPlan to `feature_requests/<slug>-plan.md`.
+2. Write an ExecPlan to `.tasks/<issue#>-<slug>/plan.md`.
 3. Define acceptance criteria, each with a `proof_method`.
 4. Walk the human through it and wait for approval before implementing.
 
@@ -32,25 +32,29 @@ The ExecPlan is the detailed living plan document. Follow the format guide at
 prose-first narrative, self-contained for a novice, with the mandatory living
 sections — `Progress`, `Surprises & Discoveries`, `Decision Log`, and
 `Outcomes & Retrospective`. Write it to the project at
-`feature_requests/<kebab-slug>-plan.md`. If the guide is not present, still
-produce those sections; do not invent a different shape.
+`.tasks/<issue#>-<slug>/plan.md` — the same folder as the work's Throughline;
+name the folder `<issue#>-<kebab-slug>` from the tracker issue, or `<slug>`
+alone until one exists (rename when `/to-issues` creates it). `.tasks/` is
+local working state: ensure the project's `.gitignore` lists it, adding the
+entry if missing. If the guide is not present, still produce those sections;
+do not invent a different shape.
 
 The ExecPlan is the heavy detail. The Throughline is the lightweight control
 file that points at it. They are different files in the same
-`feature_requests/` directory and both are kept current.
+`.tasks/<issue#>-<slug>/` folder and both are kept current.
 
 ## Process
 
 ### Step 1 — Gather inputs
 
 Read the ask and the issue. If a Throughline exists at
-`feature_requests/*-throughline.md` with `status: in_progress`, read its
+`.tasks/*/throughline.md` with `status: in_progress`, read its
 resolved `## Decision Ledger` — those decisions are settled and the plan must
 honor them, not reopen them.
 
 ### Step 2 — Write the ExecPlan
 
-Author or update `feature_requests/<slug>-plan.md` per the format above. Break
+Author or update `.tasks/<issue#>-<slug>/plan.md` per the format above. Break
 the work into independently verifiable milestones. Record the design choices
 you make in its Decision Log.
 

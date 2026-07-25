@@ -20,9 +20,10 @@ pipx install notebooklm-py
 > cookie extraction.
 
 **Dev/staging shortcut (this repo):** the spike venv at
-`feature_requests/notebooklm-export/.venv` already has the CLI plus the `[browser]` extra and
-a Playwright Chromium. Use `feature_requests/notebooklm-export/.venv/bin/notebooklm` if you'd
-rather not install globally.
+`.tasks/notebooklm-export/.venv` already has the CLI plus the `[browser]` extra and
+a Playwright Chromium. Use `.tasks/notebooklm-export/.venv/bin/notebooklm` if you'd
+rather not install globally (a venv created under the old `feature_requests/` path
+must be recreated — venv scripts embed their absolute path).
 
 ## 2. Authenticate (once)
 

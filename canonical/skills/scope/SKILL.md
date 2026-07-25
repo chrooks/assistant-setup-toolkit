@@ -88,7 +88,7 @@ Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, <N
 ## DevOS: write the sizing into the Throughline
 
 When the work is part of a DevOS run — there is a Throughline at
-`feature_requests/*-throughline.md` with `status: in_progress`, or the Conductor
+`.tasks/*/throughline.md` with `status: in_progress`, or the Conductor
 dispatched you — record the sizing instead of only presenting it:
 
 1. Set the frontmatter fields `grillable`, `tier`, and `effort` to your verdict.

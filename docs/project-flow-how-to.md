@@ -167,7 +167,7 @@ Then choose:
 Once the work has a plan or clear task list:
 
 ```text
-/to-issues feature_requests/saved-views-plan.md
+/to-issues .tasks/saved-views/plan.md
 ```
 
 That creates issue records or sub-issues.

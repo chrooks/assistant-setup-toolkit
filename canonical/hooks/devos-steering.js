@@ -2,7 +2,7 @@
 // UserPromptSubmit hook: DevOS per-turn steering.
 //
 // Keeps a DevOS run alive across turns. If the current project has an active
-// Throughline (a file matching feature_requests/*-throughline.md with
+// Throughline (a file matching .tasks/*/throughline.md with
 // `status: in_progress`), this re-injects a one-line reminder of the current
 // stage and next action on every user turn. A skill is a one-shot injected
 // prompt, so over a long session or after compaction the agent can forget a run
@@ -90,17 +90,35 @@ function getField(frontmatter, key) {
 }
 
 function findThroughlines(cwd) {
-  const dir = path.join(cwd, "feature_requests");
-  let entries;
+  const found = [];
+
+  // Current convention: .tasks/<issue#>-<slug>/throughline.md
+  const tasksDir = path.join(cwd, ".tasks");
+  let taskEntries = [];
   try {
-    entries = fs.readdirSync(dir);
+    taskEntries = fs.readdirSync(tasksDir);
   } catch {
-    return [];
+    // No .tasks directory — fine.
   }
-  return entries
-    .filter((name) => name.endsWith("-throughline.md"))
-    .sort()
-    .map((name) => path.join(dir, name));
+  for (const name of taskEntries.sort()) {
+    const file = path.join(tasksDir, name, "throughline.md");
+    if (fs.existsSync(file)) found.push(file);
+  }
+
+  // ponytail: legacy feature_requests/*-throughline.md scan — drop once every
+  // repo with an active run has migrated to .tasks/.
+  const legacyDir = path.join(cwd, "feature_requests");
+  let legacyEntries = [];
+  try {
+    legacyEntries = fs.readdirSync(legacyDir);
+  } catch {
+    // No feature_requests directory — fine.
+  }
+  for (const name of legacyEntries.filter((n) => n.endsWith("-throughline.md")).sort()) {
+    found.push(path.join(legacyDir, name));
+  }
+
+  return found;
 }
 
 function main() {
@@ -138,7 +156,9 @@ function main() {
 
   const slug =
     getField(activeFm, "slug") ||
-    path.basename(active).replace(/-throughline\.md$/, "");
+    (path.basename(active) === "throughline.md"
+      ? path.basename(path.dirname(active))
+      : path.basename(active).replace(/-throughline\.md$/, ""));
   const stage = getField(activeFm, "stage");
   const next = getField(activeFm, "next_action");
 

@@ -28,7 +28,7 @@ assess stage. You never decide that work is done.
 
 ### Step 1 — Read the criteria and their proof methods
 
-From the Throughline at `feature_requests/*-throughline.md`, read every entry in
+From the Throughline at `.tasks/*/throughline.md`, read every entry in
 `acceptance_criteria`. Each carries the `proof_method` recorded at plan time, so
 you never have to guess how to prove something — a UI change has a
 Playwright/DOM assertion, an endpoint has an integration test, a pure function

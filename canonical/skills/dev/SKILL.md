@@ -17,14 +17,14 @@ write the result back so the run survives compaction.
 Read the user's invocation positionally (works on both runtimes):
 
 - `/dev fix the table sort bug` → interpret the ask, find or create the
-  Throughline in the current project's `feature_requests/`, route to the
+  Throughline in the current project's `.tasks/`, route to the
   fitting stage.
 - `/dev scope 2` → jump straight to the `scope` stage for issue 2.
 - `/dev` (no argument) → resume: read the active Throughline, report its
   `stage` and `next_action`, and continue.
 
 Minimal first run, by hand: copy `throughline-template.md` to
-`feature_requests/<slug>-throughline.md`, fill the frontmatter, report the
+`.tasks/<issue#>-<slug>/throughline.md`, fill the frontmatter, report the
 stage, do the stage's work, then update `stage` and `next_action`.
 
 You are advisory: you make judgment calls in dialogue with the human. But you
@@ -178,13 +178,21 @@ upstream of DevOS — not handled here.)
 The Throughline for a run lives in the **target project** (the current working
 directory's project), never in the toolkit, at:
 
-    feature_requests/<slug>-throughline.md
+    .tasks/<issue#>-<slug>/throughline.md
 
-1. Look for a file matching `feature_requests/*-throughline.md` with
+Each `.tasks/` subfolder holds one piece of work: its `throughline.md`, its
+`plan.md`, and any other documents the work accretes (questions, design
+frames, PRDs). Name the folder `<issue#>-<slug>` from the tracker issue; if
+no issue exists yet, use `<slug>` alone and rename the folder when `/to-issues`
+creates one.
+
+1. Look for a file matching `.tasks/*/throughline.md` with
    `status: in_progress`. If exactly one exists, that is the active run.
-2. If none exists and the user is starting work, create
-   `feature_requests/` if needed, then copy the template from this skill
-   (`throughline-template.md`) to `feature_requests/<slug>-throughline.md`.
+2. If none exists and the user is starting work, create the
+   `.tasks/<issue#>-<slug>/` folder if needed — and ensure `.tasks/` is
+   listed in the project's `.gitignore` (add it if missing; the folder is
+   local working state, never committed). Then copy the template from this
+   skill (`throughline-template.md`) to that folder's `throughline.md`.
    Choose a short kebab-case `slug` from the ask or issue title. Fill
    `project`, `issue` (or `null`), `slug`, set `stage` to the entry stage, and
    set `next_action` to the command for that stage.

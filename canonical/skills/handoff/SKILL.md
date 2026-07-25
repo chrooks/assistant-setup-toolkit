@@ -56,7 +56,7 @@ Changed files:
 ## Process
 
 1. Identify the source of truth for the work.
-   - Prefer an active plan file and matching questions file, usually under `feature_requests/`.
+   - Prefer an active plan file and matching questions file, usually under the work's `.tasks/<issue#>-<slug>/` folder.
    - Treat the plan and questions files as authoritative for scope, completed work, pending work, acceptance criteria, and constraints.
 
 2. Detect whether this session already started from an earlier handoff.

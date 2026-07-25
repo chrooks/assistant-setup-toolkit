@@ -54,7 +54,8 @@ A distilled profile of who Chris is — reason from it the way you use the Lexic
 Unsure of a specific fact, setting, figure, or API behavior → verify before answering: Context7 MCP for library/API docs and setup steps (automatically, without being asked), web search for the rest.
 
 ## ExecPlans
-Complex features, significant refactors, and anything worth planning get an ExecPlan (format: `~/.claude/PLAN.md`) at `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`.
+Complex features, significant refactors, and anything worth planning get an ExecPlan (format: `~/.claude/PLAN.md`) at `<CURRENT_PROJECT_DIR>/.tasks/<issue#>-<slug>/plan.md`.
+`.tasks/` is local working state — one gitignored folder per piece of work holding its Throughline, ExecPlan, and any related docs. Ensure `.tasks/` is in the project's `.gitignore` (add it if missing). No tracker issue yet → name the folder `<slug>` and rename when the issue lands.
 
 ## Division of Responsibility
 Chris owns **taste**: designing and directing the shape of the product, and assessing the results of what shipped.

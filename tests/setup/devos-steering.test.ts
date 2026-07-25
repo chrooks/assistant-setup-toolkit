@@ -44,6 +44,12 @@ afterEach(() => {
 });
 
 function writeThroughline(contents: string): void {
+  const dir = path.join(projectDir, ".tasks", "2-dex-table-controls");
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "throughline.md"), contents);
+}
+
+function writeLegacyThroughline(contents: string): void {
   const dir = path.join(projectDir, "feature_requests");
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "dex-table-controls-throughline.md"), contents);
@@ -89,6 +95,20 @@ describe("DevOS steering hook", () => {
     expect(payload.additionalContext).toContain("dex-table-controls");
     expect(payload.additionalContext).toContain("stage=scope");
     expect(payload.additionalContext).toContain("next=/grill-me 2");
+  });
+
+  it("still finds a legacy feature_requests/*-throughline.md run", () => {
+    writeLegacyThroughline(ACTIVE_THROUGHLINE);
+
+    const result = runHook({
+      session_id: "session-test",
+      hook_event_name: "UserPromptSubmit",
+      user_prompt: "hello",
+    });
+
+    expect(result.status).toBe(0);
+    const payload = JSON.parse(result.stdout) as { additionalContext: string };
+    expect(payload.additionalContext).toContain("dex-table-controls");
   });
 
   it("stays silent when no Throughline exists", () => {

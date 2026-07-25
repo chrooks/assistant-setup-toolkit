@@ -4,7 +4,7 @@ This file is the template the `/dev` Conductor copies when it creates a new
 Throughline. A Throughline is the durable on-disk control file for one piece of
 work: it records where the work sits in its lifecycle and survives conversation
 compaction. Instances live in the **target project** at
-`feature_requests/<slug>-throughline.md`, never in this toolkit.
+`.tasks/<issue#>-<slug>/throughline.md`, never in this toolkit.
 
 When creating an instance, copy everything below the line, replace the
 `<...>` placeholders, drop fields you cannot fill yet (the Conductor fills them

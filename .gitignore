@@ -10,6 +10,9 @@ node_modules/
 dist/
 .setup-cache/
 tests/.tmp/
+# Per-work-item docs (Throughline + ExecPlan + related): local working state.
+.tasks/
+# Legacy name for .tasks/ — keeps stale local copies on other machines ignored.
 feature_requests/
 .table-exports/
 .diagram-exports/

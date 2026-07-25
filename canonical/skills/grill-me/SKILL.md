@@ -27,7 +27,7 @@ The dependency ordering is what makes this safe. Dumping every question at once 
 ## DevOS: record decisions into the Throughline
 
 When this is the DevOS grill stage — there is a Throughline at
-`feature_requests/*-throughline.md` with `status: in_progress` — the grill is
+`.tasks/*/throughline.md` with `status: in_progress` — the grill is
 not just conversation; it is how the Decision Ledger gets filled.
 
 - Scope may have seeded `## Decision Ledger` with open Meaningful Decisions (a

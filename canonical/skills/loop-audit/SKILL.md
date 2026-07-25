@@ -12,8 +12,8 @@ session or across many — and convert each finding he approves into a drafted
 harness change. The goal is loop engineering: fewer interventions per unit of
 shipped work, cycle over cycle.
 
-Design record: `feature_requests/loop-audit-design-frame.md` and
-`feature_requests/loop-audit-plan.md` in the toolkit repo.
+Design record: `.tasks/loop-audit/design-frame.md` and
+`.tasks/loop-audit/plan.md` in the toolkit repo.
 
 ## Boundaries (non-negotiable)
 
