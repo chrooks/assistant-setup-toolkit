@@ -51,10 +51,30 @@ Produce a sizing verdict, always:
   `effort: low`. A first project slice, cross-cutting change, or many decisions
   → `heavy`, `effort: high`. In between → `medium`.
 
-### Step 3: Present the options
+### Step 3: Declare the route and proceed
 
-Present exactly three options with a one-line rationale for each, tailored to
-the request, and lead with the sizing verdict:
+You hold the verdict, so make the call — the grill/no-grill judgment needs domain
+knowledge the human often doesn't have, and owning it is the point. State the
+sizing and the route in one line, name the decisions you're skipping so the human
+can veto a specific one, then invoke the chosen workflow:
+
+```
+Sizing: grillable=false, tier=light, effort=low, 1 open decision (cache TTL) → going straight to /implement.
+Say "grill" to open the decisions first.
+```
+
+The verdict points the way: `grillable: true` → `/grill-me`; `grillable: false`
+with real design work still ahead → `/plan`; a clean `grillable: false` →
+`/implement`, where you invoke the `implement` Skill, which reads the user-level
+`## Right Skill, Right Job` section and starts the fitting workflow.
+
+Honor a veto the moment it arrives: stop the workflow you started and open the
+named decisions instead.
+
+### Step 4: Fallback — the three-option menu
+
+Only when the user explicitly asks for options, present exactly three with a
+one-line rationale each, led by the sizing verdict, and wait for the pick:
 
 ```
 Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, <N> open decision(s).
@@ -63,21 +83,6 @@ Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, <N
 2. /grill-me — [why: fuzzy scope, unstated assumptions, needs sharpening]
 3. /implement — [why: ready to do now using the right Skill workflow]
 ```
-
-For **/implement**, state that you will invoke the `implement` Skill, which reads
-the user-level `## Right Skill, Right Job` section and starts the selected
-workflow.
-
-### Step 4: Recommend
-
-State which option you recommend and why, in one sentence. The verdict usually
-points the way: `grillable: true` favors `/grill-me`; a clean `grillable: false`
-favors `/implement`. Wait for the user to pick.
-
-### Step 5: Execute
-
-Once the user picks, invoke the corresponding Skill. For `/implement`, invoke the
-`implement` Skill.
 
 ## DevOS: write the sizing into the Throughline
 
@@ -99,24 +104,15 @@ dispatched you — record the sizing instead of only presenting it:
 
 Then advance: set `stage` to the stage `next_action` points at.
 
-**Declare the route; don't offer a menu.** In DevOS mode you already hold the
-verdict — so state the call in one line and proceed, rather than presenting the
-three options and waiting. The grill/no-grill judgment needs domain knowledge the
-human often doesn't have; owning it is the point. Shape:
-
-    grillable:false, 1 open decision (cache TTL) → going straight to /plan.
-    Say "grill" to open the decisions first.
-
-Name the decisions you're skipping so the human can veto a specific one. Only
-fall back to the three-option presentation (Step 3) when there is no Throughline
-— the standalone path. When `autonomy: afk`, don't even pause for the veto on a
-clean `grillable:false`: state the route and advance; only a `grillable:true`
-with a decision you can't resolve is a genuine stop.
+Declaring the route (Step 3) applies here too — with the route stated as the
+Throughline's `next_action`. When `autonomy: afk`, don't even pause for the veto
+on a clean `grillable:false`: state the route and advance; only a
+`grillable:true` with a decision you can't resolve is a genuine stop.
 
 ## Rules
 
-- Do not start implementing before the user picks (standalone) or before the
-  Conductor advances (DevOS).
+- Proceed on a clean verdict — declare the route and start it rather than waiting
+  on a pick — and honor a veto immediately when one arrives.
 - If the user says "just do it" or similar, treat it as `/implement`.
 - If the user already specified a workflow (e.g., typed `/plan`), do not triage — just run it.
 - Never record an acceptance criterion without its proof method.

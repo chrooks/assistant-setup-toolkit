@@ -264,6 +264,9 @@ Parse the JSON and write it back with this fixed map:
   and any design concerns); preserve it in the ledger so a bounced design AC has
   the evidence behind it.
 - `files_changed` → a dated line in `## Work Log`.
+- When the Throughline or its ExecPlan carries an `## Issue Map`, the same
+  result also syncs the mapped issue record via `/to-issues update` — a progress
+  comment and ticked acceptance-criteria checkboxes for what the stage landed.
 - `suggested_next_action` → the frontmatter `next_action` **only when applying
   it would not cross the assess gate**. The prove stage proposes `assess`; set
   `stage: assess` and `next_action: /dev assess` and stop for the human. Never
@@ -323,7 +326,9 @@ When a stage finishes:
 2. Update the frontmatter: set `stage` to the next stage and `next_action` to
    the next command. Update `grillable`, `tier`, `effort`, or
    `acceptance_criteria` if this stage produced them.
-3. On `close`, set `status: done`.
+3. On `close`, set `status: done`, and close the issue records in the
+   `## Issue Map` via `/to-issues close`, handing it the `## Proof Ledger`
+   evidence as the closing comment. Never close a record without that evidence.
 
 Editing the frontmatter is a mechanical, deterministic step — change only the
 fields that moved, preserve everything else, and keep the file valid.

@@ -64,6 +64,8 @@ Each milestone must be independently verifiable and incrementally implement the 
 * If you change course mid-implementation, document why in the `Decision Log` and reflect the implications in `Progress`. Plans are guides for the next contributor as much as checklists for you.
 * At completion of a major task or the full plan, write an `Outcomes & Retrospective` entry summarizing what was achieved, what remains, and lessons learned.
 
+The `Issue Map` is living too. It is created when the plan is approved and the issue records are published, so the plan and the tracker agree from the start about which milestone each record covers. As execution proceeds, update the mapped record with the progress made, and mark an entry closed in the map once its work is verified and the record itself is closed. A plan whose Issue Map has drifted from the tracker is out of date in the same way a stale `Progress` section is.
+
 # Prototyping milestones and parallel implementations
 
 It is acceptable—-and often encouraged—-to include explicit prototyping milestones when they de-risk a larger change. Examples: adding a low-level operator to a dependency to validate feasibility, or exploring two composition orders while measuring optimizer effects. Keep prototypes additive and testable. Clearly label the scope as “prototyping”; describe how to run and observe results; and state the criteria for promoting or discarding the prototype.
@@ -145,6 +147,13 @@ Prefer additive code changes followed by subtractions that keep tests passing. P
 
     ### Deleted Files
     - (if any)
+
+    ## Issue Map
+
+    List each milestone or slice beside the issue record that tracks it, using rich references rather than bare numbers. Leave the section reading "No issue records — <reason>" when the work is too small to warrant them.
+
+    - Milestone 1: <name> — [#123 Issue title](https://tracker/issue/123) — open
+    - Milestone 2: <name> — [#124 Issue title](https://tracker/issue/124) — closed (proof: <evidence>)
 
     ## Data & API Changes
 

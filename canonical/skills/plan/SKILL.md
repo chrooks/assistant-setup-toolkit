@@ -70,7 +70,33 @@ gets an integration test; a pure function gets a unit test. Never write a
 criterion without its proof method — that is the contract the prove stage runs
 against.
 
-### Step 4 — Walk the human through it
+### Step 4 — Map the work to issue records
+
+Size the breakdown to the tier scope stamped — issue ceremony follows the work,
+not the other way round:
+
+- Trivial work (`tier: light`, `effort: low`) → no issue ceremony at all.
+- A single-slice change → one issue record.
+- Multi-slice or `tier: heavy` work → a tracker milestone grouping its issues.
+
+Draft the breakdown as tracer-bullet Vertical Slices per the `/to-issues` rules
+— thin end-to-end increments, not Layer slices. Each plan milestone (or group of
+acceptance criteria) maps to one issue record carrying those criteria as its
+acceptance criteria.
+
+**Plan proposes; `/to-issues` mutates.** Nothing is published until the human
+approves (Step 7). On approval, publish the approved breakdown through
+`/to-issues` (create, or `sub-issues` under a parent) and set the milestone
+through `/to-issues update`. Never mutate the tracker from `/plan` directly.
+`/roadmap` stays the sequencing authority — consult it when the new issues need
+prioritizing into existing work.
+
+Record the mapping in the ExecPlan's `## Issue Map` section and keep it current
+through execution: a work stage completing updates its mapped issue
+(`/to-issues update`), and a verified completion closes it (`/to-issues close`)
+with the proof evidence.
+
+### Step 5 — Walk the human through it
 
 Present the plan as a walkthrough, not a wall of text:
 
@@ -82,7 +108,7 @@ Present the plan as a walkthrough, not a wall of text:
 - The acceptance criteria, each beside its proof method (a `/table md` table
   reads well here).
 
-### Step 5 — Offer a visual plan
+### Step 6 — Offer a visual plan
 
 After the walkthrough, propose rendering it as a visual plan with `/visual-plan`
 — the richer review surface (inline diagrams, file-by-file map, annotated code,
@@ -94,10 +120,12 @@ approve a direction before code. Skip it for trivial, well-specified work whose
 diff fits in one sentence. `/visual-plan` reuses this ExecPlan as its source, so
 it builds the surface from the plan instead of starting over.
 
-### Step 6 — Approval gate
+### Step 7 — Approval gate
 
 Ask the human to approve, tweak, or reject. Do not start implementing until
-they approve. This is the human-in-the-loop gate.
+they approve. This is the human-in-the-loop gate. On approval, publish the
+issue breakdown from Step 4 via `/to-issues` and write the resulting records
+into the ExecPlan's `## Issue Map`.
 
 ## DevOS: write the plan into the Throughline
 
@@ -119,5 +147,7 @@ valid YAML, preserve everything else.
 - Follow the ExecPlan format guide; keep the mandatory living sections.
 - Never record an acceptance criterion without its proof method.
 - Never start implementing before the human approves.
+- Plan proposes the issue breakdown; `/to-issues` is the only thing that
+  mutates the tracker — and a closure only lands with verification evidence.
 - The ExecPlan and the Throughline are both kept current; they do not duplicate
   each other — the Throughline points at the ExecPlan.

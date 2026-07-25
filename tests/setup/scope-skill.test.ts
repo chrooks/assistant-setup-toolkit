@@ -33,7 +33,8 @@ describe("scope Skill", () => {
     const instructions = await readFile(instructionsPath, "utf-8");
 
     expect(instructions).toContain("## Right Skill, Right Job");
-    expect(instructions).toContain("`/scope` decides whether to `/implement`, plan, or grill");
+    expect(instructions).toMatch(/`\/scope` it first, then orchestrate the route end-to-end/);
+    expect(instructions).toMatch(/grill→plan when it's grillable.*`\/plan`.*`\/implement`/);
     expect(instructions).toContain("`/to-issues` creates, updates, and closes issue records");
     expect(instructions).toContain("`/roadmap` chooses, prioritizes, sequences, and reshapes work");
     expect(instructions).not.toMatch(/\bor Trivial\b/);

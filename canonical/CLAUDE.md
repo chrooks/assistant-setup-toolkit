@@ -57,7 +57,7 @@ Unsure of a specific fact, setting, figure, or API behavior → verify before an
 Complex features, significant refactors, and anything worth planning get an ExecPlan (format: `~/.claude/PLAN.md`) at `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`.
 
 ## Right Skill, Right Job
-- Open-ended feature/change/refactor request with no workflow named → `/scope`. `/scope` decides whether to `/implement`, plan, or grill before starting work.
+- Open-ended feature/change/refactor request with no workflow named → `/scope` it first, then orchestrate the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, straight to `/implement` when it's trivial. Declare the route in one line and proceed (per **Default and Proceed**) — name the decisions you're skipping so Chris can veto one; never stop at a menu.
 - Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
 - `/project-flow-setup` when a repo lacks project-flow docs, triage labels, milestones, or GitHub Project setup.
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
