@@ -20,6 +20,10 @@ once after pulling.** Delete this file when every machine has migrated.
   `LEXICON.md`, legacy `CONTEXT.md` still honored).
 - `/handoff` writes files only when needed, to `.claude/handoffs/`
   (`.codex/handoffs/` on Codex) — `.cowork/` is gone.
+- `/project-flow-setup` is now model-invocable (its `disable-model-invocation`
+  flag is gone) and `/roadmap` and `/to-issues` run it inline when a repo lacks
+  project-flow docs, instead of recommending it. No manual step — but step 2
+  below is required, or these machines keep the old "recommend" wording.
 - Visual-skill output consolidated: `.table-exports/`, `.diagram-exports/`, and
   `.figure-exports/` → **`.exports/<kind>/`**. One `.gitignore` entry
   (`.exports/`) now covers every visual skill, in any repo.
