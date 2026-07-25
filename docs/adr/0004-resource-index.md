@@ -22,7 +22,9 @@ repo is public, and machine rule files are local-only per ADR-0003.
    stating which access mode is live locally and at what path. They may also
    add **machine-local entries** — resources only that machine knows about
    (e.g. a work-only second brain) — invisible to every other machine.
-3. **A versioned template** (`canonical/rules/machines/TEMPLATE.md`,
+3. **A versioned template** (now `canonical/machines/TEMPLATE.md` — moved with
+   the machine-profile restructure, see ADR-0003 amendment 2026-07-25; was
+   `canonical/rules/machines/TEMPLATE.md`,
    gitignore-excepted) is the copy source for hand-creating machine files.
    When the `machine` Variant is set but the machine file is missing on
    disk, the Setup Wizard prints a Next Steps nudge to create it.

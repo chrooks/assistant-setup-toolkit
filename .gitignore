@@ -34,3 +34,5 @@ canonical/machines/*/rules.md
 # Other machines' skills stay tracked; the .gitkeep keeps work/skills/ on clone.
 canonical/machines/work/skills/*
 !canonical/machines/work/skills/.gitkeep
+
+.exports

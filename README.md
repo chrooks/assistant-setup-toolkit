@@ -131,21 +131,24 @@ See [docs/project-flow-how-to.md](docs/project-flow-how-to.md) for the `/project
 canonical/            # Canonical Assistant Source — distributable content
   INSTRUCTIONS.md     # Global instructions (installed to ~/.claude/CLAUDE.md, projected to Codex AGENTS.md)
   LEXICON.md          # Global Lexicon (installed to ~/.claude/LEXICON.md)
-  PLAN.md             # ExecPlan template
-  skills/             # Distributable skill directories (SKILL.md each)
-  commands/           # Claude Code commands
-  hooks/              # Session hooks
-.claude/              # Repo-local Claude Code config
-  skills/             # Project-scoped skills (e.g., /ingest-skill)
-  rules/              # Claude Code rules
+  PLAN.md             # ExecPlan format guide
+  skills/             # 50+ distributable skill directories (SKILL.md each)
+  hooks/              # Hook scripts (.js) + wiring.yaml manifest
+  rules/              # Common/language rules → ~/.claude/rules/ and ~/.codex/rules/
+  machines/           # Machine profiles — rules.md + skills/ per machine class (ADR-0003)
+  config/             # *.example.* config templates (filled-in copies stay local)
+docs/                 # ADRs, project-flow guides, agent docs
 manifests/
   install.yaml        # Installation Manifest — External Sources
+  presets.yaml        # Machine-class Presets (ADR-0002)
 scripts/
   setup.ts            # Setup Wizard entry point
   get-skills.sh       # Skill packaging helper
 src/setup/            # Setup Wizard modules
 tests/setup/          # Test suite
 ```
+
+Repo-local assistant config (`.claude/`, `.codex/`) and generated output (`artifacts/`, `.setup/`, `.exports/`, `.tasks/`) are gitignored.
 
 ### Canonical Assistant Source
 
@@ -157,21 +160,26 @@ tests/setup/          # Test suite
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
-| `/commit` | Stage and commit with a conventional commit message |
-| `/feature <description>` | Full-cycle feature development: discovery, plan, TDD, review, commit |
-| `/mode <socratic\|annotator\|standard>` | Switch learning mode for the session |
-| `/handoff` | Generate a continuation prompt for the next session |
+`canonical/skills/` holds 50+ skills, each a directory with a `SKILL.md` (plus optional scripts, templates, and references). They cover the development lifecycle (`/dev`, `/scope`, `/plan`, `/implement`, `/prove-it`, `/commit`), visuals (`/table`, `/diagram`, `/figure` — output lands in `.exports/<kind>/`), knowledge work (`/ingest`, `/lexicon`, `/handoff`), and more. The routing table lives in `canonical/INSTRUCTIONS.md` under "Right Skill, Right Job".
 
 ## Hooks
 
-| Hook | Purpose |
-|------|---------|
-| `session-mode-loader.sh` | Restore persisted learning mode on session start |
-| `session-mode-cleanup.sh` | Clear non-persisted mode on session end |
-| `lexicon-reminder.sh` | Claude Code `UserPromptSubmit` hook: re-injects a Lexicon-enforcement reminder every turn (see `canonical/INSTRUCTIONS.md` Lexicon Usage). Codex CLI is intentionally not wired because it displays `additionalContext` in the transcript. Disable per session with `CLAUDE_LEXICON_REMINDER=0` or globally with `touch ~/.claude/.lexicon-reminder.off`. Wired automatically via `canonical/hooks/wiring.yaml`. |
-| `canonical-sync.sh` | Project-level PostToolUse hook: when `canonical/` changes, runs the Setup Wizard quietly so Assistant Homes and Target Projections stay synced. Disable per session with `CANONICAL_SYNC=0` or per project with `touch .canonical-sync.off`. |
+All hooks are Node scripts (`.js`) under `canonical/hooks/`, registered declaratively via `wiring.yaml`:
+
+| Hook | Event | Purpose |
+|------|-------|---------|
+| `lexicon-reminder.js` | UserPromptSubmit | Re-inject the Lexicon + style reminder every turn (Claude-only; disable with `CLAUDE_LEXICON_REMINDER=0` or `touch ~/.claude/.lexicon-reminder.off`) |
+| `quick-recap-reminder.js` | UserPromptSubmit | Nudge the TLDR + completion-status line on work-completing turns |
+| `ship-mode-reminder.js` | UserPromptSubmit | Keep ship-mode posture active without drift |
+| `devos-steering.js` | UserPromptSubmit | Re-anchor an active DevOS Throughline (`.tasks/*/throughline.md`) every turn |
+| `notify-activity.js` | UserPromptSubmit | Stamp session activity so `claude-notify` knows whether you're present |
+| `proxy-guard.js` | PreToolUse (Bash) | Block commands that would print proxy credentials (work machines) |
+| `canonical-sync.js` | PostToolUse | Auto-run the Setup Wizard when `canonical/` changes so installs stay synced (disable with `CANONICAL_SYNC=0` or `touch .canonical-sync.off`) |
+| `diagram-upkeep.js` | PostToolUse (Bash) | Living-diagram upkeep reminder after commits in repos carrying diagram models |
+| `strategic-compact.js` | tool-use events | Suggest `/compact` at strategic thresholds instead of hitting auto-compact |
+| `claude-notify.js` | Stop, Notification | Desktop banner / Pushover push when a turn finishes or input is needed |
+| `environment-context.js` | SessionStart | Tell the assistant which machine it's actually on |
+| `quiz-me.js` | SessionStart | Offer a recall quiz on the repo's previous conversation |
 
 ### Hook Wiring
 
