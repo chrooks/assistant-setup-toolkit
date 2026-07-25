@@ -106,7 +106,7 @@ Reshape actions that proceed without asking:
 - move work into a parent/sub-issue hierarchy
 - add comments that explain sequencing
 
-Ask first only when the reshape changes direction or destroys work:
+Ask first only when the reshape crosses into the human's side of the **Division of Responsibility** — changing direction or destroying work:
 
 - dropping work out of a milestone the human set
 - reversing a prioritization the human made explicitly

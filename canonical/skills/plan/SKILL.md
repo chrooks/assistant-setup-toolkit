@@ -124,8 +124,10 @@ it builds the surface from the plan instead of starting over.
 ### Step 7 — Approval gate
 
 Ask the human to approve, tweak, or reject. Do not start implementing until
-they approve. This is the human-in-the-loop gate, and the only one — plan
-approval doubles as breakdown approval. On approval, publish the issue
+they approve. This is the human-in-the-loop gate, and the only one — the plan is
+the shape of the product, which is the human's side of the **Division of
+Responsibility**; publishing it is the assistant's, so plan approval doubles as
+breakdown approval. On approval, publish the issue
 breakdown from Step 4 via `/to-issues` straight away, write the resulting
 records into the ExecPlan's `## Issue Map`, and report what landed in one line.
 

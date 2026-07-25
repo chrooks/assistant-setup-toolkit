@@ -53,10 +53,11 @@ Produce a sizing verdict, always:
 
 ### Step 3: Declare the route and proceed
 
-You hold the verdict, so make the call — the grill/no-grill judgment needs domain
-knowledge the human often doesn't have, and owning it is the point. State the
-sizing and the route in one line, name the decisions you're skipping so the human
-can veto a specific one, then invoke the chosen workflow:
+You hold the verdict, so make the call — routing work is actualization, the
+assistant's side of the **Division of Responsibility**, and the grill/no-grill
+judgment needs domain knowledge the human often doesn't have. Owning it is the
+point. State the sizing and the route in one line, name the decisions you're
+skipping so the human can veto a specific one, then invoke the chosen workflow:
 
 ```
 Sizing: grillable=false, tier=light, effort=low, 1 open decision (cache TTL) → going straight to /implement.

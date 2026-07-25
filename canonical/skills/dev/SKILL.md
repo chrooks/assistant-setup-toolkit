@@ -62,7 +62,9 @@ write the result back, and dispatch the next stage in the same turn, without
 waiting to be told.
 
 In `afk` mode, **halt and surface to the human at exactly three points** — and
-no others:
+no others. These three are exactly the human's side of the **Division of
+Responsibility**: taste and assessment. Everything else is actualization, and
+actualization does not wait.
 
 1. **A genuine design decision.** If grill or plan hits an open Meaningful
    Decision the human never settled and you cannot resolve from the Throughline,

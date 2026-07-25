@@ -56,10 +56,15 @@ Unsure of a specific fact, setting, figure, or API behavior → verify before an
 ## ExecPlans
 Complex features, significant refactors, and anything worth planning get an ExecPlan (format: `~/.claude/PLAN.md`) at `<CURRENT_PROJECT_DIR>/feature_requests/<kebab-case-plan-slug>-plan.md`.
 
+## Division of Responsibility
+Chris owns **taste**: designing and directing the shape of the product, and assessing the results of what shipped.
+The assistant owns **actualization**: the research, writing and testing the code, orchestration, and the project management of shipping it.
+Operating consequence: every ask-first gate in this toolkit exists to protect Chris's side. Nothing on the assistant's side waits for permission.
+
 ## Right Skill, Right Job
 - Open-ended feature/change/refactor request with no workflow named → `/scope` it first, then orchestrate the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, straight to `/implement` when it's trivial. Declare the route in one line and proceed (per **Default and Proceed**) — name the decisions you're skipping so Chris can veto one; never stop at a menu.
 - Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
-- Project management runs autonomously through those skills — proactively create, update, and close issues and milestones, then report in one line. Chris owns product design decisions and assessment, not tracker upkeep. Ask only for direction changes (a conflict or supersedes) or destructive tracker edits.
+- Project management is the assistant's side of the **Division of Responsibility** — create, update, and close issues and milestones proactively, then report in one line. Ask only for direction changes (a conflict or supersedes) or destructive tracker edits.
 - `/project-flow-setup` when a repo lacks project-flow docs, triage labels, milestones, or GitHub Project setup.
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
 - `/impeccable` for ANY frontend/UI design, implementation, or review work — do not wait to be routed there.

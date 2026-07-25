@@ -110,9 +110,9 @@ Use Mermaid only when the user's Surface is likely to render it well. Keep label
 
 ### 6. Publish by default; ask only on the ask-list
 
-Tracker bookkeeping is yours, not the human's. A clean, unambiguous breakdown gets published — do not stage it for approval first.
+Tracker bookkeeping is the assistant's side of the **Division of Responsibility** — actualization, not taste. A clean, unambiguous breakdown gets published; do not stage it for approval first.
 
-Stop and quiz the user only when one of these is true:
+The ask-list below is exactly the part that touches the human's side. Stop and quiz the user only when one of these is true:
 
 - **Conflicts or supersedes**: a proposed slice changes direction on existing work, or retires something the human decided.
 - **Destructive edit**: deleting a record, gutting an issue's scope, or reversing an explicit human decision.
