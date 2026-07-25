@@ -1,37 +1,35 @@
-# Machine-local project config written by hook wiring (absolute paths).
+# Repo-local assistant config: machine-local, never distributable content.
 .codex/
-# Claude Code project config is local except deliberately tracked skills.
 .claude/
-prompts/
-.DS_Store
-.mcp.json
-artifacts/
+
+# Generated / transient
 node_modules/
 dist/
-.setup-cache/
+artifacts/
 tests/.tmp/
+.setup/
+.table-exports/
+.diagram-exports/
+.DS_Store
+.mcp.json
+
 # Per-work-item docs (Throughline + ExecPlan + related): local working state.
 .tasks/
 # Legacy name for .tasks/ — keeps stale local copies on other machines ignored.
 feature_requests/
-.table-exports/
-.diagram-exports/
 
 # Personal self-profile: local-only, generated from "Chris's Brain" via /sync-self.
 canonical/PROFILE.md
 
-# Filled-in config: only the *.example.* templates under canonical/config/ are
-# tracked. The real files hold personal absolute paths / secrets — keep local.
-canonical/knowledge-config.json
-secrets-pushover.env
+# Only the *.example.* templates under canonical/config/ are tracked. A filled-in
+# copy holds personal absolute paths and secrets — it stays local.
+canonical/config/*
+!canonical/config/*.example.*
 
 # Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
 canonical/machines/*/rules.md
 
 # Machine-scoped skills: only the work laptop's are local-only (it can't push).
-# hestia/mac machine skills stay tracked; the .gitkeep keeps work/skills/ present on clone.
+# Other machines' skills stay tracked; the .gitkeep keeps work/skills/ on clone.
 canonical/machines/work/skills/*
 !canonical/machines/work/skills/.gitkeep
-
-# Setup Wizard run logs (see reporter.ts) — local diagnostics, not source.
-.setup/
