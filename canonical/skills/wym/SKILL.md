@@ -76,7 +76,7 @@ limit, light expertise taper). Do not restate that cheat sheet here.
 - If concept ambiguous, pick most likely interpretation in context. Note alternatives at bottom.
 - Keep total output under ~40 lines. Brevity is point.
 - Default to in-chat visuals (ASCII, `/table md`, `/diagram md`) so the sandwich stays immediate; only reach for `/table html` or `/diagram html` when Chris will want to explore interactively.
-- If project has `CONTEXT.md`, check it for domain-specific definitions of concept.
+- If project has `LEXICON.md`, check it for domain-specific definitions of concept.
 - If concept is a Lexicon term, use Lexicon definition as ground truth for Human layer.
 
 ## Example

@@ -63,7 +63,7 @@ describe("payload", () => {
         canonicalFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/canonical/CLAUDE.md",
+            sourcePath: "/repo/canonical/INSTRUCTIONS.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,

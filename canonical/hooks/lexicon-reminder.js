@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // UserPromptSubmit hook: per-turn Lexicon coaching reminder.
 //
-// Re-injects a short reminder to use shared terms from ~/.claude/CONTEXT.md,
-// ~/.codex/CONTEXT.md, and/or <project>/CONTEXT.md on every user turn.
+// Re-injects a short reminder to use shared terms from ~/.claude/LEXICON.md,
+// ~/.codex/LEXICON.md, and/or <project>/LEXICON.md on every user turn.
 // This is the per-turn anti-drift guard that complements the @import of
-// CONTEXT.md in CLAUDE.md or AGENTS.md, which only loads at session start.
+// LEXICON.md in CLAUDE.md or AGENTS.md, which only loads at session start.
 //
 // Ported from lexicon-reminder.sh. `node {hook}` resolves identically on Mac,
 // bare Windows, and Windows+WSL.
@@ -41,7 +41,7 @@ function readPayload() {
 // style rule last for recency. Keep the locked phrases out of this comment so
 // the test's first-occurrence indexes land in the string below, not up here.
 const REMINDER =
-  "Lexicon reminder: use Lexicon terms exactly; link each occurrence to its CONTEXT.md definition. Correct misuse, _Avoid_ synonyms, or fail to use the right term — briefly. Active every response, including after tool use and compaction. Full rules live in ~/.claude/CLAUDE.md and CONTEXT.md; this is the recency nudge, not the rulebook. Issue references: link every tracker issue with a short description — [#5 UI refactor](url) — never a bare #5. Visuals: route concept-shaped explanations (comparison, process, architecture, state, hierarchy) through /visualize, which renders via /table or /diagram; representational, not decorative; skip for nuance or narrative. NOW THE OPERATIVE STYLE RULE — apply to every explanatory response: lead with the answer; one idea per line; prefer lists and short stacked lines over prose; drop corporate and hedge filler; reread once and tighten. Precision and the Lexicon always win. This style governs explanatory prose only — code, commits, and PRs stay normal.";
+  "Lexicon reminder: use Lexicon terms exactly; link each occurrence to its LEXICON.md definition. Correct misuse, _Avoid_ synonyms, or fail to use the right term — briefly. Active every response, including after tool use and compaction. Full rules live in ~/.claude/CLAUDE.md and LEXICON.md; this is the recency nudge, not the rulebook. Issue references: link every tracker issue with a short description — [#5 UI refactor](url) — never a bare #5. Visuals: route concept-shaped explanations (comparison, process, architecture, state, hierarchy) through /visualize, which renders via /table or /diagram; representational, not decorative; skip for nuance or narrative. NOW THE OPERATIVE STYLE RULE — apply to every explanatory response: lead with the answer; one idea per line; prefer lists and short stacked lines over prose; drop corporate and hedge filler; reread once and tighten. Precision and the Lexicon always win. This style governs explanatory prose only — code, commits, and PRs stay normal.";
 
 function main() {
   const payload = readPayload();
@@ -58,10 +58,12 @@ function main() {
     return;
   }
 
-  // Skip if no Lexicon is configured (no global or project CONTEXT.md to enforce)
+  // Skip if no Lexicon is configured (no global or project LEXICON.md to
+  // enforce). CONTEXT.md is the legacy name — accept it until repos migrate.
   const hasLexicon =
-    fs.existsSync(path.join(home, ".claude", "CONTEXT.md")) ||
-    fs.existsSync(path.join(home, ".codex", "CONTEXT.md")) ||
+    fs.existsSync(path.join(home, ".claude", "LEXICON.md")) ||
+    fs.existsSync(path.join(home, ".codex", "LEXICON.md")) ||
+    fs.existsSync(path.join(process.cwd(), "LEXICON.md")) ||
     fs.existsSync(path.join(process.cwd(), "CONTEXT.md"));
   if (!hasLexicon) return;
 

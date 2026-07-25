@@ -1,13 +1,13 @@
 ---
 name: lexicon
-description: "Manage CONTEXT.md Lexicon entries: add a term from a name and definition, name only, or definition only; look up remembered terms; list, update, and remove entries. Use when the user invokes /lexicon or mistypes /lxicon."
+description: "Manage LEXICON.md Lexicon entries: add a term from a name and definition, name only, or definition only; look up remembered terms; list, update, and remove entries. Use when the user invokes /lexicon or mistypes /lxicon."
 argument-hint: "add <term - definition | term | definition> | <lookup> | list | remove <term>"
 disable-model-invocation: false
 ---
 
 # /lexicon - Lexicon Manager
 
-Manage Lexicon entries in the project's `CONTEXT.md` file. Add, update, look up,
+Manage Lexicon entries in the project's `LEXICON.md` file. Add, update, look up,
 list, and remove terms from the `## Language` section.
 
 ## Commands
@@ -28,9 +28,11 @@ If the user types `/lxicon`, treat it as `/lexicon`.
 3. First word matches `remove` or `delete`: remove the named term.
 4. Anything else: treat the input as a lookup query for an existing Lexicon term.
 
-## CONTEXT.md Location
+## LEXICON.md Location
 
-Find `CONTEXT.md` at the project root, resolved from the git root or current
+Find `LEXICON.md` (or the legacy name `CONTEXT.md` — treat it as the project's
+Lexicon and keep editing it under its existing name) at the project root,
+resolved from the git root or current
 working directory. If it does not exist, create this minimal scaffold:
 
 ```markdown
@@ -128,10 +130,10 @@ When this happens:
 1. Restate the concept briefly in plain language.
 2. Suggest the 3 best candidate names.
 3. Prefer names that are concise, domain-specific, and consistent with existing
-   `CONTEXT.md` terms.
+   `LEXICON.md` terms.
 4. If one candidate is clearly strongest, mark it as recommended and explain why
    in one short sentence.
-5. Ask which name to add before modifying `CONTEXT.md`, unless the user
+5. Ask which name to add before modifying `LEXICON.md`, unless the user
    explicitly asked you to choose.
 
 ## Passive Recognition

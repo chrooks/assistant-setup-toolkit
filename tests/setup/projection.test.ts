@@ -93,14 +93,14 @@ describe("projection", () => {
   });
 
   describe("planCodexProjection", () => {
-    it("maps CLAUDE.md to .codex/AGENTS.md", () => {
+    it("maps INSTRUCTIONS.md to .codex/AGENTS.md", () => {
       const plan = planCodexProjection({
-        claudeFiles: ["CLAUDE.md"],
+        claudeFiles: ["INSTRUCTIONS.md"],
         skillDirs: [],
       });
 
       expect(plan).toHaveLength(1);
-      expect(plan[0].source).toBe("CLAUDE.md");
+      expect(plan[0].source).toBe("INSTRUCTIONS.md");
       expect(plan[0].target).toBe(".codex/AGENTS.md");
     });
 
@@ -115,15 +115,15 @@ describe("projection", () => {
       expect(plan[0].target).toBe(".codex/PLAN.md");
     });
 
-    it("maps CONTEXT.md to .codex/CONTEXT.md", () => {
+    it("maps LEXICON.md to .codex/LEXICON.md", () => {
       const plan = planCodexProjection({
-        claudeFiles: ["CONTEXT.md"],
+        claudeFiles: ["LEXICON.md"],
         skillDirs: [],
       });
 
       expect(plan).toHaveLength(1);
-      expect(plan[0].source).toBe("CONTEXT.md");
-      expect(plan[0].target).toBe(".codex/CONTEXT.md");
+      expect(plan[0].source).toBe("LEXICON.md");
+      expect(plan[0].target).toBe(".codex/LEXICON.md");
     });
 
     it("maps PROFILE.md to .codex/PROFILE.md", () => {
@@ -193,7 +193,7 @@ describe("projection", () => {
 
     it("treats configFiles as optional — omitting it produces no config mappings", () => {
       const plan = planCodexProjection({
-        claudeFiles: ["CLAUDE.md"],
+        claudeFiles: ["INSTRUCTIONS.md"],
         skillDirs: [],
       });
 
@@ -203,7 +203,7 @@ describe("projection", () => {
     it("skips commands (no Codex equivalent surface)", () => {
       // planCodexProjection has no commands input — commands are not projected
       const plan = planCodexProjection({
-        claudeFiles: ["CLAUDE.md"],
+        claudeFiles: ["INSTRUCTIONS.md"],
         skillDirs: [],
       });
 
@@ -247,7 +247,7 @@ describe("projection", () => {
 
     it("treats hookFiles as optional — omitting it produces no hook mappings", () => {
       const plan = planCodexProjection({
-        claudeFiles: ["CLAUDE.md"],
+        claudeFiles: ["INSTRUCTIONS.md"],
         skillDirs: [],
       });
 
@@ -256,7 +256,7 @@ describe("projection", () => {
 
     it("non-hook mappings have isHook=false", () => {
       const plan = planCodexProjection({
-        claudeFiles: ["CLAUDE.md"],
+        claudeFiles: ["INSTRUCTIONS.md"],
         skillDirs: [{ name: "commit", files: ["SKILL.md"] }],
         hookFiles: [],
       });

@@ -40,7 +40,7 @@ function runReminderHook(input: unknown): {
 describe("Lexicon reminder", () => {
   it("coaches corrections instead of requiring repeated term definitions", async () => {
     const instructions = await readFile(
-      path.join(repoRoot, "canonical", "CLAUDE.md"),
+      path.join(repoRoot, "canonical", "INSTRUCTIONS.md"),
       "utf-8",
     );
     const hook = await readFile(
@@ -59,7 +59,7 @@ describe("Lexicon reminder", () => {
 
   it("nudges list-first communication and routes visuals through /visualize", async () => {
     const instructions = await readFile(
-      path.join(repoRoot, "canonical", "CLAUDE.md"),
+      path.join(repoRoot, "canonical", "INSTRUCTIONS.md"),
       "utf-8",
     );
     const hook = await readFile(
@@ -87,7 +87,7 @@ describe("Lexicon reminder", () => {
 
   it("enforces the issue-reference link Contract in both surfaces", async () => {
     const instructions = await readFile(
-      path.join(repoRoot, "canonical", "CLAUDE.md"),
+      path.join(repoRoot, "canonical", "INSTRUCTIONS.md"),
       "utf-8",
     );
     const hook = await readFile(

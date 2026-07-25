@@ -1,6 +1,6 @@
 ---
 name: grill-with-docs
-description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.
+description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (LEXICON.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.
 ---
 
 <what-to-do>
@@ -25,7 +25,7 @@ Most repos have a single context:
 
 ```
 /
-├── CONTEXT.md
+├── LEXICON.md
 ├── docs/
 │   └── adr/
 │       ├── 0001-event-sourced-orders.md
@@ -42,14 +42,14 @@ If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The ma
 │   └── adr/                          ← system-wide decisions
 ├── src/
 │   ├── ordering/
-│   │   ├── CONTEXT.md
+│   │   ├── LEXICON.md
 │   │   └── docs/adr/                 ← context-specific decisions
 │   └── billing/
-│       ├── CONTEXT.md
+│       ├── LEXICON.md
 │       └── docs/adr/
 ```
 
-Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
+Create files lazily — only when you have something to write. If no `LEXICON.md` exists, create one when the first term is resolved — unless a legacy `CONTEXT.md` already holds the project's Lexicon; keep updating that file under its existing name. If no `docs/adr/` exists, create it when the first ADR is needed.
 
 ### Path overrides
 
@@ -57,13 +57,13 @@ Before writing ADRs, check if `.cowork/config.yaml` exists and has an `adr_dir` 
 
 ### Index update (standalone invocation)
 
-After writing files, if `.cowork/index.md` exists, update the **Source-of-truth documents** section: add/update the `CONTEXT.md` entry and any new ADR entries. Update the header timestamp. If `.cowork/index.md` does not exist, skip — no-op.
+After writing files, if `.cowork/index.md` exists, update the **Source-of-truth documents** section: add/update the `LEXICON.md` entry and any new ADR entries. Update the header timestamp. If `.cowork/index.md` does not exist, skip — no-op.
 
 ## During the session
 
 ### Challenge against the Lexicon
 
-When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your Lexicon defines 'cancellation' as X, but you seem to mean Y — which is it?"
+When the user uses a term that conflicts with the existing language in `LEXICON.md`, call it out immediately. "Your Lexicon defines 'cancellation' as X, but you seem to mean Y — which is it?"
 
 ### Sharpen fuzzy language
 
@@ -77,11 +77,11 @@ When domain relationships are being discussed, stress-test them with specific sc
 
 When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
 
-### Update CONTEXT.md inline
+### Update LEXICON.md inline
 
-When a term is resolved, update `CONTEXT.md` right there. Don't batch these up — capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
+When a term is resolved, update `LEXICON.md` right there. Don't batch these up — capture them as they happen. Use the format in [LEXICON-FORMAT.md](./LEXICON-FORMAT.md).
 
-Don't couple `CONTEXT.md` to implementation details. Only include terms that are meaningful to domain experts.
+Don't couple `LEXICON.md` to implementation details. Only include terms that are meaningful to domain experts.
 
 ### Offer ADRs sparingly
 

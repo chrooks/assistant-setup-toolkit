@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 <what-to-do>
 
-Package the current session into one immediately usable markdown block for the next session. Read `CONTEXT.md` for domain vocabulary and `docs/adr/` for existing decisions — use the project's terminology in the handoff body.
+Package the current session into one immediately usable markdown block for the next session. Read `LEXICON.md` for domain vocabulary and `docs/adr/` for existing decisions — use the project's terminology in the handoff body.
 
 If the user supplied `$ARGUMENTS`, use that as the requested next step or scope hint. Otherwise, infer the next concrete step from the active plan and latest user direction.
 
@@ -25,13 +25,13 @@ During handoff composition, look for existing documentation:
 
 ```
 /
-├── CONTEXT.md
+├── LEXICON.md
 └── docs/
     ├── adr/
     └── prd/
 ```
 
-Read `CONTEXT.md` for domain vocabulary — use the project's canonical terms in the handoff, not synonyms. Reference ADRs and PRDs by path when they're relevant to the next session's work.
+Read `LEXICON.md` for domain vocabulary — use the project's canonical terms in the handoff, not synonyms. Reference ADRs and PRDs by path when they're relevant to the next session's work.
 
 ### Path conventions
 

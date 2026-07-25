@@ -5,7 +5,7 @@ import { rewriteContentForCodex } from "../../src/setup/projection.js";
 
 const repoRoot = process.cwd();
 const skillPath = path.join(repoRoot, "canonical", "skills", "scope", "SKILL.md");
-const instructionsPath = path.join(repoRoot, "canonical", "CLAUDE.md");
+const instructionsPath = path.join(repoRoot, "canonical", "INSTRUCTIONS.md");
 
 describe("scope Skill", () => {
   it("offers implement instead of trivial and delegates execution to user-level skill guidance", async () => {

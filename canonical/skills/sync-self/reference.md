@@ -1,6 +1,6 @@
 # sync-self reference — allow-list & redaction rules
 
-This is the privacy [Boundary](~/.codex/CONTEXT.md) for the self-profile. The profile is
+This is the privacy [Boundary](~/.codex/LEXICON.md) for the self-profile. The profile is
 installed into every harness and (in the Codex case) inlined into `AGENTS.md`, so what
 crosses this boundary matters. When in doubt, leave it out — the brain is one query away.
 
@@ -64,7 +64,7 @@ spec, never in the shipped profile.
   "allow yourself to be bad first"; communicating concepts clearly; judging assistant output;
   the recurring rabbit holes.
 - **Values:** help people grow rather than depend; anti-dark-pattern; stories of the unheard;
-  a pointer to the Lexicon (`~/.codex/CONTEXT.md`) for the design ethos — do not duplicate it.
+  a pointer to the Lexicon (`~/.codex/LEXICON.md`) for the design ethos — do not duplicate it.
 - **Communication:** clean colloquial prose; strict Lexicon use; builder's incrementalism.
 
 ## Output shape

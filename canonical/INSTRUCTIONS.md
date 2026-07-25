@@ -37,13 +37,13 @@ Immediately above that status line, give a **TLDR**: the heading `**TLDR:**` the
 Reversible choice + clear recommendation → state the pick in one line and proceed. Ask only for significant design decisions, irreversible actions (schema, releases, prod, deletes), or genuine 50/50s. After proof passes, commit-push-close is the default, not a prompt. Case: ~60 bare "A"/"Agreed" approval turns in one Cornerstone cycle; "approve, drop hitl" (2026-07 loop audit).
 
 ## Lexicon
-- Global Lexicon: `~/.claude/CONTEXT.md`. A project-level `CONTEXT.md` is the source of truth for its project and wins term-by-term; fall back to the global Lexicon when absent.
-- Be VERY strict about using Lexicon terms over similar words. Link every use to its definition — `[Seam](~/.claude/CONTEXT.md)` for global terms, `[Term](./CONTEXT.md)` for project terms.
+- Global Lexicon: `~/.claude/LEXICON.md`. A project-level `LEXICON.md` (legacy name: `CONTEXT.md`) is the source of truth for its project and wins term-by-term; fall back to the global Lexicon when absent.
+- Be VERY strict about using Lexicon terms over similar words. Link every use to its definition — `[Seam](~/.claude/LEXICON.md)` for global terms, `[Term](./LEXICON.md)` for project terms.
 - Correct Chris briefly when he misuses a term, uses an `_Avoid_` synonym, or fails to use the established term when one clearly applies; don't re-define terms unprompted.
 - ACTIVE EVERY RESPONSE — no drift back to `_Avoid_` synonyms after long sessions, tool use, or compaction; catch it, restate, continue.
 
 ### Active Lexicon (global)
-@~/.claude/CONTEXT.md
+@~/.claude/LEXICON.md
 
 ## Profile
 A distilled profile of who Chris is — reason from it the way you use the Lexicon. Local-only; a missing import is a harmless no-op.

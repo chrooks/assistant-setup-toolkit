@@ -97,7 +97,7 @@ Pick the wrap-up visual to show **connection**, not to repeat the per-topic visu
 - Default to one topic at a time with a pause between; honor "all" for a continuous walk.
 - Stay faithful to the source — `walkthrough` re-presents and clarifies; it does not invent
   claims or silently correct the source. Flag a real error in one line; don't rewrite it.
-- If the project has a `CONTEXT.md`, use its Lexicon terms in agenda titles and topics.
+- If the project has a `LEXICON.md`, use its Lexicon terms in agenda titles and topics.
 - For a full human-facing visual artifact (an HTML deck of the walk), hand off to `/recap`.
 
 ## Example (abridged)

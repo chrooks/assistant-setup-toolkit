@@ -44,7 +44,7 @@ Identify and extract:
 - **PRD seeds** — ideas for new projects, documents, or conversations to fork.
 - **Open questions** — things explicitly left unresolved.
 
-If the conversation references a `CONTEXT.md` or project doc, treat that vocabulary as authoritative and use it precisely in both outputs.
+If the conversation references a `LEXICON.md` or project doc, treat that vocabulary as authoritative and use it precisely in both outputs.
 
 ### Step 2: Produce The Visual Recap
 

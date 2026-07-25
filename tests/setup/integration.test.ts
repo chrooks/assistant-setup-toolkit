@@ -47,7 +47,7 @@ describe("integration", () => {
       const canonicalFiles: PayloadFile[] = [
         {
           relativePath: "CLAUDE.md",
-          sourcePath: "/repo/canonical/CLAUDE.md",
+          sourcePath: "/repo/canonical/INSTRUCTIONS.md",
           component: "instructions",
           origin: "canonical-source",
           executable: false,
@@ -93,7 +93,7 @@ describe("integration", () => {
   describe("Codex CLI Default Install with projections", () => {
     it("includes projected AGENTS.md in codex-home payload", () => {
       const projectionMappings = planCodexProjection({
-        claudeFiles: ["CLAUDE.md", "PLAN.md"],
+        claudeFiles: ["INSTRUCTIONS.md", "PLAN.md"],
         skillDirs: [{ name: "commit", files: ["SKILL.md"] }],
       });
 
@@ -224,7 +224,7 @@ describe("integration", () => {
         payloadFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/canonical/CLAUDE.md",
+            sourcePath: "/repo/canonical/INSTRUCTIONS.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,
@@ -264,7 +264,7 @@ describe("integration", () => {
         payloadFiles: [
           {
             relativePath: "CLAUDE.md",
-            sourcePath: "/repo/canonical/CLAUDE.md",
+            sourcePath: "/repo/canonical/INSTRUCTIONS.md",
             component: "instructions",
             origin: "canonical-source",
             executable: false,

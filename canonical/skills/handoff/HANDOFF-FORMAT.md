@@ -47,7 +47,7 @@ Acknowledge the receipt of this handoff, explore the repo for relevant context, 
 
 ### Context
 - Point to the source-of-truth files (plan, PRD, questions file).
-- Reference `CONTEXT.md` and relevant ADRs when they exist.
+- Reference `LEXICON.md` and relevant ADRs when they exist.
 
 ### Current Implementation Status
 - Summarize only work that is **complete** — do not speculate.

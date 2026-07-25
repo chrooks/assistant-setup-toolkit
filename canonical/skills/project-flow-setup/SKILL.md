@@ -66,7 +66,7 @@ Use read-only checks.
 
 Inspect:
 
-- Project Lexicon: `CONTEXT.md`
+- Project Lexicon: `LEXICON.md`
 - Workflow docs: `docs/agents/project-flow.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`
 - Git remote shape: `git remote -v`
 - GitHub auth and host status: `gh auth status`
@@ -164,7 +164,7 @@ List anything the human must run under a `Needs you:` line. Keep it to commands 
 
 ## Rules
 
-- Use repo-local `CONTEXT.md` Lexicon terms when present.
+- Use repo-local `LEXICON.md` Lexicon terms when present.
 - Prefer repo-local docs over defaults once they exist.
 - Run setup to completion; gate only what the Approval Boundary names.
 - Keep this Skill setup-focused. Route operational work to `/to-issues`, `/roadmap`, `/scope`, `/implement`, `/verification-loop`, or `/prep-pr`.

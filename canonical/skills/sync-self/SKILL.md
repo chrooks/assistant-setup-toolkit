@@ -12,7 +12,7 @@ lean projection of it that the Setup Wizard installs into every harness. This sk
 **inverse of `sync-projects`**: it reads the brain and regenerates the profile.
 
 `canonical/PROFILE.md` is **gitignored and local-only** — it may hold detail that must
-never enter the toolkit's git history. So this skill enforces a privacy [Boundary](~/.codex/CONTEXT.md)
+never enter the toolkit's git history. So this skill enforces a privacy [Boundary](~/.codex/LEXICON.md)
 and **never writes without explicit approval**. The full allow-list and redaction rules live
 in `reference.md` next to this file — read it before distilling.
 
@@ -60,7 +60,7 @@ inventories — that's biographical trivia by the standard below.
 
 Apply the redaction rules from `reference.md`. In particular: **no employer name, no specific
 company name** anywhere; no health, financial, family, faith, or taste detail; and reference
-the Lexicon (`~/.codex/CONTEXT.md`) for the design ethos rather than re-deriving it. **Do not
+the Lexicon (`~/.codex/LEXICON.md`) for the design ethos rather than re-deriving it. **Do not
 enumerate the withheld categories in the profile** — naming what's hidden advertises its shape.
 Refer to anything out of scope generically (e.g. "anything not covered here lives in the
 brain, consulted on demand"), never as a list of the redacted topics. Keep it lean — roughly

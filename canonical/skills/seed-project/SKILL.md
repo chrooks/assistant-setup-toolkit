@@ -1,6 +1,6 @@
 ---
 name: seed-project
-description: "Turn a raw idea (and optional handoff notes) into a new project scaffold in the Repositories folder — README, project Lexicon (CONTEXT.md), implementation BRIEF for the next harness, a stub tree for the chosen stack, git init — then register it in the source-of-truth index. Use when starting a new project from an idea. Does NOT implement features."
+description: "Turn a raw idea (and optional handoff notes) into a new project scaffold in the Repositories folder — README, project Lexicon (LEXICON.md), implementation BRIEF for the next harness, a stub tree for the chosen stack, git init — then register it in the source-of-truth index. Use when starting a new project from an idea. Does NOT implement features."
 argument-hint: "[idea, or path to a handoff/brief file]"
 ---
 
@@ -36,7 +36,7 @@ Create `<Repositories>/<slug>/` with, at minimum:
 
 - `README.md` — what it does (target behavior), stack, project layout, status line
   marking **SCAFFOLD ONLY**, pointer to `BRIEF.md`.
-- `CONTEXT.md` — the **project Lexicon**: domain terms with concise definitions and
+- `LEXICON.md` — the **project Lexicon**: domain terms with concise definitions and
   `_Avoid_` lines, plus any known constants from the handoff (marked as seeds, not
   Invariants). This takes precedence over the global Lexicon for the project.
 - `BRIEF.md` — the harness handoff: goal, carried-over analysis, open questions,
@@ -84,4 +84,4 @@ nothing is implemented yet.
 - **No implementation.** Stubs, Contracts, and docs only.
 - One index mechanism — always update `PROJECTS.md` via `.repo-index/index.py`,
   never by re-deriving the table by hand.
-- Project Lexicon (`CONTEXT.md`) uses industry-standard meanings; keep it lean.
+- Project Lexicon (`LEXICON.md`) uses industry-standard meanings; keep it lean.

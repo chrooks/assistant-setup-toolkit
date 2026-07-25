@@ -96,7 +96,7 @@ Review each changed file for:
 - Missing error handling
 - Potential edge cases
 - Missing or mismatched tests
-- Drift from the project's `CONTEXT.md` Lexicon
+- Drift from the project's `LEXICON.md` Lexicon
 
 Diff coverage rules:
 - `git diff HEAD` covers staged and unstaged tracked files.
@@ -128,7 +128,7 @@ it working.]
 
 Keep the report source-faithful:
 - Ground it in the actual diff, tests, and user-visible behavior.
-- Correct Lexicon misuse or missing established terms from `CONTEXT.md` briefly.
+- Correct Lexicon misuse or missing established terms from `LEXICON.md` briefly.
 - Do not add speculative benefits that the code does not deliver.
 
 ## Optional Review Fan-Out

@@ -47,7 +47,7 @@ Output goes through `reporter.ts`: `detail()` writes to the run log under `.setu
 
 ### Domain Model
 
-Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`, `WriteBehavior`, `PayloadFile`, `AssistantPayload`, `InstallReceipt`. See `CONTEXT.md` for the authoritative glossary of all domain terms (Canonical Assistant Source, Target Projection, Setup Wizard, Safe Merge, etc.).
+Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`, `WriteBehavior`, `PayloadFile`, `AssistantPayload`, `InstallReceipt`. See `LEXICON.md` for the authoritative glossary of all domain terms (Canonical Assistant Source, Target Projection, Setup Wizard, Safe Merge, etc.).
 
 ## Key Directories
 

@@ -72,7 +72,7 @@ actualization does not wait.
 
 1. **A genuine design decision.** If grill or plan hits an open Meaningful
    Decision the human never settled and you cannot resolve from the Throughline,
-   the Decision Ledger, or `CONTEXT.md`, stop and ask. Naming the decision is the
+   the Decision Ledger, or `LEXICON.md`, stop and ask. Naming the decision is the
    job; guessing it is the failure. (This is the ambiguity that needs domain
    knowledge — it is the human's to give.)
 2. **`assess`.** Always a human stop, in every mode. `afk` never crosses the

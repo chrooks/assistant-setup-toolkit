@@ -29,13 +29,13 @@ present → assume only the claude.ai access modes below.
 
 ## The Lexicon
 
-- **What:** the global engineering-conversation Lexicon; project `CONTEXT.md`
+- **What:** the global engineering-conversation Lexicon; project `LEXICON.md`
   files override it term-by-term.
 - **For:** using and linking canonical terms consistently in every
   Development Conversation.
-- **Access modes:** installed at `~/.claude/CONTEXT.md` on every machine;
-  canonical source is `canonical/CONTEXT.md` in the toolkit.
-- **Local access:** `~/.claude/CONTEXT.md`.
+- **Access modes:** installed at `~/.claude/LEXICON.md` on every machine;
+  canonical source is `canonical/LEXICON.md` in the toolkit.
+- **Local access:** `~/.claude/LEXICON.md`.
 
 ## The profile
 

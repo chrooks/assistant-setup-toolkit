@@ -33,7 +33,7 @@ If the user asks "what should I pick up next?", "what is the next slice?", "what
 
 ### 1. Gather source-of-truth context
 
-Read the project `CONTEXT.md` first when present, then the repo-local project-flow docs:
+Read the project `LEXICON.md` first when present, then the repo-local project-flow docs:
 
 - `docs/agents/project-flow.md`
 - `docs/agents/issue-tracker.md`
@@ -144,7 +144,7 @@ Asking first:
 
 ## Rules
 
-- Use the project's Lexicon terms from `CONTEXT.md`.
+- Use the project's Lexicon terms from `LEXICON.md`.
 - Prefer live issue-tracker truth over memory or stale summaries.
 - Keep recommendations grounded in visible issue records, milestones, Project fields, and blockers.
 - Do not create new issue records.

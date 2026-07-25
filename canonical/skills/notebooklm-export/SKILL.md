@@ -12,12 +12,12 @@ an **audio overview** ("deep dive" podcast). Built for interview prep — the ri
 is a `wiki/experience/teardowns/<topic>.md` page.
 
 This is a **thin wrapper** over the unofficial [`notebooklm-py`](https://github.com/teng-lin/notebooklm-py)
-CLI. The skill owns only the brain-specific [Seam](~/.claude/CONTEXT.md): picking the right
+CLI. The skill owns only the brain-specific [Seam](~/.claude/LEXICON.md): picking the right
 wiki pages for a topic, driving the CLI, and filing the study outputs back into the vault.
-The generic NotebookLM [Surface](~/.claude/CONTEXT.md) (every artifact type, chat, research,
+The generic NotebookLM [Surface](~/.claude/LEXICON.md) (every artifact type, chat, research,
 sharing) belongs to the upstream `notebooklm` skill — **do not reimplement it here.**
 
-**[Boundary](~/.claude/CONTEXT.md):** DATA (the corpus, teardowns, generated study outputs)
+**[Boundary](~/.claude/LEXICON.md):** DATA (the corpus, teardowns, generated study outputs)
 lives in the brain vault. TOOLING (the CLI, its venv) lives outside it. Never put a `.venv`
 or executable code in the vault.
 

@@ -123,18 +123,20 @@ async function discoverCanonicalFiles(
   // the "config" dir is a source grouping, not a target path segment.
   const flattenToRoot = new Set(["config"]);
 
-  // Check for top-level instruction files
-  for (const [filename, component] of [
-    ["CLAUDE.md", "instructions"],
-    ["CONTEXT.md", "instructions"],
-    ["PROFILE.md", "instructions"],
-    ["PLAN.md", "plans"],
+  // Check for top-level instruction files. Canonical names are
+  // target-neutral (INSTRUCTIONS.md, LEXICON.md); the install path is the
+  // target's own convention (CLAUDE.md in a Claude home).
+  for (const [filename, installName, component] of [
+    ["INSTRUCTIONS.md", "CLAUDE.md", "instructions"],
+    ["LEXICON.md", "LEXICON.md", "instructions"],
+    ["PROFILE.md", "PROFILE.md", "instructions"],
+    ["PLAN.md", "PLAN.md", "plans"],
   ] as const) {
     const filePath = path.join(canonicalDir, filename);
     try {
       await fs.access(filePath);
       files.push({
-        relativePath: filename,
+        relativePath: installName,
         sourcePath: filePath,
         component,
         origin: "canonical-source",
@@ -518,7 +520,7 @@ export async function runSetupWizard(
     if (hasCodex) {
       // Discover what's in canonical/ for projection planning
       const claudeFiles: string[] = [];
-      for (const name of ["CLAUDE.md", "CONTEXT.md", "PROFILE.md", "PLAN.md"]) {
+      for (const name of ["INSTRUCTIONS.md", "LEXICON.md", "PROFILE.md", "PLAN.md"]) {
         try {
           await fs.access(path.join(repoRoot, "canonical", name));
           claudeFiles.push(name);
@@ -583,7 +585,7 @@ export async function runSetupWizard(
           await fs.copyFile(sourcePath, targetPath);
         } else {
           let sourceContent = await fs.readFile(sourcePath, "utf-8");
-          if (mapping.source === "CLAUDE.md") {
+          if (mapping.source === "INSTRUCTIONS.md") {
             // Codex has no @import — inline the imported rules so they actually load.
             // ADR-0003: the machine rule is imported at its fixed install path but
             // lives at machines/<name>/rules.md in canonical — resolve via the Variant.

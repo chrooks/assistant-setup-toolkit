@@ -13,7 +13,7 @@ Conversation Threads or immediate Cornerstone work.
 ## Process
 
 1. Read the user's idea and any repo docs that can answer obvious questions:
-   - Read the local `CONTEXT.md` first, then relevant PRDs, ADRs, README files,
+   - Read the local `LEXICON.md` first, then relevant PRDs, ADRs, README files,
      specs, or nearby docs.
    - Use project Lexicon terms precisely. If the user uses an `_Avoid_` term
      where a Lexicon term applies, briefly correct it and continue.

@@ -45,7 +45,7 @@ In local mode, read issue references when needed for context, but do not create,
 
 ### 2. Explore the codebase when useful
 
-If issue titles, acceptance criteria, or verification commands depend on current code, inspect the repo before drafting. Use the project's Lexicon from `CONTEXT.md`, and respect ADRs in the relevant area.
+If issue titles, acceptance criteria, or verification commands depend on current code, inspect the repo before drafting. Use the project's Lexicon from `LEXICON.md`, and respect ADRs in the relevant area.
 
 ### 3. Inspect existing work
 

@@ -55,9 +55,9 @@ interface SkillDirEntry {
 
 /** Maps top-level canonical/ filenames to their .codex/ targets. */
 const FILE_MAP: Record<string, string> = {
-  "CLAUDE.md": ".codex/AGENTS.md",
+  "INSTRUCTIONS.md": ".codex/AGENTS.md",
   "PLAN.md": ".codex/PLAN.md",
-  "CONTEXT.md": ".codex/CONTEXT.md",
+  "LEXICON.md": ".codex/LEXICON.md",
   "PROFILE.md": ".codex/PROFILE.md",
 };
 
@@ -192,7 +192,7 @@ export function planCodexProjection(
 ): readonly ProjectionMapping[] {
   const mappings: ProjectionMapping[] = [];
 
-  // Map known top-level files (CLAUDE.md, PLAN.md, CONTEXT.md)
+  // Map known top-level files (INSTRUCTIONS.md, PLAN.md, LEXICON.md)
   for (const file of input.claudeFiles) {
     const target = FILE_MAP[file];
     if (target) {

@@ -52,7 +52,7 @@ hooks:
   # Quick-recap completion-status nudge — re-injects every turn so the
   # 🟢/🟡/🔴 status-line convention survives long sessions and compaction.
   # Only work-completing turns get a line; Q&A skips it. Full rules live in
-  # canonical/CLAUDE.md. Claude-only, mirroring lexicon-reminder (Codex shows
+  # canonical/INSTRUCTIONS.md. Claude-only, mirroring lexicon-reminder (Codex shows
   # additionalContext as transcript noise).
   - file: quick-recap-reminder.js
     event: UserPromptSubmit

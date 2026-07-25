@@ -1,6 +1,6 @@
 # Installation Manifest for the Assistant Setup Toolkit
 # Lists External Sources the Setup Wizard can fetch and install.
-# See CONTEXT.md for domain language definitions.
+# See LEXICON.md for domain language definitions.
 
 version: 1
 externalSources:
