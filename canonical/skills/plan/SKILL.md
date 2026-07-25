@@ -84,10 +84,11 @@ Draft the breakdown as tracer-bullet Vertical Slices per the `/to-issues` rules
 acceptance criteria) maps to one issue record carrying those criteria as its
 acceptance criteria.
 
-**Plan proposes; `/to-issues` mutates.** Nothing is published until the human
-approves (Step 7). On approval, publish the approved breakdown through
-`/to-issues` (create, or `sub-issues` under a parent) and set the milestone
-through `/to-issues update`. Never mutate the tracker from `/plan` directly.
+**Plan proposes; `/to-issues` mutates.** Approving the plan approves its
+breakdown — there is no second review round. On plan approval (Step 7), publish
+the breakdown through `/to-issues` immediately (create, or `sub-issues` under a
+parent), create the milestone, and set it through `/to-issues update`. Never
+mutate the tracker from `/plan` directly.
 `/roadmap` stays the sequencing authority — consult it when the new issues need
 prioritizing into existing work.
 
@@ -123,9 +124,10 @@ it builds the surface from the plan instead of starting over.
 ### Step 7 — Approval gate
 
 Ask the human to approve, tweak, or reject. Do not start implementing until
-they approve. This is the human-in-the-loop gate. On approval, publish the
-issue breakdown from Step 4 via `/to-issues` and write the resulting records
-into the ExecPlan's `## Issue Map`.
+they approve. This is the human-in-the-loop gate, and the only one — plan
+approval doubles as breakdown approval. On approval, publish the issue
+breakdown from Step 4 via `/to-issues` straight away, write the resulting
+records into the ExecPlan's `## Issue Map`, and report what landed in one line.
 
 ## DevOS: write the plan into the Throughline
 

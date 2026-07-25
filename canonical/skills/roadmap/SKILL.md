@@ -93,21 +93,26 @@ Answer with a short ranked list. For each candidate, include:
 
 Always include one clear recommendation at the top. If nothing is ready, recommend the smallest unblock step.
 
-### 5. Propose reshape actions
+### 5. Apply reshape actions
 
-When board, milestone, or reprioritization changes would help, present them as proposed changes and wait for approval before mutating the issue tracker.
+Non-destructive reshapes are yours to make. Apply them, then report them in one line — do not stage them for approval.
 
-Useful reshape actions include:
+Reshape actions that proceed without asking:
 
 - move issue records between Kanban columns
 - set or change priority fields
-- add or change milestones
+- add or change milestones on issue records
 - mark blockers or related issues
 - move work into a parent/sub-issue hierarchy
 - add comments that explain sequencing
-- identify issue records that should be closed through `/to-issues close`
 
-Do not mutate the issue tracker unless the user approves the proposed changes.
+Ask first only when the reshape changes direction or destroys work:
+
+- dropping work out of a milestone the human set
+- reversing a prioritization the human made explicitly
+- anything that reshapes product direction rather than sequencing it
+
+Closures stay out of scope either way: identify issue records that should close and route them through `/to-issues close`.
 
 ## Output shapes
 
@@ -129,10 +134,12 @@ Board read:
 - Blocked: 2 issue records, both waiting on #120
 - At risk: Milestone Beta has 4 open issue records and 1 unclear dependency
 
-Proposed changes:
-- Move #123 from Backlog to Ready.
-- Add #125 to Milestone Beta.
-- Ask `/to-issues update #126` to split the vague follow-up into sub-issues.
+Applied:
+- Moved #123 from Backlog to Ready.
+- Added #125 to Milestone Beta.
+
+Asking first:
+- Dropping #127 from Milestone Beta reverses your sequencing call — confirm?
 ```
 
 ## Rules
@@ -142,5 +149,6 @@ Proposed changes:
 - Keep recommendations grounded in visible issue records, milestones, Project fields, and blockers.
 - Do not create new issue records.
 - Do not close issue records. Route closures through `/to-issues close`.
+- Apply non-destructive reshapes without asking; report them after in one line. Ask only for direction-changing or destructive reshapes.
 - Do not run implementation. Route ready work through `/implement`.
 - Do not overfit to priority alone; include dependency and milestone context.

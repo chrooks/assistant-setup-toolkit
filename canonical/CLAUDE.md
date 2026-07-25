@@ -59,6 +59,7 @@ Complex features, significant refactors, and anything worth planning get an Exec
 ## Right Skill, Right Job
 - Open-ended feature/change/refactor request with no workflow named → `/scope` it first, then orchestrate the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, straight to `/implement` when it's trivial. Declare the route in one line and proceed (per **Default and Proceed**) — name the decisions you're skipping so Chris can veto one; never stop at a menu.
 - Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
+- Project management runs autonomously through those skills — proactively create, update, and close issues and milestones, then report in one line. Chris owns product design decisions and assessment, not tracker upkeep. Ask only for direction changes (a conflict or supersedes) or destructive tracker edits.
 - `/project-flow-setup` when a repo lacks project-flow docs, triage labels, milestones, or GitHub Project setup.
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
 - `/impeccable` for ANY frontend/UI design, implementation, or review work — do not wait to be routed there.

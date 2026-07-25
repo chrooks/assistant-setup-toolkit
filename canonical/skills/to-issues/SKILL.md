@@ -9,7 +9,7 @@ disable-model-invocation: false
 
 Use this Skill to create, update, and close issue records. It owns issue-record mutations around a source plan, task list, TODO, PRD, existing issue, or completed slice.
 
-By default, this Skill publishes approved slices to the project issue tracker. With the `local` subcommand, update the project-root `TODO.md` instead and make no issue tracker mutations.
+By default, this Skill publishes slices to the project issue tracker and reports what it did afterward. With the `local` subcommand, update the project-root `TODO.md` instead and make no issue tracker mutations.
 
 Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md). Load that file only when local mode is active or when the user asks about the local TODO.md format.
 
@@ -82,11 +82,11 @@ Slices may be `HITL` or `AFK`. HITL slices require human interaction, such as an
 - Prefer many thin slices over a few thick ones.
 </vertical-slice-rules>
 
-When a task should roll into existing work, do not draft it as a new issue or TODO task by default. Include it as a roll-in target and ask whether to add a comment, checklist update, issue-body update, or local TODO update.
+When a task should roll into existing work, do not draft it as a new issue or TODO task by default. Record it as a roll-in target and apply the fitting form — a comment, checklist update, issue-body update, or local TODO update.
 
-### 5. Show dependency chart
+### 5. Build the dependency chart
 
-Before asking for approval, show a compact dependency chart that includes:
+Build a compact dependency chart that includes:
 
 - proposed new issue records
 - proposed sub-issues and their parent issue
@@ -108,9 +108,17 @@ Use a readable Markdown chart by default, so issue references can be linked:
 
 Use Mermaid only when the user's Surface is likely to render it well. Keep labels short.
 
-### 6. Quiz the user
+### 6. Publish by default; ask only on the ask-list
 
-Present the proposed breakdown as a bulleted list, not a numbered list. Numbered proposals are easy to confuse with real issue numbers. For each slice or update, show:
+Tracker bookkeeping is yours, not the human's. A clean, unambiguous breakdown gets published — do not stage it for approval first.
+
+Stop and quiz the user only when one of these is true:
+
+- **Conflicts or supersedes**: a proposed slice changes direction on existing work, or retires something the human decided.
+- **Destructive edit**: deleting a record, gutting an issue's scope, or reversing an explicit human decision.
+- **Genuine granularity doubt**: the source material cannot settle whether something is one slice or three, one issue or a roll-in.
+
+When you do ask, keep it to the unresolved item — publish the rest. Present the questioned slices as a bulleted list, not a numbered list. Numbered proposals are easy to confuse with real issue numbers. For each, show:
 
 - **Title**: short descriptive name
 - **Mode**: new issue, sub-issue, update, roll-in, close, or local TODO
@@ -119,27 +127,26 @@ Present the proposed breakdown as a bulleted list, not a numbered list. Numbered
 - **Existing work relation**: duplicate, roll-in target, blocked by, blocks, related, conflicts, supersedes, or none
 - **User stories covered**: which user stories this addresses, if the source material has them
 
-Ask only the questions needed to publish or update safely:
-
-- Does the granularity feel right?
-- Are the dependency relationships correct?
-- Should any task roll into an existing issue instead of becoming a new issue?
-- Should any slices be merged or split further?
-- Are the correct slices marked as HITL and AFK?
-
-Iterate until the user approves the issue-record changes.
-
 ### 7. Publish, update, or close
 
-In issue tracker mode, apply only the approved issue-record changes.
+In issue tracker mode, apply the issue-record changes — everything off the ask-list proceeds without waiting.
 
-For each approved new slice, publish a new issue record in dependency order. Use the issue body template below. These issues are considered ready for AFK agents, so publish them with the correct triage label unless instructed otherwise.
+For each new slice, publish a new issue record in dependency order. Use the issue body template below. These issues are considered ready for AFK agents, so publish them with the correct triage label unless instructed otherwise.
 
 For sub-issues, prefer native issue-tracker parent/sub-issue support when the project guidance provides it. If the tracker or available CLI cannot create native sub-issues, create normal issue records with a `Parent` section and add a parent issue comment linking the created children.
 
-For approved roll-ins and updates, do not create a new issue record. Add the agreed checklist item, body edit, metadata change, or comment to the target issue record.
+For roll-ins and updates, do not create a new issue record. Add the checklist item, body edit, metadata change, or comment to the target issue record.
 
-Do not close issue records until verification evidence is present. When closing, add a concise closing comment that names the verification command, manual check, PR, commit, or release evidence. Do not close parent issues merely because sub-issues were created.
+**Milestones.** When the source material's Issue Map calls for a milestone grouping its issues, create it — `gh api` for GitHub-backed repos, the tracker equivalent from the project guidance elsewhere — and set it on the records through update mode. Reuse an existing milestone when one already fits; do not ask first.
+
+Do not close issue records until verification evidence is present. With evidence in hand, close without asking. When closing, add a concise closing comment that names the verification command, manual check, PR, commit, or release evidence. Do not close parent issues merely because sub-issues were created.
+
+### 8. Report what you did
+
+After the mutations land, report once:
+
+- The dependency chart from step 5, now describing real records with rich references.
+- One line naming the counts and the ask-list items still open: `Created 4, updated 1, closed 2, milestone Beta. Asking on: the auth slice supersedes [#31 Legacy login](https://tracker/issue/31).`
 
 <issue-template>
 ## Parent
@@ -173,12 +180,12 @@ Omit this section if there are no related issues beyond "Blocked by".
 
 ## Local mode
 
-In local mode, write the approved breakdown to project-root `TODO.md` using [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md).
+In local mode, write the breakdown to project-root `TODO.md` using [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md).
 
 - Do not publish issue tracker tickets.
 - Do not comment on, label, close, or otherwise mutate issue tracker items.
 - Create `TODO.md` if it does not exist.
 - Preserve existing `TODO.md` content. If the file already contains `<!-- to-issues:begin -->` and `<!-- to-issues:end -->`, replace only that generated block. Otherwise append a `## To Issues` section.
-- Preserve checked items and user-written notes when an existing TODO entry clearly matches an approved slice.
+- Preserve checked items and user-written notes when an existing TODO entry clearly matches a drafted slice.
 - Write slices in dependency order, blockers first.
 - Use stable TODO titles so future `/to-issues local` runs can reference and update the same TODOs.

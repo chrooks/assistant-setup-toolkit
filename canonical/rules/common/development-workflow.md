@@ -52,8 +52,8 @@ Case: ~12 "I don't see it / still broken" corrections in one Cornerstone cycle (
 
 ## Close the Loop
 
-After completing a unit of work, proactively do (or offer in one line) the capture pass — do not wait to be asked:
+After completing a unit of work, run the capture pass — do not wait to be asked:
 
-- **Tracker**: update the issue being worked, create issues for side ideas, close what's verified (`/to-issues`).
-- **Docs**: update runbooks/docs in docs repos when the work changed how something operates.
-- **Memory**: save non-obvious learnings that will matter next session.
+- **Tracker**: do it, don't offer it. Update the issue being worked, create issues for side ideas, close what's verified (`/to-issues`), then report in one line. Ask first only for direction changes or destructive edits.
+- **Docs**: do it, or offer in one line — update runbooks/docs in docs repos when the work changed how something operates.
+- **Memory**: do it, or offer in one line — save non-obvious learnings that will matter next session.
