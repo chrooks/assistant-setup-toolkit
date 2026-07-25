@@ -1,6 +1,6 @@
 # Handoff Format
 
-Handoffs live in `.cowork/handoffs/` and use date-prefixed naming: `<YYYY-MM-DD>-<slug>.md`.
+When a handoff is written to disk (only when genuinely needed — default is the copyable block), it lives in the harness config dir (`.claude/handoffs/` on Claude Code, `.codex/handoffs/` on Codex) with date-prefixed naming: `<YYYY-MM-DD>-<slug>.md`.
 
 ## Template
 

@@ -26,24 +26,16 @@ During handoff composition, look for existing documentation:
 ```
 /
 ├── CONTEXT.md
-├── docs/
-│   ├── adr/
-│   └── prd/
-└── .cowork/
-    ├── handoffs/
-    ├── config.yaml
-    └── index.md
+└── docs/
+    ├── adr/
+    └── prd/
 ```
 
 Read `CONTEXT.md` for domain vocabulary — use the project's canonical terms in the handoff, not synonyms. Reference ADRs and PRDs by path when they're relevant to the next session's work.
 
 ### Path conventions
 
-Write handoff files to `.cowork/handoffs/<YYYY-MM-DD>-<slug>.md`. This path is not configurable (`.cowork/` is plumbing, not user-facing).
-
-### Index update (standalone invocation)
-
-After writing a handoff file, if `.cowork/index.md` exists, update the **Handoffs** section: add an entry for the new handoff file. Update the header timestamp: `Last updated: <YYYY-MM-DD> by /handoff`. If `.cowork/index.md` does not exist, skip — no-op.
+Default output is the copyable markdown block only — do NOT write a handoff file unless one is actually needed (the next session starts cold on another machine, or the user asks for a file). When a file is warranted, write it to `<harness-config-dir>/handoffs/<YYYY-MM-DD>-<slug>.md` in the project — `.claude/handoffs/` on Claude Code, `.codex/handoffs/` on Codex.
 
 ## Current context
 
