@@ -41,6 +41,10 @@ not just conversation; it is how the Decision Ledger gets filled.
   <issue>` (the work needs an acceptance-criteria-and-proof plan) or, when the
   approach is already concrete enough to build, to the implement stage. Then
   advance `stage` to match.
+- When the route is `/plan`, run the plan stage immediately in the same
+  conversation — do not stop for the human between grill and plan; the plan's
+  approval gate is the human stop. When the route is implement, stop for the
+  human as usual.
 
 Editing the Throughline is mechanical: change only the fields and ledger lines
 that moved, keep the file valid, and preserve everything else.

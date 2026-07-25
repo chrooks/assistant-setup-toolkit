@@ -40,6 +40,10 @@ Stages run in this order:
     kickoff -> scope -> grill -> plan -> implement -> prove -> assess -> close
 
 - `scope` may skip `grill` and `plan` when a task is already well-defined.
+- `grill` auto-advances into `plan`: when the grill resolves every Meaningful
+  Decision, run the plan stage immediately in the same conversation — no
+  human hand-off between grill and plan. The plan stage's approval gate
+  remains the human stop.
 - `assess` is the only stage that may loop backward — its back-edge points at
   `implement` (see "The assess stage and the back-edge" below).
 - Everything else moves forward one stage at a time.
@@ -275,6 +279,12 @@ Parse the JSON and write it back with this fixed map:
   it would not cross the assess gate**. The prove stage proposes `assess`; set
   `stage: assess` and `next_action: /dev assess` and stop for the human. Never
   auto-run assess or close.
+
+After every implement write-back, deliver the **story recap** defined in the
+`implement` Skill ("Story recap" section): plain-English narrative of what
+shipped, real code snippets, a visual when the concept has shape, verified
+outputs as evidence, surprises led — never a raw relay of the sub-agent's
+JSON.
 
 ### The assess stage and the back-edge
 

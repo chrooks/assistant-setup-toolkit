@@ -107,6 +107,17 @@ Throughline) writes back and uses to advance the run:
 The Conductor — not this Skill — edits the Throughline frontmatter and advances
 the stage. Parallel implementations naturally coalesce at the prove stage.
 
+## Story recap (every implement)
+
+After the work is verified — standalone or DevOS — close with an
+**evidence-backed story recap** in plain English: what shipped and why it
+matters, told as a short narrative, not a bullet dump of files. Include real
+code snippets from the landed diff, a visual (diagram or table) when the
+concept has a shape one carries, and the actual verified command outputs as
+evidence. Surprises and corrections (a number that moved, a spec typo caught)
+are the best part of the story — lead with them, never bury them. Case: Chris
+asked for exactly this after the move-ladder M1 recap (2026-07-25).
+
 ## Rules
 
 - Do not ask the user to choose again when the request is already ready to do.
