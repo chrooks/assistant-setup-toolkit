@@ -130,6 +130,10 @@ _Avoid_: priority, difficulty, size, complexity level
 A per-machine flavor choice for a Toolkit Component, recorded as plain data on the Setup Profile (for example `visual-plans: local-files | self-hosted | none`). A Preset may pre-answer a Variant.
 _Avoid_: flavor, mode, edition
 
+**Resource Index**:
+A canonical, always-loaded table of contents of Chris's durable resources (brain, toolkit, Lexicon, profile) — what each is, what it's for, and every known access mode — with machine-local access paths deferred to the machine Variant rule (ADR-0003). Machine rule files may add machine-local entries other machines never see.
+_Avoid_: table of contents, sitemap, registry
+
 **Preset**:
 A named, repo-declared partial Setup Profile in `manifests/presets.yaml`, keyed by machine class (for example work, personal, hestia), that pre-answers Setup Wizard questions. The Install Receipt remembers only the Preset name; contents always re-resolve from the repo, and explicit CLI flags win as one-off overrides.
 _Avoid_: profile, device config, machine template
@@ -190,6 +194,11 @@ _Avoid_: profile, device config, machine template
 - A single assistant can use more than one **Assistant Home**.
 - Claude Code uses `~/.claude` as an **Assistant Home**.
 - Codex CLI uses `~/.codex` for Codex configuration and `~/.agents` for shared agent skills; both are treated as **Assistant Homes**.
+
+- The **Resource Index** is a common rule in the **Canonical Assistant Source**, always loaded via CLAUDE.md import and inlined into Codex `AGENTS.md` by **Target Projection**.
+- A **Resource Index** entry has a fixed shape: what it is, what it's for, access modes, local access.
+- Canonical **Resource Index** entries defer local access to the machine Variant rule; machine rule files may add machine-local entries.
+- `canonical/rules/machines/TEMPLATE.md` is the versioned template for hand-creating a machine rule file (the files themselves are local-only per ADR-0003).
 
 ## Example Dialogue
 

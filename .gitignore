@@ -24,6 +24,7 @@ secrets-pushover.env
 
 # Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
 canonical/rules/machines/*.md
+!canonical/rules/machines/TEMPLATE.md
 
 # Machine-scoped skills: only the work laptop's are local-only (it can't push).
 # hestia/mac machine skills stay tracked; the .gitkeep keeps work/ present on clone.

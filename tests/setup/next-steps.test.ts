@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   formatNextStepsSection,
   planInstallCommandNextSteps,
+  planMachineRuleNextSteps,
   planVisualPlansNextSteps,
 } from "../../src/setup/next-steps.js";
 import type { ExternalSource } from "../../src/setup/manifest.js";
@@ -104,6 +105,23 @@ describe("next-steps", () => {
 
     it("none emits no steps", () => {
       expect(planVisualPlansNextSteps("none", ["claude-code"])).toEqual([]);
+    });
+  });
+
+  describe("planMachineRuleNextSteps", () => {
+    it("nudges to copy TEMPLATE.md when the machine Variant's rule file is missing", () => {
+      const steps = planMachineRuleNextSteps("work", false);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain("canonical/rules/machines/work.md");
+      expect(steps[0].description).toContain("TEMPLATE.md");
+    });
+
+    it("emits no steps when the rule file exists", () => {
+      expect(planMachineRuleNextSteps("hestia", true)).toEqual([]);
+    });
+
+    it("emits no steps when no machine Variant is set", () => {
+      expect(planMachineRuleNextSteps(undefined, false)).toEqual([]);
     });
   });
 });

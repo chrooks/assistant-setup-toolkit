@@ -39,3 +39,8 @@ select components and Variants, not individual rule files.
   design; a machine is one class. Shared content belongs in `rules/common/`.
 - Renaming a machine class means renaming the file and the Variant value
   together; presets.yaml is the single place both appear.
+- **Noted 2026-07-25:** Codex parity works by inlining — the projection
+  resolves `rules/machine.md` → `rules/machines/<name>.md` via the `machine`
+  Variant and inlines the content into `AGENTS.md` (Codex has no `@` import
+  mechanism). With no Variant set, the import line is dropped, matching the
+  missing-file no-op on the Claude side.

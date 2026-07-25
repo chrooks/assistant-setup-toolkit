@@ -119,6 +119,24 @@ export function planVisualPlansNextSteps(
 }
 
 /**
+ * Build the Next Step for a `machine` Variant whose rule file is missing on
+ * disk (ADR-0003: machine files are local-only and hand-created; ADR-0004:
+ * TEMPLATE.md is the copy source). The wizard surfaces it, never creates it.
+ */
+export function planMachineRuleNextSteps(
+  machine: string | undefined,
+  machineRuleFileExists: boolean,
+): readonly NextStep[] {
+  if (!machine || machineRuleFileExists) return [];
+  return [
+    {
+      kind: "manual-action",
+      description: `Machine Variant "${machine}" is set but canonical/rules/machines/${machine}.md does not exist — copy canonical/rules/machines/TEMPLATE.md to it and fill in this machine's context and Resource access, then re-run setup.`,
+    },
+  ];
+}
+
+/**
  * Format Next Steps as human-readable lines for CLI output.
  */
 export function formatNextSteps(

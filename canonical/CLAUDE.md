@@ -94,6 +94,7 @@ Messages may arrive via voice transcription — interpret intent, not the litera
 
 ## Rules
 
+@~/.claude/rules/common/resource-index.md
 @~/.claude/rules/common/coding-style.md
 @~/.claude/rules/common/git-workflow.md
 @~/.claude/rules/common/development-workflow.md

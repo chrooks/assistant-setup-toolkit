@@ -112,7 +112,9 @@ export function rewriteContentForCodex(
  * text and the rule never becomes active. Inlining makes the content actually load.
  *
  * `readSource` returns canonical file content for a canonical-relative path, or
- * undefined if absent (e.g. the machine-Variant rule) — those lines are dropped.
+ * undefined if absent — those lines are dropped. The caller resolves the
+ * machine-Variant rule (rules/machine.md → rules/machines/<name>.md) before
+ * lookup, so machine context inlines too when a `machine` Variant is set.
  * Run this on canonical content BEFORE rewriteContentForCodex.
  */
 export function inlineCanonicalImports(

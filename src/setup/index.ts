@@ -9,6 +9,7 @@
 
 import path from "node:path";
 import fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { tryParseCliFlags } from "./cli.js";
 import { runInteractivePrompts } from "./prompts.js";
 import {
@@ -40,6 +41,7 @@ import {
   buildStandardNextSteps,
   formatNextStepsSection,
   planInstallCommandNextSteps,
+  planMachineRuleNextSteps,
   planVisualPlansNextSteps,
 } from "./next-steps.js";
 import type { NextStep } from "./next-steps.js";
@@ -906,11 +908,19 @@ export async function runSetupWizard(
       resolveVisualPlansVariant(profile),
       profile.targets,
     );
+    const machineVariant = profile.variants?.[MACHINE_VARIANT_KEY];
+    const machineRuleSteps = planMachineRuleNextSteps(
+      machineVariant,
+      machineVariant
+        ? existsSync(path.join(repoRoot, "canonical", "rules", "machines", `${machineVariant}.md`))
+        : false,
+    );
     const allNextSteps: NextStep[] = [
       ...installCommandSteps,
       ...standardSteps,
       ...mcpSteps,
       ...visualPlansSteps,
+      ...machineRuleSteps,
     ];
     // Next Steps stay on the console: they are the one part of the run that
     // asks the human to go do something.
