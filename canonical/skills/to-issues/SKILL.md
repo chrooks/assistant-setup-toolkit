@@ -13,7 +13,7 @@ By default, this Skill publishes slices to the project issue tracker and reports
 
 Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md). Load that file only when local mode is active or when the user asks about the local TODO.md format.
 
-In issue tracker mode, inspect `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` when present. If they are missing, recommend `/project-flow-setup docs` before mutating issue records unless the user asks for a one-off issue-tracker change. Local mode does not require issue tracker setup.
+In issue tracker mode, inspect `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` when present. If they are missing, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
 
 ## Boundary
 

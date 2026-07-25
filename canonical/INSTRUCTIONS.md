@@ -66,7 +66,7 @@ Operating consequence: every ask-first gate in this toolkit exists to protect Ch
 - Open-ended feature/change/refactor request with no workflow named → `/scope` it first, then orchestrate the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, straight to `/implement` when it's trivial. Declare the route in one line and proceed (per **Default and Proceed**) — name the decisions you're skipping so Chris can veto one; never stop at a menu.
 - Keep the issue-work routing Boundary clear: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
 - Project management is the assistant's side of the **Division of Responsibility** — create, update, and close issues and milestones proactively, then report in one line. Ask only for direction changes (a conflict or supersedes) or destructive tracker edits.
-- `/project-flow-setup` when a repo lacks project-flow docs, triage labels, milestones, or GitHub Project setup.
+- Project-flow setup is plumbing, never a prompt. A repo missing project-flow docs, triage labels, milestones, or GitHub Project setup gets `/project-flow-setup` run inline as the first step of whatever issue work triggered it — report it in one line, never stop to recommend it. Chris should never have to invoke it himself.
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
 - `/impeccable` for ANY frontend/UI design, implementation, or review work — do not wait to be routed there.
 - `/security-review` before committing changes that touch auth, user input, payments, or secrets — fix CRITICAL findings before continuing and rotate any exposed secrets.

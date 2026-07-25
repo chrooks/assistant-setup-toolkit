@@ -39,7 +39,7 @@ Read the project `LEXICON.md` first when present, then the repo-local project-fl
 - `docs/agents/issue-tracker.md`
 - `docs/agents/triage-labels.md`
 
-If these docs are missing, recommend `/project-flow-setup audit` or `/project-flow-setup docs` before ranking work unless the user asks for a one-off answer. Then read any additional project planning docs or active ExecPlans.
+If these docs are missing, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off answer. Then read any additional project planning docs or active ExecPlans.
 
 Use live issue-tracker data when available. For GitHub-backed repos, prefer `gh` commands from the project guidance. Inspect open issues, recently closed issues when relevant, milestones, Project items, labels, assignees, blockers, parent/sub-issue relationships, and pull requests.
 

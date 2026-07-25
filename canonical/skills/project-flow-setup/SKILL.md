@@ -2,7 +2,6 @@
 name: project-flow-setup
 description: Configure a repository for the project-flow workflow by auditing repo-local docs and GitHub setup, writing workflow docs from templates, and applying issue, milestone, label, and Project setup. Use when adopting /to-issues and /roadmap or when project-flow docs are missing.
 argument-hint: "[audit|docs|apply] [repo]"
-disable-model-invocation: true
 ---
 
 # Project Flow Setup
