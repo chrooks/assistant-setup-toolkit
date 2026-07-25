@@ -123,28 +123,30 @@ export function buildAssistantPayloads(
     !excludeVisualPlans ||
     !VISUAL_PLANS_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p));
 
-  // Machine gate (ADR-0003): rules/machines/<name>.md ships only to the
-  // machine whose `machine` Variant matches, installed at the fixed path
-  // rules/machine.md so CLAUDE.md can import it unconditionally (a missing
-  // import is a harmless no-op on machines without one).
+  // Machine gate (ADR-0003): canonical/machines/<name>/ holds one machine
+  // class's profile — rules.md ships only to the machine whose `machine`
+  // Variant matches, installed at the fixed path rules/machine.md so CLAUDE.md
+  // can import it unconditionally (a missing import is a harmless no-op on
+  // machines without one).
   const machine = input.variants?.[MACHINE_VARIANT_KEY];
   const gateFile = (file: PayloadFile): PayloadFile | null => {
     if (!isIncluded(file)) return null;
+    if (!file.relativePath.startsWith("machines/")) return file;
 
     // Machine-scoped skills mirror the machine rule gate: a skill under
-    // skills/machines/<machine>/<skill>/... ships only to the matching machine,
-    // installed at skills/<skill>/... with the machines/<machine>/ prefix
-    // stripped. Lets a machine carry skills the others never see (and, when the
-    // dir is gitignored, skills that never enter version control at all).
-    const skillMatch = file.relativePath.match(/^skills\/machines\/([^/]+)\/(.+)$/);
+    // machines/<machine>/skills/<skill>/... ships only to the matching machine,
+    // installed at skills/<skill>/... with the machines/<machine>/skills/
+    // prefix stripped. Lets a machine carry skills the others never see (and,
+    // when the dir is gitignored, skills that never enter version control).
+    const skillMatch = file.relativePath.match(/^machines\/([^/]+)\/skills\/(.+)$/);
     if (skillMatch) {
       if (skillMatch[1] !== machine) return null;
+      if (skillMatch[2] === ".gitkeep") return null; // dir placeholder, not a skill
       return { ...file, relativePath: `skills/${skillMatch[2]}` };
     }
 
-    const match = file.relativePath.match(/^rules\/machines\/(.+)\.md$/);
-    if (!match) return file;
-    if (match[1] !== machine) return null;
+    const match = file.relativePath.match(/^machines\/([^/]+)\/rules\.md$/);
+    if (!match || match[1] !== machine) return null; // TEMPLATE.md and non-matching machines drop
     return { ...file, relativePath: MACHINE_RULE_INSTALL_PATH };
   };
 

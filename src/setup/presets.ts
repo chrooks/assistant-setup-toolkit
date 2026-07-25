@@ -242,7 +242,7 @@ export function describePresetEffects(
 function describeVariant(key: string, value: string | undefined): string {
   if (value === undefined) return "";
   if (key === "machine") {
-    return ` — installs rules/machine.md from canonical/rules/machines/${value}.md`;
+    return ` — installs rules/machine.md from canonical/machines/${value}/rules.md`;
   }
   if (key === "visual-plans") {
     if (value === "none") return " — visual-plan/visual-recap skills excluded";

@@ -1,7 +1,7 @@
 # Machine Context — <machine-name>
 
 <!--
-Copy this file to canonical/rules/machines/<machine>.md on the machine it
+Copy this file to canonical/machines/<machine>/rules.md on the machine it
 describes and fill it in. Machine files are local-only and gitignored
 (ADR-0003) — they describe a real box and the repo is public. The Setup
 Wizard installs the file matching the `machine` Variant as rules/machine.md.

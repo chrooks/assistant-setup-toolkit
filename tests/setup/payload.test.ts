@@ -271,8 +271,9 @@ describe("payload", () => {
       });
       const canonicalFiles = [
         rule("rules/common/coding-style.md"),
-        rule("rules/machines/hestia.md"),
-        rule("rules/machines/work.md"),
+        rule("machines/hestia/rules.md"),
+        rule("machines/work/rules.md"),
+        rule("machines/TEMPLATE.md"),
       ];
 
       it("installs only the matching machine rule, at the fixed rules/machine.md path", () => {
@@ -290,7 +291,7 @@ describe("payload", () => {
         const machineRule = result.payloads[0].files.find(
           (f) => f.relativePath === "rules/machine.md",
         );
-        expect(machineRule!.sourcePath).toBe("/repo/canonical/rules/machines/hestia.md");
+        expect(machineRule!.sourcePath).toBe("/repo/canonical/machines/hestia/rules.md");
       });
 
       it("drops every machine rule when no machine Variant is set", () => {
@@ -317,8 +318,9 @@ describe("payload", () => {
       });
       const canonicalFiles = [
         skill("skills/commit/SKILL.md"),
-        skill("skills/machines/work/timesheet/SKILL.md"),
-        skill("skills/machines/hestia/deploy/SKILL.md"),
+        skill("machines/work/skills/timesheet/SKILL.md"),
+        skill("machines/hestia/skills/deploy/SKILL.md"),
+        skill("machines/work/skills/.gitkeep"),
       ];
 
       it("installs only the matching machine's skills, with the prefix stripped", () => {
@@ -337,7 +339,7 @@ describe("payload", () => {
           (f) => f.relativePath === "skills/timesheet/SKILL.md",
         );
         expect(installed!.sourcePath).toBe(
-          "/repo/canonical/skills/machines/work/timesheet/SKILL.md",
+          "/repo/canonical/machines/work/skills/timesheet/SKILL.md",
         );
       });
 

@@ -112,7 +112,7 @@ describe("next-steps", () => {
     it("nudges to copy TEMPLATE.md when the machine Variant's rule file is missing", () => {
       const steps = planMachineRuleNextSteps("work", false);
       expect(steps).toHaveLength(1);
-      expect(steps[0].description).toContain("canonical/rules/machines/work.md");
+      expect(steps[0].description).toContain("canonical/machines/work/rules.md");
       expect(steps[0].description).toContain("TEMPLATE.md");
     });
 

@@ -148,12 +148,12 @@ describe("integration", () => {
       expect(agentsPaths).toContain("skills/commit/SKILL.md");
     });
 
-    it("discovers machine-scoped skills nested under skills/machines/<machine>/<skill>/", async () => {
+    it("discovers machine-scoped skills nested under machines/<machine>/skills/<skill>/", async () => {
       await writeFile("canonical/skills/commit/SKILL.md", "# Commit");
-      await writeFile("canonical/skills/machines/hestia/deploy/SKILL.md", "# Deploy");
-      // A machine dir with no skill subdirectories yet (e.g. work/ holding only
+      await writeFile("canonical/machines/hestia/skills/deploy/SKILL.md", "# Deploy");
+      // A machine skills dir with no skill subdirectories yet (holding only
       // a .gitkeep so it survives on clone) must not blow up discovery.
-      await writeFile("canonical/skills/machines/work/.gitkeep", "");
+      await writeFile("canonical/machines/work/skills/.gitkeep", "");
 
       const skillDirs = await discoverSkillDirs(tmpDir);
       const names = skillDirs.map((d) => d.name).sort();
@@ -171,7 +171,7 @@ describe("integration", () => {
 
       expect(projectionMappings).toHaveLength(1);
       expect(projectionMappings[0].target).toBe(
-        ".agents/skills/machines/hestia/deploy/SKILL.md",
+        ".agents/machines/hestia/skills/deploy/SKILL.md",
       );
 
       // Mirror index.ts's projectionFiles transform: strip the .codex/.agents

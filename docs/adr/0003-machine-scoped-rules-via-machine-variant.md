@@ -40,7 +40,15 @@ select components and Variants, not individual rule files.
 - Renaming a machine class means renaming the file and the Variant value
   together; presets.yaml is the single place both appear.
 - **Noted 2026-07-25:** Codex parity works by inlining — the projection
-  resolves `rules/machine.md` → `rules/machines/<name>.md` via the `machine`
+  resolves `rules/machine.md` → `machines/<name>/rules.md` via the `machine`
   Variant and inlines the content into `AGENTS.md` (Codex has no `@` import
   mechanism). With no Variant set, the import line is dropped, matching the
   missing-file no-op on the Claude side.
+- **Amended 2026-07-25:** everything machine-scoped now lives together at
+  `canonical/machines/<name>/` — the rule at `machines/<name>/rules.md`, skills
+  at `machines/<name>/skills/<skill>/`, future hooks alongside. The old
+  `canonical/rules/machines/<name>.md` and `canonical/skills/machines/<machine>/`
+  homes buried a machine profile inside component directories; a machine class
+  is a first-class grouping, so it gets a top-level home. Install paths and the
+  Variant mechanism are unchanged. The rules template is
+  `canonical/machines/TEMPLATE.md`.

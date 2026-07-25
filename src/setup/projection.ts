@@ -113,7 +113,7 @@ export function rewriteContentForCodex(
  *
  * `readSource` returns canonical file content for a canonical-relative path, or
  * undefined if absent — those lines are dropped. The caller resolves the
- * machine-Variant rule (rules/machine.md → rules/machines/<name>.md) before
+ * machine-Variant rule (rules/machine.md → machines/<name>/rules.md) before
  * lookup, so machine context inlines too when a `machine` Variant is set.
  * Run this on canonical content BEFORE rewriteContentForCodex.
  */
@@ -206,12 +206,19 @@ export function planCodexProjection(
     }
   }
 
-  // Map skill directories to .agents/skills/
+  // Map skill directories to .agents/skills/. Machine-scoped skills
+  // (ADR-0003) live at machines/<machine>/skills/<skill>/ in canonical — stage
+  // them under that same shape so the payload machine gate re-applies to the
+  // projected files.
   for (const skillDir of input.skillDirs) {
+    const machineMatch = skillDir.name.match(/^machines\/([^/]+)\/(.+)$/);
+    const rel = machineMatch
+      ? `machines/${machineMatch[1]}/skills/${machineMatch[2]}`
+      : `skills/${skillDir.name}`;
     for (const file of skillDir.files) {
       mappings.push({
-        source: `skills/${skillDir.name}/${file}`,
-        target: `.agents/skills/${skillDir.name}/${file}`,
+        source: `${rel}/${file}`,
+        target: `.agents/${rel}/${file}`,
         isSkill: file === "SKILL.md",
         isHook: false,
         isConfig: false,

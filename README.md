@@ -90,7 +90,7 @@ Setup Wizard — dry-run · Default Install · Safe Merge · preset hestia
 Targets: Claude Code -> ~/.claude
 Preset: hestia (from Install Receipt)
     variants.visual-plans = self-hosted — visual-plan/visual-recap via the Plan MCP
-    variants.machine = hestia — installs rules/machine.md from canonical/rules/machines/hestia.md
+    variants.machine = hestia — installs rules/machine.md from canonical/machines/hestia/rules.md
 
   Sources    0 to fetch, 8 skipped, 2 manual (MCP)
   Writes     0 would write, 163 would skip, 0 would remove

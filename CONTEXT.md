@@ -198,7 +198,8 @@ _Avoid_: profile, device config, machine template
 - The **Resource Index** is a common rule in the **Canonical Assistant Source**, always loaded via CLAUDE.md import and inlined into Codex `AGENTS.md` by **Target Projection**.
 - A **Resource Index** entry has a fixed shape: what it is, what it's for, access modes, local access.
 - Canonical **Resource Index** entries defer local access to the machine Variant rule; machine rule files may add machine-local entries.
-- `canonical/rules/machines/TEMPLATE.md` is the versioned template for hand-creating a machine rule file (the files themselves are local-only per ADR-0003).
+- `canonical/machines/<name>/` is a machine profile's single home — `rules.md` plus `skills/<skill>/` (and future hooks) for one machine class, gated by the machine Variant (ADR-0003).
+- `canonical/machines/TEMPLATE.md` is the versioned template for hand-creating a machine's `rules.md` (the rule files themselves are local-only per ADR-0003).
 
 ## Example Dialogue
 

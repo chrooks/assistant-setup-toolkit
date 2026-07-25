@@ -145,6 +145,27 @@ async function discoverCanonicalFiles(
     }
   }
 
+  // Machine-scoped content (ADR-0003): canonical/machines/<name>/ carries one
+  // machine class's rules.md and skills/. Walked under a machines/ prefix so
+  // gateFile (payload.ts) can route it by the machine Variant; component kind
+  // reflects what each file is, not where it lives.
+  const machinesDir = path.join(canonicalDir, "machines");
+  try {
+    const entries = await walkDir(machinesDir);
+    for (const entry of entries) {
+      const within = path.relative(machinesDir, entry.path);
+      files.push({
+        relativePath: path.join("machines", within),
+        sourcePath: entry.path,
+        component: /^[^/]+\/skills\//.test(within) ? "skills" : "rules",
+        origin: "canonical-source",
+        executable: entry.executable,
+      });
+    }
+  } catch {
+    // No machines directory — skip
+  }
+
   // Walk component directories
   for (const [dirName, component] of Object.entries(dirComponentMap)) {
     const dirPath = path.join(canonicalDir, dirName);
@@ -215,37 +236,33 @@ export async function discoverSkillDirs(
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
 
-      // machines/<machine>/<skill>/ holds machine-scoped skills, gated into the
-      // payload by the machine Variant (see payload.ts gateFile), not a skill
-      // itself. Recurse one level deeper so each is discovered under its
-      // machines/<machine>/ name — the gate strips that prefix at build time,
-      // same as it already does for canonicalFiles.
-      if (entry.name === "machines") {
-        const machinesDir = path.join(skillsDir, entry.name);
-        const machineEntries = await fs
-          .readdir(machinesDir, { withFileTypes: true })
-          .catch(() => []);
-        for (const machineEntry of machineEntries) {
-          if (!machineEntry.isDirectory()) continue;
-          const machineDir = path.join(machinesDir, machineEntry.name);
-          const skillEntries = await fs
-            .readdir(machineDir, { withFileTypes: true })
-            .catch(() => []);
-          for (const skillEntry of skillEntries) {
-            if (!skillEntry.isDirectory()) continue;
-            await addSkill(
-              `machines/${machineEntry.name}/${skillEntry.name}`,
-              path.join(machineDir, skillEntry.name),
-            );
-          }
-        }
-        continue;
-      }
-
       await addSkill(entry.name, path.join(skillsDir, entry.name));
     }
   } catch {
     // No skills directory
+  }
+
+  // Machine-scoped skills live at canonical/machines/<machine>/skills/<skill>/
+  // (ADR-0003), gated into the payload by the machine Variant (see payload.ts
+  // gateFile). Discovered under a machines/<machine>/ name — the gate strips
+  // that prefix at build time, same as it already does for canonicalFiles.
+  const machinesDir = path.join(repoRoot, "canonical", "machines");
+  const machineEntries = await fs
+    .readdir(machinesDir, { withFileTypes: true })
+    .catch(() => []);
+  for (const machineEntry of machineEntries) {
+    if (!machineEntry.isDirectory()) continue;
+    const machineSkillsDir = path.join(machinesDir, machineEntry.name, "skills");
+    const skillEntries = await fs
+      .readdir(machineSkillsDir, { withFileTypes: true })
+      .catch(() => []);
+    for (const skillEntry of skillEntries) {
+      if (!skillEntry.isDirectory()) continue;
+      await addSkill(
+        `machines/${machineEntry.name}/${skillEntry.name}`,
+        path.join(machineSkillsDir, skillEntry.name),
+      );
+    }
   }
 
   return result;
@@ -569,13 +586,13 @@ export async function runSetupWizard(
           if (mapping.source === "CLAUDE.md") {
             // Codex has no @import — inline the imported rules so they actually load.
             // ADR-0003: the machine rule is imported at its fixed install path but
-            // lives at rules/machines/<name>.md in canonical — resolve via the Variant.
+            // lives at machines/<name>/rules.md in canonical — resolve via the Variant.
             const machine = profile.variants?.[MACHINE_VARIANT_KEY];
             const imports = new Map<string, string>();
             for (const rel of sourceContent.matchAll(/^@~\/\.claude\/(\S+)\s*$/gm)) {
               const canonicalRel =
                 rel[1] === MACHINE_RULE_INSTALL_PATH && machine
-                  ? `rules/machines/${machine}.md`
+                  ? `machines/${machine}/rules.md`
                   : rel[1];
               try {
                 imports.set(rel[1], await fs.readFile(path.join(repoRoot, "canonical", canonicalRel), "utf-8"));
@@ -912,7 +929,7 @@ export async function runSetupWizard(
     const machineRuleSteps = planMachineRuleNextSteps(
       machineVariant,
       machineVariant
-        ? existsSync(path.join(repoRoot, "canonical", "rules", "machines", `${machineVariant}.md`))
+        ? existsSync(path.join(repoRoot, "canonical", "machines", machineVariant, "rules.md"))
         : false,
     );
     const allNextSteps: NextStep[] = [

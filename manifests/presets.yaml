@@ -10,7 +10,7 @@ presets:
   work:
     variants:
       visual-plans: local-files
-      # ADR-0003: installs canonical/rules/machines/work.md as rules/machine.md.
+      # ADR-0003: installs canonical/machines/work/rules.md as rules/machine.md.
       # That file is gitignored — author it on the work laptop itself.
       machine: work
     selectedExternalSourceIds: []
@@ -20,10 +20,10 @@ presets:
   hestia:
     variants:
       visual-plans: self-hosted
-      # ADR-0003: installs canonical/rules/machines/hestia.md as rules/machine.md
+      # ADR-0003: installs canonical/machines/hestia/rules.md as rules/machine.md
       machine: hestia
   mac:
     variants:
       visual-plans: self-hosted
-      # machine Variant also gates skills/machines/mac/<skill>/ into the payload.
+      # machine Variant also gates canonical/machines/mac/skills/<skill>/ into the payload.
       machine: mac

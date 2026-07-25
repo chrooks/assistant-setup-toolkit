@@ -54,8 +54,8 @@ export const SELF_HOSTED_PLAN_URL = "https://plan.hestia.chrooks.com";
 
 /**
  * The Variant key naming which machine class this install is (ADR-0003).
- * Gates machine-scoped rules: canonical/rules/machines/<name>.md ships only
- * where variants.machine === name.
+ * Gates machine-scoped content: canonical/machines/<name>/ (rules.md,
+ * skills/) ships only where variants.machine === name.
  */
 export const MACHINE_VARIANT_KEY = "machine";
 

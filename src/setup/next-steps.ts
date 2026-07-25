@@ -131,7 +131,7 @@ export function planMachineRuleNextSteps(
   return [
     {
       kind: "manual-action",
-      description: `Machine Variant "${machine}" is set but canonical/rules/machines/${machine}.md does not exist — copy canonical/rules/machines/TEMPLATE.md to it and fill in this machine's context and Resource access, then re-run setup.`,
+      description: `Machine Variant "${machine}" is set but canonical/machines/${machine}/rules.md does not exist — copy canonical/machines/TEMPLATE.md to it and fill in this machine's context and Resource access, then re-run setup.`,
     },
   ];
 }

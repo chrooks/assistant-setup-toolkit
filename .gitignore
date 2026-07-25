@@ -23,13 +23,12 @@ canonical/knowledge-config.json
 secrets-pushover.env
 
 # Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
-canonical/rules/machines/*.md
-!canonical/rules/machines/TEMPLATE.md
+canonical/machines/*/rules.md
 
 # Machine-scoped skills: only the work laptop's are local-only (it can't push).
-# hestia/mac machine skills stay tracked; the .gitkeep keeps work/ present on clone.
-canonical/skills/machines/work/*
-!canonical/skills/machines/work/.gitkeep
+# hestia/mac machine skills stay tracked; the .gitkeep keeps work/skills/ present on clone.
+canonical/machines/work/skills/*
+!canonical/machines/work/skills/.gitkeep
 
 # Setup Wizard run logs (see reporter.ts) — local diagnostics, not source.
 .setup/
