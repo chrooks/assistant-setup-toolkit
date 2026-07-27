@@ -337,15 +337,29 @@ export async function runSetupWizard(
     const repoRoot = findRepoRoot();
 
     // Load Installation Manifest early so the interactive prompt can offer
-    // External Sources to pick from. Failures here should not abort setup;
-    // we fall back to an empty manifest and continue.
+    // External Sources to pick from.
+    //
+    // A missing manifest is a legitimate state — install the local Canonical
+    // Assistant Source and nothing else. A manifest that exists but does not
+    // parse is not: continuing would silently install a fraction of the
+    // payload (317 files instead of 799) while reporting success, and the one
+    // warning line scrolls past in a run that otherwise looks healthy. Fail
+    // loudly instead — a YAML typo should cost one error message, not a
+    // debugging session.
     const manifestPath = path.join(repoRoot, "manifests", "install.yaml");
     let manifest;
-    try {
-      manifest = await loadInstallationManifest(manifestPath);
-    } catch {
-      console.log("Warning: Could not load manifests/install.yaml — continuing without External Sources.");
+    if (!existsSync(manifestPath)) {
       manifest = { version: 1 as const, externalSources: [] };
+    } else {
+      try {
+        manifest = await loadInstallationManifest(manifestPath);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        // The reporter is not constructed this early in the run, so this goes
+        // straight to stderr.
+        console.error(`Error: manifests/install.yaml exists but could not be parsed.\n${message}`);
+        return 1;
+      }
     }
 
     // Presets (ADR-0002): load the repo's Presets and the machine's
@@ -742,9 +756,21 @@ export async function runSetupWizard(
     // confirmed, and a silent "local wins" is indistinguishable from a silent
     // "local lost".
     if (payloadResult.conflicts.length > 0) {
-      summary("Conflicts resolved:");
+      // One line on the console naming the shadowed skills; the file-by-file
+      // detail goes to the log. Twenty-odd identical "local wins" lines is a
+      // wall the eye skips, which defeats the point of surfacing it at all.
+      const shadowed = [
+        ...new Set(
+          payloadResult.conflicts.map(
+            (c) => c.relativePath.split("/")[1] ?? c.relativePath,
+          ),
+        ),
+      ].sort();
+      summary(
+        `  Conflicts  ${payloadResult.conflicts.length} file(s) — local wins: ${shadowed.join(", ")}`,
+      );
       for (const conflict of payloadResult.conflicts) {
-        summary(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
+        log(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
       }
     }
 

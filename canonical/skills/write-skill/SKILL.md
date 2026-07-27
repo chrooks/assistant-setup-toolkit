@@ -12,7 +12,7 @@ Side-effectful: writes files in `canonical/` and may run the Setup Wizard. User-
 
 See [REFERENCE.md](REFERENCE.md) for the full Claude Code skill feature surface, Codex parity matrix, and frontmatter spec.
 
-For the **craft** of the skill body — predictability, leading words, information hierarchy, completion criteria, and the failure modes (premature completion, sediment, sprawl, no-op) — consult the `writing-great-skills` skill. This skill covers the mechanics; that one covers whether the body is good.
+For the **craft** of the skill body — predictability, leading words, information hierarchy, completion criteria, and the failure modes (premature completion, duplication, sediment, sprawl, no-op, negation) — consult the `writing-great-skills` skill. This skill covers the mechanics; that one covers whether the body is good.
 
 ## Invocation forms
 
@@ -157,7 +157,7 @@ Several frontmatter fields are Claude-Code-specific and ignored by Codex project
 - [ ] Background-knowledge skills set `user-invocable: false`
 - [ ] Tool-restricted skills set `allowed-tools`
 - [ ] Bundled resources referenced by relative path
-- [ ] Body checked against `writing-great-skills` failure modes (no premature-completion, duplication, sediment, sprawl, no-op)
+- [ ] Body checked against `writing-great-skills` failure modes (premature completion, duplication, sediment, sprawl, no-op, negation)
 - [ ] Codex-only path tested with `name` + `description` + body alone
 - [ ] Correct target paths written per scope
 - [ ] Wizard ran: `npm run sync` (create/update) or `--write prune` (rename)
