@@ -1,6 +1,6 @@
-# write-skill Reference
+# Skill Authoring Reference
 
-Complete Claude Code skill feature surface for authored skills. See [SKILL.md](SKILL.md) for the workflow.
+Complete Claude Code skill feature surface for authored skills. See [authoring-skill.md](authoring-skill.md) for the workflow.
 
 ## Progressive Disclosure
 

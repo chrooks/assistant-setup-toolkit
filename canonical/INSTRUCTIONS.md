@@ -70,18 +70,11 @@ Operating consequence: every ask-first gate in this toolkit exists to protect Ch
 - `/implement` to build · `/verification-loop` after building · `/commit` to commit · `/diagnose` for difficult bugs.
 - `/impeccable` for ANY frontend/UI design, implementation, or review work — do not wait to be routed there.
 - `/security-review` before committing changes that touch auth, user input, payments, or secrets — fix CRITICAL findings before continuing and rotate any exposed secrets.
-- Creating, changing, or reviewing Skills, Plugins, hook scripts, MCP Servers, Manifest entries, or Setup Wizard behavior → consult the `consult` Skill first.
+- Creating, changing, or removing Skills, rules, instructions, hook scripts, machine rules, or Manifest entries → `/toolkit`. It holds the routing table and writes the artifact.
 - Otherwise, iff no other Skill has been invoked for a request → `/find-skill`.
 
 ## Where learnings go
-| A thing worth keeping | Goes to |
-|---|---|
-| Correction or non-obvious learning | auto-memory |
-| Repeated multi-step procedure | a skill |
-| Convention tied to a file type or directory | `paths:`-gated rule |
-| Behavior that must happen 100% of the time | hook |
-| Machine-specific fact | machine Variant rule (ADR-0003) |
-| Universal personal preference (rare) | this file — displace something |
+A thing worth keeping goes somewhere durable — a correction to auto-memory, everything else through `/toolkit`, which routes it to a skill, a rule, an instruction, a hook, a machine rule, or a manifest entry. Don't hand-place it; the routing table lives in that Skill.
 
 ## Agent-Native visual plans
 `/visual-plan` and `/visual-recap` never publish to Builder's hosted `plan.agent-native.com`. Each machine carries one Variant (`--visual-plans`, Install Receipt; ADR-0001) — detect locally: `plan` MCP present (personal devices) → publish via it and hand back the `https://plan.hestia.chrooks.com` URL; absent (work laptop) → the skills' local-files privacy mode, never register an MCP server there. The CLI needs Node 22 (`source ~/.nvm/nvm.sh && nvm use 22`).
