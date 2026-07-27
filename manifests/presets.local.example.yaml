@@ -1,0 +1,23 @@
+# Machine-local Preset overlay — copy to `presets.local.yaml` to use it.
+#
+# `presets.local.yaml` is gitignored. It exists so a machine that cannot push to
+# this repository (the work laptop) can still tune its own Preset, without
+# leaving a permanent dirty diff in the tracked manifests/presets.yaml that
+# conflicts on every pull.
+#
+# Merging is per-preset and per-field: name only the fields you are changing and
+# the rest are inherited from presets.yaml. `variants` merge per key, so setting
+# one Variant here does not drop the others. You may also define a Preset name
+# that presets.yaml has never heard of.
+#
+# The Setup Wizard prints "presets.local.yaml applied" on any run where this
+# file changed the Preset it used.
+
+version: 1
+presets:
+  work:
+    # Inherits work's variants (visual-plans: local-files, machine: work) from
+    # presets.yaml; overrides only the External Sources this machine installs.
+    selectedExternalSourceIds:
+      - matt-pocock-engineering
+      - matt-pocock-productivity

@@ -8,6 +8,7 @@
  */
 
 import fs from "node:fs/promises";
+import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { Preset, SetupProfile } from "./domain.js";
 
@@ -101,6 +102,77 @@ export async function loadPresets(
     throw err;
   }
   return parsePresetsYaml(raw);
+}
+
+/** The machine-local overlay filename, alongside the tracked presets file. */
+export const LOCAL_PRESETS_FILENAME = "presets.local.yaml";
+
+/** Presets after the machine-local overlay, plus which names it touched. */
+export interface LoadedPresets {
+  readonly presets: Record<string, Preset>;
+  /** Preset names the local overlay created or changed; empty when absent. */
+  readonly overriddenByLocal: readonly string[];
+}
+
+/**
+ * Merge a machine-local overlay over the repo's tracked Presets.
+ *
+ * Per-preset and per-field: an overlay naming only `selectedExternalSourceIds`
+ * changes that field and inherits the tracked Preset's `variants` untouched.
+ * `variants` themselves merge per key, matching how a CLI flag overrides one
+ * Variant without dropping the rest. An overlay may also define a Preset the
+ * tracked file has never heard of.
+ *
+ * Pure; never mutates either input.
+ */
+export function mergePresets(
+  base: Readonly<Record<string, Preset>>,
+  overlay: Readonly<Record<string, Preset>>,
+): Record<string, Preset> {
+  const merged: Record<string, Preset> = { ...base };
+
+  for (const [name, localPreset] of Object.entries(overlay)) {
+    const basePreset = base[name];
+    if (basePreset === undefined) {
+      merged[name] = localPreset;
+      continue;
+    }
+
+    const hasVariants = basePreset.variants || localPreset.variants;
+    merged[name] = {
+      ...basePreset,
+      ...localPreset,
+      ...(hasVariants
+        ? { variants: { ...basePreset.variants, ...localPreset.variants } }
+        : {}),
+    };
+  }
+
+  return merged;
+}
+
+/**
+ * Load the tracked Presets, then apply the machine-local overlay if present.
+ *
+ * ADR-0002 assumed every Preset could be shared by git. That does not hold on a
+ * machine that cannot push — the work laptop — where tuning its own Preset would
+ * otherwise mean editing a tracked file it can never commit, leaving a permanent
+ * dirty diff that conflicts on every pull. The overlay is gitignored, so that
+ * machine's identity stays on that machine, exactly as its rules and skills
+ * already do (ADR-0003).
+ *
+ * A missing overlay is the normal case, not a warning.
+ */
+export async function loadPresetsWithLocal(
+  manifestsDir: string,
+): Promise<LoadedPresets> {
+  const presets = await loadPresets(path.join(manifestsDir, "presets.yaml"));
+  const local = await loadPresets(path.join(manifestsDir, LOCAL_PRESETS_FILENAME));
+
+  const overriddenByLocal = Object.keys(local);
+  if (overriddenByLocal.length === 0) return { presets, overriddenByLocal };
+
+  return { presets: mergePresets(presets, local), overriddenByLocal };
 }
 
 /**

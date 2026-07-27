@@ -4,6 +4,10 @@
 # contents re-resolve from this file every run — edit here, sync everywhere.
 # Allowed fields per preset: targets, components, selectedExternalSourceIds,
 # variants, writeBehavior. Run flags (--dry-run, --yes, ...) never belong here.
+#
+# A machine that cannot push (the work laptop) overrides its own Preset in
+# manifests/presets.local.yaml — gitignored, merged over this file per field.
+# See presets.local.example.yaml and the ADR-0002 amendment.
 
 version: 1
 presets:

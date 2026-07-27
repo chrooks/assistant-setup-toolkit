@@ -36,3 +36,6 @@ canonical/machines/work/skills/*
 !canonical/machines/work/skills/.gitkeep
 
 .exports
+# Machine-local Preset overlay (ADR-0002). The work laptop cannot push, so its
+# Preset is tuned here instead of in the tracked manifests/presets.yaml.
+manifests/presets.local.yaml

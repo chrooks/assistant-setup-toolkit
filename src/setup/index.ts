@@ -48,7 +48,8 @@ import {
 import type { ConfigStatus, NextStep } from "./next-steps.js";
 import { applyWritePlan, readInstallReceipt } from "./apply.js";
 import {
-  loadPresets,
+  loadPresetsWithLocal,
+  LOCAL_PRESETS_FILENAME,
   resolvePresetIntoProfile,
   resolvePresetName,
   describePresetEffects,
@@ -365,8 +366,10 @@ export async function runSetupWizard(
     // Presets (ADR-0002): load the repo's Presets and the machine's
     // remembered Preset name (Install Receipt) before profile resolution so
     // both non-interactive and interactive paths can walk the ladder.
-    const presets = await loadPresets(
-      path.join(repoRoot, "manifests", "presets.yaml"),
+    // The local overlay (manifests/presets.local.yaml) is gitignored, so a
+    // machine that cannot push still tunes its own Preset — see loadPresetsWithLocal.
+    const { presets, overriddenByLocal } = await loadPresetsWithLocal(
+      path.join(repoRoot, "manifests"),
     );
     let rememberedPresetName: string | undefined;
     let priorReceiptVariants: Readonly<Record<string, string>> | undefined;
@@ -477,7 +480,12 @@ export async function runSetupWizard(
         presets[profile.presetName],
       );
       const source = flagPresetName ? "--preset" : "Install Receipt";
-      summary(`Preset: ${profile.presetName} (from ${source})`);
+      // Say when the machine-local overlay is in play. Otherwise a value that
+      // disagrees with the tracked file reads as the tracked file being wrong.
+      const local = overriddenByLocal.includes(profile.presetName)
+        ? `, ${LOCAL_PRESETS_FILENAME} applied`
+        : "";
+      summary(`Preset: ${profile.presetName} (from ${source}${local})`);
       for (const e of effects) {
         summary(
           `    ${e.field} = ${e.effect}${e.overridden ? "   [overridden by flag]" : ""}`,

@@ -47,3 +47,39 @@ invisible.
 - Renaming a Preset requires touching the machines that recorded the old name
   (loud failure tells you which names exist); acceptable for a handful of
   machines, revisit if that ever hurts.
+
+## Amendment — 2026-07-27: the machine-local overlay
+
+Decision 1 said Presets live in the repo and are "shared by git like the rest of
+the Canonical Assistant Source." That holds for every machine that can push. It
+does not hold for the work laptop, which cannot.
+
+The consequence was a trap. Tuning the `work` Preset's `selectedExternalSourceIds`
+meant editing tracked `manifests/presets.yaml` on the one machine that can never
+commit the edit — leaving a permanent dirty working tree that conflicts on every
+pull, and a change no other machine can see. The Preset system exists to contain
+per-machine identity, and on the machine with the most machine-specific identity
+it required a commit it could not make.
+
+`manifests/presets.local.yaml` is a gitignored overlay merged over the tracked
+file, per preset and per field. Naming only `selectedExternalSourceIds` changes
+that field and inherits the Preset's `variants` untouched; `variants` themselves
+merge per key. An overlay may define a Preset name the tracked file does not have.
+`manifests/presets.local.example.yaml` is tracked so a fresh clone documents the
+mechanism.
+
+Decision 1 now reads: **Presets live in the repo; a machine that cannot push
+overrides its own in a gitignored overlay.** Decisions 2 through 5 are unchanged —
+the receipt still remembers only a name, the ladder is untouched, the field list is
+the same five, and there is still no machine sniffing. The overlay is data the
+human writes, not detection the pipeline performs.
+
+This is the same shape ADR-0003 already uses for `canonical/machines/*/rules.md`
+and the gitignore already uses for `canonical/machines/work/skills/*`, both local
+for the same reason. The gap was that Presets never got the treatment their two
+neighbours had.
+
+Cost: `presets.yaml` alone no longer answers "what does each machine install" —
+on a machine with an overlay you must read both. The Setup Wizard prints
+`presets.local.yaml applied` on any run the overlay changed, so the discrepancy is
+announced rather than discovered.

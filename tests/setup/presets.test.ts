@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import path from "node:path";
+import fs from "node:fs/promises";
+import { tmpdir } from "node:os";
 import {
   loadPresets,
+  loadPresetsWithLocal,
+  mergePresets,
+  LOCAL_PRESETS_FILENAME,
   parsePresetsYaml,
   resolvePresetIntoProfile,
   resolvePresetName,
@@ -237,5 +242,97 @@ describe("presets", () => {
         overridden: true,
       });
     });
+  });
+});
+
+describe("mergePresets — the machine-local overlay", () => {
+  const base = {
+    work: {
+      variants: { "visual-plans": "local-files", machine: "work" },
+      selectedExternalSourceIds: [],
+    },
+    personal: { variants: { "visual-plans": "self-hosted" } },
+  };
+
+  it("overrides one field and inherits the rest", () => {
+    const merged = mergePresets(base, {
+      work: { selectedExternalSourceIds: ["matt-pocock-engineering"] },
+    });
+
+    expect(merged.work.selectedExternalSourceIds).toEqual(["matt-pocock-engineering"]);
+    // The whole point: tuning sources must not cost you the Variants.
+    expect(merged.work.variants).toEqual({
+      "visual-plans": "local-files",
+      machine: "work",
+    });
+  });
+
+  it("merges variants per key rather than replacing the block", () => {
+    const merged = mergePresets(base, {
+      work: { variants: { "visual-plans": "none" } },
+    });
+
+    expect(merged.work.variants).toEqual({ "visual-plans": "none", machine: "work" });
+  });
+
+  it("leaves presets the overlay does not name alone", () => {
+    const merged = mergePresets(base, { work: { writeBehavior: "overwrite" } });
+
+    expect(merged.personal).toEqual(base.personal);
+  });
+
+  it("accepts a preset the tracked file has never heard of", () => {
+    const merged = mergePresets(base, { laptop2: { variants: { machine: "laptop2" } } });
+
+    expect(merged.laptop2).toEqual({ variants: { machine: "laptop2" } });
+    expect(Object.keys(merged).sort()).toEqual(["laptop2", "personal", "work"]);
+  });
+
+  it("never mutates either input", () => {
+    const snapshot = JSON.stringify(base);
+    mergePresets(base, { work: { selectedExternalSourceIds: ["x"] } });
+
+    expect(JSON.stringify(base)).toBe(snapshot);
+  });
+});
+
+describe("loadPresetsWithLocal — reading the overlay from disk", () => {
+  it("reports no overrides when the overlay is absent", async () => {
+    const { presets, overriddenByLocal } = await loadPresetsWithLocal(
+      path.join(process.cwd(), "manifests"),
+    );
+
+    // The tracked file still loads; the example file must not be picked up.
+    expect(Object.keys(presets)).toContain("work");
+    expect(overriddenByLocal).toEqual([]);
+  });
+
+  it("applies an overlay and names what it touched", async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), "presets-"));
+    await fs.writeFile(
+      path.join(dir, "presets.yaml"),
+      "version: 1\npresets:\n  work:\n    variants:\n      machine: work\n",
+    );
+    await fs.writeFile(
+      path.join(dir, LOCAL_PRESETS_FILENAME),
+      "version: 1\npresets:\n  work:\n    selectedExternalSourceIds:\n      - only-this\n",
+    );
+
+    const { presets, overriddenByLocal } = await loadPresetsWithLocal(dir);
+
+    expect(overriddenByLocal).toEqual(["work"]);
+    expect(presets.work.selectedExternalSourceIds).toEqual(["only-this"]);
+    expect(presets.work.variants).toEqual({ machine: "work" });
+  });
+
+  it("fails loudly on a malformed overlay rather than ignoring it", async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), "presets-"));
+    await fs.writeFile(path.join(dir, "presets.yaml"), "version: 1\npresets: {}\n");
+    await fs.writeFile(
+      path.join(dir, LOCAL_PRESETS_FILENAME),
+      "version: 1\npresets:\n  work:\n    varaints:\n      machine: work\n",
+    );
+
+    await expect(loadPresetsWithLocal(dir)).rejects.toThrow(/unknown field "varaints"/);
   });
 });
