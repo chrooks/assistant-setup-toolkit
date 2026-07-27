@@ -69,8 +69,12 @@ silently — it is not a finding.
 Launch these paths concurrently when available:
 - `code-reviewer` agent via ECC, focused on defects, security, maintainability,
   and missing tests.
-- `/improve-codebase-architecture`, in review-only mode, focused on deepening
-  opportunities, locality, leverage, and testability.
+- The `/codebase-design` lens — its vocabulary (module, interface, depth, seam,
+  leverage, locality) and the deletion test, applied to the diff for deepening
+  opportunities and testability. Use this rather than
+  `/improve-codebase-architecture`: that skill scans a whole codebase and stops
+  for a pick, which does not fit a concurrent read-only pass. Escalate to it
+  afterwards when a finding deserves the full report.
 - `/codex:adversarial-review`, focused on challenging the implementation
   approach, design choices, tradeoffs, and assumptions.
 - **Design critique** — run only when `uiTouched` (see Design Diff Detection).
@@ -150,7 +154,7 @@ Scope:
 
 Review Paths:
 - code-reviewer: [completed / skipped: reason]
-- /improve-codebase-architecture: [completed / skipped: reason]
+- /codebase-design lens: [completed / skipped: reason]
 - /codex:adversarial-review: [completed / skipped: reason]
 - design critique (impeccable detect): [completed / skipped: not UI / unavailable]
 

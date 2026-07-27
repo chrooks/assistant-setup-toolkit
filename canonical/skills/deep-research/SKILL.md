@@ -28,6 +28,29 @@ At least one of:
 
 Both together give the best coverage. Configure in `~/.claude.json` or `~/.codex/config.toml`.
 
+## Run it in the background
+
+Reading is the slow part and none of it needs the main thread. Once the goal is
+clear (Step 1), hand the search-and-read work to a **background agent** and keep
+working; collect its findings when it reports.
+
+Keep in the main thread: the clarifying questions, the final synthesis, and any
+decision that depends on the findings. Send to the agent: the searching, the
+scraping, and the deep reads.
+
+Skip the background agent when the question is small enough that dispatching it
+costs more than answering it.
+
+## Follow claims to the source that owns them
+
+Investigate against **primary sources** — official docs, source code, specs,
+first-party APIs — not a secondary write-up of them. A blog post explaining an
+API is evidence about the blog post; the API reference is evidence about the
+API. When a claim matters, follow it back to whoever owns it and cite that.
+
+Say so when a claim only has secondary support. An unsourced number in a
+confident report is worse than an acknowledged gap.
+
 ## Workflow
 
 ### Step 1: Understand the Goal
@@ -86,6 +109,20 @@ crawling_exa(url: "<url>", tokensNum: 5000)
 Read 3-5 key sources in full for depth. Do not rely only on search snippets.
 
 ### Step 5: Synthesize and Write Report
+
+**Write it to a file, not just the chat.** A report that only exists in a
+transcript is gone at the next compaction. Resolve the destination in this
+order, and tell the user the path:
+
+1. **An active work item** — if a `.tasks/<issue#>-<slug>/` folder exists for
+   the work this research serves, write `research-<topic-slug>.md` there. The
+   findings belong with the Throughline and ExecPlan they inform.
+2. **Otherwise** `.exports/research/<topic-slug>.md`, alongside the other
+   generated-output kinds. Create the directory lazily; `.exports/` is already
+   gitignored, so nothing lands in version control uninvited.
+
+If the repo already has an established home for research notes, match that
+convention instead of either default, and say where you put it.
 
 Structure the report:
 
