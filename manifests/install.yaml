@@ -31,13 +31,16 @@ externalSources:
   - id: impeccable
     name: Impeccable
     kind: skill
-    url: https://github.com/pbakaus/impeccable
+    url: https://github.com/pbakaus/impeccable/tree/main/plugin/skills/impeccable
     default: true
     targets:
       - claude-code
       - codex-cli
     notes:
-      - Install via `npx skills add pbakaus/impeccable`.
+      - The repo root is the whole Impeccable project (CLI, extension, demos);
+        the distributable skill lives at plugin/skills/impeccable. Point the URL
+        at that subpath — the root has no SKILL.md.
+      - Alternative native install via `npx skills add pbakaus/impeccable`.
 
   - id: agent-native-visual-plans
     name: Agent-Native Visual Plans
@@ -122,12 +125,20 @@ externalSources:
   - id: codex-plugin-cc
     name: Codex for Claude Code
     kind: plugin
-    url: https://github.com/openai/codex-plugin-cc
+    url: https://github.com/openai/codex-plugin-cc/tree/main/plugins/codex
     default: true
     targets:
       - claude-code
     installWhen:
       assistantTargetExists: claude-code
+    installCommands:
+      claude-code:
+        - /plugin marketplace add openai/codex-plugin-cc
+        - /plugin install codex@openai-codex
+    notes:
+      - Monorepo — component dirs live under plugins/codex, not the repo root.
+      - Native install (from the README) keeps the `codex:` namespace and the
+        codex-rescue subagent; the fetched copy is the flat fallback.
 
   - id: playwright-mcp
     name: Playwright MCP
