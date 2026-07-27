@@ -4,11 +4,11 @@
 
 version: 1
 externalSources:
-  # Matt Pocock's skills, scoped to the two groups he actively maintains.
-  # Whole-repo would also pull skills/deprecated/, skills/in-progress/, and
-  # his skills/personal/ — 19 skills that are either abandoned, half-built, or
-  # not ours. Scoping keeps standing updates without that freight, and picks up
-  # new skills he adds to these groups automatically.
+  # Matt Pocock's skills, scoped per group. Whole-repo would also pull
+  # skills/deprecated/ and his skills/personal/ — abandoned or not ours.
+  # Scoping keeps standing updates without that freight, and picks up new
+  # skills he adds to these groups automatically. in-progress is fetched
+  # knowingly half-built; expect churn and rough edges there.
   #
   # Overlaps are safe: payload.ts layers external files first and canonical
   # files last, so a local skills/<name>/SKILL.md always wins. The seven
@@ -52,6 +52,22 @@ externalSources:
         Supplies the grilling primitive that /grill-me and /grill-with-docs
         wrap. Disabling this group breaks both wrappers, so keep it on unless
         you re-vendor grilling deliberately.
+
+  - id: matt-pocock-in-progress
+    name: Matt Pocock Skills — in-progress
+    kind: skill-pack
+    url: https://github.com/mattpocock/skills/tree/main/skills/in-progress
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - >-
+        Upstream's half-built skills, fetched knowingly: batch-grill-me,
+        claude-handoff, loop-me, setup-ts-deep-modules, to-questionnaire,
+        wizard, writing-beats, writing-fragments, writing-shape. No name
+        collisions with canonical/skills as of 2026-07; if one appears,
+        the local copy wins via the normal payload layering.
 
   - id: find-skills
     name: find-skills

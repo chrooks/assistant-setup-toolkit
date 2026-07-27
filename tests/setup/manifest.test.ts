@@ -159,16 +159,18 @@ externalSources:
 
       expect(manifest.version).toBe(1);
       // All sources tracked in manifests/install.yaml
-      expect(manifest.externalSources).toHaveLength(11);
+      expect(manifest.externalSources).toHaveLength(12);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
       expect(ids).toContain("find-skills");
-      // Upstream is pulled per maintained group, not whole-repo: whole-repo
-      // would also install skills/deprecated/, skills/in-progress/, and Matt's
-      // skills/personal/. These supply grilling and domain-modeling.
+      // Upstream is pulled per group, not whole-repo: whole-repo would also
+      // install skills/deprecated/ and Matt's skills/personal/. engineering
+      // and productivity supply grilling and domain-modeling; in-progress is
+      // fetched knowingly half-built.
       expect(ids).toContain("matt-pocock-engineering");
       expect(ids).toContain("matt-pocock-productivity");
+      expect(ids).toContain("matt-pocock-in-progress");
       expect(ids).not.toContain("matt-pocock-skills");
       expect(ids).toContain("impeccable");
       expect(ids).toContain("caveman");
