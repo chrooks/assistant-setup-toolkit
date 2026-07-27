@@ -15,6 +15,7 @@ import type {
   InstallReceipt,
   WriteBehavior,
 } from "./domain.js";
+import { resolveOwnedFiles } from "./domain.js";
 import { resolveReceiptPath } from "./paths.js";
 
 /**
@@ -63,6 +64,31 @@ interface ApplyError {
 }
 
 // -- Helpers --
+
+/**
+ * Walk up from `dir` removing directories left empty by a prune, stopping at
+ * the Assistant Home. Without this, pruning a skill leaves an empty
+ * skills/<name>/ husk behind for every skill ever removed.
+ */
+async function removeEmptyParents(
+  assistantHome: string,
+  dir: string,
+): Promise<void> {
+  let current = path.resolve(dir);
+  const stop = path.resolve(assistantHome);
+
+  while (current !== stop && current.startsWith(stop + path.sep)) {
+    try {
+      const entries = await fs.readdir(current);
+      if (entries.length > 0) return;
+      await fs.rmdir(current);
+    } catch {
+      // Already gone, or not removable — nothing more to clean up this branch.
+      return;
+    }
+    current = path.dirname(current);
+  }
+}
 
 /** Back up a single file from the Assistant Home into the backup directory. */
 async function backupFile(
@@ -153,6 +179,7 @@ export async function applyWritePlan(
           }
           const targetPath = path.join(plan.assistantHome, action.relativePath);
           await fs.unlink(targetPath);
+          await removeEmptyParents(plan.assistantHome, path.dirname(targetPath));
           filesRemoved++;
           break;
         }
@@ -178,8 +205,27 @@ export async function applyWritePlan(
       .filter((a) => a.action === "copy" || a.action === "overwrite")
       .map((a) => a.relativePath);
 
+    // Ownership is broader than "written this run": a Safe Merge skip leaves a
+    // toolkit-owned file in place, and a file this run removed is no longer
+    // ours. Carry the previous run's set forward so ownership accumulates
+    // across runs instead of resetting to whatever this one happened to touch.
+    const previous = await readInstallReceipt(plan.assistantHome);
+    const removedPaths = new Set(
+      plan.actions.filter((a) => a.action === "remove").map((a) => a.relativePath),
+    );
+    const ownedFiles = [
+      ...new Set([
+        ...(previous ? resolveOwnedFiles(previous) : []),
+        ...plan.actions
+          .filter((a) => a.action !== "remove")
+          .map((a) => a.relativePath),
+      ]),
+    ]
+      .filter((p) => !removedPaths.has(p))
+      .sort();
+
     const receipt = {
-      schemaVersion: 1,
+      schemaVersion: 2 as const,
       toolkit: "code-assistant-context",
       installedAt: new Date().toISOString(),
       assistantTarget: receiptOptions.assistantTarget,
@@ -192,6 +238,7 @@ export async function applyWritePlan(
         preset: receiptOptions.preset,
       },
       files: writtenFiles,
+      ownedFiles,
     };
 
     const receiptPath = resolveReceiptPath(plan.assistantHome);

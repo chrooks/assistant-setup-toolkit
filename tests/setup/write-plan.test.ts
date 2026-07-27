@@ -103,6 +103,72 @@ describe("write-plan", () => {
       expect(overwrites[0].relativePath).toBe("skills/kept/SKILL.md");
     });
 
+    it("prunes a file orphaned in an earlier run, absent from the last run's writes", () => {
+      // The v2 receipt shape: `files` is only what the last run wrote, while
+      // `ownedFiles` remembers everything the toolkit ever placed here. Reading
+      // `files` alone is what left teach/ stranded in ~/.claude for two weeks.
+      const previousReceipt: InstallReceipt = {
+        schemaVersion: 2,
+        toolkit: "code-assistant-context",
+        installedAt: "2026-05-05T00:00:00.000Z",
+        assistantTarget: "claude-code",
+        assistantHome,
+        setupProfile: {
+          mode: "default",
+          components: ["skills"],
+          writeBehavior: "overwrite",
+        },
+        files: ["skills/kept/SKILL.md"],
+        ownedFiles: ["skills/kept/SKILL.md", "skills/teach/SKILL.md"],
+      };
+
+      const plan = planWrites({
+        assistantHome,
+        payloadFiles: [makeFile("skills/kept/SKILL.md")],
+        existingFiles: ["skills/kept/SKILL.md", "skills/teach/SKILL.md"],
+        previousReceipt,
+        writeBehavior: "prune",
+        dryRun: false,
+      });
+
+      const removes = plan.actions.filter((a) => a.action === "remove");
+      expect(removes).toHaveLength(1);
+      expect(removes[0].relativePath).toBe("skills/teach/SKILL.md");
+    });
+
+    it("refuses to prune when the payload is incomplete", () => {
+      // Dry-run skips External Source fetching, so their installed files are
+      // absent from the payload. Pruning on that basis would delete every
+      // correctly-installed external file.
+      const previousReceipt: InstallReceipt = {
+        schemaVersion: 2,
+        toolkit: "code-assistant-context",
+        installedAt: "2026-05-05T00:00:00.000Z",
+        assistantTarget: "claude-code",
+        assistantHome,
+        setupProfile: {
+          mode: "default",
+          components: ["skills"],
+          writeBehavior: "overwrite",
+        },
+        files: ["skills/kept/SKILL.md"],
+        ownedFiles: ["skills/kept/SKILL.md", "skills/from-external/SKILL.md"],
+      };
+
+      const plan = planWrites({
+        assistantHome,
+        payloadFiles: [makeFile("skills/kept/SKILL.md")],
+        existingFiles: ["skills/kept/SKILL.md", "skills/from-external/SKILL.md"],
+        previousReceipt,
+        writeBehavior: "prune",
+        dryRun: false,
+        payloadComplete: false,
+      });
+
+      expect(plan.actions.filter((a) => a.action === "remove")).toHaveLength(0);
+      expect(plan.warnings.join(" ")).toContain("payload is incomplete");
+    });
+
     it("warns and falls back when no previous receipt exists", () => {
       const plan = planWrites({
         assistantHome,

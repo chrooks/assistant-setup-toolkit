@@ -11,6 +11,7 @@ import type {
   InstallReceipt,
   WriteBehavior,
 } from "./domain.js";
+import { resolveOwnedFiles } from "./domain.js";
 import { resolveBackupPath } from "./paths.js";
 
 // -- Types --
@@ -47,6 +48,13 @@ export interface PlanWritesInput {
   readonly previousReceipt: InstallReceipt | null;
   readonly writeBehavior: WriteBehavior;
   readonly dryRun: boolean;
+  /**
+   * Whether the payload represents everything that should be installed.
+   * False when External Sources were not all resolved (dry-run skips fetching,
+   * a clone can fail), which makes their already-installed files look stale.
+   * Prune must not act on that — defaults to true when omitted.
+   */
+  readonly payloadComplete?: boolean;
 }
 
 // -- Write planning --
@@ -67,6 +75,7 @@ export function planWrites(input: PlanWritesInput): WritePlan {
     previousReceipt,
     writeBehavior,
     dryRun,
+    payloadComplete,
   } = input;
 
   const existingSet = new Set(existingFiles);
@@ -78,6 +87,13 @@ export function planWrites(input: PlanWritesInput): WritePlan {
   if (writeBehavior === "prune" && !previousReceipt) {
     warnings.push(
       "No previous Install Receipt found. Cannot prune — falling back to overwrite behavior.",
+    );
+    effectiveBehavior = "overwrite";
+  } else if (writeBehavior === "prune" && payloadComplete === false) {
+    // Every External Source file would look stale, so prune would delete
+    // correctly-installed content. Refuse rather than trust a partial payload.
+    warnings.push(
+      "External Sources were not all resolved this run, so the payload is incomplete. Cannot prune — falling back to overwrite behavior.",
     );
     effectiveBehavior = "overwrite";
   }
@@ -121,9 +137,11 @@ export function planWrites(input: PlanWritesInput): WritePlan {
     }
   }
 
-  // Prune: remove receipt-owned files absent from new payload
+  // Prune: remove receipt-owned files absent from new payload. Reads the
+  // cumulative ownership set, not the last run's writes — a file orphaned
+  // several runs ago must still be removable.
   if (effectiveBehavior === "prune" && previousReceipt) {
-    for (const receiptFile of previousReceipt.files) {
+    for (const receiptFile of resolveOwnedFiles(previousReceipt)) {
       if (!payloadPaths.has(receiptFile) && existingSet.has(receiptFile)) {
         actions.push({
           relativePath: receiptFile,

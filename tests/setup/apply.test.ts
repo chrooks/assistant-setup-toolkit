@@ -233,10 +233,11 @@ describe("apply", () => {
       const receiptPath = path.join(homeDir, ".assistant-setup-toolkit", "receipt.json");
       const receiptRaw = await fs.readFile(receiptPath, "utf-8");
       const receipt = JSON.parse(receiptRaw);
-      expect(receipt.schemaVersion).toBe(1);
+      expect(receipt.schemaVersion).toBe(2);
       expect(receipt.toolkit).toBe("code-assistant-context");
       expect(receipt.assistantTarget).toBe("claude-code");
       expect(receipt.files).toContain("CLAUDE.md");
+      expect(receipt.ownedFiles).toContain("CLAUDE.md");
       expect(receipt.setupProfile.variants).toEqual({
         "visual-plans": "self-hosted",
       });
@@ -247,6 +248,129 @@ describe("apply", () => {
         "self-hosted",
       );
       expect(readBack?.setupProfile.preset).toBe("personal");
+    });
+
+    it("carries ownership forward so a file dropped from the payload stays prunable", async () => {
+      const receiptOptions = {
+        assistantTarget: "claude-code" as const,
+        mode: "default" as const,
+        components: ["instructions" as const],
+        writeBehavior: "safe-merge" as const,
+        variants: {},
+      };
+      const basePlan = {
+        assistantHome: homeDir,
+        writeBehavior: "safe-merge" as const,
+        dryRun: false,
+        backupPath: path.join(homeDir, ".assistant-setup-toolkit", "backups", "test"),
+        warnings: [],
+      };
+
+      // Run 1 installs two skills.
+      const oldSkill = await writeSource("skills/teach/SKILL.md", "# teach");
+      const keptSkill = await writeSource("skills/kept/SKILL.md", "# kept");
+      await applyWritePlan(
+        {
+          ...basePlan,
+          actions: [
+            { relativePath: "skills/teach/SKILL.md", action: "copy", sourcePath: oldSkill },
+            { relativePath: "skills/kept/SKILL.md", action: "copy", sourcePath: keptSkill },
+          ],
+        },
+        receiptOptions,
+      );
+
+      // Run 2 drops teach from the payload entirely — the old receipt shape
+      // forgot it here, which is exactly what made it unprunable.
+      await applyWritePlan(
+        {
+          ...basePlan,
+          actions: [
+            { relativePath: "skills/kept/SKILL.md", action: "overwrite", sourcePath: keptSkill },
+          ],
+        },
+        receiptOptions,
+      );
+
+      const receipt = await readInstallReceipt(homeDir);
+      expect(receipt?.files).not.toContain("skills/teach/SKILL.md");
+      expect(receipt?.ownedFiles).toContain("skills/teach/SKILL.md");
+    });
+
+    it("removes the directory a pruned file leaves empty, but keeps populated ones", async () => {
+      const goneSource = await writeSource("skills/gone/SKILL.md", "# gone");
+      const siblingSource = await writeSource("skills/shared/other.md", "# other");
+      await applyWritePlan({
+        assistantHome: homeDir,
+        writeBehavior: "overwrite",
+        dryRun: false,
+        backupPath: null,
+        actions: [
+          { relativePath: "skills/gone/SKILL.md", action: "copy", sourcePath: goneSource },
+          { relativePath: "skills/shared/SKILL.md", action: "copy", sourcePath: goneSource },
+          { relativePath: "skills/shared/other.md", action: "copy", sourcePath: siblingSource },
+        ],
+        warnings: [],
+      });
+
+      await applyWritePlan({
+        assistantHome: homeDir,
+        writeBehavior: "prune",
+        dryRun: false,
+        backupPath: null,
+        actions: [
+          { relativePath: "skills/gone/SKILL.md", action: "remove", sourcePath: null },
+          { relativePath: "skills/shared/SKILL.md", action: "remove", sourcePath: null },
+        ],
+        warnings: [],
+      });
+
+      // Emptied by the prune — the husk goes too.
+      expect(await existsInHome("skills/gone")).toBe(false);
+      // Still holds a file — must survive.
+      expect(await existsInHome("skills/shared/other.md")).toBe(true);
+      // Never walks past the Assistant Home itself.
+      expect(await existsInHome("skills")).toBe(true);
+    });
+
+    it("drops removed files from ownership so prune does not re-target them", async () => {
+      const receiptOptions = {
+        assistantTarget: "claude-code" as const,
+        mode: "default" as const,
+        components: ["instructions" as const],
+        writeBehavior: "prune" as const,
+        variants: {},
+      };
+      const sourcePath = await writeSource("skills/gone/SKILL.md", "# gone");
+
+      await applyWritePlan(
+        {
+          assistantHome: homeDir,
+          writeBehavior: "prune",
+          dryRun: false,
+          backupPath: path.join(homeDir, ".assistant-setup-toolkit", "backups", "a"),
+          actions: [{ relativePath: "skills/gone/SKILL.md", action: "copy", sourcePath }],
+          warnings: [],
+        },
+        receiptOptions,
+      );
+
+      await applyWritePlan(
+        {
+          assistantHome: homeDir,
+          writeBehavior: "prune",
+          dryRun: false,
+          backupPath: path.join(homeDir, ".assistant-setup-toolkit", "backups", "b"),
+          actions: [
+            { relativePath: "skills/gone/SKILL.md", action: "remove", sourcePath: null },
+          ],
+          warnings: [],
+        },
+        receiptOptions,
+      );
+
+      const receipt = await readInstallReceipt(homeDir);
+      expect(receipt?.ownedFiles).not.toContain("skills/gone/SKILL.md");
     });
 
     it("readInstallReceipt returns null when no receipt exists", async () => {

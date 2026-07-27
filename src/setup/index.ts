@@ -531,6 +531,9 @@ export async function runSetupWizard(
     // Per-run working dir — cleaned up in the `finally` block at the bottom.
     let externalWorkDir: string | null = null;
     let externalFiles: PayloadFile[] = [];
+    // Gates prune: a payload missing unfetched External Source files must not
+    // be diffed against the receipt, or their installed copies read as stale.
+    let sourcesResolved = true;
     // Wrap rest of the run so we can always reclaim the temp clone dir.
     try {
     if (!profile.dryRun && plannedSources.length > 0) {
@@ -547,10 +550,15 @@ export async function runSetupWizard(
       for (const r of fetchResult.results) {
         if (r.error) {
           console.error(`  [failed] ${r.sourceId}: ${r.error}`);
+          sourcesResolved = false;
         } else {
           log(`  [fetched] ${r.sourceId} (${r.files.length} file(s))`);
         }
       }
+    } else if (plannedSources.length > 0) {
+      // Dry-run never clones, so External Source files are absent from the
+      // payload — they are not stale, just unfetched.
+      sourcesResolved = false;
     }
 
     // Plan and regenerate Target Projections if Codex is selected
@@ -742,16 +750,28 @@ export async function runSetupWizard(
         // Home doesn't exist yet
       }
 
+      // Prune diffs the new payload against what the toolkit already owns
+      // here, so the receipt has to be read before planning — without it
+      // prune silently degrades to overwrite and never removes anything.
+      const previousReceipt = await readInstallReceipt(homePath);
+
       const plan = planWrites({
         assistantHome: homePath,
         payloadFiles: payload.files,
         existingFiles,
-        previousReceipt: null,
+        previousReceipt,
         writeBehavior: profile.writeBehavior,
         dryRun: profile.dryRun,
+        payloadComplete: sourcesResolved,
       });
 
       writePlans.push(plan);
+
+      // A downgraded write behavior changes what the run does, so it belongs
+      // on the console, not buried in the log.
+      for (const warning of plan.warnings) {
+        summary(`  [warning] ${homeLabel(payload.homeId)}: ${warning}`);
+      }
 
       if (!profile.dryRun && plan.backupPath) {
         log(`  Backup: ${plan.backupPath}`);

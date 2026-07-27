@@ -177,7 +177,8 @@ export interface AssistantPayload {
 
 /** A timestamped record of toolkit-owned files written during a Setup Wizard run. */
 export interface InstallReceipt {
-  readonly schemaVersion: 1;
+  /** 1: `files` only. 2: adds `ownedFiles`, the cumulative prune memory. */
+  readonly schemaVersion: 1 | 2;
   readonly toolkit: "code-assistant-context";
   readonly installedAt: string;
   readonly assistantTarget: AssistantTargetId;
@@ -189,7 +190,30 @@ export interface InstallReceipt {
     /** The Preset name this machine chose — rehydrated on later runs. */
     readonly preset?: string;
   };
+  /** Files this run actually wrote (copy + overwrite). Run-scoped, not ownership. */
   readonly files: readonly string[];
+  /**
+   * Every path the toolkit has ever placed in this home — the union of each
+   * run's payload, including files a Safe Merge skipped.
+   *
+   * This is prune's memory. `files` cannot serve the purpose: it is rewritten
+   * each run, so a file dropped from the payload vanishes from the receipt on
+   * the very next run and becomes unprunable forever. Absent on schemaVersion
+   * 1 receipts — read it through resolveOwnedFiles.
+   */
+  readonly ownedFiles?: readonly string[];
+}
+
+/**
+ * Read an Install Receipt's ownership set, tolerating schemaVersion 1 receipts
+ * that predate `ownedFiles`. A v1 receipt only knows its own run, which is the
+ * limitation v2 exists to fix — falling back to `files` keeps prune working at
+ * the old fidelity until the next run upgrades the receipt.
+ */
+export function resolveOwnedFiles(
+  receipt: Pick<InstallReceipt, "files" | "ownedFiles">,
+): readonly string[] {
+  return receipt.ownedFiles ?? receipt.files;
 }
 
 // -- Mapping: which Assistant Homes belong to which Assistant Target --
