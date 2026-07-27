@@ -7,6 +7,8 @@ const repoRoot = process.cwd();
 const skillDir = path.join(repoRoot, "canonical", "skills", "toolkit");
 const skillPath = path.join(skillDir, "SKILL.md");
 const authoringSkillPath = path.join(skillDir, "authoring-skill.md");
+const authoringRulePath = path.join(skillDir, "authoring-rule.md");
+const authoringInstructionPath = path.join(skillDir, "authoring-instruction.md");
 const instructionsPath = path.join(repoRoot, "canonical", "INSTRUCTIONS.md");
 
 /**
@@ -86,6 +88,55 @@ describe("toolkit Skill — the Skill authoring branch", () => {
 
     expect(branch).toContain("./.claude/skills/<name>/");
     expect(branch).toContain("./.agents/skills/<name>/");
+  });
+});
+
+describe("toolkit Skill — the rule authoring branch (AC10)", () => {
+  it("names every rules subdirectory and the machine-rule destination", async () => {
+    const branch = await readFile(authoringRulePath, "utf-8");
+
+    expect(branch).toContain("canonical/rules/common/");
+    expect(branch).toContain("canonical/rules/python/");
+    expect(branch).toContain("canonical/rules/typescript/");
+    expect(branch).toContain("canonical/rules/react/");
+    expect(branch).toContain("canonical/rules/web/");
+    expect(branch).toContain("canonical/machines/<name>/rules.md");
+  });
+
+  it("explains paths: gating and the dead-file trap", async () => {
+    const branch = await readFile(authoringRulePath, "utf-8");
+
+    expect(branch).toMatch(/paths:/);
+    expect(branch).toContain('"**/*.py"');
+    // A rule with neither paths: nor an @ import installs and never loads.
+    expect(branch).toMatch(/neither `paths:` nor an `@` import is a dead file/i);
+    expect(branch).toMatch(/write `paths:` unless you are also adding the `@` import/i);
+  });
+});
+
+describe("toolkit Skill — the instruction authoring branch (AC11)", () => {
+  it("runs the budget check against the documented ceiling", async () => {
+    const branch = await readFile(authoringInstructionPath, "utf-8");
+
+    expect(branch).toContain("wc -l canonical/INSTRUCTIONS.md");
+    expect(branch).toMatch(/120 lines/);
+  });
+
+  it("proposes displacement candidates rather than picking one", async () => {
+    const branch = await readFile(authoringInstructionPath, "utf-8");
+
+    expect(branch).toMatch(/propose two or three displacement candidates/i);
+    expect(branch).toMatch(/let the user choose/i);
+    expect(branch).toMatch(/do not pick for them/i);
+  });
+
+  it("prefers relocation into canonical/rules/ over deletion", async () => {
+    const branch = await readFile(authoringInstructionPath, "utf-8");
+
+    expect(branch).toMatch(/prefer relocation over deletion/i);
+    expect(branch).toContain("canonical/rules/");
+    expect(branch).toMatch(/delete outright only when the model \*\*demonstrably\*\* follows/i);
+    expect(branch).toMatch(/when in doubt, relocate/i);
   });
 });
 
