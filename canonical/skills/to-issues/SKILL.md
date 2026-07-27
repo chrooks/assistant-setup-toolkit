@@ -15,6 +15,12 @@ Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TOD
 
 In issue tracker mode, inspect `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` when present. If they are missing, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
 
+Every record this Skill creates or updates carries **exactly one `type:` category
+and at most one state label** (`needs-scope`, `needs-decision`, `blocked`). Never
+write a second state label onto a record that already has one — swap it, or ask
+which applies. When you touch an existing record that already violates this, say
+so in one line rather than silently inheriting it.
+
 ## Boundary
 
 - `/to-issues` creates, updates, and closes issue records.

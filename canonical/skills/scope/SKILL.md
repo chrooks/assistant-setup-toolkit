@@ -110,6 +110,21 @@ Throughline's `next_action`. When `autonomy: afk`, don't even pause for the veto
 on a clean `grillable:false`: state the route and advance; only a
 `grillable:true` with a decision you can't resolve is a genuine stop.
 
+## Publish the verdict to the tracker
+
+The Throughline lives in `.tasks/`, which is gitignored and machine-local — a
+verdict recorded only there is invisible to the tracker, to `/roadmap`, and to
+every other machine. When the work maps to an issue record, publish it:
+
+- `grillable: false` → set the Project `Status` to **Ready**. That is precisely
+  what Ready means: sized, no open Meaningful Decisions, executable.
+- `grillable: true` → leave `Status` alone. A grill is still owed, so the record
+  is not ready no matter how well sized it is.
+- Map `tier`/`effort` onto the `Size` field when the repo's Project has one.
+
+No issue record yet (ad-hoc work, `issue: null`) → nothing to publish; the
+Throughline is the only record and that is fine.
+
 ## Rules
 
 - Proceed on a clean verdict — declare the route and start it rather than waiting

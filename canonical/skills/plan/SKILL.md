@@ -65,7 +65,29 @@ that cannot name its files is not ready: split it, or send the open question
 back to design. Small tasks make sub-agent dispatch cheap to review and hard
 to misinterpret.
 
-### Step 3 — Define acceptance criteria with proof methods
+### Step 3 — Sketch the seams before writing criteria
+
+Decide **where** the feature will be proved before deciding what to prove. Doing
+this after the criteria exist is how a feature ends up proved at five scattered
+points instead of one good one.
+
+Name the [Seams](~/.claude/LEXICON.md) the work will be tested at:
+
+- **Prefer existing Seams to new ones.** A Seam the codebase already has is one
+  the tests already reach.
+- **Use the highest Seam possible.** If a new one is needed, propose it at the
+  highest point you can — the higher it sits, the more behavior one proof covers.
+- **Fewer is better; one is the target.** Say the count out loud, so a sprawl of
+  five is visible as a choice rather than an accident.
+
+Confirm the Seam list with the human before moving on. They know which surfaces
+are stable and which are about to change; you do not.
+
+### Step 4 — Define acceptance criteria with proof methods
+
+Each `proof_method` below attaches to one of the Seams just confirmed. If a
+criterion needs a Seam that is not on the list, that is a signal the sketch was
+wrong — go back and revise it with the human rather than quietly adding a sixth.
 
 For each user-visible behavior, write an acceptance criterion as a concrete,
 checkable statement, and pair it with a `proof_method` — how it will be proven
@@ -74,7 +96,7 @@ gets an integration test; a pure function gets a unit test. Never write a
 criterion without its proof method — that is the contract the prove stage runs
 against.
 
-### Step 4 — Map the work to issue records
+### Step 5 — Map the work to issue records
 
 Size the breakdown to the tier scope stamped — issue ceremony follows the work,
 not the other way round:
@@ -89,7 +111,7 @@ acceptance criteria) maps to one issue record carrying those criteria as its
 acceptance criteria.
 
 **Plan proposes; `/to-issues` mutates.** Approving the plan approves its
-breakdown — there is no second review round. On plan approval (Step 7), publish
+breakdown — there is no second review round. On plan approval (Step 8), publish
 the breakdown through `/to-issues` immediately (create, or `sub-issues` under a
 parent), create the milestone, and set it through `/to-issues update`. Never
 mutate the tracker from `/plan` directly.
@@ -101,7 +123,7 @@ through execution: a work stage completing updates its mapped issue
 (`/to-issues update`), and a verified completion closes it (`/to-issues close`)
 with the proof evidence.
 
-### Step 5 — Walk the human through it
+### Step 6 — Walk the human through it
 
 Present the plan as a walkthrough, not a wall of text:
 
@@ -113,7 +135,7 @@ Present the plan as a walkthrough, not a wall of text:
 - The acceptance criteria, each beside its proof method (a `/table md` table
   reads well here).
 
-### Step 6 — Offer a visual plan
+### Step 7 — Offer a visual plan
 
 After the walkthrough, propose rendering it as a visual plan with `/visual-plan`
 — the richer review surface (inline diagrams, file-by-file map, annotated code,
@@ -125,14 +147,14 @@ approve a direction before code. Skip it for trivial, well-specified work whose
 diff fits in one sentence. `/visual-plan` reuses this ExecPlan as its source, so
 it builds the surface from the plan instead of starting over.
 
-### Step 7 — Approval gate
+### Step 8 — Approval gate
 
 Ask the human to approve, tweak, or reject. Do not start implementing until
 they approve. This is the human-in-the-loop gate, and the only one — the plan is
 the shape of the product, which is the human's side of the **Division of
 Responsibility**; publishing it is the assistant's, so plan approval doubles as
 breakdown approval. On approval, publish the issue
-breakdown from Step 4 via `/to-issues` straight away, write the resulting
+breakdown from Step 5 via `/to-issues` straight away, write the resulting
 records into the ExecPlan's `## Issue Map`, and report what landed in one line.
 
 ## DevOS: write the plan into the Throughline

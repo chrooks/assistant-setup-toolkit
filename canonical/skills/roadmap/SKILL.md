@@ -45,6 +45,19 @@ Use live issue-tracker data when available. For GitHub-backed repos, prefer `gh`
 
 If the user named a specific Project, milestone, label, issue, or board column, scope the lookup there first.
 
+**Check the label invariant as you read.** Every issue record carries exactly one
+`type:` category and at most one state label (`needs-scope`, `needs-decision`,
+`blocked`) — see `docs/agents/triage-labels.md`. Name any record that violates it
+and ask, rather than ranking it on a guess:
+
+- Two state labels — the record claims to be waiting on two different things, and
+  which one it is changes where it belongs in the order.
+- Two `type:` labels, or none — it was never classified, so its category cannot
+  inform the ranking.
+
+Report violations together in one line before the ranking, not one interruption
+each.
+
 ### 2. Build the work map
 
 Group work by:

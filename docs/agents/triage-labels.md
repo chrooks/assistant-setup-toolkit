@@ -69,3 +69,23 @@ Recommended label families:
 - `blocked`
 
 Prefer Project fields over labels for priority and status when a Project is available. Labels should help filtering and routing, not become a second board.
+## One category, one state
+
+Labels split into two families, and an issue record carries **exactly one
+category** and **at most one state**:
+
+- **Category** — `type:feature`, `type:bug`, `type:docs`, `type:refactor`,
+  `type:test`. Exactly one. Zero means the record was never classified; two
+  means nobody decided what it is.
+- **State** — `needs-scope`, `needs-decision`, `blocked`. At most one, because
+  they are mutually exclusive claims about what the record is waiting on. An
+  issue that is both `blocked` and `needs-decision` is telling two stories.
+
+Skills that read the tracker (`/roadmap`, `/to-issues`) **flag a violation and
+ask** rather than proceeding on a guess. A silent pick is how a record with two
+states gets ranked as though it had one.
+
+Readiness is a Project `Status`, not a label — `/scope` sets `Status: Ready`
+once it stamps a clean verdict, so the board reflects a judgement that was
+otherwise stranded in local working state.
+
