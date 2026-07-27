@@ -34,8 +34,7 @@ describe("roadmap Skill", () => {
     expect(skill).toContain("docs/agents/project-flow.md");
     expect(skill).toContain("docs/agents/issue-tracker.md");
     expect(skill).toContain("docs/agents/triage-labels.md");
-    expect(skill).toContain("/project-flow-setup audit");
-    expect(skill).toContain("/project-flow-setup docs");
+    expect(skill).toContain("run `/project-flow-setup` inline");
   });
 
   it("is discoverable for projection and Skill Artifacts", async () => {

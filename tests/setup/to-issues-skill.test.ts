@@ -29,7 +29,7 @@ describe("to-issues Skill", () => {
 
     expect(skill).toContain("docs/agents/issue-tracker.md");
     expect(skill).toContain("docs/agents/triage-labels.md");
-    expect(skill).toContain("/project-flow-setup docs");
+    expect(skill).toContain("run `/project-flow-setup` inline");
   });
 
   it("documents the local TODO.md subcommand", async () => {

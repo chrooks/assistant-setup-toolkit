@@ -18,7 +18,7 @@ describe("project-flow-setup Skill", () => {
 
     expect(skill).toContain("name: project-flow-setup");
     expect(skill).toContain("argument-hint: \"[audit|docs|apply] [repo]\"");
-    expect(skill).toContain("disable-model-invocation: true");
+    expect(skill).not.toContain("disable-model-invocation");
     expect(skill).toContain("Bare `/project-flow-setup`");
     expect(skill).toContain("guided setup");
     expect(skill).toContain("/project-flow-setup audit");
