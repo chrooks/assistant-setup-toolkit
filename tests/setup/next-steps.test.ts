@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   formatNextStepsSection,
+  planConfigNextSteps,
   planInstallCommandNextSteps,
   planMachineRuleNextSteps,
   planVisualPlansNextSteps,
@@ -122,6 +123,45 @@ describe("next-steps", () => {
 
     it("emits no steps when no machine Variant is set", () => {
       expect(planMachineRuleNextSteps(undefined, false)).toEqual([]);
+    });
+  });
+
+  describe("planConfigNextSteps", () => {
+    const healthy = {
+      fileName: "knowledge-config.json",
+      home: "~/.claude",
+      exists: true,
+      problems: [],
+    };
+
+    it("stays silent when every config is healthy — the run is the common case", () => {
+      expect(planConfigNextSteps([healthy])).toEqual([]);
+    });
+
+    it("points at the example file when the live config is missing", () => {
+      const steps = planConfigNextSteps([{ ...healthy, exists: false }]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain("~/.claude/knowledge-config.json");
+      expect(steps[0].description).toContain("knowledge-config.example.json");
+    });
+
+    it("names each problem in an existing config", () => {
+      const steps = planConfigNextSteps([
+        { ...healthy, problems: ["projectsIndex does not resolve", "profileTarget does not resolve"] },
+      ]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain("2 problem(s)");
+      expect(steps[0].description).toContain("projectsIndex does not resolve");
+      expect(steps[0].description).toContain("profileTarget does not resolve");
+    });
+
+    it("reports each Assistant Home separately so a drifted copy is visible", () => {
+      const steps = planConfigNextSteps([
+        healthy,
+        { ...healthy, home: "~/.codex", exists: false },
+      ]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain("~/.codex");
     });
   });
 });

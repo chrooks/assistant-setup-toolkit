@@ -9,7 +9,7 @@
 
 import path from "node:path";
 import fs from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { tryParseCliFlags } from "./cli.js";
 import { runInteractivePrompts } from "./prompts.js";
 import {
@@ -40,11 +40,12 @@ import { planMcpNextSteps } from "./mcp.js";
 import {
   buildStandardNextSteps,
   formatNextStepsSection,
+  planConfigNextSteps,
   planInstallCommandNextSteps,
   planMachineRuleNextSteps,
   planVisualPlansNextSteps,
 } from "./next-steps.js";
-import type { NextStep } from "./next-steps.js";
+import type { ConfigStatus, NextStep } from "./next-steps.js";
 import { applyWritePlan, readInstallReceipt } from "./apply.js";
 import {
   loadPresets,
@@ -99,6 +100,44 @@ function targetLabel(targetId: AssistantTargetId): string {
     "codex-cli": "Codex CLI",
   };
   return labels[targetId];
+}
+
+/**
+ * Inspect the live knowledge-config.json in an Assistant Home — the config the
+ * ingest, lint, sync-projects, sync-self, and notebooklm-export Skills read.
+ *
+ * The wizard never writes this file (it ships knowledge-config.example.json
+ * beside it), so the only way a stale absolute path surfaces is a check like
+ * this one. Filesystem-touching counterpart to the pure planConfigNextSteps.
+ */
+function inspectKnowledgeConfig(homeId: AssistantHomeId): ConfigStatus {
+  const fileName = "knowledge-config.json";
+  const home = homeLabel(homeId);
+  const filePath = path.join(resolveAssistantHomePath(homeId), fileName);
+
+  if (!existsSync(filePath)) {
+    return { fileName, home, exists: false, problems: [] };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { fileName, home, exists: true, problems: [`not valid JSON (${message})`] };
+  }
+  if (typeof parsed !== "object" || parsed === null) {
+    return { fileName, home, exists: true, problems: ["not a JSON object"] };
+  }
+
+  // Absolute string values are paths into this machine; relative ones (rawDir,
+  // wikiDir) are resolved against vaultPath by the Skills, not checked here.
+  const problems = Object.entries(parsed as Record<string, unknown>)
+    .filter(([, value]) => typeof value === "string" && path.isAbsolute(value))
+    .filter(([, value]) => !existsSync(value as string))
+    .map(([key]) => `${key} does not resolve`);
+
+  return { fileName, home, exists: true, problems };
 }
 
 /** Discover which canonical/ files exist and categorize them by component kind. */
@@ -934,12 +973,20 @@ export async function runSetupWizard(
         ? existsSync(path.join(repoRoot, "canonical", "machines", machineVariant, "rules.md"))
         : false,
     );
+    // Live config the canonical Skills and hooks read. The wizard ships the
+    // examples and the human owns the live files, so this only reports.
+    const configSteps = planConfigNextSteps(
+      payloadResult.payloads
+        .filter((p) => p.homeId !== "agents-home")
+        .map((p) => inspectKnowledgeConfig(p.homeId)),
+    );
     const allNextSteps: NextStep[] = [
       ...installCommandSteps,
       ...standardSteps,
       ...mcpSteps,
       ...visualPlansSteps,
       ...machineRuleSteps,
+      ...configSteps,
     ];
     // Next Steps stay on the console: they are the one part of the run that
     // asks the human to go do something.

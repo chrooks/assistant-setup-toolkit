@@ -136,6 +136,55 @@ export function planMachineRuleNextSteps(
   ];
 }
 
+/** Health of one live config file in an Assistant Home. */
+export interface ConfigStatus {
+  /** Config filename, e.g. "knowledge-config.json". */
+  readonly fileName: string;
+  /** Assistant Home holding it, e.g. "~/.claude". */
+  readonly home: string;
+  /** Whether the live file exists (the example shipping beside it does not count). */
+  readonly exists: boolean;
+  /**
+   * Human-readable problems found inside an existing file — an unresolvable
+   * path value, unparseable content. Empty means healthy.
+   */
+  readonly problems: readonly string[];
+}
+
+/**
+ * Build Next Steps for live config the canonical Skills and hooks depend on.
+ *
+ * The wizard ships `*.example.*` files and the human owns the live ones, so
+ * this reports rather than writes. Conditional by design: a step appears only
+ * when a config is missing or carries a path that does not resolve. An
+ * unconditional "update your config" line every run is noise, and noise is how
+ * a stale path survives unnoticed.
+ */
+export function planConfigNextSteps(
+  statuses: readonly ConfigStatus[],
+): readonly NextStep[] {
+  const steps: NextStep[] = [];
+
+  for (const status of statuses) {
+    const example = status.fileName.replace(/\.([^.]+)$/, ".example.$1");
+    if (!status.exists) {
+      steps.push({
+        kind: "manual-action",
+        description: `${status.home}/${status.fileName} does not exist — Skills that read it will fail. Copy ${status.home}/${example} to it and fill in your paths.`,
+      });
+      continue;
+    }
+    if (status.problems.length > 0) {
+      steps.push({
+        kind: "manual-action",
+        description: `${status.home}/${status.fileName} has ${status.problems.length} problem(s): ${status.problems.join("; ")} — update it.`,
+      });
+    }
+  }
+
+  return steps;
+}
+
 /**
  * Format Next Steps as human-readable lines for CLI output.
  */
