@@ -9,6 +9,8 @@ const skillPath = path.join(skillDir, "SKILL.md");
 const authoringSkillPath = path.join(skillDir, "authoring-skill.md");
 const authoringRulePath = path.join(skillDir, "authoring-rule.md");
 const authoringInstructionPath = path.join(skillDir, "authoring-instruction.md");
+const authoringHookPath = path.join(skillDir, "authoring-hook.md");
+const authoringManifestPath = path.join(skillDir, "authoring-manifest.md");
 const instructionsPath = path.join(repoRoot, "canonical", "INSTRUCTIONS.md");
 
 /**
@@ -137,6 +139,61 @@ describe("toolkit Skill — the instruction authoring branch (AC11)", () => {
     expect(branch).toContain("canonical/rules/");
     expect(branch).toMatch(/delete outright only when the model \*\*demonstrably\*\* follows/i);
     expect(branch).toMatch(/when in doubt, relocate/i);
+  });
+});
+
+describe("toolkit Skill — the hook authoring branch (AC12)", () => {
+  it("states that a hook is two artifacts, not one", async () => {
+    const branch = await readFile(authoringHookPath, "utf-8");
+
+    expect(branch).toMatch(/\*\*A hook is two artifacts\.\*\*/);
+    expect(branch).toContain("canonical/hooks/");
+    expect(branch).toContain("canonical/hooks/wiring.yaml");
+    // Writing only the script installs a file that nothing ever runs.
+    expect(branch).toMatch(/installs and never runs/i);
+  });
+
+  it("names every wiring.yaml field", async () => {
+    const branch = await readFile(authoringHookPath, "utf-8");
+
+    for (const field of ["`file`", "`event`", "`targets`", "`matcher`", "`scope`", "`command`", "`variants`"]) {
+      expect(branch).toContain(field);
+    }
+  });
+
+  it("states the .test.js sibling rule", async () => {
+    const branch = await readFile(authoringHookPath, "utf-8");
+
+    expect(branch).toMatch(/\*\*Branching logic gets a test\. A pass-through reminder does not\.\*\*/);
+    expect(branch).toContain(".test.js");
+  });
+});
+
+describe("toolkit Skill — the manifest authoring branch (AC13)", () => {
+  it("documents the YAML plain-scalar hazard", async () => {
+    const branch = await readFile(authoringManifestPath, "utf-8");
+
+    expect(branch).toMatch(/plain-scalar hazard/i);
+    expect(branch).toMatch(/cannot contain `: ` followed by a backtick/i);
+    expect(branch).toMatch(/cannot span lines with an implicit key/i);
+    expect(branch).toContain(">-");
+  });
+
+  it("requires re-parsing and reporting the source count", async () => {
+    const branch = await readFile(authoringManifestPath, "utf-8");
+
+    expect(branch).toMatch(/verify by re-parsing/i);
+    expect(branch).toContain("loadInstallationManifest");
+    expect(branch).toContain("externalSources.length");
+    expect(branch).toMatch(/compare the count to what you expected/i);
+  });
+
+  it("names every External Source field the schema accepts", async () => {
+    const branch = await readFile(authoringManifestPath, "utf-8");
+
+    for (const field of ["`id`", "`name`", "`kind`", "`url`", "`default`", "`targets`", "`notes`", "`exclude`"]) {
+      expect(branch).toContain(field);
+    }
   });
 });
 
