@@ -1,7 +1,7 @@
 ---
 name: toolkit
 description: Change how the assistants behave — create, update, or remove a skill, rule, instruction, hook, machine rule, or external source in the Canonical Assistant Source, then install it. Routes a plain-English request to the right artifact kind so the user never has to name it. Use when the user says "from now on", "always", "never", "every time you", "make a skill for", "add a rule", "encode this", "stop doing X", "remove that rule", or otherwise describes a durable change to assistant behavior.
-argument-hint: "[create|update|remove] [canonical|project|machine <name>] <what you want>"
+argument-hint: "[create|update|remove|check] [canonical|project|machine <name>] <what you want>"
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch
 ---
 
@@ -31,6 +31,7 @@ When it is genuinely ambiguous, ask one short question rather than guessing. Wri
 | A behavior that must fire 100% of the time | **both** an instruction *and* a **hook** in `canonical/hooks/` | [authoring-instruction.md](authoring-instruction.md) + [authoring-hook.md](authoring-hook.md) |
 | A fact true only on one machine | a **machine rule** in `canonical/machines/<name>/rules.md` | [authoring-rule.md](authoring-rule.md) |
 | Somebody else's published work worth pulling in | an **external source** in `manifests/install.yaml` | [authoring-manifest.md](authoring-manifest.md) |
+| "Has upstream changed?" for a Skill copied or wrapped from elsewhere | the **drift check** over `upstream:` frontmatter blocks | [checking-upstream.md](checking-upstream.md) |
 
 Worked examples of asks paired with their destination live in [routing-fixtures.md](routing-fixtures.md). Read it when a request does not obviously match a row.
 
@@ -65,6 +66,12 @@ Machine names are the directory names under `canonical/machines/`. Check what ex
 **create** — the artifact does not exist yet. Gather what the branch needs, write it, install.
 
 **update** — the artifact exists. Read it first, apply the change in place, preserve the `name:` slug and everything not being changed, install.
+
+**check** — nothing is being changed yet; the ask is whether somebody else's work has moved. Run the drift report and read it:
+
+    npm run check-upstream
+
+It reports and never writes. A hit worth acting on becomes a **update** on that Skill, and the Skill's `ref` is advanced afterwards. See [checking-upstream.md](checking-upstream.md).
 
 **remove** — deleting from `canonical/` does nothing on its own; the installed copies in `~/.claude/` and `~/.codex/` survive until pruned.
 

@@ -1,7 +1,11 @@
 ---
 name: deep-research
 description: Multi-source deep research using firecrawl and exa MCPs. Searches the web, synthesizes findings, and delivers cited reports with source attribution. Use when the user wants thorough research on any topic with evidence and citations.
-origin: ECC
+upstream:
+  repo: affaan-m/everything-claude-code
+  path: skills/deep-research/SKILL.md
+  ref: 7113b5bf63694b716f8b2413c5919824a82fc095
+  relationship: near-copy
 ---
 
 # Deep Research

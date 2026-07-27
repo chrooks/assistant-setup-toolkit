@@ -1,7 +1,11 @@
 ---
 name: verification-loop
 description: "Comprehensive post-change verification with optional explanatory reporting and delegated review fan-out."
-origin: ECC
+upstream:
+  repo: affaan-m/everything-claude-code
+  path: skills/verification-loop/SKILL.md
+  ref: af3a2064129d1cdad4e5d6e91838916d4ce6e4a1
+  relationship: rewrite
 ---
 
 # Verification Loop Skill

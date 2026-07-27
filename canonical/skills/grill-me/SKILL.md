@@ -1,6 +1,11 @@
 ---
 name: grill-me
 description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Records each resolved decision into the DevOS Throughline's Decision Ledger when one exists. Use when the user wants to stress-test a plan, get grilled on their design, mentions "grill me", or as the DevOS grill stage.
+upstream:
+  repo: mattpocock/skills
+  path: skills/productivity/grilling/SKILL.md
+  ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
+  relationship: wrapper
 ---
 
 Run a `/grilling` session, with the two changes below.

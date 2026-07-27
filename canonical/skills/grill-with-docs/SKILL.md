@@ -1,6 +1,11 @@
 ---
 name: grill-with-docs
 description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (LEXICON.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.
+upstream:
+  repo: mattpocock/skills
+  path: skills/engineering/grill-with-docs/SKILL.md
+  ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
+  relationship: rewrite
 ---
 
 <what-to-do>

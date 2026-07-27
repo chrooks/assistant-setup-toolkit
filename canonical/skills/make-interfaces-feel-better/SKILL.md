@@ -1,7 +1,11 @@
 ---
 name: make-interfaces-feel-better
 description: Apply concrete design-engineering details that make interfaces feel polished. Use when reviewing or improving UI spacing, typography, borders, shadows, motion, hit areas, icons, text wrapping, and interaction states.
-origin: community
+upstream:
+  repo: affaan-m/everything-claude-code
+  path: skills/make-interfaces-feel-better/SKILL.md
+  ref: 7113b5bf63694b716f8b2413c5919824a82fc095
+  relationship: near-copy
 ---
 
 # Make Interfaces Feel Better

@@ -1,7 +1,6 @@
 ---
 name: review-fanout
 description: "Concurrent read-only code review fan-out with actionable concern synthesis and fix-forward routing."
-origin: ECC
 ---
 
 # Review Fan-Out Skill

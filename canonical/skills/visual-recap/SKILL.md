@@ -6,6 +6,11 @@ description: >-
   notes.
 metadata:
   visibility: exported
+upstream:
+  repo: BuilderIO/skills
+  path: skills/visual-recap/SKILL.md
+  ref: 6c31f2188f87d4afdc38c14c3af8bed2088e4558
+  relationship: verbatim
 ---
 
 # Visual Recap

@@ -1,7 +1,11 @@
 ---
 name: skill-stocktake
 description: "Use when auditing Claude skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential subagent batch evaluation."
-origin: ECC
+upstream:
+  repo: affaan-m/everything-claude-code
+  path: skills/skill-stocktake/SKILL.md
+  ref: 7113b5bf63694b716f8b2413c5919824a82fc095
+  relationship: near-copy
 ---
 
 # skill-stocktake

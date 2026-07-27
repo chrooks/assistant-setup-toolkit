@@ -1,7 +1,11 @@
 ---
 name: security-review
 description: Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns.
-origin: ECC
+upstream:
+  repo: affaan-m/everything-claude-code
+  path: skills/security-review/SKILL.md
+  ref: 7113b5bf63694b716f8b2413c5919824a82fc095
+  relationship: near-copy
 ---
 
 # Security Review Skill

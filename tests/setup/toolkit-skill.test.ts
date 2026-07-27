@@ -11,6 +11,7 @@ const authoringRulePath = path.join(skillDir, "authoring-rule.md");
 const authoringInstructionPath = path.join(skillDir, "authoring-instruction.md");
 const authoringHookPath = path.join(skillDir, "authoring-hook.md");
 const authoringManifestPath = path.join(skillDir, "authoring-manifest.md");
+const checkingUpstreamPath = path.join(skillDir, "checking-upstream.md");
 const instructionsPath = path.join(repoRoot, "canonical", "INSTRUCTIONS.md");
 
 /**
@@ -211,6 +212,51 @@ describe("toolkit Skill — the absorbed Skills are gone (AC6)", () => {
 
     expect(instructions).toMatch(/hook scripts, machine rules, or Manifest entries → `\/toolkit`/);
     expect(instructions).not.toMatch(/consult the `consult` Skill/);
+  });
+});
+
+/**
+ * Seam 2 — the same Skill-content assertion, reused for the drift check rather
+ * than standing up a second surface for it.
+ */
+describe("toolkit Skill — the check verb (#22 AC10)", () => {
+  it("lists check among its verbs and names the command", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    expect(skill).toContain("**check**");
+    expect(skill).toContain("npm run check-upstream");
+    expect(skill).toContain("[create|update|remove|check]");
+    expect(skill).toContain("[checking-upstream.md](checking-upstream.md)");
+  });
+
+  it("documents all four relationships in the branch", async () => {
+    const branch = await readFile(checkingUpstreamPath, "utf-8");
+
+    for (const relationship of ["verbatim", "near-copy", "rewrite", "wrapper"]) {
+      expect(branch, relationship).toContain(`\`${relationship}\``);
+    }
+  });
+
+  it("states the report-only rule and the drift framing", async () => {
+    const branch = await readFile(checkingUpstreamPath, "utf-8");
+
+    expect(branch).toMatch(/reports; it never writes/i);
+    expect(branch).toMatch(/upstream at the recorded `ref` against upstream at its current/i);
+    expect(branch).toMatch(/never compares the local file against upstream/i);
+  });
+
+  it("states that the ref must be advanced after a port", async () => {
+    const branch = await readFile(checkingUpstreamPath, "utf-8");
+
+    expect(branch).toMatch(/Advance the `ref` after every port/i);
+    expect(branch).toMatch(/re-reports the same upstream commits forever/i);
+  });
+
+  it("states that a missing path is re-pointed by a human, not guessed", async () => {
+    const branch = await readFile(checkingUpstreamPath, "utf-8");
+
+    expect(branch).toMatch(/does not guess where the file moved/i);
+    expect(branch).toContain("Re-point `upstream.path`");
   });
 });
 
