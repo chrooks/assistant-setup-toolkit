@@ -553,6 +553,20 @@ export async function runSetupWizard(
           sourcesResolved = false;
         } else {
           log(`  [fetched] ${r.sourceId} (${r.files.length} file(s))`);
+          // An `exclude` entry that matches nothing is almost always a typo or
+          // a skill upstream renamed. Silently excluding nothing would leave
+          // the human believing a skill was dropped when it was installed.
+          const source = manifest.externalSources.find((s) => s.id === r.sourceId);
+          for (const name of source?.exclude ?? []) {
+            const stillPresent = r.files.some((f) =>
+              f.relativePath.startsWith(`skills/${name}/`),
+            );
+            if (stillPresent) {
+              console.error(
+                `  [warning] ${r.sourceId}: exclude "${name}" did not take effect.`,
+              );
+            }
+          }
         }
       }
     } else if (plannedSources.length > 0) {

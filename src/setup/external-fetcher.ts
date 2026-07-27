@@ -239,6 +239,7 @@ async function mapSkillPack(
 
   const out: PayloadFile[] = [];
   const seen = new Set<string>();
+  const excluded = new Set(source.exclude ?? []);
 
   for (const root of candidateRoots) {
     const entries = await fs.readdir(root, { withFileTypes: true });
@@ -254,6 +255,7 @@ async function mapSkillPack(
       const skillDirs = await collectSkillDirs(dirPath, 2);
       for (const skillDir of skillDirs) {
         const skillName = path.basename(skillDir);
+        if (excluded.has(skillName)) continue;
         if (seen.has(skillName)) continue;
         seen.add(skillName);
         const files = await walkAsPayload(

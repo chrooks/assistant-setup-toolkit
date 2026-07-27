@@ -236,6 +236,51 @@ describe("fetchExternalSource (skill-pack)", () => {
     const rels = result.files.map((f) => f.relativePath).sort();
     expect(rels).toEqual(["skills/bar/SKILL.md", "skills/foo/SKILL.md"]);
   });
+
+  it("drops excluded skills entirely, including their supporting files", async () => {
+    // A pack is otherwise all-or-nothing per group, forcing a choice between
+    // standing updates and inheriting every skill the group happens to hold.
+    const source: ExternalSource = {
+      id: "pack",
+      name: "pack",
+      kind: "skill-pack",
+      url: "https://github.com/o/r",
+      default: true,
+      targets: ["claude-code"],
+      exclude: ["unwanted"],
+    };
+    const fakeGit = makeFakeGit({
+      "https://github.com/o/r.git": {
+        "wanted/SKILL.md": "w",
+        "unwanted/SKILL.md": "u",
+        "unwanted/REFERENCE.md": "ur",
+      },
+    });
+
+    const result = await fetchExternalSource(source, workDir, fakeGit);
+    expect(result.error).toBeUndefined();
+    expect(result.files.map((f) => f.relativePath).sort()).toEqual([
+      "skills/wanted/SKILL.md",
+    ]);
+  });
+
+  it("excluding every skill is an error, not a silent empty install", async () => {
+    const source: ExternalSource = {
+      id: "pack",
+      name: "pack",
+      kind: "skill-pack",
+      url: "https://github.com/o/r",
+      default: true,
+      targets: ["claude-code"],
+      exclude: ["only"],
+    };
+    const fakeGit = makeFakeGit({
+      "https://github.com/o/r.git": { "only/SKILL.md": "o" },
+    });
+
+    const result = await fetchExternalSource(source, workDir, fakeGit);
+    expect(result.error).toMatch(/contained no skills/);
+  });
 });
 
 // -- fetchExternalSource — plugin kind --

@@ -34,6 +34,13 @@ const ExternalSourceSchema = z.object({
   default: z.boolean(),
   targets: z.array(z.enum(["claude-code", "codex-cli"])).min(1, "targets must have at least one entry"),
   notes: z.array(z.string()).optional(),
+  /**
+   * Skill names to drop from a `skill-pack` — upstream skills you do not want.
+   * A pack is otherwise all-or-nothing per group, which forces a choice between
+   * standing updates and inheriting every skill the group happens to contain.
+   * Ignored for non-pack kinds.
+   */
+  exclude: z.array(z.string().min(1)).optional(),
   installCommands: InstallCommandsSchema.optional(),
   requiresConfirmation: z.boolean().optional(),
   requiredSecrets: z.array(z.string()).optional(),
