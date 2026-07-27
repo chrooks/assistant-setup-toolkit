@@ -723,11 +723,14 @@ export async function runSetupWizard(
       variants: profile.variants,
     });
 
-    // Report conflicts if any
+    // Report conflicts if any. On the console, not just the log: an External
+    // Source shadowing a local skill is exactly what the human wants to see
+    // confirmed, and a silent "local wins" is indistinguishable from a silent
+    // "local lost".
     if (payloadResult.conflicts.length > 0) {
-      log("Conflicts resolved:");
+      summary("Conflicts resolved:");
       for (const conflict of payloadResult.conflicts) {
-        log(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
+        summary(`  - ${conflict.relativePath}: ${conflict.winner} wins over ${conflict.loser}`);
       }
     }
 
