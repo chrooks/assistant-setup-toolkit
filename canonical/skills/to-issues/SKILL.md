@@ -141,6 +141,8 @@ For roll-ins and updates, do not create a new issue record. Add the checklist it
 
 Do not close issue records until verification evidence is present. With evidence in hand, close without asking. When closing, add a concise closing comment that names the verification command, manual check, PR, commit, or release evidence. Do not close parent issues merely because sub-issues were created.
 
+**Tick the boxes before you close.** Closing is the last step, not the only one. First edit the issue body so every satisfied checkbox — Acceptance criteria, task lists, checklists anywhere in the body — is `- [x]`, then close. A criterion you cannot show evidence for stays unchecked: either it is not done (do not close), or it is out of scope (say so in the closing comment). Same rule for update mode — tick what the current work satisfied even when the issue stays open.
+
 ### 8. Report what you did
 
 After the mutations land, report once:

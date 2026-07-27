@@ -13,8 +13,14 @@ externalSources:
   # Overlaps are safe: payload.ts layers external files first and canonical
   # files last, so a local skills/<name>/SKILL.md always wins. The seven
   # overlapping skills (grill-me, grill-with-docs, implement, tdd, handoff,
-  # writing-great-skills, improve-codebase-architecture) keep their local
-  # versions; the wizard prints one "local wins" line each.
+  # writing-great-skills) keep their local versions; the wizard prints one
+  # "local wins" line each.
+  #
+  # improve-codebase-architecture is deliberately NOT local: upstream moved its
+  # vocabulary into codebase-design, added an HTML report, and delegates to
+  # grilling and domain-modeling. The local copy could not wrap it (same name,
+  # so it shadows rather than delegates), so it was dropped in favour of
+  # upstream's. Cost: upstream says CONTEXT.md where this setup says LEXICON.md.
   - id: matt-pocock-engineering
     name: Matt Pocock Skills — engineering
     kind: skill-pack
