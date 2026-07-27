@@ -159,7 +159,7 @@ externalSources:
 
       expect(manifest.version).toBe(1);
       // All sources tracked in manifests/install.yaml
-      expect(manifest.externalSources).toHaveLength(11);
+      expect(manifest.externalSources).toHaveLength(12);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
@@ -168,6 +168,7 @@ externalSources:
       // Fetched rather than vendored, so upstream improvements arrive on their
       // own — grilling backs /grill-me and /grill-with-docs.
       expect(ids).toContain("grilling");
+      expect(ids).toContain("domain-modeling");
       expect(ids).toContain("impeccable");
       expect(ids).toContain("caveman");
       expect(ids).toContain("ponytail");

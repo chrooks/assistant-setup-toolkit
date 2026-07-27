@@ -19,12 +19,15 @@ externalSources:
         etc.) are vendored into canonical/skills. Re-enable to pull the
         full pack.
       - >-
-        Vendoring is the right call only when upstream has stopped being a
-        source of truth. design-an-interface qualifies — upstream moved it to
-        skills/deprecated/, so the vendored copy preserves it rather than
-        lagging it. Skills that upstream still maintains belong in their own
-        fetched entry (see grilling); a vendored copy of a live skill just
-        rots quietly.
+        Vendor only what upstream no longer maintains. Anything upstream still
+        develops belongs in its own fetched entry (see grilling,
+        domain-modeling) — a vendored copy of a live skill rots quietly, which
+        is how the Negation and YAGNI-scoping improvements were missed.
+      - >-
+        Enabling this pack pulls all 41 skills, including skills/deprecated/,
+        skills/in-progress/, and Matt's skills/personal/. Prefer per-skill
+        entries, or point a pack entry at skills/engineering and
+        skills/productivity to get the maintained groups only.
 
   - id: find-skills
     name: find-skills
@@ -50,6 +53,23 @@ externalSources:
       - /grill-me and /grill-with-docs are wrappers over it. Local divergence
         (dependency-ordered rounds, the DevOS ledger) lives in those wrappers,
         never in this file — editing a fetched skill re-creates the fork.
+
+  - id: domain-modeling
+    name: domain-modeling
+    kind: skill
+    url: https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - >-
+        Builds and sharpens a project's domain model (ubiquitous language, ADRs).
+        Fetched, not vendored — upstream actively maintains it.
+      - >-
+        /grill-with-docs keeps its own Lexicon and ADR material rather than
+        delegating here, because the Lexicon is Chris's own term and format;
+        upstream's equivalent uses a generic glossary.
 
   - id: impeccable
     name: Impeccable
@@ -141,9 +161,12 @@ externalSources:
     notes:
       - Disabled by default — it installed ~270 skills, of which only a handful
         were ever used. Those (configure-ecc, consult, deep-research, diagnose,
-        note, tdd, design-an-interface, make-interfaces-feel-better,
-        security-review, improve-codebase-architecture) are vendored into
-        canonical/skills. Re-enable to pull the full plugin.
+        note, tdd, make-interfaces-feel-better, security-review,
+        improve-codebase-architecture) are vendored into canonical/skills.
+        Re-enable to pull the full plugin.
+      - >-
+        design-an-interface was dropped entirely — /impeccable covers it, and
+        upstream had already moved it to skills/deprecated/.
 
   - id: codex-plugin-cc
     name: Codex for Claude Code
