@@ -57,17 +57,3 @@ there is no local divergence there.
 
 The `CONTEXT-MAP.md` multi-context convention is upstream's and unchanged; a repo
 with several contexts still points at them from that file.
-
-## Local addition: `.cowork` path overrides
-
-Neither upstream skill knows about `.cowork`. Both steps are no-ops when the
-directory is absent, so a repo without it behaves exactly as upstream describes.
-
-**Before writing ADRs**, check whether `.cowork/config.yaml` exists and carries an
-`adr_dir` key. If so, write ADRs there instead of `docs/adr/`. If the file is
-missing or malformed, use the default.
-
-**After writing files**, if `.cowork/index.md` exists, update its
-**Source-of-truth documents** section — add or update the `LEXICON.md` entry and
-any new ADR entries, and refresh the header timestamp. If the file does not exist,
-skip.
