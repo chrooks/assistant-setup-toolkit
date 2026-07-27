@@ -4,7 +4,7 @@ description: "Use when auditing Claude skills and commands for quality. Supports
 upstream:
   repo: affaan-m/everything-claude-code
   path: skills/skill-stocktake/SKILL.md
-  ref: 7113b5bf63694b716f8b2413c5919824a82fc095
+  ref: 6a9f075cd97c139a5f7e84e1e3f2c9ab095adf64
   relationship: near-copy
 ---
 

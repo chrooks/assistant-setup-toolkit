@@ -4,7 +4,7 @@ description: "Comprehensive post-change verification with optional explanatory r
 upstream:
   repo: affaan-m/everything-claude-code
   path: skills/verification-loop/SKILL.md
-  ref: af3a2064129d1cdad4e5d6e91838916d4ce6e4a1
+  ref: 6a9f075cd97c139a5f7e84e1e3f2c9ab095adf64
   relationship: rewrite
 ---
 

@@ -5,105 +5,69 @@ upstream:
   repo: mattpocock/skills
   path: skills/engineering/grill-with-docs/SKILL.md
   ref: ed37663cc5fbef691ddfecd080dff42f7e7e350d
-  relationship: rewrite
+  relationship: wrapper
 ---
 
-<what-to-do>
+Run a `/grilling` session, using the `/domain-modeling` skill, with the changes below.
 
-Run a `/grilling` session, applying the domain-awareness material below throughout.
+Both are fetched from upstream and carry the substance. `grilling` holds the
+interview itself — relentless questioning, one branch of the decision tree at a
+time, a recommended answer for every question, and the rule that **facts** get
+looked up while **decisions** come to the human. `domain-modeling` holds the
+doc-writing discipline — challenging terms against the glossary, sharpening fuzzy
+language, stress-testing with concrete scenarios, cross-referencing against code,
+and the three-part test for when a decision earns an ADR. Do not restate either
+here; read those skills.
 
-`grilling` is fetched from upstream and carries the interview itself — including
-the rule that **facts** get looked up while **decisions** come to the human. Do not
-restate it here; read that skill.
+Everything below is deliberate local divergence. It lives here, in a file this
+repo owns, precisely so both upstream skills can keep tracking upstream.
 
-**Override, same as `/grill-me`:** ask in **dependency-ordered rounds**, not one
-question at a time. A round is every open question whose answer does not depend on
-another open question — ask those together (3–5 per round), take one reply covering
-all of them, then build the next round from what those answers unlocked. Number
-questions continuously across the session (Q1–Q4, then Q5–Q7) and give your
-recommended answer for every question. Never put two questions in the same round
-when one's answer would change the other's framing — sequence those across rounds.
+## Override: ask in rounds
 
-</what-to-do>
+Ask in **dependency-ordered rounds**, not one question at a time — `grilling`
+says one at a time, and this overrides it, exactly as `/grill-me` does.
 
-<supporting-info>
+A round is every open question whose answer does not depend on another open
+question. Ask those together, take one reply covering all of them, then build the
+next round from what those answers unlocked.
 
-## Domain awareness
+- Number questions continuously across the whole session — Q1–Q4 in round one, Q5–Q7 in round two — so replies can address them by number and out of order.
+- Never put two questions in the same round when one's answer would change the other's framing. That dependency is what rounds preserve and a flat question-dump destroys.
+- Give your recommended answer for every question. Most rounds should be answerable with "yes to all but Q3."
+- Three to five questions per round is the working range. Past that, split the round.
 
-During codebase exploration, also look for existing documentation:
+**Why the override:** one-at-a-time ends every session with a run of questions that
+are all agreements, each costing a full model round trip. Rounds collapse those into
+one reply, and the dependency ordering is what keeps that safe.
 
-### File structure
+## Override: the glossary is `LEXICON.md`, not `CONTEXT.md`
 
-Most repos have a single context:
+`domain-modeling` names the project glossary `CONTEXT.md` throughout — the file
+structure, the challenge-against-the-glossary rule, the update-inline rule, and
+its `CONTEXT-FORMAT.md` reference. **Everywhere it says `CONTEXT.md`, read
+`LEXICON.md`.**
 
-```
-/
-├── LEXICON.md
-├── docs/
-│   └── adr/
-│       ├── 0001-event-sourced-orders.md
-│       └── 0002-postgres-for-write-model.md
-└── src/
-```
+One exception: when a repo already carries a legacy `CONTEXT.md` holding its
+Lexicon, keep updating that file under its existing name rather than splitting the
+glossary across two files. Create `LEXICON.md` only when neither exists.
 
-If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
+Use the format in [LEXICON-FORMAT.md](./LEXICON-FORMAT.md) rather than upstream's
+`CONTEXT-FORMAT.md`. For ADRs, upstream's `ADR-FORMAT.md` stands as written —
+there is no local divergence there.
 
-```
-/
-├── CONTEXT-MAP.md
-├── docs/
-│   └── adr/                          ← system-wide decisions
-├── src/
-│   ├── ordering/
-│   │   ├── LEXICON.md
-│   │   └── docs/adr/                 ← context-specific decisions
-│   └── billing/
-│       ├── LEXICON.md
-│       └── docs/adr/
-```
+The `CONTEXT-MAP.md` multi-context convention is upstream's and unchanged; a repo
+with several contexts still points at them from that file.
 
-Create files lazily — only when you have something to write. If no `LEXICON.md` exists, create one when the first term is resolved — unless a legacy `CONTEXT.md` already holds the project's Lexicon; keep updating that file under its existing name. If no `docs/adr/` exists, create it when the first ADR is needed.
+## Local addition: `.cowork` path overrides
 
-### Path overrides
+Neither upstream skill knows about `.cowork`. Both steps are no-ops when the
+directory is absent, so a repo without it behaves exactly as upstream describes.
 
-Before writing ADRs, check if `.cowork/config.yaml` exists and has an `adr_dir` key. If so, use that path instead of `docs/adr/`. If missing or malformed, use the default.
+**Before writing ADRs**, check whether `.cowork/config.yaml` exists and carries an
+`adr_dir` key. If so, write ADRs there instead of `docs/adr/`. If the file is
+missing or malformed, use the default.
 
-### Index update (standalone invocation)
-
-After writing files, if `.cowork/index.md` exists, update the **Source-of-truth documents** section: add/update the `LEXICON.md` entry and any new ADR entries. Update the header timestamp. If `.cowork/index.md` does not exist, skip — no-op.
-
-## During the session
-
-### Challenge against the Lexicon
-
-When the user uses a term that conflicts with the existing language in `LEXICON.md`, call it out immediately. "Your Lexicon defines 'cancellation' as X, but you seem to mean Y — which is it?"
-
-### Sharpen fuzzy language
-
-When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account' — do you mean the Customer or the User? Those are different things."
-
-### Discuss concrete scenarios
-
-When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
-
-### Cross-reference with code
-
-When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible — which is right?"
-
-### Update LEXICON.md inline
-
-When a term is resolved, update `LEXICON.md` right there. Don't batch these up — capture them as they happen. Use the format in [LEXICON-FORMAT.md](./LEXICON-FORMAT.md).
-
-Don't couple `LEXICON.md` to implementation details. Only include terms that are meaningful to domain experts.
-
-### Offer ADRs sparingly
-
-Only offer to create an ADR when all three are true:
-
-1. **Hard to reverse** — the cost of changing your mind later is meaningful
-2. **Surprising without context** — a future reader will wonder "why did they do it this way?"
-3. **The result of a real trade-off** — there were genuine alternatives and you picked one for specific reasons
-
-If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
-
-</supporting-info>
+**After writing files**, if `.cowork/index.md` exists, update its
+**Source-of-truth documents** section — add or update the `LEXICON.md` entry and
+any new ADR entries, and refresh the header timestamp. If the file does not exist,
+skip.

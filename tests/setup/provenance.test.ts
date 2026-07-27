@@ -114,16 +114,16 @@ describe("readAllProvenance — the real canonical tree (AC1, AC3)", () => {
     }
   });
 
-  it("tracks the wrapper and the two verbatim copies", async () => {
+  it("tracks the two wrappers and the two verbatim copies", async () => {
     const records = await readAllProvenance(repoRoot);
     const byName = new Map(records.map((r) => [r.skill, r]));
 
     expect(byName.get("grill-me")?.relationship).toBe("wrapper");
     expect(byName.get("visual-plan")?.relationship).toBe("verbatim");
     expect(byName.get("visual-recap")?.relationship).toBe("verbatim");
-    // grill-with-docs was a wrapper until upstream gutted its body down to a
-    // one-line delegation; the local file is the real implementation now.
-    expect(byName.get("grill-with-docs")?.relationship).toBe("rewrite");
+    // Rebuilt on upstream's delegation shape: it now wraps the fetched grilling
+    // and domain-modeling skills rather than carrying a copy of their bodies.
+    expect(byName.get("grill-with-docs")?.relationship).toBe("wrapper");
   });
 });
 
