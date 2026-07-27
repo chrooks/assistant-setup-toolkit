@@ -58,6 +58,12 @@ entries) to judge the three semantic concerns:
   this** — it's pure reading judgment. Look for old facts on hub pages especially.
 - **Gaps / missing pages** — concepts mentioned all over but lacking their own page. The
   script's **broken wikilinks** and **dead-ends** are your best leads here.
+- **Stale digests** — if the vault's CLAUDE.md defines **Digest** life domains (e.g.
+  training, dev-log), read each Digest hub page and compare its last-synced date against
+  the domain's stated cadence (weekly unless the hub says otherwise). A digest older than
+  its cadence is a stale claim — flag it with how far behind it is; the fix is a sync of
+  that domain, not an edit to the page. No script for this either — the Life domains
+  table is the roster, the hub pages are the evidence.
 
 Respect the ingest skill's `[inferred]` provenance tags: an `[inferred]` claim that newer
 sources don't support is a prime stale-claim candidate. (Lint surfaces these tags; it
