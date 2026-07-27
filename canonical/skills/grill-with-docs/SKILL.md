@@ -5,11 +5,19 @@ description: Grilling session that challenges your plan against the existing dom
 
 <what-to-do>
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Run a `/grilling` session, applying the domain-awareness material below throughout.
 
-Ask in **dependency-ordered rounds**, not one question at a time. A round is every open question whose answer does not depend on another open question — ask those together (3–5 per round), take one reply covering all of them, then build the next round from what those answers unlocked. Number questions continuously across the session (Q1–Q4, then Q5–Q7) and give your recommended answer for every question. Never put two questions in the same round when one's answer would change the other's framing — sequence those across rounds.
+`grilling` is fetched from upstream and carries the interview itself — including
+the rule that **facts** get looked up while **decisions** come to the human. Do not
+restate it here; read that skill.
 
-If a question can be answered by exploring the codebase, explore the codebase instead.
+**Override, same as `/grill-me`:** ask in **dependency-ordered rounds**, not one
+question at a time. A round is every open question whose answer does not depend on
+another open question — ask those together (3–5 per round), take one reply covering
+all of them, then build the next round from what those answers unlocked. Number
+questions continuously across the session (Q1–Q4, then Q5–Q7) and give your
+recommended answer for every question. Never put two questions in the same round
+when one's answer would change the other's framing — sequence those across rounds.
 
 </what-to-do>
 

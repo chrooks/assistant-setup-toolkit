@@ -210,13 +210,22 @@ describe("DevOS-conformed stage skills", () => {
   describe("grill-me", () => {
     const skill = readSkill("grill-me");
 
-    it("keeps its slug and relentless-interview behavior", () => {
+    it("keeps its slug and delegates the interview to the grilling primitive", () => {
       expect(skill).toMatch(/^name:\s*grill-me\s*$/m);
-      expect(skill).toMatch(/[Ii]nterview me relentlessly/);
+      // The interview body is no longer copied here — it lives in `grilling`,
+      // fetched from upstream so its improvements arrive without a re-vendor.
+      expect(skill).toMatch(/`\/grilling`/);
+      expect(skill).not.toMatch(/[Ii]nterview me relentlessly/);
+    });
+
+    it("keeps local divergence in the wrapper, not in the fetched primitive", () => {
       // Rounds, not one-at-a-time: batch independent questions, take one reply,
       // build the next round from it. Dependency ordering is what keeps it safe.
+      // This contradicts `grilling` on purpose, so it must be stated as an
+      // override here rather than by editing the fetched skill.
       expect(skill).toMatch(/dependency-ordered rounds/i);
       expect(skill).toMatch(/not one question at a time/i);
+      expect(skill).toMatch(/override/i);
     });
 
     it("teaches appending resolved decisions to the Decision Ledger", () => {
