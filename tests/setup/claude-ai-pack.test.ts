@@ -3,7 +3,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CLAUDE_AI_PREFERENCES_CHAR_LIMIT,
+  buildToolboxIndex,
   buildUploadChecklist,
+  extractSkillGloss,
   parseClaudeAiManifest,
   selectPackSkills,
 } from "../../src/setup/claude-ai-pack.js";
@@ -43,6 +45,67 @@ describe("parseClaudeAiManifest", () => {
       /mapping/,
     );
   });
+
+  it("parses connectors and defaults them to empty", () => {
+    const withConnectors = parseClaudeAiManifest(
+      "version: 1\nskills: [wym]\nconnectors:\n  Athena: the brain\n",
+    );
+    expect(withConnectors.connectors).toEqual({ Athena: "the brain" });
+
+    const without = parseClaudeAiManifest("version: 1\nskills: [wym]\n");
+    expect(without.connectors).toEqual({});
+  });
+
+  it("rejects a connector without a gloss string", () => {
+    expect(() =>
+      parseClaudeAiManifest(
+        "version: 1\nskills: [wym]\nconnectors:\n  Athena: 3\n",
+      ),
+    ).toThrow(/Connector "Athena"/);
+  });
+});
+
+describe("extractSkillGloss", () => {
+  it("takes the first sentence of the frontmatter description", () => {
+    const gloss = extractSkillGloss(
+      "---\nname: x\ndescription: Does the thing well. Use when asked.\n---\n",
+    );
+    expect(gloss).toBe("Does the thing well.");
+  });
+
+  it("truncates an overlong first sentence with an ellipsis", () => {
+    const gloss = extractSkillGloss(
+      `---\ndescription: ${"word ".repeat(60)}end.\n---\n`,
+    );
+    expect(gloss.length).toBeLessThanOrEqual(160);
+    expect(gloss.endsWith("…")).toBe(true);
+  });
+
+  it("strips a YAML quote and unescapes inner quotes", () => {
+    const gloss = extractSkillGloss(
+      '---\ndescription: "Explains \\"wym\\" things. Use when asked."\n---\n',
+    );
+    expect(gloss).toBe('Explains "wym" things.');
+  });
+
+  it("returns empty when there is no description line", () => {
+    expect(extractSkillGloss("---\nname: x\n---\n")).toBe("");
+  });
+});
+
+describe("buildToolboxIndex", () => {
+  it("lists skills with glosses and connectors", () => {
+    const toolbox = buildToolboxIndex(
+      [
+        { name: "grill-me", gloss: "Interviews you." },
+        { name: "wym", gloss: "" },
+      ],
+      { Athena: "the brain" },
+    );
+    expect(toolbox).toContain("- **grill-me** — Interviews you.");
+    expect(toolbox).toContain("- **wym**\n");
+    expect(toolbox).toContain("- **Athena** — the brain");
+  });
 });
 
 describe("selectPackSkills", () => {
@@ -73,9 +136,15 @@ describe("selectPackSkills", () => {
 
 describe("buildUploadChecklist", () => {
   it("lists every packed skill as a ZIP checkbox", () => {
-    const checklist = buildUploadChecklist(["grill-me", "quiz-me"]);
+    const checklist = buildUploadChecklist(["grill-me", "quiz-me"], true);
     expect(checklist).toContain("- [ ] grill-me.zip");
     expect(checklist).toContain("- [ ] quiz-me.zip");
+    expect(checklist).toContain("PROFILE.md, and TOOLBOX.md");
+  });
+
+  it("points at the local profile when no canonical copy packed", () => {
+    const checklist = buildUploadChecklist(["grill-me"], false);
+    expect(checklist).toContain("~/.claude/PROFILE.md");
   });
 });
 
@@ -89,6 +158,14 @@ describe("manifests/claude-ai.yaml (repo integrity)", () => {
     );
     const { missing } = selectPackSkills(available, manifest.skills);
     expect(missing).toEqual([]);
+  });
+
+  it("ships a canonical Lexicon for Project knowledge", async () => {
+    const lexicon = await readFile(
+      path.join(repoRoot, "canonical", "LEXICON.md"),
+      "utf-8",
+    );
+    expect(lexicon.length).toBeGreaterThan(0);
   });
 
   it("keeps the preferences paste under claude.ai's character cap", async () => {

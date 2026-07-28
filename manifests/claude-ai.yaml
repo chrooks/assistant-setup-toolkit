@@ -29,3 +29,11 @@ skills:
   - design-audit # reasons from PROFILE.md — add it as Project knowledge
   - nickify # plain-English brief translator
   - ingest # files to the brain via the Athena connector's inbox tools
+# Connectors enabled on the claude.ai account — listed in TOOLBOX.md so Claude
+# knows what's at its disposal. The repo can't detect claude.ai account config;
+# update this by hand when connectors change.
+connectors:
+  Athena: the brain — search, read, and inbox filing for the LLM-Wiki knowledge base
+  Context7: current library and API docs — check before answering setup or API questions
+  Trek: the travel planner — trips, itineraries, packing, budgets
+  Gmail / Google Calendar / Google Drive: mail, calendar, and files
