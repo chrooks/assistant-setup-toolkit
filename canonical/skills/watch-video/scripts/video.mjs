@@ -299,13 +299,32 @@ export function writeTranscript(cacheDir, segments) {
 }
 
 /**
- * Speech-to-text for videos with no caption track. faster-whisper, never
- * mlx-whisper — the latter is Apple-Silicon-only and would fail on any other
- * machine this toolkit installs to.
+ * Whisper command-line clients, in preference order.
+ *
+ * Note `faster-whisper` is NOT here: that pip package is a *library* and ships
+ * no binary. Its CLI is the separate `whisper-ctranslate2` package, which is a
+ * drop-in for OpenAI's `whisper` client but backed by CTranslate2. Never
+ * `mlx-whisper` — Apple-Silicon-only, so it would fail on other machines.
  */
-export function transcribeWithWhisper(mediaPath, cacheDir) {
+const WHISPER_CLIS = ["whisper-ctranslate2", "whisper"];
+
+/** The first whisper CLI present on PATH, or null. */
+export function findWhisperCli() {
+  return WHISPER_CLIS.find((bin) => hasBinary(bin)) ?? null;
+}
+
+/**
+ * Speech-to-text for videos with no caption track.
+ *
+ * Throws when the CLI fails — most often because it cannot reach Hugging Face
+ * to fetch the model weights, which is exactly what happens behind a corporate
+ * proxy. The caller degrades on that rather than losing the whole load.
+ */
+export function transcribeWithWhisper(mediaPath, cacheDir, cli = findWhisperCli()) {
+  if (!cli) throw new Error("no whisper CLI on PATH");
   fs.mkdirSync(cacheDir, { recursive: true });
-  run("faster-whisper", [
+
+  run(cli, [
     "--model", "base",
     "--output_format", "vtt",
     "--output_dir", cacheDir,
@@ -343,14 +362,40 @@ export function buildTranscript(source, mediaPath, cacheDir) {
     }
   }
 
-  if (mediaPath && hasBinary("faster-whisper")) {
-    segments = transcribeWithWhisper(mediaPath, cacheDir);
-    if (segments.length > 0) {
-      return { status: "whisper", path: writeTranscript(cacheDir, segments), segments: segments.length };
-    }
+  const cli = findWhisperCli();
+  if (!cli) {
+    return {
+      status: "none",
+      reason: "No caption track, and no whisper CLI installed (try: pip install whisper-ctranslate2).",
+    };
   }
 
-  return { status: "none" };
+  if (!mediaPath) {
+    return { status: "none", reason: "No caption track and no media file to transcribe." };
+  }
+
+  // Whisper failing must not cost the frames already extracted. The most common
+  // failure is a blocked model download (HTTP 403 behind a corporate proxy), and
+  // a video the user can still look at beats no video at all.
+  try {
+    segments = transcribeWithWhisper(mediaPath, cacheDir, cli);
+  } catch (error) {
+    return {
+      status: "none",
+      reason: `Whisper (${cli}) failed — often a blocked model download. ${firstLine(error.message)}`,
+    };
+  }
+
+  if (segments.length > 0) {
+    return { status: "whisper", path: writeTranscript(cacheDir, segments), segments: segments.length };
+  }
+
+  return { status: "none", reason: `Whisper (${cli}) produced no speech segments.` };
+}
+
+/** Keep an error surface to one readable line for the manifest. */
+function firstLine(message) {
+  return String(message ?? "").split("\n")[0].slice(0, 200);
 }
 
 /**
@@ -694,6 +739,7 @@ if (invokedDirectly) {
 
 export {
   CELL_HEIGHT,
+  WHISPER_CLIS,
   DEFAULT_CACHE_SEGMENTS,
   MIN_SCENE_GAP_SEC,
   CELL_WIDTH,

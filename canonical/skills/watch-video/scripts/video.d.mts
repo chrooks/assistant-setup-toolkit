@@ -18,6 +18,8 @@ export interface TranscriptInfo {
   status: "captions" | "whisper" | "none";
   path?: string;
   segments?: number;
+  /** Present when status is "none": why there is no transcript. */
+  reason?: string;
 }
 
 export interface FrameEntry {
@@ -97,7 +99,13 @@ export declare function vttTimeToSeconds(stamp: string): number;
 export declare function parseVtt(vttPath: string): Segment[];
 export declare function formatTimestamp(seconds: number): string;
 export declare function writeTranscript(cacheDir: string, segments: Segment[]): string;
-export declare function transcribeWithWhisper(mediaPath: string, cacheDir: string): Segment[];
+export declare const WHISPER_CLIS: readonly string[];
+export declare function findWhisperCli(): string | null;
+export declare function transcribeWithWhisper(
+  mediaPath: string,
+  cacheDir: string,
+  cli?: string | null,
+): Segment[];
 export declare function buildTranscript(
   source: Source,
   mediaPath: string | null,

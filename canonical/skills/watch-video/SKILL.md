@@ -24,8 +24,17 @@ Two command-line programs must be installed:
 Install both with `brew install yt-dlp ffmpeg` (macOS) or `pip install yt-dlp` plus your
 platform's ffmpeg package. The script reports which one is missing and how to install it.
 
-Optional: `faster-whisper` for videos with no subtitle track. Use `faster-whisper`, never
-`mlx-whisper` — the latter is Apple-Silicon-only and fails elsewhere.
+Optional, for videos with no subtitle track: a whisper CLI. Install
+`pip install whisper-ctranslate2` — the `faster-whisper` package is a *library* and ships
+no binary, so installing it alone does nothing here. OpenAI's `whisper` CLI also works.
+Never `mlx-whisper` — Apple-Silicon-only, so it fails on other machines.
+
+**Behind a corporate proxy**, the first whisper run downloads model weights from Hugging
+Face and may be blocked with an HTTP 403. That is survivable: the load completes with
+frames, `transcript.status` comes back `none`, and `transcript.reason` says why. To fix it
+properly, pre-populate the model cache from an unrestricted machine (copy
+`~/.cache/huggingface/hub/models--Systran--faster-whisper-base/`) and set `HF_HUB_OFFLINE=1`,
+or ask for `huggingface.co` to be allowlisted.
 
 ## Routing — what the argument is
 
@@ -53,7 +62,8 @@ for a re-extract; otherwise a second run on the same video reuses the first extr
 Everything downstream reads this one object:
 
 - `title`, `channel`, `durationSec` — for the header line.
-- `transcript.status` — `captions`, `whisper`, or `none`; `transcript.path` when it exists.
+- `transcript.status` — `captions`, `whisper`, or `none`; `transcript.path` when it exists,
+  and `transcript.reason` explaining why when it is `none`.
 - `frames[]` — `{ t, path }` per frame, full resolution, on disk.
 - `grids[]` — `{ path, cells, from, to, cellTimes }`; each grid tiles up to 16 frames.
 - `budget` — `policy`, `framesFound`, `framesKept`, `estTokens`.
@@ -77,11 +87,11 @@ disk instead of loaded eagerly.
 ## Gate: no transcript
 
 When `transcript.status` is `none`, **stop and ask the user to confirm** before going any
-further. Say plainly that no subtitle track was found and `faster-whisper` is not
-installed, so the video can only be loaded as frames with no spoken content. Offer to
-install `faster-whisper`. Do not silently proceed with frames alone — a talk without its
-transcript is mostly worthless, and the user should decide whether that is worth their
-context.
+further. Quote `transcript.reason` — it distinguishes "no whisper installed" from "whisper
+was blocked downloading its model", which need different fixes. Say plainly that the video
+can only be loaded as frames with no spoken content, and offer the fix that matches the
+reason. Do not silently proceed with frames alone — a talk without its transcript is mostly
+worthless, and the user should decide whether that is worth their context.
 
 ## Brief + acknowledge
 

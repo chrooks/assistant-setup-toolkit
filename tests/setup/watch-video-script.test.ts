@@ -6,6 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   buildGrids,
   DEFAULT_CACHE_SEGMENTS,
+  findWhisperCli,
+  WHISPER_CLIS,
   detectScenes,
   everySecond,
   extractFrames,
@@ -346,6 +348,52 @@ describe("watch-video script — frame budget", () => {
   it("spaces kept frames evenly rather than taking a prefix", () => {
     const kept = thinFrames([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 5);
     expect(kept).toEqual([0, 2, 5, 7, 9]);
+  });
+});
+
+describe("watch-video script — whisper detection", () => {
+  // The faster-whisper pip package is a library and ships no binary; its CLI is
+  // the separate whisper-ctranslate2 package. Calling `faster-whisper` never
+  // worked, and the whisper path was dead for everyone.
+  it("looks for real whisper CLIs, not the library package name", () => {
+    expect(WHISPER_CLIS).toContain("whisper-ctranslate2");
+    expect(WHISPER_CLIS).not.toContain("faster-whisper");
+    expect(WHISPER_CLIS).not.toContain("mlx-whisper");
+  });
+
+  it("returns null rather than throwing when no whisper CLI is present", () => {
+    const found = findWhisperCli();
+    expect(found === null || WHISPER_CLIS.includes(found)).toBe(true);
+  });
+});
+
+describe.skipIf(!ffmpegAvailable)("watch-video script — transcript degradation", () => {
+  let workDir: string;
+  let fixture: string;
+
+  beforeAll(() => {
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-degrade-"));
+    fixture = buildFixture(workDir);
+  });
+
+  afterAll(() => {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  });
+
+  // A blocked model download (HTTP 403 behind a corporate proxy) previously
+  // threw and aborted the load, throwing away frames already extracted.
+  it("completes the load and explains itself when there is no transcript", () => {
+    const cacheDir = path.join(workDir, "no-transcript");
+    const result = runScript([fixture, "--cache-dir", cacheDir]);
+
+    expect(result.status).toBe(0);
+
+    const manifest = readManifest(cacheDir);
+    expect(manifest!.transcript.status).toBe("none");
+    expect(manifest!.transcript.reason).toBeTruthy();
+    // Frames must survive a missing transcript.
+    expect(manifest!.frames.length).toBeGreaterThan(0);
+    expect(manifest!.grids.length).toBeGreaterThan(0);
   });
 });
 
