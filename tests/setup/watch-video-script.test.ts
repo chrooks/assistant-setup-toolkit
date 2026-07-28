@@ -4,12 +4,16 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  formatTimestamp,
   isPlaylistUrl,
   parseArgs,
+  parseVtt,
   probeDuration,
   readManifest,
   resolveSource,
   videoIdFor,
+  vttTimeToSeconds,
+  writeTranscript,
 } from "../../canonical/skills/watch-video/scripts/video.mjs";
 
 const repoRoot = process.cwd();
@@ -133,6 +137,96 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — manifest Seam", () => 
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Playlist URLs are not supported");
+  });
+});
+
+describe("watch-video script — transcript track", () => {
+  let workDir: string;
+
+  beforeAll(() => {
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-vtt-"));
+  });
+
+  afterAll(() => {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  });
+
+  function writeVtt(name: string, body: string): string {
+    const target = path.join(workDir, name);
+    fs.writeFileSync(target, body);
+    return target;
+  }
+
+  it("converts VTT timestamps to seconds", () => {
+    expect(vttTimeToSeconds("00:00:02.500")).toBeCloseTo(2.5, 3);
+    expect(vttTimeToSeconds("00:01:30.000")).toBeCloseTo(90, 3);
+    expect(vttTimeToSeconds("01:00:00.000")).toBeCloseTo(3600, 3);
+  });
+
+  it("parses a plain VTT into timestamped segments", () => {
+    const vtt = writeVtt(
+      "plain.vtt",
+      [
+        "WEBVTT",
+        "",
+        "00:00:00.000 --> 00:00:02.000",
+        "Hello world",
+        "",
+        "00:00:02.000 --> 00:00:04.000",
+        "Second line",
+        "",
+      ].join("\n"),
+    );
+
+    expect(parseVtt(vtt)).toEqual([
+      { t: 0, text: "Hello world" },
+      { t: 2, text: "Second line" },
+    ]);
+  });
+
+  // Auto-generated YouTube captions carry word-level timing tags and repeat the
+  // previous cue's tail on every cue. Both have to come out or the transcript
+  // reads as a stutter.
+  it("strips inline timing tags and rolling duplicates from auto-generated captions", () => {
+    const vtt = writeVtt(
+      "auto.vtt",
+      [
+        "WEBVTT",
+        "Kind: captions",
+        "Language: en",
+        "",
+        "00:00:01.000 --> 00:00:03.000",
+        "the model reads",
+        "",
+        "00:00:03.000 --> 00:00:05.000",
+        "the model reads",
+        "<00:00:03.500><c>every</c> <00:00:04.100><c>token</c>",
+        "",
+      ].join("\n"),
+    );
+
+    const segments = parseVtt(vtt);
+    expect(segments).toHaveLength(2);
+    expect(segments[0]).toEqual({ t: 1, text: "the model reads" });
+    expect(segments[1].t).toBe(3);
+    expect(segments[1].text).toBe("every token");
+    expect(segments[1].text).not.toContain("<");
+  });
+
+  it("formats timestamps as MM:SS", () => {
+    expect(formatTimestamp(0)).toBe("00:00");
+    expect(formatTimestamp(65.9)).toBe("01:05");
+    expect(formatTimestamp(3599)).toBe("59:59");
+  });
+
+  it("writes a transcript with one timestamped line per segment", () => {
+    const cacheDir = path.join(workDir, "transcript-out");
+    const written = writeTranscript(cacheDir, [
+      { t: 0, text: "opening" },
+      { t: 92, text: "the main point" },
+    ]);
+
+    expect(fs.readFileSync(written, "utf-8")).toBe("[00:00] opening\n[01:32] the main point\n");
   });
 });
 

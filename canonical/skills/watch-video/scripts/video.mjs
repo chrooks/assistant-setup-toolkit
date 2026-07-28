@@ -144,6 +144,159 @@ export function describeSource(source) {
   return { title: title ?? source.value, channel: channel || null };
 }
 
+/**
+ * Ask yt-dlp for a subtitle track without downloading the video. Returns the
+ * path to the written .vtt, or null when the video has no captions.
+ *
+ * The acquisition ladder is deliberately shallow: plain auto-sub first, then
+ * browser cookies. A third rung exists (a PO-token provider service YouTube's
+ * 2025-26 hardening may demand) but costs a Node build and ~65 MB, so it is not
+ * built until these two demonstrably fail. See the plan's Decision Log.
+ */
+export function fetchSubtitles(url, cacheDir) {
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const stem = path.join(cacheDir, "sub");
+
+  const attempts = [
+    ["--write-auto-sub", "--sub-format", "vtt", "--skip-download", "-o", stem, url],
+    ["--write-auto-sub", "--sub-format", "vtt", "--skip-download",
+     "--cookies-from-browser", "chrome", "-o", stem, url],
+  ];
+
+  for (const args of attempts) {
+    try {
+      run("yt-dlp", args, { stdio: "ignore" });
+    } catch {
+      continue; // try the next rung
+    }
+    const found = fs
+      .readdirSync(cacheDir)
+      .filter((name) => name.startsWith("sub.") && name.endsWith(".vtt"));
+    if (found.length > 0) {
+      return path.join(cacheDir, found[0]);
+    }
+  }
+
+  return null;
+}
+
+/** `HH:MM:SS.mmm` or `MM:SS.mmm` to seconds. */
+export function vttTimeToSeconds(stamp) {
+  const parts = stamp.trim().split(":").map(Number.parseFloat);
+  return parts.reduce((total, part) => total * 60 + part, 0);
+}
+
+/**
+ * WebVTT to `{ t, text }` segments.
+ *
+ * Auto-generated captions are messy in two specific ways this has to survive:
+ * inline word-level timing tags (`<00:00:01.234><c>word</c>`), and heavy
+ * duplication where each cue repeats the previous cue's tail. Both are stripped
+ * so the transcript reads as prose rather than a stutter.
+ */
+export function parseVtt(vttPath) {
+  const lines = fs.readFileSync(vttPath, "utf-8").split(/\r?\n/);
+  const segments = [];
+  let pending = null;
+
+  for (const line of lines) {
+    const timing = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?\.\d{3})\s*-->/);
+
+    if (timing) {
+      if (pending && pending.text) segments.push(pending);
+      pending = { t: vttTimeToSeconds(timing[1]), text: "" };
+      continue;
+    }
+
+    if (!pending) continue; // header, blank line, or cue id before the first timing
+    if (/^(WEBVTT|Kind:|Language:|NOTE\b)/.test(line)) continue;
+
+    const cleaned = line
+      .replace(/<\d{2}:\d{2}:\d{2}\.\d{3}>/g, "")
+      .replace(/<\/?c[^>]*>/g, "")
+      .trim();
+
+    if (!cleaned) continue;
+    if (segments.some((seg) => seg.text.endsWith(cleaned))) continue; // rolling duplicate
+    pending.text = pending.text ? `${pending.text} ${cleaned}` : cleaned;
+  }
+
+  if (pending && pending.text) segments.push(pending);
+  return segments;
+}
+
+/** Seconds to the `MM:SS` label used in the transcript and burned into frames. */
+export function formatTimestamp(seconds) {
+  const total = Math.floor(seconds);
+  const mins = String(Math.floor(total / 60)).padStart(2, "0");
+  const secs = String(total % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+}
+
+/** Write `transcript.md`, one `[MM:SS] text` line per segment. */
+export function writeTranscript(cacheDir, segments) {
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const transcriptPath = path.join(cacheDir, "transcript.md");
+  const body = segments.map((seg) => `[${formatTimestamp(seg.t)}] ${seg.text}`).join("\n");
+  fs.writeFileSync(transcriptPath, `${body}\n`);
+  return transcriptPath;
+}
+
+/**
+ * Speech-to-text for videos with no caption track. faster-whisper, never
+ * mlx-whisper — the latter is Apple-Silicon-only and would fail on any other
+ * machine this toolkit installs to.
+ */
+export function transcribeWithWhisper(mediaPath, cacheDir) {
+  fs.mkdirSync(cacheDir, { recursive: true });
+  run("faster-whisper", [
+    "--model", "base",
+    "--output_format", "vtt",
+    "--output_dir", cacheDir,
+    mediaPath,
+  ], { stdio: "ignore" });
+
+  const found = fs.readdirSync(cacheDir).filter((name) => name.endsWith(".vtt"));
+  return found.length > 0 ? parseVtt(path.join(cacheDir, found[0])) : [];
+}
+
+export function hasBinary(bin) {
+  try {
+    execFileSync("which", [bin], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Captions, else whisper, else nothing. Returns the manifest's transcript block.
+ * A `none` status is not a failure here — the Skill turns it into a question for
+ * the user rather than silently loading a video with no words.
+ */
+export function buildTranscript(source, mediaPath, cacheDir) {
+  let segments = null;
+
+  if (source.kind === "url") {
+    const vttPath = fetchSubtitles(source.value, cacheDir);
+    if (vttPath) {
+      segments = parseVtt(vttPath);
+      if (segments.length > 0) {
+        return { status: "captions", path: writeTranscript(cacheDir, segments), segments: segments.length };
+      }
+    }
+  }
+
+  if (mediaPath && hasBinary("faster-whisper")) {
+    segments = transcribeWithWhisper(mediaPath, cacheDir);
+    if (segments.length > 0) {
+      return { status: "whisper", path: writeTranscript(cacheDir, segments), segments: segments.length };
+    }
+  }
+
+  return { status: "none" };
+}
+
 // ponytail: execFileSync over a spawn wrapper — every call here is a short,
 // synchronous shell-out and the script is a one-shot CLI. Revisit if frame
 // extraction needs to parallelize.
@@ -157,11 +310,32 @@ function run(bin, args, options = {}) {
 
 /** Throw a clear error when a required external program is missing. */
 export function requireBinary(bin, installHint) {
-  try {
-    execFileSync("which", [bin], { stdio: "ignore" });
-  } catch {
+  if (!hasBinary(bin)) {
     throw new Error(`${bin} is not installed. Install it with: ${installHint}`);
   }
+}
+
+/**
+ * Pull the video itself down for a URL source. Needed for frame extraction and
+ * for whisper; caption-only runs never reach this. Capped at 720p — frames are
+ * downscaled to 1568px anyway, so a 4K download would be wasted bandwidth.
+ */
+export function downloadMedia(url, cacheDir) {
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const stem = path.join(cacheDir, "media");
+
+  run("yt-dlp", [
+    "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+    "--merge-output-format", "mp4",
+    "-o", `${stem}.%(ext)s`,
+    url,
+  ], { stdio: "ignore" });
+
+  const found = fs.readdirSync(cacheDir).filter((name) => name.startsWith("media."));
+  if (found.length === 0) {
+    throw new Error(`yt-dlp produced no media file for ${url}`);
+  }
+  return path.join(cacheDir, found[0]);
 }
 
 export function main(argv) {
@@ -195,18 +369,18 @@ export function main(argv) {
     }
   }
 
-  const mediaPath = source.kind === "file" ? source.value : null;
   const { title, channel } = describeSource(source);
+  const mediaPath = source.kind === "file" ? source.value : downloadMedia(source.value, cacheDir);
 
-  // Milestones 2-4 fill transcript, frames, and grids. The shape is fixed here
-  // so the Seam is stable from the first commit.
+  // Milestones 3-4 fill frames and grids. Their keys are shaped here so the
+  // Seam stays stable across commits.
   const manifest = {
     source: source.value,
     videoId,
     title,
     channel,
-    durationSec: probeDuration(mediaPath ?? source.value),
-    transcript: { status: "none" },
+    durationSec: probeDuration(mediaPath),
+    transcript: buildTranscript(source, mediaPath, cacheDir),
     frames: [],
     grids: [],
     budget: { policy: null, framesFound: 0, framesKept: 0, estTokens: 0 },
