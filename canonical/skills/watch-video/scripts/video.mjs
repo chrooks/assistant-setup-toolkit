@@ -11,7 +11,7 @@
 // of crossing a subprocess boundary, and to match the toolkit's `node {hook}`
 // choice for cross-machine portability.
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -32,6 +32,24 @@ Writes <cache-dir>/manifest.json and prints it to stdout.`;
 
 /** Long edge, in pixels, for extracted source frames. */
 const FRAME_LONG_EDGE = 1568;
+
+/**
+ * ffmpeg scene-change sensitivity, 0-1. 0.4 is the conventional default: low
+ * enough to catch slide advances, high enough to ignore camera noise.
+ */
+const SCENE_THRESHOLD = 0.4;
+
+/** Below this duration a video is sampled every second instead of by scene. */
+const SHORT_FORM_MAX_SEC = 120;
+
+/** Frame ceiling for anything longer. 60 frames is ~4 grids, ~19k tokens. */
+const LONG_FORM_MAX_FRAMES = 60;
+
+/** Tokens a single full-resolution image costs on Claude Opus 5. */
+const TOKENS_PER_GRID = 4784;
+
+/** Tokens a single 1568px frame costs, used before grids are built. */
+const TOKENS_PER_FRAME = 1600;
 
 /**
  * Split argv into a source plus flags. Kept deliberately small — this script
@@ -297,6 +315,122 @@ export function buildTranscript(source, mediaPath, cacheDir) {
   return { status: "none" };
 }
 
+/**
+ * Timestamps where the picture changed substantially.
+ *
+ * Caveat worth knowing: ffmpeg's scene score is *luma-weighted*, so a cut
+ * between two shots of similar brightness can score zero even when the colours
+ * differ completely. Frame lists are therefore good, not exhaustive.
+ * t=0 is always included so a video always has an opening frame.
+ */
+export function detectScenes(mediaPath, threshold = SCENE_THRESHOLD) {
+  const stderr = runCapturingStderr("ffmpeg", [
+    "-i", mediaPath,
+    "-filter:v", `select='gt(scene,${threshold})',showinfo`,
+    "-f", "null", "-",
+  ]);
+
+  const timestamps = [...stderr.matchAll(/pts_time:([0-9.]+)/g)]
+    .map((match) => Number.parseFloat(match[1]))
+    .filter((value) => Number.isFinite(value));
+
+  return [...new Set([0, ...timestamps])].sort((a, b) => a - b);
+}
+
+/**
+ * How densely to sample, by duration. Density inverts with length: a short clip
+ * is cheap and its visuals carry most of the meaning, so it gets every second.
+ * Anything longer takes scene changes capped at a token budget.
+ */
+export function framePolicy(durationSec) {
+  if (durationSec < SHORT_FORM_MAX_SEC) {
+    return { policy: "short-form-1fps", maxFrames: Math.max(1, Math.ceil(durationSec)) };
+  }
+  return { policy: "scene-change", maxFrames: LONG_FORM_MAX_FRAMES };
+}
+
+/**
+ * One timestamp per second, for the short-form path.
+ *
+ * Stops a full second short of the end: seeking to the last fractional second
+ * of a video lands past the final frame and ffmpeg produces nothing. A 19.014s
+ * video yields 0..18, not 0..19.
+ */
+export function everySecond(durationSec) {
+  const out = [];
+  for (let t = 0; t + 1 <= durationSec; t += 1) out.push(t);
+  return out.length > 0 ? out : [0];
+}
+
+/**
+ * Reduce an over-long timestamp list to maxFrames by keeping evenly spaced
+ * entries. The first is always retained so the opening frame survives.
+ */
+export function thinFrames(timestamps, maxFrames) {
+  if (timestamps.length <= maxFrames) return [...timestamps];
+  if (maxFrames <= 1) return [timestamps[0]];
+
+  const step = (timestamps.length - 1) / (maxFrames - 1);
+  const kept = [];
+  for (let i = 0; i < maxFrames; i += 1) {
+    kept.push(timestamps[Math.round(i * step)]);
+  }
+  return [...new Set(kept)];
+}
+
+/**
+ * Cut one JPEG per timestamp, long edge capped at FRAME_LONG_EDGE without
+ * enlarging smaller sources. Files are named by index rather than timestamp:
+ * scene changes can land inside the same second, and the manifest carries the
+ * real time for every frame anyway.
+ */
+export function extractFrames(mediaPath, timestamps, cacheDir) {
+  const framesDir = path.join(cacheDir, "frames");
+  fs.mkdirSync(framesDir, { recursive: true });
+
+  const frames = [];
+
+  timestamps.forEach((t, index) => {
+    const framePath = path.join(framesDir, `frame-${String(index).padStart(4, "0")}.jpg`);
+    try {
+      run("ffmpeg", [
+        "-y", "-loglevel", "error",
+        "-ss", String(t),
+        "-i", mediaPath,
+        "-frames:v", "1",
+        "-vf", `scale='min(${FRAME_LONG_EDGE},iw)':-2`,
+        framePath,
+      ], { stdio: "ignore" });
+    } catch {
+      return; // skip below
+    }
+
+    // ffmpeg can exit 0 having written nothing when the seek lands past the
+    // last frame, so existence is checked rather than trusted.
+    if (fs.existsSync(framePath) && fs.statSync(framePath).size > 0) {
+      frames.push({ t, path: framePath });
+    }
+  });
+
+  return frames;
+}
+
+/**
+ * Run a command and return its stderr. ffmpeg writes `showinfo` output there,
+ * and spawnSync (unlike execFileSync) hands back both streams regardless of
+ * exit status — which matters because `-f null -` exits non-zero on some builds
+ * while still producing exactly the output we need.
+ */
+function runCapturingStderr(bin, args) {
+  const result = spawnSync(bin, args, {
+    encoding: "utf-8",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+
+  if (result.error) throw result.error;
+  return result.stderr ?? "";
+}
+
 // ponytail: execFileSync over a spawn wrapper — every call here is a short,
 // synchronous shell-out and the script is a one-shot CLI. Revisit if frame
 // extraction needs to parallelize.
@@ -372,18 +506,31 @@ export function main(argv) {
   const { title, channel } = describeSource(source);
   const mediaPath = source.kind === "file" ? source.value : downloadMedia(source.value, cacheDir);
 
-  // Milestones 3-4 fill frames and grids. Their keys are shaped here so the
-  // Seam stays stable across commits.
+  const durationSec = probeDuration(mediaPath);
+  const { policy, maxFrames } = framePolicy(durationSec);
+
+  const candidates = policy === "short-form-1fps"
+    ? everySecond(durationSec)
+    : detectScenes(mediaPath);
+  const kept = thinFrames(candidates, maxFrames);
+  const frames = extractFrames(mediaPath, kept, cacheDir);
+
+  // Milestone 4 fills grids. The key is shaped here so the Seam stays stable.
   const manifest = {
     source: source.value,
     videoId,
     title,
     channel,
-    durationSec: probeDuration(mediaPath),
+    durationSec,
     transcript: buildTranscript(source, mediaPath, cacheDir),
-    frames: [],
+    frames,
     grids: [],
-    budget: { policy: null, framesFound: 0, framesKept: 0, estTokens: 0 },
+    budget: {
+      policy,
+      framesFound: candidates.length,
+      framesKept: frames.length,
+      estTokens: frames.length * TOKENS_PER_FRAME,
+    },
   };
 
   writeManifest(cacheDir, manifest);
@@ -401,4 +548,12 @@ if (invokedDirectly) {
   }
 }
 
-export { FRAME_LONG_EDGE, USAGE };
+export {
+  FRAME_LONG_EDGE,
+  LONG_FORM_MAX_FRAMES,
+  SCENE_THRESHOLD,
+  SHORT_FORM_MAX_SEC,
+  TOKENS_PER_FRAME,
+  TOKENS_PER_GRID,
+  USAGE,
+};

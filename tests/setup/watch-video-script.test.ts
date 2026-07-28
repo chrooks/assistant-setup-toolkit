@@ -4,13 +4,18 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  detectScenes,
+  everySecond,
+  extractFrames,
   formatTimestamp,
+  framePolicy,
   isPlaylistUrl,
   parseArgs,
   parseVtt,
   probeDuration,
   readManifest,
   resolveSource,
+  thinFrames,
   videoIdFor,
   vttTimeToSeconds,
   writeTranscript,
@@ -94,14 +99,23 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — manifest Seam", () => 
     expect(manifest).not.toBeNull();
     expect(manifest).toMatchObject({
       source: fixture,
+      // The silent fixture has no captions and no whisper in CI.
       transcript: { status: "none" },
-      frames: [],
-      grids: [],
     });
     expect(manifest!.videoId).toMatch(/^[0-9a-f]{12}$/);
     expect(manifest!.title).toBe("fixture.mp4");
     expect(manifest!.durationSec).toBeCloseTo(9, 1);
-    expect(manifest!.budget).toHaveProperty("estTokens");
+
+    // Assert the contract's shape, not its contents — later milestones populate
+    // frames and grids, and this assertion has to survive that.
+    expect(Array.isArray(manifest!.frames)).toBe(true);
+    expect(Array.isArray(manifest!.grids)).toBe(true);
+    expect(manifest!.budget).toMatchObject({
+      policy: expect.anything(),
+      framesFound: expect.any(Number),
+      framesKept: expect.any(Number),
+      estTokens: expect.any(Number),
+    });
   });
 
   // AC2 — the cache key must hold across runs.
@@ -137,6 +151,117 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — manifest Seam", () => 
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Playlist URLs are not supported");
+  });
+});
+
+describe.skipIf(!ffmpegAvailable)("watch-video script — frame track", () => {
+  let workDir: string;
+  let fixture: string;
+
+  beforeAll(() => {
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-frames-"));
+    fixture = buildFixture(workDir);
+  });
+
+  afterAll(() => {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  });
+
+  // AC3 — the fixture's cuts are at exactly 3s and 6s by construction, so this
+  // assertion is exact rather than approximate.
+  it("detects scene changes at their real timestamps", () => {
+    const scenes = detectScenes(fixture);
+
+    expect(scenes[0]).toBe(0);
+    expect(scenes.some((t) => Math.abs(t - 3) < 0.5)).toBe(true);
+    expect(scenes.some((t) => Math.abs(t - 6) < 0.5)).toBe(true);
+  });
+
+  it("always includes an opening frame at t=0", () => {
+    expect(detectScenes(fixture)).toContain(0);
+  });
+
+  it("cuts one frame file per timestamp", () => {
+    const cacheDir = path.join(workDir, "frames-out");
+    const frames = extractFrames(fixture, [0, 3, 6], cacheDir);
+
+    expect(frames).toHaveLength(3);
+    for (const frame of frames) {
+      expect(fs.existsSync(frame.path)).toBe(true);
+      expect(fs.statSync(frame.path).size).toBeGreaterThan(0);
+    }
+    expect(frames.map((f) => f.t)).toEqual([0, 3, 6]);
+  });
+
+  // A frame that cannot be produced must not take the whole load down with it —
+  // one bad seek in a long video should cost that frame, nothing more.
+  it("skips frames ffmpeg cannot produce rather than aborting", () => {
+    const cacheDir = path.join(workDir, "frames-partial");
+    const frames = extractFrames(fixture, [0, 3, 900], cacheDir);
+
+    expect(frames.map((f) => f.t)).toEqual([0, 3]);
+    expect(frames).toHaveLength(2);
+  });
+
+  it("records frames and budget in the manifest", () => {
+    const cacheDir = path.join(workDir, "manifest-frames");
+    const result = runScript([fixture, "--cache-dir", cacheDir]);
+    expect(result.status).toBe(0);
+
+    const manifest = readManifest(cacheDir);
+    // The fixture is 9s, so it takes the short-form path: one frame per second.
+    expect(manifest!.budget.policy).toBe("short-form-1fps");
+    expect(manifest!.frames.length).toBe(9);
+    expect(manifest!.budget.framesKept).toBe(9);
+    expect(manifest!.budget.estTokens).toBe(9 * 1600);
+  });
+});
+
+describe("watch-video script — frame budget", () => {
+  // AC4
+  it("samples short clips every second and long ones by scene", () => {
+    expect(framePolicy(90)).toEqual({ policy: "short-form-1fps", maxFrames: 90 });
+    expect(framePolicy(3600)).toEqual({ policy: "scene-change", maxFrames: 60 });
+  });
+
+  it("treats the two-minute mark as the boundary", () => {
+    expect(framePolicy(119).policy).toBe("short-form-1fps");
+    expect(framePolicy(120).policy).toBe("scene-change");
+  });
+
+  it("emits one timestamp per second for short clips", () => {
+    expect(everySecond(5)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  // Regression: a 19.014s video previously emitted a sample at t=19. Seeking
+  // there lands past the final frame, ffmpeg writes nothing, and the whole run
+  // aborted. Caught by driving a real video, not by the fixture.
+  it("stops a full second short of the end on a fractional duration", () => {
+    expect(everySecond(19.014)).not.toContain(19);
+    expect(everySecond(19.014)).toHaveLength(19);
+    expect(everySecond(20)).toHaveLength(20);
+  });
+
+  it("always yields at least one timestamp, even for a sub-second clip", () => {
+    expect(everySecond(0.4)).toEqual([0]);
+  });
+
+  it("thins an over-long list to the cap, keeping the first", () => {
+    const many = Array.from({ length: 187 }, (_, i) => i * 2);
+    const kept = thinFrames(many, 60);
+
+    expect(kept).toHaveLength(60);
+    expect(kept[0]).toBe(0);
+    expect(kept[kept.length - 1]).toBe(372);
+  });
+
+  it("leaves a list shorter than the cap untouched", () => {
+    expect(thinFrames([0, 3, 6], 60)).toEqual([0, 3, 6]);
+  });
+
+  it("spaces kept frames evenly rather than taking a prefix", () => {
+    const kept = thinFrames([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 5);
+    expect(kept).toEqual([0, 2, 5, 7, 9]);
   });
 });
 

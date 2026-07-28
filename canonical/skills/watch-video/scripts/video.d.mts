@@ -52,7 +52,25 @@ export interface Manifest {
 }
 
 export declare const FRAME_LONG_EDGE: number;
+export declare const SCENE_THRESHOLD: number;
+export declare const SHORT_FORM_MAX_SEC: number;
+export declare const LONG_FORM_MAX_FRAMES: number;
+export declare const TOKENS_PER_GRID: number;
+export declare const TOKENS_PER_FRAME: number;
 export declare const USAGE: string;
+
+export declare function detectScenes(mediaPath: string, threshold?: number): number[];
+export declare function framePolicy(durationSec: number): {
+  policy: "short-form-1fps" | "scene-change";
+  maxFrames: number;
+};
+export declare function everySecond(durationSec: number): number[];
+export declare function thinFrames(timestamps: number[], maxFrames: number): number[];
+export declare function extractFrames(
+  mediaPath: string,
+  timestamps: number[],
+  cacheDir: string,
+): FrameEntry[];
 
 export declare function parseArgs(argv: string[]): ParsedArgs;
 export declare function resolveSource(arg: string): Source;
