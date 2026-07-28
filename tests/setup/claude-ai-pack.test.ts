@@ -235,6 +235,16 @@ describe("manifests/claude-ai.yaml (repo integrity)", () => {
     expect(lexicon.length).toBeGreaterThan(0);
   });
 
+  it("keeps the Project instructions under claude.ai's ~8k-char box", async () => {
+    const instructions = await readFile(
+      path.join(repoRoot, "manifests", "claude-ai-project-instructions.md"),
+      "utf-8",
+    );
+    const length = [...instructions.trim()].length;
+    expect(length).toBeGreaterThan(0);
+    expect(length).toBeLessThanOrEqual(8000);
+  });
+
   it("keeps the preferences paste under claude.ai's character cap", async () => {
     const preferences = await readFile(
       path.join(repoRoot, "manifests", "claude-ai-preferences.md"),

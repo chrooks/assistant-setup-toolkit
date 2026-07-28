@@ -264,6 +264,9 @@ Uploads are manual — claude.ai has no sync API for personal accounts. Re-run
    knowledge. Skills that reference those files by path degrade gracefully;
    the knowledge files close the gap, and TOOLBOX.md tells Claude what
    skills and connectors it has.
+4. Paste PROJECT-INSTRUCTIONS.md into the HQ Project's custom instructions —
+   it tells every chat in the Project to actually reason from those three
+   files instead of treating them as documents.
 
 ## Skill ZIPs (Settings → Capabilities → Skills → Upload)
 
@@ -408,6 +411,17 @@ async function packSelection(
 
   await fs.mkdir(outDir, { recursive: true });
   await fs.writeFile(path.join(outDir, "PREFERENCES.md"), preferences);
+
+  // Project instructions — pasted into the HQ Project (~8k-char box), telling
+  // chats to reason from the three knowledge files.
+  const projectInstructions = await fs.readFile(
+    path.join(repoRoot, "manifests", "claude-ai-project-instructions.md"),
+    "utf-8",
+  );
+  await fs.writeFile(
+    path.join(outDir, "PROJECT-INSTRUCTIONS.md"),
+    projectInstructions,
+  );
 
   // Project-knowledge files: the Lexicon ships from canonical (tracked);
   // PROFILE.md is machine-local (gitignored) and may be absent.
