@@ -7,6 +7,9 @@ import {
   buildGrids,
   DEFAULT_CACHE_SEGMENTS,
   findWhisperCli,
+  OPENAI_MAX_UPLOAD_BYTES,
+  OPENAI_MODEL,
+  transcribeWithOpenAI,
   WHISPER_CLIS,
   detectScenes,
   everySecond,
@@ -394,6 +397,37 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — transcript degradation
     // Frames must survive a missing transcript.
     expect(manifest!.frames.length).toBeGreaterThan(0);
     expect(manifest!.grids.length).toBeGreaterThan(0);
+  });
+});
+
+describe("watch-video script — OpenAI transcription rung", () => {
+  // whisper-1 is the only transcription model returning WebVTT. The newer
+  // gpt-4o-transcribe models emit json/text with no timestamps, which would
+  // break the timestamp spine the pipeline is built on.
+  it("uses whisper-1, the only model that returns timestamped VTT", () => {
+    expect(OPENAI_MODEL).toBe("whisper-1");
+  });
+
+  it("knows the API's 25 MB upload cap", () => {
+    expect(OPENAI_MAX_UPLOAD_BYTES).toBe(25 * 1024 * 1024);
+  });
+
+  // Egress must be a deliberate choice, never a silent fallback.
+  it("is off unless explicitly requested", () => {
+    expect(parseArgs(["clip.mp4"]).openai).toBe(false);
+    expect(parseArgs(["clip.mp4", "--openai"]).openai).toBe(true);
+  });
+
+  it("refuses to run without a key rather than failing obscurely", async () => {
+    const previous = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    try {
+      await expect(transcribeWithOpenAI("/nonexistent.mp4", "/tmp")).rejects.toThrow(
+        /OPENAI_API_KEY/,
+      );
+    } finally {
+      if (previous !== undefined) process.env.OPENAI_API_KEY = previous;
+    }
   });
 });
 

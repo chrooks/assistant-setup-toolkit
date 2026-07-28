@@ -12,10 +12,11 @@ export interface ParsedArgs {
   cacheDir: string | null;
   force: boolean;
   help: boolean;
+  openai: boolean;
 }
 
 export interface TranscriptInfo {
-  status: "captions" | "whisper" | "none";
+  status: "captions" | "whisper" | "openai" | "none";
   path?: string;
   segments?: number;
   /** Present when status is "none": why there is no transcript. */
@@ -86,7 +87,7 @@ export declare function readManifest(cacheDir: string): Manifest | null;
 export declare function describeSource(source: Source): { title: string; channel: string | null };
 export declare function requireBinary(bin: string, installHint: string): void;
 export declare function hasBinary(bin: string): boolean;
-export declare function main(argv: string[]): number;
+export declare function main(argv: string[]): Promise<number>;
 
 export interface Segment {
   t: number;
@@ -110,7 +111,13 @@ export declare function buildTranscript(
   source: Source,
   mediaPath: string | null,
   cacheDir: string,
-): TranscriptInfo;
+  options?: { useOpenAI?: boolean },
+): Promise<TranscriptInfo>;
+
+export declare const OPENAI_MODEL: string;
+export declare const OPENAI_MAX_UPLOAD_BYTES: number;
+export declare function extractAudio(mediaPath: string, cacheDir: string): string;
+export declare function transcribeWithOpenAI(mediaPath: string, cacheDir: string): Promise<Segment[]>;
 
 export declare const GRID_COLS: number;
 export declare const GRID_ROWS: number;

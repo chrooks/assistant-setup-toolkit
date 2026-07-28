@@ -29,12 +29,21 @@ Optional, for videos with no subtitle track: a whisper CLI. Install
 no binary, so installing it alone does nothing here. OpenAI's `whisper` CLI also works.
 Never `mlx-whisper` — Apple-Silicon-only, so it fails on other machines.
 
-**Behind a corporate proxy**, the first whisper run downloads model weights from Hugging
-Face and may be blocked with an HTTP 403. That is survivable: the load completes with
-frames, `transcript.status` comes back `none`, and `transcript.reason` says why. To fix it
-properly, pre-populate the model cache from an unrestricted machine (copy
-`~/.cache/huggingface/hub/models--Systran--faster-whisper-base/`) and set `HF_HUB_OFFLINE=1`,
-or ask for `huggingface.co` to be allowlisted.
+**Behind a corporate proxy**, the first whisper run downloads model weights and may be
+blocked with an HTTP 403. Which host it needs depends on the client, and that matters:
+`whisper-ctranslate2` fetches from `huggingface.co`, while OpenAI's `whisper` fetches from
+`openaipublic.azureedge.net`. If one is blocked, try the other before anything else — the
+Azure CDN is the more commonly allowlisted of the two.
+
+A blocked download is survivable either way: the load completes with frames,
+`transcript.status` comes back `none`, and `transcript.reason` names the fix.
+
+**Last resort — `--openai`.** Transcribes through the OpenAI API instead of locally, using
+`OPENAI_API_KEY` from the environment. This is **opt-in and never automatic**, because it
+sends the video's audio off the machine — a decision the user makes, not a silent fallback
+when a local tool fails. Offer it at the no-transcript gate; never pass it unasked. On a
+work machine, say plainly that audio leaves the building so the user can weigh it against
+their policy.
 
 ## Routing — what the argument is
 
@@ -62,8 +71,8 @@ for a re-extract; otherwise a second run on the same video reuses the first extr
 Everything downstream reads this one object:
 
 - `title`, `channel`, `durationSec` — for the header line.
-- `transcript.status` — `captions`, `whisper`, or `none`; `transcript.path` when it exists,
-  and `transcript.reason` explaining why when it is `none`.
+- `transcript.status` — `captions`, `whisper`, `openai`, or `none`; `transcript.path` when it
+  exists, and `transcript.reason` explaining why when it is `none`.
 - `frames[]` — `{ t, path }` per frame, full resolution, on disk.
 - `grids[]` — `{ path, cells, from, to, cellTimes }`; each grid tiles up to 16 frames.
 - `budget` — `policy`, `framesFound`, `framesKept`, `estTokens`.
@@ -89,9 +98,11 @@ disk instead of loaded eagerly.
 When `transcript.status` is `none`, **stop and ask the user to confirm** before going any
 further. Quote `transcript.reason` — it distinguishes "no whisper installed" from "whisper
 was blocked downloading its model", which need different fixes. Say plainly that the video
-can only be loaded as frames with no spoken content, and offer the fix that matches the
-reason. Do not silently proceed with frames alone — a talk without its transcript is mostly
-worthless, and the user should decide whether that is worth their context.
+can only be loaded as frames with no spoken content, and offer the fixes that match the
+reason — installing a whisper CLI, trying the other client's download host, or re-running
+with `--openai` (noting that it sends audio off the machine). Do not silently proceed with
+frames alone, and do not reach for `--openai` on your own — a talk without its transcript is
+mostly worthless, but so is uploading a work recording the user did not agree to send.
 
 ## Brief + acknowledge
 

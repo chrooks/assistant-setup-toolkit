@@ -26,6 +26,8 @@ Options:
   --cache-dir <dir>     Where to write the manifest and extracted assets.
                         Defaults to ./.exports/watch-video/<videoId>/
   --force               Re-extract even when a cached manifest already exists.
+  --openai              Transcribe via the OpenAI API when there is no caption
+                        track. Sends audio off this machine; needs OPENAI_API_KEY.
   --help                Print this message.
 
 Writes <cache-dir>/manifest.json and prints it to stdout.`;
@@ -65,6 +67,18 @@ const TOKENS_PER_FRAME = 1600;
  */
 const DEFAULT_CACHE_SEGMENTS = [".exports", "watch-video"];
 
+/**
+ * OpenAI transcription. `whisper-1` is deliberate: it is the only transcription
+ * model that returns WebVTT. gpt-4o-transcribe and gpt-4o-mini-transcribe are
+ * newer and cheaper but emit json/text only, with no timestamps — which would
+ * break the timestamp spine the whole pipeline is built on.
+ */
+const OPENAI_MODEL = "whisper-1";
+const OPENAI_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
+
+/** Hard cap enforced by the API, in bytes. */
+const OPENAI_MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
 /** Contact-sheet geometry. 4x4 at CELL_WIDTH gives a 2576px long edge. */
 const GRID_COLS = 4;
 const GRID_ROWS = 4;
@@ -76,7 +90,7 @@ const CELL_HEIGHT = 362;
  * has three options and does not need an arg-parsing dependency.
  */
 export function parseArgs(argv) {
-  const options = { source: null, cacheDir: null, force: false, help: false };
+  const options = { source: null, cacheDir: null, force: false, help: false, openai: false };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -84,6 +98,8 @@ export function parseArgs(argv) {
       options.help = true;
     } else if (arg === "--force") {
       options.force = true;
+    } else if (arg === "--openai") {
+      options.openai = true;
     } else if (arg === "--cache-dir") {
       i += 1;
       options.cacheDir = argv[i] ?? null;
@@ -299,6 +315,68 @@ export function writeTranscript(cacheDir, segments) {
 }
 
 /**
+ * Downmix to small mono speech audio. 16 kHz mono at 32 kbps is roughly
+ * 14 MB/hour, so a typical talk clears the API's 25 MB cap comfortably, and
+ * speech recognition gains nothing from stereo or a higher sample rate.
+ */
+export function extractAudio(mediaPath, cacheDir) {
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const audioPath = path.join(cacheDir, "audio.mp3");
+
+  run("ffmpeg", [
+    "-y", "-loglevel", "error",
+    "-i", mediaPath,
+    "-vn", "-ac", "1", "-ar", "16000", "-b:a", "32k",
+    audioPath,
+  ], { stdio: "ignore" });
+
+  return audioPath;
+}
+
+/**
+ * Transcribe via OpenAI's API. Opt-in only — this sends audio off the machine,
+ * which is a decision the user makes explicitly rather than something that
+ * happens because a local tool failed.
+ *
+ * The key is read from OPENAI_API_KEY and never written to the manifest, logged,
+ * or echoed.
+ */
+export async function transcribeWithOpenAI(mediaPath, cacheDir) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
+
+  const audioPath = extractAudio(mediaPath, cacheDir);
+  const { size } = fs.statSync(audioPath);
+  if (size > OPENAI_MAX_UPLOAD_BYTES) {
+    const mb = (size / 1024 / 1024).toFixed(1);
+    throw new Error(
+      `audio is ${mb} MB, over the API's 25 MB limit — split the video or use a local whisper CLI`,
+    );
+  }
+
+  const form = new FormData();
+  form.append("file", new Blob([fs.readFileSync(audioPath)]), "audio.mp3");
+  form.append("model", OPENAI_MODEL);
+  form.append("response_format", "vtt");
+
+  const response = await fetch(OPENAI_ENDPOINT, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+
+  if (!response.ok) {
+    // Deliberately does not echo the body verbatim — it can quote request
+    // headers back, and the key rides in one.
+    throw new Error(`OpenAI transcription failed: HTTP ${response.status}`);
+  }
+
+  const vttPath = path.join(cacheDir, "openai.vtt");
+  fs.writeFileSync(vttPath, await response.text());
+  return parseVtt(vttPath);
+}
+
+/**
  * Whisper command-line clients, in preference order.
  *
  * Note `faster-whisper` is NOT here: that pip package is a *library* and ships
@@ -349,7 +427,7 @@ export function hasBinary(bin) {
  * A `none` status is not a failure here — the Skill turns it into a question for
  * the user rather than silently loading a video with no words.
  */
-export function buildTranscript(source, mediaPath, cacheDir) {
+export async function buildTranscript(source, mediaPath, cacheDir, { useOpenAI = false } = {}) {
   let segments = null;
 
   if (source.kind === "url") {
@@ -362,16 +440,29 @@ export function buildTranscript(source, mediaPath, cacheDir) {
     }
   }
 
+  if (!mediaPath) {
+    return { status: "none", reason: "No caption track and no media file to transcribe." };
+  }
+
+  if (useOpenAI) {
+    try {
+      segments = await transcribeWithOpenAI(mediaPath, cacheDir);
+      if (segments.length > 0) {
+        return { status: "openai", path: writeTranscript(cacheDir, segments), segments: segments.length };
+      }
+      return { status: "none", reason: "OpenAI transcription returned no speech segments." };
+    } catch (error) {
+      return { status: "none", reason: `OpenAI transcription failed. ${firstLine(error.message)}` };
+    }
+  }
+
   const cli = findWhisperCli();
   if (!cli) {
     return {
       status: "none",
-      reason: "No caption track, and no whisper CLI installed (try: pip install whisper-ctranslate2).",
+      reason: "No caption track, and no whisper CLI installed (try: pip install openai-whisper). "
+        + "Re-run with --openai to transcribe via the OpenAI API instead.",
     };
-  }
-
-  if (!mediaPath) {
-    return { status: "none", reason: "No caption track and no media file to transcribe." };
   }
 
   // Whisper failing must not cost the frames already extracted. The most common
@@ -382,7 +473,8 @@ export function buildTranscript(source, mediaPath, cacheDir) {
   } catch (error) {
     return {
       status: "none",
-      reason: `Whisper (${cli}) failed — often a blocked model download. ${firstLine(error.message)}`,
+      reason: `Whisper (${cli}) failed — often a blocked model download. ${firstLine(error.message)} `
+        + "Re-run with --openai to transcribe via the OpenAI API instead.",
     };
   }
 
@@ -656,7 +748,7 @@ export function downloadMedia(url, cacheDir) {
   return path.join(cacheDir, found[0]);
 }
 
-export function main(argv) {
+export async function main(argv) {
   const options = parseArgs(argv);
 
   if (options.help || !options.source) {
@@ -709,7 +801,7 @@ export function main(argv) {
     title,
     channel,
     durationSec,
-    transcript: buildTranscript(source, mediaPath, cacheDir),
+    transcript: await buildTranscript(source, mediaPath, cacheDir, { useOpenAI: options.openai }),
     frames,
     grids,
     budget: {
@@ -730,7 +822,7 @@ export function main(argv) {
 const invokedDirectly = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 if (invokedDirectly) {
   try {
-    process.exit(main(process.argv.slice(2)));
+    process.exit(await main(process.argv.slice(2)));
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
     process.exit(1);
@@ -739,6 +831,8 @@ if (invokedDirectly) {
 
 export {
   CELL_HEIGHT,
+  OPENAI_MAX_UPLOAD_BYTES,
+  OPENAI_MODEL,
   WHISPER_CLIS,
   DEFAULT_CACHE_SEGMENTS,
   MIN_SCENE_GAP_SEC,
