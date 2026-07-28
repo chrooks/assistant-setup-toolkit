@@ -1,0 +1,31 @@
+# Skills packed for claude.ai (npm run claude-ai).
+#
+# claude.ai is NOT an install target — there is no Assistant Home to project
+# into, no hooks, no rules directory — so this is deliberately not an
+# ADR-0002 Preset. What claude.ai does accept:
+#   - custom skill ZIPs, uploaded by hand (Settings → Capabilities → Skills),
+#     account-wide across web, iOS, and desktop
+#   - a pasted preferences text (claude-ai-preferences.md, 1,500-char limit)
+#   - Project instructions (~8k chars) + knowledge files (LEXICON.md, PROFILE.md)
+# This manifest names which canonical skills make that trip.
+#
+# Curation rule: knowledge-work skills only. Anything needing the real
+# filesystem, git, subagents, or local MCPs stays out:
+#   - seed-project, lexicon, note, handoff — need ~/.claude or the repo tree
+#   - dev workflow (scope/plan/implement/commit/dev/...) — Claude Code territory
+version: 1
+skills:
+  - grill-me # pure conversation
+  - quiz-me # active recall on a topic or Project knowledge
+  - wym # concept explainer
+  - walkthrough # topic-by-topic breakdown of a doc or answer
+  - recap # packages a conversation into recap artifacts
+  - visualize # umbrella picker over table/diagram/figure
+  - table # md inline; html becomes a claude.ai Artifact
+  - diagram # md inline; html becomes a claude.ai Artifact
+  - figure # md inline; html becomes a claude.ai Artifact
+  - deep-research # degrades to claude.ai native web search (no firecrawl/exa MCPs)
+  - idea-to-design # reasons from PROFILE.md — add it as Project knowledge
+  - design-audit # reasons from PROFILE.md — add it as Project knowledge
+  - nickify # plain-English brief translator
+  - ingest # files to the brain via the Athena connector's inbox tools

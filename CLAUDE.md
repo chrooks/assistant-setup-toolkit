@@ -14,6 +14,9 @@ npm run setup -- --claude --default --preset work   # Machine-class Preset (mani
 npm run setup -- --claude --default --write overwrite  # safe-merge (default) | overwrite | prune
 npm run setup -- --claude --default --artifacts        # Also build Skill Artifact ZIPs (off by default)
 
+# claude.ai pack — curated skill ZIPs + preferences for manual upload
+npm run claude-ai                             # manifests/claude-ai.yaml -> artifacts/claude-ai/
+
 # Dev commands
 npm test                                      # Run all tests (vitest run)
 npm run test:watch                            # Run tests in watch mode
