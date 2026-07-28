@@ -45,6 +45,22 @@ Only modify the `## Language` section. Never touch `## Relationships`,
 `## Example dialogue`, `## Flagged ambiguities`, or any other section unless the
 user explicitly asks.
 
+### Capture mode — when the real Lexicon is not reachable
+
+Running where the user's actual `LEXICON.md` cannot be reached — claude.ai, a
+sandbox, any environment without the user's real project tree — switches the
+skill to capture mode:
+
+1. NEVER create the scaffold there. A sandbox file evaporates, so
+   `added <Term> to Lexicon` would be a false success that loses the term.
+2. Lookups, listing, and passive recognition read `LEXICON.md` from the
+   Project's knowledge files when present.
+3. For add, update, or remove: emit the exact formatted entry block (or the
+   removal instruction) in a copyable code fence for the user to land in the
+   real Lexicon later, and say plainly that nothing has been written yet.
+4. If the Athena connector is available, offer once to file the entry to the
+   brain's inbox so it lands durably.
+
 ## Lexicon Entry Format
 
 ```markdown
