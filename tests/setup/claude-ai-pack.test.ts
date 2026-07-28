@@ -6,6 +6,7 @@ import {
   buildToolboxIndex,
   buildUploadChecklist,
   extractSkillGloss,
+  groupExternalSkillDirs,
   parseClaudeAiManifest,
   selectPackSkills,
 } from "../../src/setup/claude-ai-pack.js";
@@ -62,6 +63,59 @@ describe("parseClaudeAiManifest", () => {
         "version: 1\nskills: [wym]\nconnectors:\n  Athena: 3\n",
       ),
     ).toThrow(/Connector "Athena"/);
+  });
+
+  it("parses externalSkills and defaults them to empty", () => {
+    const withExternal = parseClaudeAiManifest(
+      "version: 1\nskills: [wym]\nexternalSkills:\n  - grilling\n",
+    );
+    expect(withExternal.externalSkills).toEqual(["grilling"]);
+
+    const without = parseClaudeAiManifest("version: 1\nskills: [wym]\n");
+    expect(without.externalSkills).toEqual([]);
+  });
+
+  it("rejects a skill listed in both homes", () => {
+    expect(() =>
+      parseClaudeAiManifest(
+        "version: 1\nskills: [wym]\nexternalSkills: [wym]\n",
+      ),
+    ).toThrow(/both/);
+  });
+});
+
+describe("groupExternalSkillDirs", () => {
+  it("groups fetched payload files into per-skill dirs", () => {
+    const dirs = groupExternalSkillDirs([
+      {
+        relativePath: "skills/grilling/SKILL.md",
+        sourcePath: "/tmp/clone/skills/productivity/grilling/SKILL.md",
+        component: "skills",
+        origin: "external-source",
+        executable: false,
+      },
+      {
+        relativePath: "skills/grilling/notes/extra.md",
+        sourcePath: "/tmp/clone/skills/productivity/grilling/notes/extra.md",
+        component: "skills",
+        origin: "external-source",
+        executable: false,
+      },
+      {
+        relativePath: "rules/common/foo.md",
+        sourcePath: "/tmp/clone/rules/common/foo.md",
+        component: "rules",
+        origin: "external-source",
+        executable: false,
+      },
+    ]);
+    expect(dirs).toEqual([
+      {
+        name: "grilling",
+        files: ["SKILL.md", "notes/extra.md"],
+        sourceDir: "/tmp/clone/skills/productivity/grilling",
+      },
+    ]);
   });
 });
 
@@ -158,6 +212,19 @@ describe("manifests/claude-ai.yaml (repo integrity)", () => {
     );
     const { missing } = selectPackSkills(available, manifest.skills);
     expect(missing).toEqual([]);
+  });
+
+  it("keeps externalSkills out of canonical — a copy there would shadow them", async () => {
+    const manifest = parseClaudeAiManifest(
+      await readFile(path.join(repoRoot, "manifests", "claude-ai.yaml"), "utf-8"),
+    );
+    const canonicalNames = new Set(
+      (await discoverSkillDirs(repoRoot)).map((dir) => dir.name),
+    );
+    const shadowed = manifest.externalSkills.filter((name) =>
+      canonicalNames.has(name),
+    );
+    expect(shadowed).toEqual([]);
   });
 
   it("ships a canonical Lexicon for Project knowledge", async () => {

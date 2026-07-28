@@ -31,6 +31,15 @@ skills:
   - ingest # files to the brain via the Athena connector's inbox tools
   - handoff # copyable continuation prompt — carries context to the next session
   - lexicon # capture mode on claude.ai — emits entry blocks / files via Athena, never scaffolds
+# External skills — fetched from install.yaml's skill sources at pack time,
+# not from canonical/. Layering matches the wizard (canonical wins): if one of
+# these is ever vendored into canonical/skills, move it up to `skills` — a
+# repo-integrity test flags the shadowing.
+externalSkills:
+  - grilling # the primitive grill-me wraps — without it grill-me is half a skill
+  - writing-beats # mattpocock in-progress writing skills
+  - writing-fragments
+  - writing-shape
 # Connectors enabled on the claude.ai account — listed in TOOLBOX.md so Claude
 # knows what's at its disposal. The repo can't detect claude.ai account config;
 # update this by hand when connectors change.

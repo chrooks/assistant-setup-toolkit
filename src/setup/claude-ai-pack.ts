@@ -11,10 +11,14 @@
  */
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { discoverSkillDirs } from "./index.js";
 import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
+import { loadInstallationManifest } from "./manifest.js";
+import { fetchPlannedSources } from "./external-fetcher.js";
+import type { PayloadFile } from "./domain.js";
 
 /** claude.ai's account-level preferences box caps at 1,500 characters. */
 export const CLAUDE_AI_PREFERENCES_CHAR_LIMIT = 1500;
@@ -22,6 +26,8 @@ export const CLAUDE_AI_PREFERENCES_CHAR_LIMIT = 1500;
 /** The curated claude.ai skill selection from manifests/claude-ai.yaml. */
 export interface ClaudeAiManifest {
   readonly skills: readonly string[];
+  /** Skills packed from install.yaml's External Sources, not canonical/. */
+  readonly externalSkills: readonly string[];
   /** Connectors enabled on the claude.ai account, name → one-line gloss. */
   readonly connectors: Readonly<Record<string, string>>;
 }
@@ -69,6 +75,26 @@ export function parseClaudeAiManifest(yamlText: string): ClaudeAiManifest {
     }
   }
 
+  const externalRaw = doc.externalSkills ?? [];
+  if (!Array.isArray(externalRaw)) {
+    throw new Error("`externalSkills` must be a list of skill names.");
+  }
+  for (const entry of externalRaw) {
+    if (typeof entry !== "string" || entry.length === 0) {
+      throw new Error(
+        `Every external skill entry must be a non-empty string — got ${JSON.stringify(entry)}.`,
+      );
+    }
+  }
+  const overlap = (externalRaw as string[]).filter((name) =>
+    (skills as string[]).includes(name),
+  );
+  if (overlap.length > 0) {
+    throw new Error(
+      `Skills listed in both \`skills\` and \`externalSkills\`: ${overlap.join(", ")} — pick one home each.`,
+    );
+  }
+
   const connectorsRaw = doc.connectors ?? {};
   if (
     connectorsRaw === null ||
@@ -89,7 +115,48 @@ export function parseClaudeAiManifest(yamlText: string): ClaudeAiManifest {
     connectors[name] = gloss;
   }
 
-  return { skills: skills as string[], connectors };
+  return {
+    skills: skills as string[],
+    externalSkills: externalRaw as string[],
+    connectors,
+  };
+}
+
+/**
+ * Regroup fetched skill-component PayloadFiles (relativePath
+ * `skills/<name>/<rest>`) into per-skill directories the artifact planner
+ * understands. `sourceDir` is derived by stripping `<rest>` from each file's
+ * absolute sourcePath, so it points into the clone.
+ */
+export function groupExternalSkillDirs(
+  files: readonly PayloadFile[],
+): PackSkillDir[] {
+  const byName = new Map<string, { files: string[]; sourceDir: string }>();
+
+  for (const file of files) {
+    if (file.component !== "skills") continue;
+    const parts = file.relativePath.split("/");
+    if (parts[0] !== "skills" || parts.length < 3) continue;
+    const name = parts[1];
+    const rest = parts.slice(2).join("/");
+    const sourceDir = file.sourcePath.slice(
+      0,
+      file.sourcePath.length - rest.length - 1,
+    );
+
+    const existing = byName.get(name);
+    if (existing === undefined) {
+      byName.set(name, { files: [rest], sourceDir });
+    } else {
+      existing.files.push(rest);
+    }
+  }
+
+  return [...byName.entries()].map(([name, dir]) => ({
+    name,
+    files: dir.files.sort(),
+    sourceDir: dir.sourceDir,
+  }));
 }
 
 /** Longest gloss the toolbox renders before truncating with an ellipsis. */
@@ -254,6 +321,79 @@ export async function runClaudeAiPack(repoRoot: string): Promise<number> {
     );
     return 1;
   }
+
+  // A canonical copy would shadow the external one in the wizard's layering —
+  // the manifest must say which home each skill lives in.
+  const shadowed = manifest.externalSkills.filter((name) =>
+    available.some((dir) => dir.name === name),
+  );
+  if (shadowed.length > 0) {
+    console.error(
+      `externalSkills now exist in canonical/skills (move them to \`skills\`): ${shadowed.join(", ")}.`,
+    );
+    return 1;
+  }
+
+  // External skills: clone the manifest's skill sources into a temp dir and
+  // select from the fetched universe. The temp dir must outlive ZIP creation —
+  // createSkillArtifacts reads the files from it.
+  let externalWorkDir: string | undefined;
+  let externalSelected: readonly PackSkillDir[] = [];
+  try {
+    if (manifest.externalSkills.length > 0) {
+      const install = await loadInstallationManifest(
+        path.join(repoRoot, "manifests", "install.yaml"),
+      );
+      const skillSources = install.externalSources.filter(
+        (source) =>
+          source.kind === "skill-pack" ||
+          ((source.kind === "skill" || source.kind === "skill-or-plugin") &&
+            manifest.externalSkills.includes(source.id)),
+      );
+      externalWorkDir = await fs.mkdtemp(
+        path.join(os.tmpdir(), "claude-ai-pack-"),
+      );
+      const fetchResult = await fetchPlannedSources(
+        skillSources,
+        externalWorkDir,
+      );
+      for (const r of fetchResult.results) {
+        if (r.error) console.error(`  [fetch failed] ${r.sourceId}: ${r.error}`);
+      }
+      const externalAvailable = groupExternalSkillDirs(fetchResult.files);
+      const externalSelection = selectPackSkills(
+        externalAvailable,
+        manifest.externalSkills,
+      );
+      if (externalSelection.missing.length > 0) {
+        console.error(
+          `externalSkills not found in any fetched source: ${externalSelection.missing.join(", ")}.`,
+        );
+        return 1;
+      }
+      externalSelected = externalSelection.selected;
+    }
+
+    return await packSelection(
+      repoRoot,
+      [...selected, ...externalSelected],
+      manifest,
+      preferences,
+    );
+  } finally {
+    if (externalWorkDir !== undefined) {
+      await fs.rm(externalWorkDir, { recursive: true, force: true });
+    }
+  }
+}
+
+/** Zip the selected skills and write the companion files. */
+async function packSelection(
+  repoRoot: string,
+  selected: readonly PackSkillDir[],
+  manifest: ClaudeAiManifest,
+  preferences: string,
+): Promise<number> {
 
   const outDir = path.join(repoRoot, "artifacts", "claude-ai");
   const planned = planSkillArtifacts({
