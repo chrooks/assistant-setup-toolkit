@@ -45,6 +45,13 @@ const SHORT_FORM_MAX_SEC = 120;
 /** Frame ceiling for anything longer. 60 frames is ~4 grids, ~19k tokens. */
 const LONG_FORM_MAX_FRAMES = 60;
 
+/**
+ * Minimum seconds between kept scene changes. A fade or animation trips the
+ * threshold on many consecutive frames, and without this the whole budget is
+ * spent on one transition.
+ */
+const MIN_SCENE_GAP_SEC = 2;
+
 /** Tokens a single full-resolution image costs on Claude Opus 5. */
 const TOKENS_PER_GRID = 4784;
 
@@ -94,12 +101,29 @@ export function resolveSource(arg) {
 }
 
 /**
- * A playlist would multiply the frame budget by however many videos it holds,
- * for a context nobody can reason across. Reject it rather than silently
- * loading the first entry or all of them.
+ * True only for a *pure* playlist URL — one naming a list with no specific
+ * video. Those would multiply the frame budget by however many videos the list
+ * holds, for a context nobody can reason across.
+ *
+ * A watch URL carrying both `v=` and `list=` is NOT a playlist: it is one video
+ * that happened to be opened from a list (Watch Later, a queue, an autoplay
+ * chain). The user pointed at that video, so load it and drop the list context.
  */
 export function isPlaylistUrl(value) {
-  return /[?&]list=/.test(value);
+  const hasList = /[?&]list=/.test(value);
+  const hasVideo = /[?&]v=[^&]+/.test(value);
+  return hasList && !hasVideo;
+}
+
+/**
+ * Strip incidental context from a watch URL — playlist membership, queue index,
+ * a start-time deep link. Without this, yt-dlp given `?v=X&list=Y` downloads the
+ * whole of Y, and the cache key would vary with how the link was copied.
+ */
+export function normalizeUrl(value) {
+  const match = value.match(/[?&]v=([^&]+)/);
+  if (!match) return value;
+  return `https://www.youtube.com/watch?v=${match[1]}`;
 }
 
 /**
@@ -109,7 +133,7 @@ export function isPlaylistUrl(value) {
  */
 export function videoIdFor(source) {
   if (source.kind === "url") {
-    return run("yt-dlp", ["--print", "id", "--skip-download", source.value]).trim();
+    return run("yt-dlp", ["--no-playlist", "--print", "id", "--skip-download", source.value]).trim();
   }
 
   const { size } = fs.statSync(source.value);
@@ -160,6 +184,7 @@ export function describeSource(source) {
   }
 
   const out = run("yt-dlp", [
+    "--no-playlist",
     "--print", "%(title)s\n%(channel)s",
     "--skip-download",
     source.value,
@@ -182,8 +207,8 @@ export function fetchSubtitles(url, cacheDir) {
   const stem = path.join(cacheDir, "sub");
 
   const attempts = [
-    ["--write-auto-sub", "--sub-format", "vtt", "--skip-download", "-o", stem, url],
-    ["--write-auto-sub", "--sub-format", "vtt", "--skip-download",
+    ["--no-playlist", "--write-auto-sub", "--sub-format", "vtt", "--skip-download", "-o", stem, url],
+    ["--no-playlist", "--write-auto-sub", "--sub-format", "vtt", "--skip-download",
      "--cookies-from-browser", "chrome", "-o", stem, url],
   ];
 
@@ -340,7 +365,44 @@ export function detectScenes(mediaPath, threshold = SCENE_THRESHOLD) {
     .map((match) => Number.parseFloat(match[1]))
     .filter((value) => Number.isFinite(value));
 
-  return [...new Set([0, ...timestamps])].sort((a, b) => a - b);
+  return spaceOut([0, ...timestamps], MIN_SCENE_GAP_SEC);
+}
+
+/**
+ * Collapse a burst of near-identical timestamps to its first entry. Exact-value
+ * dedup is not enough: a two-second fade emits dozens of *distinct* floats
+ * (576.04, 576.08, ...) that would otherwise consume the entire frame budget.
+ */
+export function spaceOut(timestamps, minGapSec) {
+  const sorted = [...timestamps].sort((a, b) => a - b);
+  const kept = [];
+
+  for (const t of sorted) {
+    if (kept.length === 0 || t - kept[kept.length - 1] >= minGapSec) {
+      kept.push(t);
+    }
+  }
+
+  return kept;
+}
+
+/**
+ * Guarantee coverage across the whole video.
+ *
+ * Scene detection alone is not enough for screencasts and talking-head footage,
+ * which change gradually rather than cutting: a 17-minute screencast can yield
+ * three usable timestamps, leaving most of the video unsampled. Where detection
+ * comes up short of the budget, top up with evenly spaced samples so the frames
+ * describe the whole runtime rather than whichever moments happened to cut.
+ */
+export function withCoverageFloor(scenes, durationSec, maxFrames) {
+  if (scenes.length >= maxFrames) return scenes;
+
+  const spread = [];
+  const step = durationSec / maxFrames;
+  for (let i = 0; i < maxFrames; i += 1) spread.push(Number((i * step).toFixed(2)));
+
+  return spaceOut([...scenes, ...spread], Math.min(MIN_SCENE_GAP_SEC, step / 2));
 }
 
 /**
@@ -528,6 +590,7 @@ export function downloadMedia(url, cacheDir) {
   const stem = path.join(cacheDir, "media");
 
   run("yt-dlp", [
+    "--no-playlist",
     "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
     "--merge-output-format", "mp4",
     "-o", `${stem}.%(ext)s`,
@@ -549,7 +612,10 @@ export function main(argv) {
     return 0;
   }
 
-  const source = resolveSource(options.source);
+  let source = resolveSource(options.source);
+  if (source.kind === "url") {
+    source = { kind: "url", value: normalizeUrl(source.value) };
+  }
 
   if (source.kind === "url" && isPlaylistUrl(source.value)) {
     process.stderr.write("Playlist URLs are not supported — pass a single video URL.\n");
@@ -580,7 +646,7 @@ export function main(argv) {
 
   const candidates = policy === "short-form-1fps"
     ? everySecond(durationSec)
-    : detectScenes(mediaPath);
+    : withCoverageFloor(detectScenes(mediaPath), durationSec, maxFrames);
   const kept = thinFrames(candidates, maxFrames);
   const frames = extractFrames(mediaPath, kept, cacheDir);
   const grids = buildGrids(frames, cacheDir);
@@ -621,6 +687,7 @@ if (invokedDirectly) {
 
 export {
   CELL_HEIGHT,
+  MIN_SCENE_GAP_SEC,
   CELL_WIDTH,
   FRAME_LONG_EDGE,
   GRID_COLS,

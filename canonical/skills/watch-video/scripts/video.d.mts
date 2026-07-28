@@ -110,3 +110,13 @@ export declare const CELL_WIDTH: number;
 export declare const CELL_HEIGHT: number;
 
 export declare function buildGrids(frames: FrameEntry[], cacheDir: string): GridEntry[];
+
+export declare function normalizeUrl(value: string): string;
+
+export declare const MIN_SCENE_GAP_SEC: number;
+export declare function spaceOut(timestamps: number[], minGapSec: number): number[];
+export declare function withCoverageFloor(
+  scenes: number[],
+  durationSec: number,
+  maxFrames: number,
+): number[];

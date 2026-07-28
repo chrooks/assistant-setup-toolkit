@@ -11,6 +11,9 @@ import {
   formatTimestamp,
   framePolicy,
   isPlaylistUrl,
+  normalizeUrl,
+  spaceOut,
+  withCoverageFloor,
   parseArgs,
   parseVtt,
   probeDuration,
@@ -146,9 +149,9 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — manifest Seam", () => 
     expect(elapsed).toBeLessThan(1000);
   });
 
-  // AC7
+  // AC7 — a *pure* playlist URL, one naming no specific video.
   it("rejects playlist URLs with a clear message", () => {
-    const result = runScript(["https://youtube.com/watch?v=abc&list=PL123"]);
+    const result = runScript(["https://youtube.com/playlist?list=PL123"]);
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Playlist URLs are not supported");
@@ -345,6 +348,46 @@ describe("watch-video script — frame budget", () => {
   });
 });
 
+describe("watch-video script — scene spacing and coverage", () => {
+  // Regression: a 17-minute screencast produced [0, 576x14, 1027] — a fade at
+  // 9:36 tripped the threshold on every frame it touched, and the burst ate the
+  // whole budget. Found by loading a real talk, not by any fixture.
+  it("collapses a burst of near-identical timestamps to its first entry", () => {
+    const burst = [0, 576.0, 576.04, 576.08, 576.12, 576.16, 1027.4];
+    expect(spaceOut(burst, 2)).toEqual([0, 576.0, 1027.4]);
+  });
+
+  it("keeps timestamps that are genuinely far apart", () => {
+    expect(spaceOut([0, 30, 60, 90], 2)).toEqual([0, 30, 60, 90]);
+  });
+
+  it("sorts before spacing so unordered input still collapses", () => {
+    expect(spaceOut([100, 0, 100.5, 50], 2)).toEqual([0, 50, 100]);
+  });
+
+  // A screencast changes gradually, so detection alone leaves most of the
+  // runtime unsampled. The floor makes frames describe the whole video.
+  it("tops up sparse scene detection to cover the full duration", () => {
+    const sparse = [0, 576, 1027];
+    const covered = withCoverageFloor(sparse, 1038, 60);
+
+    expect(covered.length).toBeGreaterThan(50);
+    expect(covered[0]).toBe(0);
+    expect(covered[covered.length - 1]).toBeGreaterThan(1000);
+  });
+
+  it("leaves detection alone when it already fills the budget", () => {
+    const plenty = Array.from({ length: 60 }, (_, i) => i * 10);
+    expect(withCoverageFloor(plenty, 600, 60)).toEqual(plenty);
+  });
+
+  it("preserves real scene changes when topping up", () => {
+    const covered = withCoverageFloor([0, 576, 1027], 1038, 60);
+    expect(covered).toContain(576);
+    expect(covered).toContain(1027);
+  });
+});
+
 describe("watch-video script — transcript track", () => {
   let workDir: string;
 
@@ -446,10 +489,22 @@ describe("watch-video script — argument handling", () => {
     expect(path.isAbsolute(resolveSource("./clip.mp4").value)).toBe(true);
   });
 
-  it("recognises playlist URLs by their list parameter", () => {
-    expect(isPlaylistUrl("https://youtube.com/watch?v=a&list=PL1")).toBe(true);
+  // A watch URL carrying a list is one video opened from a queue, not a
+  // playlist. Rejecting it would refuse the most common way people copy a link.
+  it("rejects only pure playlist URLs, not watch URLs with list context", () => {
     expect(isPlaylistUrl("https://youtube.com/playlist?list=PL1")).toBe(true);
+    expect(isPlaylistUrl("https://youtube.com/watch?v=a&list=WL&index=24")).toBe(false);
     expect(isPlaylistUrl("https://youtube.com/watch?v=a")).toBe(false);
+  });
+
+  it("strips playlist, index, and start-time context from a watch URL", () => {
+    expect(normalizeUrl("https://www.youtube.com/watch?v=M6mYodf0dJM&list=WL&index=24&t=84s"))
+      .toBe("https://www.youtube.com/watch?v=M6mYodf0dJM");
+    expect(normalizeUrl("https://youtube.com/watch?v=abc")).toBe("https://www.youtube.com/watch?v=abc");
+  });
+
+  it("leaves non-watch URLs alone", () => {
+    expect(normalizeUrl("https://vimeo.com/12345")).toBe("https://vimeo.com/12345");
   });
 
   it("parses flags and the positional source", () => {
