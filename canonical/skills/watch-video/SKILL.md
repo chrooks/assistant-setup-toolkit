@@ -1,0 +1,107 @@
+---
+name: watch-video
+description: Load a video into context for discussion — pull its transcript and a set of scene-change frames, emit a short brief, and acknowledge the video is loaded and ready. Use when the user invokes /watch-video, pastes a YouTube URL, drops a video file path, or says 'watch this video', 'load this video', 'summarize this talk', or wants to discuss a video's content.
+argument-hint: "[a video URL (YouTube, Vimeo, TikTok, …) or a path to a local video file]"
+---
+
+# /watch-video — Load a Video into Context
+
+Claude can't watch video. This skill loads one as **timestamped transcript + a small
+set of frames** so you and the user can actually discuss it — what was said, what was
+shown, and how the two line up.
+
+The deliverable is small: a short brief, then an explicit acknowledgement that the video
+is **loaded in context and ready**. Do NOT over-produce — this is a loader, not an essay.
+It does not write to the knowledge base; `/ingest` does that, and only if the user asks.
+
+## Prerequisite
+
+Two command-line programs must be installed:
+
+- `yt-dlp` — downloads video and subtitle tracks. Only needed for URLs.
+- `ffmpeg` (which also provides `ffprobe`) — scene detection, frame cutting, grid tiling.
+
+Install both with `brew install yt-dlp ffmpeg` (macOS) or `pip install yt-dlp` plus your
+platform's ffmpeg package. The script reports which one is missing and how to install it.
+
+Optional: `faster-whisper` for videos with no subtitle track. Use `faster-whisper`, never
+`mlx-whisper` — the latter is Apple-Silicon-only and fails elsewhere.
+
+## Routing — what the argument is
+
+1. **A URL** (starts `http://` or `https://`): the happy path. Any site `yt-dlp` supports.
+2. **A file path**: also fully supported, and it skips the download entirely.
+3. **A playlist URL** (contains `list=`): rejected. Ask the user for a single video URL.
+4. **No argument**: ask which video — a URL or a file path.
+
+## Run
+
+Everything mechanical is one script. Do not reimplement it inline.
+
+    node ~/.claude/skills/watch-video/scripts/video.mjs "<source>" --cache-dir "<scratchpad>/watch-video/<videoId>"
+
+Let the script pick the cache directory when you have no reason to override it. It writes
+`manifest.json` and prints it to stdout. Pass `--force` only when the user explicitly asks
+for a re-extract; otherwise a second run on the same video reuses the first extraction.
+
+### The manifest
+
+Everything downstream reads this one object:
+
+- `title`, `channel`, `durationSec` — for the header line.
+- `transcript.status` — `captions`, `whisper`, or `none`; `transcript.path` when it exists.
+- `frames[]` — `{ t, path }` per frame, full resolution, on disk.
+- `grids[]` — `{ path, cells, from, to }`; each grid tiles up to 16 frames with their
+  timestamps burned in.
+- `budget` — `policy`, `framesFound`, `framesKept`, `estTokens`.
+
+## Read the grids, not the frames
+
+`Read` each entry in `grids[]`. Do **not** Read the individual `frames[]` up front — that
+costs roughly five times as much and floods the context.
+
+The grids carry burned-in `MM:SS` labels precisely so a specific moment can be found
+later. When the user asks about something specific ("what was on the architecture
+slide?"), find the timestamp in the relevant grid cell, then `Read` that one full-resolution
+frame from `frames[]`. **The question does the selecting** — that is why frames are left
+on disk instead of loaded eagerly.
+
+## Gate: no transcript
+
+When `transcript.status` is `none`, **stop and ask the user to confirm** before going any
+further. Say plainly that no subtitle track was found and `faster-whisper` is not
+installed, so the video can only be loaded as frames with no spoken content. Offer to
+install `faster-whisper`. Do not silently proceed with frames alone — a talk without its
+transcript is mostly worthless, and the user should decide whether that is worth their
+context.
+
+## Brief + acknowledge
+
+Output, tight:
+
+1. **One header line** — `Title — Channel · duration`.
+2. **Sampling disclosure** — phrased from `budget`, e.g. "48 frames across 1h12m, roughly
+   one per 90 seconds" or "all 187 scene changes kept". When `framesKept` is less than
+   `framesFound`, say so — never imply complete coverage.
+3. **Structural read** — three to five lines on what the video covers, each anchored to a
+   timestamp. Draw on both tracks: what is said and what is shown.
+4. **Cache path** — where the transcript and frames live, so the user can hand the
+   transcript to `/ingest` or open a frame themselves.
+5. **Acknowledge** — state plainly that the video is **loaded and ready**, and offer 2-3
+   concrete next moves (discuss a section, pull a specific slide at full resolution, hand
+   the transcript path to `/ingest`).
+
+Stop there. Wait for the user to pick the direction.
+
+## Notes
+
+- **Scene detection is luma-weighted.** Two shots with different colours but similar
+  brightness can read as one continuous shot, so a cut is occasionally missed. If the user
+  says a moment is missing, extract that timestamp directly rather than trusting the
+  frame list to be exhaustive.
+- **Frame density inverts with duration.** Clips under two minutes take one frame per
+  second; longer videos take scene changes capped at a token budget. A short clip is
+  cheap and its visuals carry most of the meaning.
+- Multiple videos: load each separately. Playlists are rejected by design — ten videos
+  means ten times the frame budget for a context nobody can reason across.
+- This skill loads; it does not commit anything or write outside the cache directory.
