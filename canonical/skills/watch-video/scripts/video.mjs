@@ -24,7 +24,7 @@ const USAGE = `Usage: video.mjs <source> [options]
 
 Options:
   --cache-dir <dir>     Where to write the manifest and extracted assets.
-                        Defaults to ./.watch-video/<videoId>/
+                        Defaults to ./.exports/watch-video/<videoId>/
   --force               Re-extract even when a cached manifest already exists.
   --help                Print this message.
 
@@ -57,6 +57,13 @@ const TOKENS_PER_GRID = 4784;
 
 /** Tokens a single 1568px frame costs, if read individually. */
 const TOKENS_PER_FRAME = 1600;
+
+/**
+ * Default cache location, relative to the working directory. `.exports/` is
+ * this repo's existing convention for skill output (see `.exports/diagram/`,
+ * `.exports/table/`) and is already gitignored.
+ */
+const DEFAULT_CACHE_SEGMENTS = [".exports", "watch-video"];
 
 /** Contact-sheet geometry. 4x4 at CELL_WIDTH gives a 2576px long edge. */
 const GRID_COLS = 4;
@@ -628,7 +635,7 @@ export function main(argv) {
   }
 
   const videoId = videoIdFor(source);
-  const cacheDir = options.cacheDir ?? path.join(process.cwd(), ".watch-video", videoId);
+  const cacheDir = options.cacheDir ?? path.join(process.cwd(), ...DEFAULT_CACHE_SEGMENTS, videoId);
 
   if (!options.force) {
     const cached = readManifest(cacheDir);
@@ -687,6 +694,7 @@ if (invokedDirectly) {
 
 export {
   CELL_HEIGHT,
+  DEFAULT_CACHE_SEGMENTS,
   MIN_SCENE_GAP_SEC,
   CELL_WIDTH,
   FRAME_LONG_EDGE,

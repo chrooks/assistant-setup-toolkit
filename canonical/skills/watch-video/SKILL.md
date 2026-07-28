@@ -31,17 +31,21 @@ Optional: `faster-whisper` for videos with no subtitle track. Use `faster-whispe
 
 1. **A URL** (starts `http://` or `https://`): the happy path. Any site `yt-dlp` supports.
 2. **A file path**: also fully supported, and it skips the download entirely.
-3. **A playlist URL** (contains `list=`): rejected. Ask the user for a single video URL.
-4. **No argument**: ask which video — a URL or a file path.
+3. **A watch URL carrying playlist context** (`?v=…&list=WL&index=3&t=84s`): fine — that is
+   one video opened from a queue. The script strips the incidental params itself.
+4. **A pure playlist URL** (`list=` with no `v=`): rejected. Ask for a single video URL.
+5. **No argument**: ask which video — a URL or a file path.
 
 ## Run
 
 Everything mechanical is one script. Do not reimplement it inline.
 
-    node ~/.claude/skills/watch-video/scripts/video.mjs "<source>" --cache-dir "<scratchpad>/watch-video/<videoId>"
+    node ~/.claude/skills/watch-video/scripts/video.mjs "<source>"
 
-Let the script pick the cache directory when you have no reason to override it. It writes
-`manifest.json` and prints it to stdout. Pass `--force` only when the user explicitly asks
+Let the script pick the cache directory — it defaults to `.exports/watch-video/<videoId>/`
+in the current project, matching where `/diagram` and `/table` write. Only pass
+`--cache-dir` when the user asks for somewhere specific. It writes `manifest.json` and
+prints it to stdout. Pass `--force` only when the user explicitly asks
 for a re-extract; otherwise a second run on the same video reuses the first extraction.
 
 ### The manifest

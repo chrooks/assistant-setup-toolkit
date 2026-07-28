@@ -120,3 +120,5 @@ export declare function withCoverageFloor(
   durationSec: number,
   maxFrames: number,
 ): number[];
+
+export declare const DEFAULT_CACHE_SEGMENTS: readonly string[];

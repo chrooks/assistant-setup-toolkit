@@ -5,6 +5,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   buildGrids,
+  DEFAULT_CACHE_SEGMENTS,
   detectScenes,
   everySecond,
   extractFrames,
@@ -345,6 +346,28 @@ describe("watch-video script — frame budget", () => {
   it("spaces kept frames evenly rather than taking a prefix", () => {
     const kept = thinFrames([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 5);
     expect(kept).toEqual([0, 2, 5, 7, 9]);
+  });
+});
+
+describe("watch-video script — cache location", () => {
+  it("defaults into .exports, matching where sibling skills write", () => {
+    expect(DEFAULT_CACHE_SEGMENTS).toEqual([".exports", "watch-video"]);
+  });
+
+  it("writes the manifest under .exports/watch-video/<videoId> when no dir is given", () => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-default-"));
+    try {
+      const fixture = buildFixture(cwd);
+      execFileSync("node", [scriptPath, fixture], { cwd, encoding: "utf-8" });
+
+      const base = path.join(cwd, ".exports", "watch-video");
+      const ids = fs.readdirSync(base);
+
+      expect(ids).toHaveLength(1);
+      expect(fs.existsSync(path.join(base, ids[0], "manifest.json"))).toBe(true);
+    } finally {
+      fs.rmSync(cwd, { recursive: true, force: true });
+    }
   });
 });
 
