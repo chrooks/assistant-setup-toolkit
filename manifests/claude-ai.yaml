@@ -11,7 +11,7 @@
 #
 # Curation rule: knowledge-work skills only. Anything needing the real
 # filesystem, git, subagents, or local MCPs stays out:
-#   - seed-project, lexicon, note, handoff — need ~/.claude or the repo tree
+#   - seed-project, lexicon, note — need ~/.claude or the repo tree
 #   - dev workflow (scope/plan/implement/commit/dev/...) — Claude Code territory
 version: 1
 skills:
@@ -29,6 +29,7 @@ skills:
   - design-audit # reasons from PROFILE.md — add it as Project knowledge
   - nickify # plain-English brief translator
   - ingest # files to the brain via the Athena connector's inbox tools
+  - handoff # copyable continuation prompt — carries context to the next session
 # Connectors enabled on the claude.ai account — listed in TOOLBOX.md so Claude
 # knows what's at its disposal. The repo can't detect claude.ai account config;
 # update this by hand when connectors change.
