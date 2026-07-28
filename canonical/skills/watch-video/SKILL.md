@@ -124,10 +124,22 @@ Stop there. Wait for the user to pick the direction.
 
 ## Notes
 
-- **Scene detection is luma-weighted.** Two shots with different colours but similar
-  brightness can read as one continuous shot, so a cut is occasionally missed. If the user
-  says a moment is missing, extract that timestamp directly rather than trusting the
-  frame list to be exhaustive.
+- **Never conclude something is absent from the grids.** The frames are a *sample*, not a
+  record. A graphic shown for a few seconds can fall entirely between two samples, and
+  scene detection is luma-weighted so a transition into or out of a dark card may not
+  register at all. "It is not in the grids" only ever means "it is not in the frames I
+  looked at."
+
+  When the user asks whether the video shows something specific, and the grids do not show
+  it: find the relevant window in the transcript, then **re-extract densely across that
+  window** before answering. One frame per second over a 30-second window is cheap:
+
+      for t in $(seq 306 340); do
+        ffmpeg -y -loglevel error -ss $t -i <cacheDir>/media.mp4 -frames:v 1 \
+          -vf "scale='min(1568,iw)':-2" /tmp/dense/t$t.jpg
+      done
+
+  Only say a thing is not in the video after that comes back empty.
 - **Frame density inverts with duration.** Clips under two minutes take one frame per
   second; longer videos take scene changes capped at a token budget. A short clip is
   cheap and its visuals carry most of the meaning.

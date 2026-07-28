@@ -310,7 +310,20 @@ describe("watch-video script — frame budget", () => {
   // AC4
   it("samples short clips every second and long ones by scene", () => {
     expect(framePolicy(90)).toEqual({ policy: "short-form-1fps", maxFrames: 90 });
-    expect(framePolicy(3600)).toEqual({ policy: "scene-change", maxFrames: 60 });
+    expect(framePolicy(3600)).toEqual({ policy: "scene-change", maxFrames: 160 });
+  });
+
+  // Regression: a flat 60-frame cap gave a 6.6-minute video one sample per 6.6
+  // seconds while spending only ~19k of the ~100k budget, and a stat card shown
+  // for ~5s fell entirely between two samples.
+  it("scales frame count with duration instead of a flat cap", () => {
+    const short = framePolicy(396);
+    expect(short.maxFrames).toBe(99);
+    expect(396 / short.maxFrames).toBeLessThanOrEqual(4);
+  });
+
+  it("caps long videos so the budget stays bounded", () => {
+    expect(framePolicy(7200).maxFrames).toBe(160);
   });
 
   it("treats the two-minute mark as the boundary", () => {

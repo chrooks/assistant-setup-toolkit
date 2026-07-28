@@ -44,8 +44,17 @@ const SCENE_THRESHOLD = 0.4;
 /** Below this duration a video is sampled every second instead of by scene. */
 const SHORT_FORM_MAX_SEC = 120;
 
-/** Frame ceiling for anything longer. 60 frames is ~4 grids, ~19k tokens. */
-const LONG_FORM_MAX_FRAMES = 60;
+/**
+ * Sampling target for anything longer: aim for a frame every TARGET_GAP_SEC,
+ * bounded by MAX_FRAMES.
+ *
+ * A flat 60-frame cap under-sampled short videos badly. A 6.6-minute video got
+ * one frame per 6.6 seconds while using only 19k of the ~100k token budget —
+ * and a stat card shown for ~5 seconds fell entirely between two samples.
+ * Deriving the count from duration spends the budget that is actually there.
+ */
+const TARGET_GAP_SEC = 4;
+const MAX_FRAMES = 160;
 
 /**
  * Minimum seconds between kept scene changes. A fade or animation trips the
@@ -558,7 +567,8 @@ export function framePolicy(durationSec) {
   if (durationSec < SHORT_FORM_MAX_SEC) {
     return { policy: "short-form-1fps", maxFrames: Math.max(1, Math.ceil(durationSec)) };
   }
-  return { policy: "scene-change", maxFrames: LONG_FORM_MAX_FRAMES };
+  const wanted = Math.ceil(durationSec / TARGET_GAP_SEC);
+  return { policy: "scene-change", maxFrames: Math.min(wanted, MAX_FRAMES) };
 }
 
 /**
@@ -840,7 +850,8 @@ export {
   FRAME_LONG_EDGE,
   GRID_COLS,
   GRID_ROWS,
-  LONG_FORM_MAX_FRAMES,
+  MAX_FRAMES,
+  TARGET_GAP_SEC,
   SCENE_THRESHOLD,
   SHORT_FORM_MAX_SEC,
   TOKENS_PER_FRAME,
