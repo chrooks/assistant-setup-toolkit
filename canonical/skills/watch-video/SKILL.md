@@ -51,20 +51,24 @@ Everything downstream reads this one object:
 - `title`, `channel`, `durationSec` — for the header line.
 - `transcript.status` — `captions`, `whisper`, or `none`; `transcript.path` when it exists.
 - `frames[]` — `{ t, path }` per frame, full resolution, on disk.
-- `grids[]` — `{ path, cells, from, to }`; each grid tiles up to 16 frames with their
-  timestamps burned in.
+- `grids[]` — `{ path, cells, from, to, cellTimes }`; each grid tiles up to 16 frames.
 - `budget` — `policy`, `framesFound`, `framesKept`, `estTokens`.
 
 ## Read the grids, not the frames
 
 `Read` each entry in `grids[]`. Do **not** Read the individual `frames[]` up front — that
-costs roughly five times as much and floods the context.
+costs roughly three to five times as much and floods the context.
 
-The grids carry burned-in `MM:SS` labels precisely so a specific moment can be found
-later. When the user asks about something specific ("what was on the architecture
-slide?"), find the timestamp in the relevant grid cell, then `Read` that one full-resolution
-frame from `frames[]`. **The question does the selecting** — that is why frames are left
-on disk instead of loaded eagerly.
+**Cells are laid out 4 across, row-major** — left to right, then top to bottom. Each grid's
+`cellTimes` array lists its frame timestamps in that exact reading order, so cell *i* is at
+`cellTimes[i]`. That array is the cell-to-timestamp mapping; nothing is written on the
+image itself. (ffmpeg's text filter needs a libfreetype build that Homebrew does not ship,
+and depending on one would make this Skill machine-specific.)
+
+When the user asks about something specific ("what was on the architecture slide?"), find
+the cell, read its timestamp from `cellTimes`, then `Read` the matching full-resolution
+frame from `frames[]`. **The question does the selecting** — that is why frames are left on
+disk instead of loaded eagerly.
 
 ## Gate: no transcript
 

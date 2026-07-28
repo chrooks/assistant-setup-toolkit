@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  buildGrids,
   detectScenes,
   everySecond,
   extractFrames,
@@ -213,7 +214,86 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — frame track", () => {
     expect(manifest!.budget.policy).toBe("short-form-1fps");
     expect(manifest!.frames.length).toBe(9);
     expect(manifest!.budget.framesKept).toBe(9);
-    expect(manifest!.budget.estTokens).toBe(9 * 1600);
+    expect(manifest!.budget.framesFound).toBe(9);
+    // Pricing is grid-based and asserted in the grid-track suite; frames only
+    // set the ceiling for what reading them individually would have cost.
+    expect(manifest!.budget.estTokens).toBeLessThan(9 * 1600);
+  });
+});
+
+describe.skipIf(!ffmpegAvailable)("watch-video script — grid track", () => {
+  let workDir: string;
+  let fixture: string;
+  let sampleFramePath: string;
+
+  beforeAll(() => {
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-grids-"));
+    fixture = buildFixture(workDir);
+    sampleFramePath = extractFrames(fixture, [0], path.join(workDir, "sample"))[0].path;
+  });
+
+  afterAll(() => {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  });
+
+  /** 60 frame entries pointing at one real JPEG — buildGrids only reads pixels. */
+  function syntheticFrames(count: number) {
+    return Array.from({ length: count }, (_, i) => ({ t: i * 30, path: sampleFramePath }));
+  }
+
+  // AC5
+  it("tiles 60 frames into 4 grids, the last holding 12 cells", () => {
+    const cacheDir = path.join(workDir, "grids-60");
+    const grids = buildGrids(syntheticFrames(60), cacheDir);
+
+    expect(grids).toHaveLength(4);
+    expect(grids.slice(0, 3).map((g) => g.cells)).toEqual([16, 16, 16]);
+    expect(grids[3].cells).toBe(12);
+  });
+
+  it("writes a non-empty image for every grid", () => {
+    const cacheDir = path.join(workDir, "grids-nonempty");
+    for (const grid of buildGrids(syntheticFrames(20), cacheDir)) {
+      expect(fs.existsSync(grid.path)).toBe(true);
+      expect(fs.statSync(grid.path).size).toBeGreaterThan(0);
+    }
+  });
+
+  // drawtext is unavailable in Homebrew's ffmpeg, so cellTimes carries the
+  // cell-to-timestamp mapping instead of it being burned into the image.
+  it("records cell timestamps in row-major reading order", () => {
+    const cacheDir = path.join(workDir, "grids-celltimes");
+    const grids = buildGrids(syntheticFrames(20), cacheDir);
+
+    expect(grids[0].cellTimes).toHaveLength(16);
+    expect(grids[0].cellTimes[0]).toBe(0);
+    expect(grids[0].cellTimes[15]).toBe(15 * 30);
+    expect(grids[1].cellTimes).toEqual([16, 17, 18, 19].map((i) => i * 30));
+  });
+
+  it("spans each grid from its first cell time to its last", () => {
+    const cacheDir = path.join(workDir, "grids-span");
+    const grids = buildGrids(syntheticFrames(20), cacheDir);
+
+    expect(grids[0].from).toBe(0);
+    expect(grids[0].to).toBe(15 * 30);
+    expect(grids[1].from).toBe(16 * 30);
+  });
+
+  it("returns no grids for no frames", () => {
+    expect(buildGrids([], path.join(workDir, "grids-empty"))).toEqual([]);
+  });
+
+  it("prices the manifest on grids, not individual frames", () => {
+    const cacheDir = path.join(workDir, "manifest-grids");
+    const result = runScript([fixture, "--cache-dir", cacheDir]);
+    expect(result.status).toBe(0);
+
+    const manifest = readManifest(cacheDir);
+    // 9 frames tile into a single grid.
+    expect(manifest!.grids).toHaveLength(1);
+    expect(manifest!.grids[0].cells).toBe(9);
+    expect(manifest!.budget.estTokens).toBe(4784);
   });
 });
 

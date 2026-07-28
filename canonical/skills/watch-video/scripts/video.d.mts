@@ -30,6 +30,8 @@ export interface GridEntry {
   cells: number;
   from: number;
   to: number;
+  /** Frame timestamps in row-major reading order — the cell-to-time mapping. */
+  cellTimes: number[];
 }
 
 export interface Budget {
@@ -101,3 +103,10 @@ export declare function buildTranscript(
   mediaPath: string | null,
   cacheDir: string,
 ): TranscriptInfo;
+
+export declare const GRID_COLS: number;
+export declare const GRID_ROWS: number;
+export declare const CELL_WIDTH: number;
+export declare const CELL_HEIGHT: number;
+
+export declare function buildGrids(frames: FrameEntry[], cacheDir: string): GridEntry[];

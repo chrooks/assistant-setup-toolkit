@@ -48,8 +48,14 @@ const LONG_FORM_MAX_FRAMES = 60;
 /** Tokens a single full-resolution image costs on Claude Opus 5. */
 const TOKENS_PER_GRID = 4784;
 
-/** Tokens a single 1568px frame costs, used before grids are built. */
+/** Tokens a single 1568px frame costs, if read individually. */
 const TOKENS_PER_FRAME = 1600;
+
+/** Contact-sheet geometry. 4x4 at CELL_WIDTH gives a 2576px long edge. */
+const GRID_COLS = 4;
+const GRID_ROWS = 4;
+const CELL_WIDTH = 644;
+const CELL_HEIGHT = 362;
 
 /**
  * Split argv into a source plus flags. Kept deliberately small — this script
@@ -416,6 +422,69 @@ export function extractFrames(mediaPath, timestamps, cacheDir) {
 }
 
 /**
+ * Tile frames into contact sheets, GRID_COLS x GRID_ROWS per sheet.
+ *
+ * Cells are filled row-major (left to right, top to bottom) and every sheet's
+ * `cellTimes` lists its frame timestamps in that same reading order. That
+ * ordering *is* the cell-to-timestamp mapping — the timestamps are deliberately
+ * not drawn onto the image, because ffmpeg's `drawtext` filter needs a
+ * libfreetype-enabled build that Homebrew's does not ship, and requiring a
+ * specific ffmpeg build would reintroduce the machine-dependence this Skill was
+ * designed to avoid.
+ *
+ * Each cell is letterboxed to a uniform size rather than stretched, so 4:3 and
+ * 16:9 sources both tile without distortion.
+ */
+export function buildGrids(frames, cacheDir) {
+  if (frames.length === 0) return [];
+
+  const gridsDir = path.join(cacheDir, "grids");
+  fs.mkdirSync(gridsDir, { recursive: true });
+
+  const perGrid = GRID_COLS * GRID_ROWS;
+  const grids = [];
+
+  for (let start = 0; start < frames.length; start += perGrid) {
+    const chunk = frames.slice(start, start + perGrid);
+    const index = grids.length;
+    const cellsDir = path.join(gridsDir, `.cells-${index}`);
+    fs.mkdirSync(cellsDir, { recursive: true });
+
+    chunk.forEach((frame, cellIndex) => {
+      run("ffmpeg", [
+        "-y", "-loglevel", "error",
+        "-i", frame.path,
+        "-vf",
+        `scale=${CELL_WIDTH}:${CELL_HEIGHT}:force_original_aspect_ratio=decrease,` +
+          `pad=${CELL_WIDTH}:${CELL_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black`,
+        path.join(cellsDir, `cell-${String(cellIndex).padStart(3, "0")}.jpg`),
+      ], { stdio: "ignore" });
+    });
+
+    const gridPath = path.join(gridsDir, `grid-${String(index).padStart(2, "0")}.jpg`);
+    run("ffmpeg", [
+      "-y", "-loglevel", "error",
+      "-i", path.join(cellsDir, "cell-%03d.jpg"),
+      "-vf", `tile=${GRID_COLS}x${GRID_ROWS}:color=black`,
+      "-frames:v", "1",
+      gridPath,
+    ], { stdio: "ignore" });
+
+    fs.rmSync(cellsDir, { recursive: true, force: true });
+
+    grids.push({
+      path: gridPath,
+      cells: chunk.length,
+      from: chunk[0].t,
+      to: chunk[chunk.length - 1].t,
+      cellTimes: chunk.map((frame) => frame.t),
+    });
+  }
+
+  return grids;
+}
+
+/**
  * Run a command and return its stderr. ffmpeg writes `showinfo` output there,
  * and spawnSync (unlike execFileSync) hands back both streams regardless of
  * exit status — which matters because `-f null -` exits non-zero on some builds
@@ -514,8 +583,8 @@ export function main(argv) {
     : detectScenes(mediaPath);
   const kept = thinFrames(candidates, maxFrames);
   const frames = extractFrames(mediaPath, kept, cacheDir);
+  const grids = buildGrids(frames, cacheDir);
 
-  // Milestone 4 fills grids. The key is shaped here so the Seam stays stable.
   const manifest = {
     source: source.value,
     videoId,
@@ -524,12 +593,14 @@ export function main(argv) {
     durationSec,
     transcript: buildTranscript(source, mediaPath, cacheDir),
     frames,
-    grids: [],
+    grids,
     budget: {
       policy,
       framesFound: candidates.length,
       framesKept: frames.length,
-      estTokens: frames.length * TOKENS_PER_FRAME,
+      // What loading the grids actually costs. Reading every frame instead
+      // would cost frames.length * TOKENS_PER_FRAME — roughly five times more.
+      estTokens: grids.length * TOKENS_PER_GRID,
     },
   };
 
@@ -549,7 +620,11 @@ if (invokedDirectly) {
 }
 
 export {
+  CELL_HEIGHT,
+  CELL_WIDTH,
   FRAME_LONG_EDGE,
+  GRID_COLS,
+  GRID_ROWS,
   LONG_FORM_MAX_FRAMES,
   SCENE_THRESHOLD,
   SHORT_FORM_MAX_SEC,
