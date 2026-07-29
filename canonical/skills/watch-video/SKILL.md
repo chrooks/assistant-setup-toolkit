@@ -75,7 +75,10 @@ Everything downstream reads this one object:
   exists, and `transcript.reason` explaining why when it is `none`.
 - `frames[]` — `{ t, path }` per frame, full resolution, on disk.
 - `grids[]` — `{ path, cells, from, to, cellTimes }`; each grid tiles up to 16 frames.
-- `budget` — `policy`, `framesFound`, `framesKept`, `estTokens`.
+- `budget` — `policy` (`scene-change`, `short-form-1fps`, or `focus`), `framesFound`,
+  `framesExtracted`, `framesDeduped`, `framesKept`, `estTokens`. Frames are oversampled,
+  then near-identical ones are dropped by comparing pixels, then the rest are thinned to
+  budget — so `framesDeduped` is how much of the video was visually repetitive.
 
 ## Read the grids, not the frames
 
@@ -139,7 +142,14 @@ Stop there. Wait for the user to pick the direction.
           -vf "scale='min(1568,iw)':-2" /tmp/dense/t$t.jpg
       done
 
-  Only say a thing is not in the video after that comes back empty.
+  The built-in way to do this is `--focus`:
+
+      node ~/.claude/skills/watch-video/scripts/video.mjs "<source>" --focus 5:09-5:36
+
+  It samples that span far denser than the whole-video pass (about two frames a
+  second for a short range) and writes its own grids. Prefer it over a hand-rolled
+  ffmpeg loop. Only say a thing is not in the video after a focused pass comes back
+  empty.
 - **Frame density inverts with duration.** Clips under two minutes take one frame per
   second; longer videos take scene changes capped at a token budget. A short clip is
   cheap and its visuals carry most of the meaning.

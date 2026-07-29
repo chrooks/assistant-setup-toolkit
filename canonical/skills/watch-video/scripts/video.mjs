@@ -28,6 +28,9 @@ Options:
   --force               Re-extract even when a cached manifest already exists.
   --openai              Transcribe via the OpenAI API when there is no caption
                         track. Sends audio off this machine; needs OPENAI_API_KEY.
+  --focus <from>-<to>   Sample densely across one span instead of the whole
+                        video, e.g. --focus 5:09-5:36. Use when hunting for a
+                        specific moment the whole-video pass may have skipped.
   --help                Print this message.
 
 Writes <cache-dir>/manifest.json and prints it to stdout.`;
@@ -39,7 +42,25 @@ const FRAME_LONG_EDGE = 1568;
  * ffmpeg scene-change sensitivity, 0-1. 0.4 is the conventional default: low
  * enough to catch slide advances, high enough to ignore camera noise.
  */
-const SCENE_THRESHOLD = 0.4;
+const SCENE_THRESHOLD = 0.2;
+
+/**
+ * Thumbnail edge, in pixels, for perceptual dedup. 16x16 grayscale is enough to
+ * tell "same shot" from "different shot" and cheap enough to decode in bulk.
+ */
+const DEDUP_THUMB = 16;
+
+/**
+ * Mean per-pixel difference (0-255) below which two frames count as the same
+ * shot. 2.0 tolerates compression noise and slight motion.
+ */
+const DEDUP_THRESHOLD = 2;
+
+/**
+ * Extract this multiple of the budget before deduping, since dedup only ever
+ * removes frames. Bounds how much extraction work a low scene threshold buys.
+ */
+const OVERSAMPLE = 3;
 
 /** Below this duration a video is sampled every second instead of by scene. */
 const SHORT_FORM_MAX_SEC = 120;
@@ -99,7 +120,7 @@ const CELL_HEIGHT = 362;
  * has three options and does not need an arg-parsing dependency.
  */
 export function parseArgs(argv) {
-  const options = { source: null, cacheDir: null, force: false, help: false, openai: false };
+  const options = { source: null, cacheDir: null, force: false, help: false, openai: false, focus: null };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -109,6 +130,9 @@ export function parseArgs(argv) {
       options.force = true;
     } else if (arg === "--openai") {
       options.openai = true;
+    } else if (arg === "--focus") {
+      i += 1;
+      options.focus = argv[i] ?? null;
     } else if (arg === "--cache-dir") {
       i += 1;
       options.cacheDir = argv[i] ?? null;
@@ -350,21 +374,54 @@ export function extractAudio(mediaPath, cacheDir) {
  * The key is read from OPENAI_API_KEY and never written to the manifest, logged,
  * or echoed.
  */
-export async function transcribeWithOpenAI(mediaPath, cacheDir) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
+/**
+ * Split a duration into pieces that each fit the upload cap.
+ *
+ * The API rejects anything over 25 MB, which at our bitrate is about 1.7 hours.
+ * Rather than failing on a long talk, cut the audio into equal pieces small
+ * enough to send. Equal-length pieces (rather than filling each to the brim)
+ * keep every request a similar size, so one slow chunk does not stall the run.
+ */
+export function planChunks(durationSec, totalBytes, maxBytes = OPENAI_MAX_UPLOAD_BYTES) {
+  if (totalBytes <= maxBytes) return [{ start: 0, duration: durationSec }];
 
-  const audioPath = extractAudio(mediaPath, cacheDir);
-  const { size } = fs.statSync(audioPath);
-  if (size > OPENAI_MAX_UPLOAD_BYTES) {
-    const mb = (size / 1024 / 1024).toFixed(1);
-    throw new Error(
-      `audio is ${mb} MB, over the API's 25 MB limit — split the video or use a local whisper CLI`,
-    );
-  }
+  const count = Math.ceil(totalBytes / maxBytes);
+  const span = durationSec / count;
+  return Array.from({ length: count }, (_, i) => ({
+    start: Number((i * span).toFixed(3)),
+    duration: Number(span.toFixed(3)),
+  }));
+}
 
+/**
+ * Re-base a chunk's timestamps onto the full video's clock.
+ *
+ * Each chunk is transcribed as if it were its own file starting at zero, so
+ * without this every chunk after the first would report times from the top of
+ * the video. This is what keeps the timestamp spine intact across a split.
+ */
+export function shiftSegments(segments, offsetSec) {
+  return segments.map((seg) => ({ ...seg, t: Number((seg.t + offsetSec).toFixed(3)) }));
+}
+
+/** Cut one piece of audio out into its own file. */
+export function sliceAudio(audioPath, chunk, cacheDir, index) {
+  const out = path.join(cacheDir, `audio-${String(index).padStart(2, "0")}.mp3`);
+  run("ffmpeg", [
+    "-y", "-loglevel", "error",
+    "-i", audioPath,
+    "-ss", String(chunk.start),
+    "-t", String(chunk.duration),
+    "-ac", "1", "-ar", "16000", "-b:a", "32k",
+    out,
+  ], { stdio: "ignore" });
+  return out;
+}
+
+/** POST one audio file and return its VTT text. */
+async function postTranscription(apiKey, audioPath) {
   const form = new FormData();
-  form.append("file", new Blob([fs.readFileSync(audioPath)]), "audio.mp3");
+  form.append("file", new Blob([fs.readFileSync(audioPath)]), path.basename(audioPath));
   form.append("model", OPENAI_MODEL);
   form.append("response_format", "vtt");
 
@@ -379,10 +436,27 @@ export async function transcribeWithOpenAI(mediaPath, cacheDir) {
     // headers back, and the key rides in one.
     throw new Error(`OpenAI transcription failed: HTTP ${response.status}`);
   }
+  return response.text();
+}
 
-  const vttPath = path.join(cacheDir, "openai.vtt");
-  fs.writeFileSync(vttPath, await response.text());
-  return parseVtt(vttPath);
+export async function transcribeWithOpenAI(mediaPath, cacheDir) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
+
+  const audioPath = extractAudio(mediaPath, cacheDir);
+  const { size } = fs.statSync(audioPath);
+  const duration = probeDuration(audioPath);
+  const chunks = planChunks(duration, size);
+
+  const segments = [];
+  for (const [index, chunk] of chunks.entries()) {
+    const piece = chunks.length === 1 ? audioPath : sliceAudio(audioPath, chunk, cacheDir, index);
+    const vttPath = path.join(cacheDir, `openai-${String(index).padStart(2, "0")}.vtt`);
+    fs.writeFileSync(vttPath, await postTranscription(apiKey, piece));
+    segments.push(...shiftSegments(parseVtt(vttPath), chunk.start));
+  }
+
+  return segments;
 }
 
 /**
@@ -637,6 +711,139 @@ export function extractFrames(mediaPath, timestamps, cacheDir) {
   return frames;
 }
 
+/** Accept "5:09", "1:02:03", or a bare "309" and return seconds. */
+export function parseTimeSpec(value) {
+  const parts = String(value).trim().split(":").map(Number);
+  if (parts.some((n) => !Number.isFinite(n))) return null;
+  return parts.reduce((total, part) => total * 60 + part, 0);
+}
+
+/** Parse `--focus 5:09-5:36` into a span. */
+export function parseFocus(value) {
+  const [rawFrom, rawTo] = String(value).split("-");
+  const from = parseTimeSpec(rawFrom);
+  const to = rawTo === undefined ? null : parseTimeSpec(rawTo);
+  if (from === null || to === null || to <= from) return null;
+  return { from, to };
+}
+
+/**
+ * Frame budget for a user-specified range.
+ *
+ * Deliberately denser than the whole-video budget: asking for a range means
+ * looking for something specific, and a graphic on screen for a few seconds has
+ * to survive the sampling. Whole-video sampling optimizes for coverage; this
+ * optimizes for not missing anything.
+ */
+export function focusPolicy(spanSec) {
+  if (spanSec <= 30) return Math.max(10, Math.ceil(spanSec * 2));
+  if (spanSec <= 120) return Math.max(60, Math.ceil(spanSec));
+  return MAX_FRAMES;
+}
+
+/** Evenly spaced timestamps across a span, inclusive of the start. */
+export function spreadOver(from, to, count) {
+  if (count <= 1) return [from];
+  const step = (to - from) / (count - 1);
+  return Array.from({ length: count }, (_, i) => Number((from + i * step).toFixed(2)));
+}
+
+/**
+ * Decode every frame to a small grayscale thumbnail in one ffmpeg pass over the
+ * numbered JPEG sequence.
+ *
+ * Fails open: any error returns [] so the caller skips dedup rather than losing
+ * frames. Requires the contiguous frame-%04d.jpg naming extractFrames produces.
+ */
+export function thumbnailFrames(paths) {
+  if (paths.length === 0) return [];
+
+  const first = path.basename(paths[0]);
+  const match = first.match(/^(.*?)(\d+)(\.[A-Za-z0-9]+)$/);
+  if (!match) return [];
+
+  const [, prefix, digits, ext] = match;
+  const pattern = path.join(path.dirname(paths[0]), `${prefix}%0${digits.length}d${ext}`);
+
+  const result = spawnSync("ffmpeg", [
+    "-hide_banner", "-loglevel", "error",
+    "-start_number", String(Number.parseInt(digits, 10)),
+    "-i", pattern,
+    "-vf", `scale=${DEDUP_THUMB}:${DEDUP_THUMB},format=gray`,
+    "-f", "rawvideo", "-",
+  ], { maxBuffer: 64 * 1024 * 1024 });
+
+  if (result.status !== 0 || !result.stdout) return [];
+
+  const chunk = DEDUP_THUMB * DEDUP_THUMB;
+  if (result.stdout.length !== chunk * paths.length) return [];
+
+  return paths.map((_, i) => result.stdout.subarray(i * chunk, (i + 1) * chunk));
+}
+
+/** Mean absolute per-pixel difference between two grayscale thumbnails. */
+export function frameDelta(a, b) {
+  if (!a || !b || a.length !== b.length || a.length === 0) return Infinity;
+  let total = 0;
+  for (let i = 0; i < a.length; i += 1) total += Math.abs(a[i] - b[i]);
+  return total / a.length;
+}
+
+/**
+ * Drop frames that look the same as the one before them.
+ *
+ * This replaces spacing frames out by *time*, which used elapsed seconds as a
+ * proxy for visual difference — a bad proxy in both directions. A fade emits
+ * dozens of near-identical frames within a second, while a graphic that appears
+ * three seconds after a cut is genuinely new information. Comparing pixels keeps
+ * the second and drops the first; comparing timestamps did the opposite.
+ */
+export function dedupePerceptual(frames, threshold = DEDUP_THRESHOLD) {
+  if (frames.length <= 1) return { kept: frames, dropped: 0 };
+
+  const thumbs = thumbnailFrames(frames.map((f) => f.path));
+  if (thumbs.length !== frames.length) return { kept: frames, dropped: 0 };
+
+  const kept = [frames[0]];
+  const dropped = [];
+  let last = thumbs[0];
+
+  for (let i = 1; i < frames.length; i += 1) {
+    if (frameDelta(thumbs[i], last) <= threshold) {
+      dropped.push(frames[i]);
+    } else {
+      kept.push(frames[i]);
+      last = thumbs[i];
+    }
+  }
+
+  discard(dropped);
+  return { kept, dropped: dropped.length };
+}
+
+/** Reduce to n frames by even spacing, deleting the rest from disk. */
+export function evenSample(frames, n) {
+  if (frames.length <= n) return frames;
+
+  const step = (frames.length - 1) / (n - 1);
+  const keepIndices = new Set();
+  for (let i = 0; i < n; i += 1) keepIndices.add(Math.round(i * step));
+
+  const kept = frames.filter((_, i) => keepIndices.has(i));
+  discard(frames.filter((_, i) => !keepIndices.has(i)));
+  return kept;
+}
+
+function discard(frames) {
+  for (const frame of frames) {
+    try {
+      fs.unlinkSync(frame.path);
+    } catch {
+      // already gone; nothing to clean up
+    }
+  }
+}
+
 /**
  * Tile frames into contact sheets, GRID_COLS x GRID_ROWS per sheet.
  *
@@ -796,13 +1003,32 @@ export async function main(argv) {
   const mediaPath = source.kind === "file" ? source.value : downloadMedia(source.value, cacheDir);
 
   const durationSec = probeDuration(mediaPath);
-  const { policy, maxFrames } = framePolicy(durationSec);
+  const focus = options.focus ? parseFocus(options.focus) : null;
+  if (options.focus && !focus) {
+    process.stderr.write(`Could not parse --focus "${options.focus}" — expected e.g. 5:09-5:36\n`);
+    return 1;
+  }
 
-  const candidates = policy === "short-form-1fps"
-    ? everySecond(durationSec)
-    : withCoverageFloor(detectScenes(mediaPath), durationSec, maxFrames);
-  const kept = thinFrames(candidates, maxFrames);
-  const frames = extractFrames(mediaPath, kept, cacheDir);
+  let policy;
+  let maxFrames;
+  let candidates;
+
+  if (focus) {
+    policy = "focus";
+    maxFrames = focusPolicy(focus.to - focus.from);
+    candidates = spreadOver(focus.from, focus.to, maxFrames);
+  } else {
+    ({ policy, maxFrames } = framePolicy(durationSec));
+    candidates = policy === "short-form-1fps"
+      ? everySecond(durationSec)
+      : withCoverageFloor(detectScenes(mediaPath), durationSec, maxFrames);
+  }
+
+  // Oversample, then let pixels decide. Dedup only removes frames, so casting
+  // wider before it costs extraction time but never coverage.
+  const extracted = extractFrames(mediaPath, thinFrames(candidates, maxFrames * OVERSAMPLE), cacheDir);
+  const { kept: deduped, dropped } = dedupePerceptual(extracted);
+  const frames = evenSample(deduped, maxFrames);
   const grids = buildGrids(frames, cacheDir);
 
   const manifest = {
@@ -817,6 +1043,8 @@ export async function main(argv) {
     budget: {
       policy,
       framesFound: candidates.length,
+      framesExtracted: extracted.length,
+      framesDeduped: dropped,
       framesKept: frames.length,
       // What loading the grids actually costs. Reading every frame instead
       // would cost frames.length * TOKENS_PER_FRAME — roughly five times more.
@@ -841,6 +1069,10 @@ if (invokedDirectly) {
 
 export {
   CELL_HEIGHT,
+  DEDUP_THRESHOLD,
+  DEDUP_THUMB,
+  OVERSAMPLE,
+
   OPENAI_MAX_UPLOAD_BYTES,
   OPENAI_MODEL,
   WHISPER_CLIS,

@@ -5,7 +5,18 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   buildGrids,
+  DEDUP_THRESHOLD,
+  dedupePerceptual,
   DEFAULT_CACHE_SEGMENTS,
+  evenSample,
+  focusPolicy,
+  frameDelta,
+  parseFocus,
+  parseTimeSpec,
+  planChunks,
+  shiftSegments,
+  spreadOver,
+  thumbnailFrames,
   findWhisperCli,
   OPENAI_MAX_UPLOAD_BYTES,
   OPENAI_MODEL,
@@ -221,9 +232,15 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — frame track", () => {
     const manifest = readManifest(cacheDir);
     // The fixture is 9s, so it takes the short-form path: one frame per second.
     expect(manifest!.budget.policy).toBe("short-form-1fps");
-    expect(manifest!.frames.length).toBe(9);
-    expect(manifest!.budget.framesKept).toBe(9);
     expect(manifest!.budget.framesFound).toBe(9);
+
+    // The fixture is three 3-second blocks of flat colour — the most repetitive
+    // input possible. Perceptual dedup collapses each run to one representative
+    // frame, so nine samples become the three genuinely distinct shots. That
+    // collapse is the feature, not a loss.
+    expect(manifest!.frames.length).toBe(3);
+    expect(manifest!.budget.framesKept).toBe(3);
+    expect(manifest!.budget.framesDeduped).toBe(6);
     // Pricing is grid-based and asserted in the grid-track suite; frames only
     // set the ceiling for what reading them individually would have cost.
     expect(manifest!.budget.estTokens).toBeLessThan(9 * 1600);
@@ -299,9 +316,10 @@ describe.skipIf(!ffmpegAvailable)("watch-video script — grid track", () => {
     expect(result.status).toBe(0);
 
     const manifest = readManifest(cacheDir);
-    // 9 frames tile into a single grid.
+    // Three surviving frames (see the dedup note in the frame-track suite) tile
+    // into a single grid, priced as one image rather than three.
     expect(manifest!.grids).toHaveLength(1);
-    expect(manifest!.grids[0].cells).toBe(9);
+    expect(manifest!.grids[0].cells).toBe(3);
     expect(manifest!.budget.estTokens).toBe(4784);
   });
 });
@@ -441,6 +459,105 @@ describe("watch-video script — OpenAI transcription rung", () => {
     } finally {
       if (previous !== undefined) process.env.OPENAI_API_KEY = previous;
     }
+  });
+});
+
+describe("watch-video script — perceptual dedup", () => {
+  const same = new Uint8Array(256).fill(100);
+  const nearlySame = new Uint8Array(256).fill(101);
+  const different = new Uint8Array(256).fill(200);
+
+  it("measures mean per-pixel difference", () => {
+    expect(frameDelta(same, same)).toBe(0);
+    expect(frameDelta(same, nearlySame)).toBe(1);
+    expect(frameDelta(same, different)).toBe(100);
+  });
+
+  it("treats mismatched thumbnails as maximally different, never as duplicates", () => {
+    expect(frameDelta(same, new Uint8Array(4))).toBe(Infinity);
+    expect(frameDelta(same, null as unknown as Uint8Array)).toBe(Infinity);
+  });
+
+  it("keeps frames that differ by more than the threshold", () => {
+    expect(DEDUP_THRESHOLD).toBe(2);
+    expect(frameDelta(same, nearlySame)).toBeLessThanOrEqual(DEDUP_THRESHOLD);
+    expect(frameDelta(same, different)).toBeGreaterThan(DEDUP_THRESHOLD);
+  });
+
+  it("is a no-op on one frame or none", () => {
+    expect(dedupePerceptual([]).kept).toEqual([]);
+    const one = [{ t: 0, path: "/nope.jpg" }];
+    expect(dedupePerceptual(one).kept).toEqual(one);
+  });
+
+  it("fails open when thumbnails cannot be produced", () => {
+    // Non-existent paths: ffmpeg fails, and dedup must return frames untouched
+    // rather than dropping everything.
+    const frames = [
+      { t: 0, path: "/nope/frame-0000.jpg" },
+      { t: 1, path: "/nope/frame-0001.jpg" },
+    ];
+    expect(dedupePerceptual(frames)).toEqual({ kept: frames, dropped: 0 });
+    expect(thumbnailFrames(["/nope/not-numbered.jpg"])).toEqual([]);
+  });
+});
+
+describe("watch-video script — focus mode", () => {
+  it("parses clock times and bare seconds", () => {
+    expect(parseTimeSpec("5:09")).toBe(309);
+    expect(parseTimeSpec("1:02:03")).toBe(3723);
+    expect(parseTimeSpec("309")).toBe(309);
+  });
+
+  it("parses a span", () => {
+    expect(parseFocus("5:09-5:36")).toEqual({ from: 309, to: 336 });
+  });
+
+  it("rejects a malformed or inverted span", () => {
+    expect(parseFocus("5:36-5:09")).toBeNull();
+    expect(parseFocus("5:09")).toBeNull();
+    expect(parseFocus("banana-5:36")).toBeNull();
+  });
+
+  // A range means the user is hunting for something specific, so sample harder
+  // than the whole-video pass would.
+  it("samples a short span far denser than the whole-video budget", () => {
+    expect(focusPolicy(27)).toBe(54);
+    expect(focusPolicy(5)).toBe(10);
+    expect(focusPolicy(600)).toBe(160);
+  });
+
+  it("spreads timestamps evenly across the span", () => {
+    expect(spreadOver(309, 336, 4)).toEqual([309, 318, 327, 336]);
+  });
+});
+
+describe("watch-video script — audio chunking", () => {
+  it("leaves audio under the cap as one piece", () => {
+    expect(planChunks(600, 5 * 1024 * 1024)).toEqual([{ start: 0, duration: 600 }]);
+  });
+
+  it("splits oversized audio into equal pieces that each fit", () => {
+    const chunks = planChunks(3600, 60 * 1024 * 1024);
+    expect(chunks).toHaveLength(3);
+    expect(chunks[0].start).toBe(0);
+    expect(chunks[2].start).toBeCloseTo(2400, 0);
+    const total = chunks.reduce((sum, c) => sum + c.duration, 0);
+    expect(total).toBeCloseTo(3600, 0);
+  });
+
+  // Each chunk is transcribed as its own file starting at zero, so without the
+  // offset every chunk after the first reports times from the top of the video.
+  it("re-bases chunk timestamps onto the full video clock", () => {
+    const segments = [{ t: 0, text: "a" }, { t: 12.5, text: "b" }];
+    expect(shiftSegments(segments, 600)).toEqual([
+      { t: 600, text: "a" },
+      { t: 612.5, text: "b" },
+    ]);
+  });
+
+  it("leaves the first chunk untouched", () => {
+    expect(shiftSegments([{ t: 3, text: "x" }], 0)).toEqual([{ t: 3, text: "x" }]);
   });
 });
 

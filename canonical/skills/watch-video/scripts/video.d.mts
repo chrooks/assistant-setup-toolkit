@@ -13,6 +13,7 @@ export interface ParsedArgs {
   force: boolean;
   help: boolean;
   openai: boolean;
+  focus: string | null;
 }
 
 export interface TranscriptInfo {
@@ -38,8 +39,10 @@ export interface GridEntry {
 }
 
 export interface Budget {
-  policy: "scene-change" | "short-form-1fps" | null;
+  policy: "scene-change" | "short-form-1fps" | "focus" | null;
   framesFound: number;
+  framesExtracted: number;
+  framesDeduped: number;
   framesKept: number;
   estTokens: number;
 }
@@ -138,3 +141,34 @@ export declare function withCoverageFloor(
 ): number[];
 
 export declare const DEFAULT_CACHE_SEGMENTS: readonly string[];
+
+export declare const DEDUP_THUMB: number;
+export declare const DEDUP_THRESHOLD: number;
+export declare const OVERSAMPLE: number;
+
+export declare function thumbnailFrames(paths: string[]): Uint8Array[];
+export declare function frameDelta(a: Uint8Array, b: Uint8Array): number;
+export declare function dedupePerceptual(
+  frames: FrameEntry[],
+  threshold?: number,
+): { kept: FrameEntry[]; dropped: number };
+export declare function evenSample(frames: FrameEntry[], n: number): FrameEntry[];
+
+export declare function parseTimeSpec(value: string | number): number | null;
+export declare function parseFocus(value: string): { from: number; to: number } | null;
+export declare function focusPolicy(spanSec: number): number;
+export declare function spreadOver(from: number, to: number, count: number): number[];
+
+export interface AudioChunk { start: number; duration: number }
+export declare function planChunks(
+  durationSec: number,
+  totalBytes: number,
+  maxBytes?: number,
+): AudioChunk[];
+export declare function shiftSegments(segments: Segment[], offsetSec: number): Segment[];
+export declare function sliceAudio(
+  audioPath: string,
+  chunk: AudioChunk,
+  cacheDir: string,
+  index: number,
+): string;
