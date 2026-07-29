@@ -758,20 +758,31 @@ export function spreadOver(from, to, count) {
 export function thumbnailFrames(paths) {
   if (paths.length === 0) return [];
 
-  const first = path.basename(paths[0]);
-  const match = first.match(/^(.*?)(\d+)(\.[A-Za-z0-9]+)$/);
-  if (!match) return [];
+  // The JPEGs are piped in as one concatenated byte stream rather than read off
+  // disk by a frame-%04d.jpg pattern. Pattern reading looked simpler but was a
+  // trap: extractFrames numbers files by candidate index and skips any frame
+  // ffmpeg cannot produce, so a single bad seek leaves a hole in the numbering.
+  // ffmpeg's image2 demuxer stops dead at the first missing index, the length
+  // check below then failed, and dedup silently turned itself off for the whole
+  // run. Piping bytes makes membership and order follow this array alone, so
+  // filenames — and any gaps in them — stop mattering.
+  let input;
+  try {
+    input = Buffer.concat(paths.map((p) => fs.readFileSync(p)));
+  } catch {
+    return [];
+  }
 
-  const [, prefix, digits, ext] = match;
-  const pattern = path.join(path.dirname(paths[0]), `${prefix}%0${digits.length}d${ext}`);
-
+  // -c:v mjpeg names the decoder outright. Without it ffmpeg probes the piped
+  // bytes to guess, and the probe needs more data than a small JPEG carries —
+  // a 320x240 frame fails with "Output file does not contain any stream" while
+  // a 1568px one succeeds. Stating the codec removes the size dependency.
   const result = spawnSync("ffmpeg", [
     "-hide_banner", "-loglevel", "error",
-    "-start_number", String(Number.parseInt(digits, 10)),
-    "-i", pattern,
+    "-f", "image2pipe", "-c:v", "mjpeg", "-i", "-",
     "-vf", `scale=${DEDUP_THUMB}:${DEDUP_THUMB},format=gray`,
     "-f", "rawvideo", "-",
-  ], { maxBuffer: 64 * 1024 * 1024 });
+  ], { input, maxBuffer: 256 * 1024 * 1024 });
 
   if (result.status !== 0 || !result.stdout) return [];
 
@@ -802,7 +813,11 @@ export function dedupePerceptual(frames, threshold = DEDUP_THRESHOLD) {
   if (frames.length <= 1) return { kept: frames, dropped: 0 };
 
   const thumbs = thumbnailFrames(frames.map((f) => f.path));
-  if (thumbs.length !== frames.length) return { kept: frames, dropped: 0 };
+  // Failing open keeps every frame, which is the safe direction — but a silent
+  // 0 here reads exactly like "nothing was repetitive", so say which one it was.
+  if (thumbs.length !== frames.length) {
+    return { kept: frames, dropped: 0, reason: "could not decode frame thumbnails" };
+  }
 
   const kept = [frames[0]];
   const dropped = [];
@@ -1027,7 +1042,7 @@ export async function main(argv) {
   // Oversample, then let pixels decide. Dedup only removes frames, so casting
   // wider before it costs extraction time but never coverage.
   const extracted = extractFrames(mediaPath, thinFrames(candidates, maxFrames * OVERSAMPLE), cacheDir);
-  const { kept: deduped, dropped } = dedupePerceptual(extracted);
+  const { kept: deduped, dropped, reason: dedupReason } = dedupePerceptual(extracted);
   const frames = evenSample(deduped, maxFrames);
   const grids = buildGrids(frames, cacheDir);
 
@@ -1045,6 +1060,9 @@ export async function main(argv) {
       framesFound: candidates.length,
       framesExtracted: extracted.length,
       framesDeduped: dropped,
+      // Only present when dedup could not run at all, so a 0 above is never
+      // mistaken for "the video had no repetitive frames".
+      ...(dedupReason ? { dedupSkipped: dedupReason } : {}),
       framesKept: frames.length,
       // What loading the grids actually costs. Reading every frame instead
       // would cost frames.length * TOKENS_PER_FRAME — roughly five times more.

@@ -79,6 +79,10 @@ Everything downstream reads this one object:
   `framesExtracted`, `framesDeduped`, `framesKept`, `estTokens`. Frames are oversampled,
   then near-identical ones are dropped by comparing pixels, then the rest are thinned to
   budget — so `framesDeduped` is how much of the video was visually repetitive.
+  `dedupSkipped` appears **only** when the dedup pass could not run at all; without it a
+  `framesDeduped` of 0 would read the same as "nothing was repetitive". Expect dedup to
+  drop little in `scene-change` mode — candidates there are already spaced seconds apart,
+  so it earns its keep mainly in `short-form-1fps` and `focus`, where they are dense.
 
 ## Read the grids, not the frames
 

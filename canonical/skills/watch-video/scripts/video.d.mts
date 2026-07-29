@@ -43,6 +43,8 @@ export interface Budget {
   framesFound: number;
   framesExtracted: number;
   framesDeduped: number;
+  /** Present only when dedup could not run, so framesDeduped: 0 stays unambiguous. */
+  dedupSkipped?: string;
   framesKept: number;
   estTokens: number;
 }
@@ -151,7 +153,7 @@ export declare function frameDelta(a: Uint8Array, b: Uint8Array): number;
 export declare function dedupePerceptual(
   frames: FrameEntry[],
   threshold?: number,
-): { kept: FrameEntry[]; dropped: number };
+): { kept: FrameEntry[]; dropped: number; reason?: string };
 export declare function evenSample(frames: FrameEntry[], n: number): FrameEntry[];
 
 export declare function parseTimeSpec(value: string | number): number | null;

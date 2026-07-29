@@ -490,15 +490,72 @@ describe("watch-video script — perceptual dedup", () => {
     expect(dedupePerceptual(one).kept).toEqual(one);
   });
 
-  it("fails open when thumbnails cannot be produced", () => {
+  it("fails open when thumbnails cannot be produced, and says so", () => {
     // Non-existent paths: ffmpeg fails, and dedup must return frames untouched
-    // rather than dropping everything.
+    // rather than dropping everything. The reason matters — without it a
+    // dropped count of 0 is indistinguishable from "nothing was repetitive".
     const frames = [
       { t: 0, path: "/nope/frame-0000.jpg" },
       { t: 1, path: "/nope/frame-0001.jpg" },
     ];
-    expect(dedupePerceptual(frames)).toEqual({ kept: frames, dropped: 0 });
-    expect(thumbnailFrames(["/nope/not-numbered.jpg"])).toEqual([]);
+    const result = dedupePerceptual(frames);
+    expect(result.kept).toEqual(frames);
+    expect(result.dropped).toBe(0);
+    expect(result.reason).toMatch(/thumbnail/i);
+    expect(thumbnailFrames(["/nope/missing.jpg"])).toEqual([]);
+  });
+});
+
+describe.skipIf(!ffmpegAvailable)("watch-video script — dedup survives a gap in the frame sequence", () => {
+  let workDir: string;
+
+  beforeAll(() => {
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), "watch-video-gap-"));
+  });
+
+  afterAll(() => {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  });
+
+  /**
+   * extractFrames names files by candidate index and skips any frame ffmpeg
+   * cannot produce, so one bad seek leaves a hole: frame-0001.jpg missing while
+   * frame-0002.jpg exists. Reading them back by a frame-%04d.jpg pattern made
+   * ffmpeg's image2 demuxer stop at that hole, which silently disabled dedup
+   * for the entire run. These frames are deliberately named with a gap.
+   */
+  function writeGappedFrames(dir: string): { t: number; path: string }[] {
+    fs.mkdirSync(dir, { recursive: true });
+    const shades = ["black", "black", "white"]; // first two identical, third differs
+    const indices = [0, 2, 5]; // non-contiguous on purpose
+    return shades.map((colour, i) => {
+      const framePath = path.join(dir, `frame-${String(indices[i]).padStart(4, "0")}.jpg`);
+      execFileSync("ffmpeg", [
+        "-y", "-loglevel", "error",
+        "-f", "lavfi", "-i", `color=${colour}:size=320x240:duration=0.1:rate=10`,
+        "-frames:v", "1", framePath,
+      ]);
+      return { t: i, path: framePath };
+    });
+  }
+
+  it("still decodes thumbnails when frame numbering is non-contiguous", () => {
+    const frames = writeGappedFrames(path.join(workDir, "thumbs"));
+    const thumbs = thumbnailFrames(frames.map((f) => f.path));
+
+    expect(thumbs).toHaveLength(3);
+    // Order follows the array passed in, not the filenames.
+    expect(frameDelta(thumbs[0], thumbs[1])).toBeLessThanOrEqual(DEDUP_THRESHOLD);
+    expect(frameDelta(thumbs[0], thumbs[2])).toBeGreaterThan(DEDUP_THRESHOLD);
+  });
+
+  it("dedupes across the gap instead of silently failing open", () => {
+    const frames = writeGappedFrames(path.join(workDir, "dedup"));
+    const result = dedupePerceptual(frames);
+
+    expect(result.reason).toBeUndefined();
+    expect(result.dropped).toBe(1);
+    expect(result.kept.map((f) => f.t)).toEqual([0, 2]);
   });
 });
 
