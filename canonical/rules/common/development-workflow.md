@@ -8,6 +8,9 @@ The Feature Implementation Workflow describes the development pipeline: research
 
 0. **Research & Reuse** _(mandatory before any new implementation)_
    - **GitHub code search first:** Run `gh search repos` and `gh search code` to find existing implementations, templates, and patterns before writing anything new.
+     - **Always `--sort=stars --order=desc`.** The default `best-match` sort floats one-off forks above maintained projects.
+     - **2-3 keywords per query, several phrasings.** GitHub ANDs keywords across name and description only — a four-word query matches almost nothing, and the toys that survive then sort to the top regardless of `--sort`.
+     - Whole-project decisions (adopt vs fork vs build) route through `/build-or-buy`, which bundles a ranked-search script instead of hand-rolling the flags each time.
    - **Library docs second:** Use Context7 or primary vendor docs to confirm API behavior, package usage, and version-specific details before implementing.
    - **Web search last:** reach for broader web research or discovery only after GitHub search and primary docs come up short.
    - **Check package registries:** Search npm, PyPI, crates.io, and other registries before writing utility code. Prefer battle-tested libraries over hand-rolled solutions.
