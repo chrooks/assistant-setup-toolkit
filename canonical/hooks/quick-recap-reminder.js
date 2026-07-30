@@ -37,7 +37,8 @@ function readPayload() {
 // Per-turn nudge, not a rulebook. Telegraphic, imperative; full rules live once
 // in CLAUDE.md (loaded at start) so they are not re-paid every turn.
 const REMINDER =
-  "Quick-recap reminder: if this turn completes a unit of work (edits, commits, file/config changes, a built or wired feature), END the response with one status line — 🟢 finished / 🟡 non-routine follow-up remains, name it / 🔴 blocked on user input. Under 100 chars, at the very end, nothing after it (no ---, no spacer). Pure Q&A or explanation: skip the line.";
+  "Quick-recap reminder: if this turn completes a unit of work (edits, commits, file/config changes, a built or wired feature), END the response with one status line — 🟢 finished / 🟡 non-routine follow-up remains, name it / 🔴 blocked on user input. Under 100 chars, at the very end, nothing after it (no ---, no spacer). Pure Q&A or explanation: skip the line. " +
+  "Comms drift check: never a bare session codename — gloss each one ('M3 — the upstream checker'); one topic per response, park tangents in one line.";
 
 function main() {
   const payload = readPayload();
