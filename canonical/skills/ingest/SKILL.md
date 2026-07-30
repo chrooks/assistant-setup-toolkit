@@ -29,13 +29,17 @@ what pages already exist.
 
 ## Step 1 — Acquire the source
 
+`<rawDir>/inbox/` holds sources not yet ingested; `<rawDir>/archived/` holds already-ingested
+sources. New captures land in `inbox/`; Step 6 moves them to `archived/` once ingestion
+completes.
+
 The source (`$ARGUMENTS`) is one of:
 
-- **A file** already in `<vaultPath>/<rawDir>/` — read it in place.
-- **A URL** — fetch it (WebFetch), and offer to save a markdown copy into `<rawDir>/` so the source stays immutable and local.
-- **Pasted text** — offer to save it into `<rawDir>/` first; raw sources are the source of truth.
+- **A file** already in `<vaultPath>/<rawDir>/` (`inbox/` or `archived/`) — read it in place.
+- **A URL** — fetch it (WebFetch), and offer to save a markdown copy into `<rawDir>/inbox/` so the source stays immutable and local.
+- **Pasted text** — offer to save it into `<rawDir>/inbox/` first; raw sources are the source of truth.
 - **"this conversation"** — the source is the current thread. (This is how ingest absorbs the old `/capture` flow.) Write the wiki pages straight from the conversation; there's no raw file unless the user wants one saved.
-- **An Apple Note** (macOS) — the user names a note they jotted in Apple Notes. Import it into `<rawDir>/` first, then ingest the imported file:
+- **An Apple Note** (macOS) — the user names a note they jotted in Apple Notes. Import it into `<rawDir>/inbox/` first, then ingest the imported file:
 
   ```bash
   # the script lives in this skill's scripts/ dir (Claude Code path shown):
@@ -46,7 +50,10 @@ The source (`$ARGUMENTS`) is one of:
 
   The first run triggers a one-time macOS Automation permission prompt — tell the user to approve it. Then read the printed file and continue from Step 2.
 
-Never modify files under `<rawDir>/` — they're immutable.
+- **Video content** (a video URL or a local video file) — invoke the `watch-video` skill first to load it as transcript + frames; do not fetch or transcribe video yourself. Once it reports the video loaded and ready, treat its transcript as the source text and continue from Step 2 — read the transcript fully, and pull specific frames (per `watch-video`'s cache path) when a wiki page needs a visual reference. Offer to save the transcript into `<rawDir>/inbox/` so the source stays immutable and local, same as a URL.
+
+Content under `<rawDir>/` is immutable — never edit it. It may be relocated (inbox → archived)
+once ingested; that's a move, not a modification.
 
 ## Step 2 — Read it fully
 
@@ -75,6 +82,12 @@ Prefer many small focused pages over few large ones. Reuse existing pages over c
 
 Tell the user exactly which pages you created vs updated, and call out any contradiction
 you flagged. Keep it to a short list so they can browse the results in Obsidian.
+
+## Step 6 — Archive the source
+
+If the source was a file in `<rawDir>/inbox/`, move it to `<rawDir>/archived/` now that
+ingestion is complete — this is what marks it as done. Skip this step for "this
+conversation" sources, or a file that already lived in `archived/`.
 
 ## Related operations
 
