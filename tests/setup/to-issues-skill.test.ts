@@ -24,12 +24,21 @@ describe("to-issues Skill", () => {
     expect(skill).toContain("Do not close issue records until verification evidence is present");
   });
 
-  it("routes missing issue-tracker setup to project-flow-setup", async () => {
+  it("reads the project-flow Contract from defaults, with repo Overrides winning", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("docs/agents/issue-tracker.md");
-    expect(skill).toContain("docs/agents/triage-labels.md");
+    expect(skill).toContain("~/.claude/skills/project-flow-setup/defaults/<name>.md");
+    expect(skill).toContain("`docs/agents/<name>.md` is an **Override**");
+    // A repo with no Override is conforming, not unconfigured.
+    expect(skill).toContain("that is the normal case, not missing setup");
+  });
+
+  it("routes a missing type: label family to project-flow-setup", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    expect(skill).toContain("gh label list --json name");
     expect(skill).toContain("run `/project-flow-setup` inline");
+    expect(skill).not.toContain("If they are missing");
   });
 
   it("documents the local TODO.md subcommand", async () => {

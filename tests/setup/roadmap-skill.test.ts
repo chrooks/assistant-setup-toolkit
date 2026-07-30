@@ -28,13 +28,21 @@ describe("roadmap Skill", () => {
     expect(skill).toContain("Do not create new issue records");
   });
 
-  it("uses project-flow setup docs before ranking work", async () => {
+  it("reads the project-flow Contract before ranking work", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("docs/agents/project-flow.md");
-    expect(skill).toContain("docs/agents/issue-tracker.md");
-    expect(skill).toContain("docs/agents/triage-labels.md");
+    expect(skill).toContain("~/.claude/skills/project-flow-setup/defaults/<name>.md");
+    expect(skill).toContain("`docs/agents/<name>.md` is an **Override**");
+    // A repo with no Override is conforming, not unconfigured.
+    expect(skill).toContain("that is the normal case, not missing setup");
+  });
+
+  it("treats a missing type: label family as the unconfigured signal", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    expect(skill).toContain("gh label list --json name");
     expect(skill).toContain("run `/project-flow-setup` inline");
+    expect(skill).not.toContain("If these docs are missing");
   });
 
   it("is discoverable for projection and Skill Artifacts", async () => {

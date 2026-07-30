@@ -115,31 +115,31 @@ trees:
         next: audit
       - id: audit
         type: action
-        label: Audit repo-local docs and GitHub setup
-        next: docs_missing
-      - id: docs_missing
+        label: Audit GitHub setup and repo-local Overrides
+        next: labels_missing
+      - id: labels_missing
         type: decision
-        label: Are repo-local docs missing?
+        label: "Does the repo have a type: label family?"
         options:
-          - label: Yes
-            next: docs
-          - label: No
-            next: github_inspect
-      - id: docs
-        type: command
-        label: /project-flow-setup docs
-        next: github_inspect
-      - id: github_inspect
-        type: decision
-        label: Inspect GitHub labels, milestones, and Project?
-        options:
-          - label: Yes
+          - label: "No"
             next: apply
-          - label: No
-            next: next_command
+          - label: "Yes"
+            next: deviates
       - id: apply
         type: command
         label: /project-flow-setup apply
+        next: deviates
+      - id: deviates
+        type: decision
+        label: Does the repo deviate from a bundled default?
+        options:
+          - label: "Yes"
+            next: override
+          - label: "No"
+            next: next_command
+      - id: override
+        type: command
+        label: /project-flow-setup override <doc>
         next: next_command
       - id: next_command
         type: decision

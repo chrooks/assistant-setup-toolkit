@@ -12,11 +12,17 @@ This repository uses a project-management and development loop built around repo
 - `/verification-loop` proves the work.
 - `/prep-pr` packages the final diff for review or PR.
 
-Related repo-local docs:
+## Where this Contract lives
 
-- `docs/agents/project-flow.md`
-- `docs/agents/issue-tracker.md`
-- `docs/agents/triage-labels.md`
+These three docs ship as defaults bundled with the `project-flow-setup` Skill, at `~/.claude/skills/project-flow-setup/defaults/`:
+
+- `project-flow.md` — this file
+- `issue-tracker.md`
+- `triage-labels.md`
+
+`/roadmap` and `/to-issues` read them from there. A repository that follows this workflow needs no copy of them.
+
+A repo-local `docs/agents/<name>.md` is an **Override** — it shadows the default of the same name and stops tracking upstream changes to it. Write one only for a real deviation: a different issue tracker, a different label taxonomy, extra `gh` recipes.
 
 ## First-Time Setup
 
@@ -26,14 +32,14 @@ Run:
 /project-flow-setup
 ```
 
-Bare `/project-flow-setup` audits the repository, explains missing docs or GitHub setup, asks before writing docs, asks before mutating GitHub labels, milestones, or Project fields, and ends with the next useful workflow command.
+Bare `/project-flow-setup` audits the repository, then creates the missing labels, milestones, and Project fields. It writes no repo files.
 
 Direct setup commands:
 
 ```text
 /project-flow-setup audit
-/project-flow-setup docs
 /project-flow-setup apply
+/project-flow-setup override <doc>
 ```
 
 ## Daily Loop

@@ -33,13 +33,17 @@ If the user asks "what should I pick up next?", "what is the next slice?", "what
 
 ### 1. Gather source-of-truth context
 
-Read the project `LEXICON.md` first when present, then the repo-local project-flow docs:
+Read the project `LEXICON.md` first when present, then the project-flow Contract:
 
-- `docs/agents/project-flow.md`
-- `docs/agents/issue-tracker.md`
-- `docs/agents/triage-labels.md`
+- `project-flow.md`
+- `issue-tracker.md`
+- `triage-labels.md`
 
-If these docs are missing, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off answer. Then read any additional project planning docs or active ExecPlans.
+Each one lives as a bundled default at `~/.claude/skills/project-flow-setup/defaults/<name>.md`. A repo-local `docs/agents/<name>.md` is an **Override** — when it exists it replaces the default of that name entirely. Read the Override where present, the default otherwise. Most repos have no Override, and that is the normal case, not missing setup.
+
+The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check `gh label list --json name`. When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line; do not stop to recommend it. Skip the setup only when the user asked for a one-off answer.
+
+Then read any additional project planning docs or active ExecPlans.
 
 Use live issue-tracker data when available. For GitHub-backed repos, prefer `gh` commands from the project guidance. Inspect open issues, recently closed issues when relevant, milestones, Project items, labels, assignees, blockers, parent/sub-issue relationships, and pull requests.
 
@@ -47,7 +51,7 @@ If the user named a specific Project, milestone, label, issue, or board column, 
 
 **Check the label invariant as you read.** Every issue record carries exactly one
 `type:` category and at most one state label (`needs-scope`, `needs-decision`,
-`blocked`) — see `docs/agents/triage-labels.md`. Name any record that violates it
+`blocked`) — see the `triage-labels.md` in force. Name any record that violates it
 and ask, rather than ranking it on a guess:
 
 - Two state labels — the record claims to be waiting on two different things, and

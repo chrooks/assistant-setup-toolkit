@@ -13,7 +13,9 @@ By default, this Skill publishes slices to the project issue tracker and reports
 
 Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TODO-FORMAT.md). Load that file only when local mode is active or when the user asks about the local TODO.md format.
 
-In issue tracker mode, inspect `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` when present. If they are missing, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
+In issue tracker mode, read the `issue-tracker.md` and `triage-labels.md` in force. Each lives as a bundled default at `~/.claude/skills/project-flow-setup/defaults/<name>.md`; a repo-local `docs/agents/<name>.md` is an **Override** that replaces the default of that name entirely. Read the Override where present, the default otherwise. Most repos have no Override, and that is the normal case, not missing setup.
+
+The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check `gh label list --json name`. When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
 
 Every record this Skill creates or updates carries **exactly one `type:` category
 and at most one state label** (`needs-scope`, `needs-decision`, `blocked`). Never

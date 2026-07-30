@@ -61,14 +61,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  setup_start["/project-flow-setup"] --> audit["Audit repo-local docs and GitHub setup"]
-  audit --> docs_missing{Are repo-local docs missing?}
-  docs_missing -->|Yes| docs_skill["/project-flow-setup docs"]
-  docs_missing -->|No| github_inspect{Inspect GitHub labels, milestones, and Project?}
-  docs_skill --> github_inspect
-  github_inspect -->|Yes| apply_skill["/project-flow-setup apply"]
-  github_inspect -->|No| next_command{What exists next?}
-  apply_skill --> next_command
+  setup_start["/project-flow-setup"] --> audit["Audit GitHub setup and repo-local Overrides"]
+  audit --> labels_missing{"Does the repo have a type: label family?"}
+  labels_missing -->|No| apply_skill["/project-flow-setup apply"]
+  labels_missing -->|Yes| deviates{Does the repo deviate from a default?}
+  apply_skill --> deviates
+  deviates -->|Yes| override_skill["/project-flow-setup override doc"]
+  deviates -->|No| next_command{What exists next?}
+  override_skill --> next_command
   next_command -->|Issue records exist| setup_roadmap["/roadmap next"]
   next_command -->|Source plan or task list exists| setup_to_issues["/to-issues source"]
 ```
@@ -116,37 +116,48 @@ In a GitHub-backed project repo, run:
 /project-flow-setup
 ```
 
-With no subcommand, the Skill walks you through the setup in order:
+With no subcommand, the Skill runs the setup to completion:
 
-1. Audit the repo for existing project-flow docs and GitHub setup.
-2. Show what is missing and what it recommends.
-3. Ask whether to write repo-local docs.
-4. Ask whether to inspect GitHub labels, milestones, and Projects.
-5. Propose GitHub changes.
-6. Wait for approval before mutating GitHub.
-7. End with the next useful workflow command, usually `/roadmap next` or `/to-issues <source>`.
+1. Audit the repo for GitHub setup and any repo-local Overrides.
+2. Show what is missing.
+3. Inspect GitHub labels, milestones, and Projects.
+4. Create the missing labels, milestones, and Project fields — setup is plumbing, so it does not stop to ask.
+5. Report what was done, and list anything only you can run under `Needs you:`.
+6. End with the next useful workflow command, usually `/roadmap next` or `/to-issues <source>`.
+
+It writes no files into your repo.
 
 Use subcommands when you want to jump to one phase:
 
 ```text
 /project-flow-setup audit
-/project-flow-setup docs
 /project-flow-setup apply
+/project-flow-setup override <doc>
 ```
 
-`audit` inspects and reports only. `docs` writes or updates repo-local docs. `apply` proposes GitHub setup changes and asks before running them.
+`audit` inspects and reports only. `apply` runs the GitHub setup. `override` copies one bundled default into `docs/agents/` so the repo can deviate from it.
 
-## Repo-Local Docs
+## The Contract lives in defaults, not in your repo
 
-The setup Skill creates or updates these files in the target project:
+The workflow Contract is three docs bundled with the Skill:
 
 ```text
-docs/agents/project-flow.md
-docs/agents/issue-tracker.md
-docs/agents/triage-labels.md
+~/.claude/skills/project-flow-setup/defaults/project-flow.md
+~/.claude/skills/project-flow-setup/defaults/issue-tracker.md
+~/.claude/skills/project-flow-setup/defaults/triage-labels.md
 ```
 
-Those docs become the repo-local source of truth for `/to-issues` and `/roadmap`.
+`/to-issues` and `/roadmap` read them from there. **A repo that follows the default workflow needs no copy of them** — a copy is duplication that silently desyncs the next time a default changes.
+
+Write a repo-local file only when the repo actually deviates:
+
+```text
+/project-flow-setup override issue-tracker
+```
+
+That writes `docs/agents/issue-tracker.md` as an **Override**. It shadows the default of the same name completely, and from then on it stops tracking upstream changes to that default. Edit it to describe how this repo differs.
+
+The signal that a repo was never set up is the absence of a `type:` label family, not a missing doc. `/to-issues` and `/roadmap` check `gh label list` and run setup inline when they find none.
 
 ## New Work
 
@@ -265,5 +276,5 @@ Bare `/project-flow-setup` is the guided path. It does not require the user to k
 Subcommands should remain available for direct control:
 
 - `/project-flow-setup audit` for read-only inspection.
-- `/project-flow-setup docs` for repo-local docs.
-- `/project-flow-setup apply` for approval-gated GitHub setup.
+- `/project-flow-setup apply` for GitHub setup.
+- `/project-flow-setup override <doc>` to write a repo-local Override of one bundled default.

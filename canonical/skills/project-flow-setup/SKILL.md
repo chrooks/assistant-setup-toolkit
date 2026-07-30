@@ -1,7 +1,7 @@
 ---
 name: project-flow-setup
-description: Configure a repository for the project-flow workflow by auditing repo-local docs and GitHub setup, writing workflow docs from templates, and applying issue, milestone, label, and Project setup. Use when adopting /to-issues and /roadmap or when project-flow docs are missing.
-argument-hint: "[audit|docs|apply] [repo]"
+description: Configure a repository for the project-flow workflow by auditing its GitHub setup and applying the missing issue, milestone, label, and Project setup. The workflow Contract lives in bundled defaults that /roadmap and /to-issues read in place; a repo only gets a docs/agents/ file when it deviates. Use when adopting /to-issues and /roadmap, when a repo has no type: labels, or when a repo needs to deviate from the default workflow.
+argument-hint: "[audit|override|apply] [repo]"
 ---
 
 # Project Flow Setup
@@ -24,40 +24,37 @@ Do not use this Skill to decide the next work item, create issue records from pr
 
 Parse arguments positionally.
 
-- Bare `/project-flow-setup` -> guided setup. Audit, then write the missing docs and apply the missing GitHub setup, then recommend the next workflow command.
+- Bare `/project-flow-setup` -> guided setup. Audit, then apply the missing GitHub setup, then recommend the next workflow command. Writes no repo files.
 - `/project-flow-setup audit [repo]` -> read-only inspection and report.
-- `/project-flow-setup docs [repo]` -> write or update repo-local workflow docs from bundled templates.
+- `/project-flow-setup override [repo] [doc]` -> copy a bundled default into `docs/agents/` so the repo can deviate from it. Only on explicit request.
 - `/project-flow-setup apply [repo]` -> inspect GitHub setup, then create the missing labels, milestones, and Project fields. See the Approval Boundary in Apply Mode.
 
 If no repo is provided, use the current working directory.
 
-## Templates
+## Defaults, and repo-local Overrides
 
-Bundled templates live beside this Skill:
+The workflow Contract lives in three defaults bundled beside this Skill:
 
-- [project-flow.md](./templates/project-flow.md)
-- [issue-tracker.md](./templates/issue-tracker.md)
-- [triage-labels.md](./templates/triage-labels.md)
+- [project-flow.md](./defaults/project-flow.md)
+- [issue-tracker.md](./defaults/issue-tracker.md)
+- [triage-labels.md](./defaults/triage-labels.md)
 
-Write them to these repo-local paths:
+**These are read in place, not copied into repos.** `/roadmap` and `/to-issues` read them from the installed Skill at `~/.claude/skills/project-flow-setup/defaults/<name>.md`. A repo that follows the default workflow needs no repo-local doc at all.
 
-- `docs/agents/project-flow.md`
-- `docs/agents/issue-tracker.md`
-- `docs/agents/triage-labels.md`
-
-Preserve user edits when updating existing docs. If a file has generated markers, replace only the generated block. Otherwise show a diff-style summary and ask before overwriting meaningful content.
+A repo-local `docs/agents/<name>.md` is an **Override**: it shadows the default of the same name completely, and it stops tracking upstream changes to that default. Write one only when the repo genuinely deviates — a different issue tracker, a different label taxonomy, extra `gh` recipes. A file byte-identical to its default is pure duplication; delete it rather than maintain it.
 
 ## Guided Setup
 
 Bare `/project-flow-setup` is the guided setup path.
 
-1. Audit repo-local docs and GitHub setup.
+1. Audit repo-local Overrides and GitHub setup.
 2. Summarize what exists and what is missing.
-3. Write any missing `docs/agents/` file from the templates.
-4. If the repo is GitHub-backed, inspect labels, milestones, and Projects.
-5. Apply the missing GitHub setup per the Approval Boundary in Apply Mode.
-6. Report what was done and what still needs the human.
-7. End with the next useful workflow command: usually `/roadmap next`, `/to-issues <source>`, or `/scope <idea>`.
+3. If the repo is GitHub-backed, inspect labels, milestones, and Projects.
+4. Apply the missing GitHub setup per the Approval Boundary in Apply Mode.
+5. Report what was done and what still needs the human.
+6. End with the next useful workflow command: usually `/roadmap next`, `/to-issues <source>`, or `/scope <idea>`.
+
+Guided setup does not write `docs/agents/` files. The defaults already carry the Contract; a repo only earns a file when it deviates.
 
 ## Audit Mode
 
@@ -66,7 +63,7 @@ Use read-only checks.
 Inspect:
 
 - Project Lexicon: `LEXICON.md`
-- Workflow docs: `docs/agents/project-flow.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`
+- Repo-local Overrides: any of `docs/agents/project-flow.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md` that exist
 - Git remote shape: `git remote -v`
 - GitHub auth and host status: `gh auth status`
 - Issue labels: `gh label list`
@@ -81,19 +78,27 @@ gh auth refresh -s project
 
 Always name `project`, never `read:project`. `read:project` lists Projects but cannot create one or set its fields, so recommending it costs a second round trip — the exact human interruption this Skill exists to avoid.
 
+**Setup is "done" when the labels exist, not when a doc exists.** The presence of a `type:` label family is the signal — `gh label list --json name` returning no `type:` prefixed label means the repo has never been set up. A missing `docs/agents/` file means nothing; the default covers it.
+
+Report any Override that is byte-identical to its bundled default as removable — it is duplication that will silently desync on the next Skill update.
+
 Audit mode must not write files and must not mutate GitHub.
 
-## Docs Mode
+## Override Mode
 
-Write repo-local docs from the bundled templates.
+`/project-flow-setup override [repo] [doc]` copies one bundled default into `docs/agents/` so the repo can deviate from it. Run it only when the user asks for an Override, or when they describe a deviation that needs one.
 
 Use this mapping:
 
-- `templates/project-flow.md` -> `docs/agents/project-flow.md`
-- `templates/issue-tracker.md` -> `docs/agents/issue-tracker.md`
-- `templates/triage-labels.md` -> `docs/agents/triage-labels.md`
+- `defaults/project-flow.md` -> `docs/agents/project-flow.md`
+- `defaults/issue-tracker.md` -> `docs/agents/issue-tracker.md`
+- `defaults/triage-labels.md` -> `docs/agents/triage-labels.md`
 
-After writing, summarize the docs created or updated and recommend `/roadmap next` when there are existing issue records, or `/to-issues <source>` when the repo still needs issue records.
+If no `doc` is named, ask which one deviates rather than writing all three.
+
+Preserve user edits when updating an existing Override. If a file has generated markers, replace only the generated block. Otherwise show a diff-style summary and ask before overwriting meaningful content.
+
+After writing, say in one line that the file now shadows its default and will not track upstream changes to it.
 
 ## Apply Mode
 
@@ -123,7 +128,7 @@ Do not assume a stable native `gh` sub-issue command. Prefer native sub-issues o
 
 Reconcile labels without asking. The `type:` prefixed family is the taxonomy the Skills read; GitHub's stock labels are not.
 
-1. Create every missing label from `templates/triage-labels.md`.
+1. Create every missing label from `defaults/triage-labels.md`, or from the repo's Override of it when one exists.
 2. Migrate stock labels onto their `type:` equivalent, then delete the stock label — `enhancement` → `type:feature`, `bug` → `type:bug`, `documentation` → `type:docs`. Migrate across `--state all` so closed issues keep their taxonomy.
 3. Delete the remaining unused GitHub defaults (`good first issue`, `help wanted`, `invalid`, `question`, `wontfix`, `duplicate`) unless issues currently carry them.
 
@@ -133,9 +138,9 @@ A label carrying no issues is a free delete. One that does gets migrated first. 
 
 Setting up project flow is plumbing, not a design decision. Run it to completion.
 
-**Apply without asking:** creating labels, writing `docs/agents/` files, label reconciliation above, creating a Project or its fields, adding milestones the user named.
+**Apply without asking:** creating labels, label reconciliation above, creating a Project or its fields, adding milestones the user named.
 
-**Stop and ask:** deleting a label that still carries issues and has no `type:` equivalent, closing or deleting issue records, anything touching a remote other than `origin`, and any command needing an auth scope the token lacks — surface the exact `gh auth refresh -s <scope>` line, since only the human can run it.
+**Stop and ask:** writing a `docs/agents/` Override (a repo deviating from the default is a decision, not plumbing), deleting a label that still carries issues and has no `type:` equivalent, closing or deleting issue records, anything touching a remote other than `origin`, and any command needing an auth scope the token lacks — surface the exact `gh auth refresh -s <scope>` line, since only the human can run it.
 
 ## Output Shape
 
@@ -143,9 +148,9 @@ For guided and audit modes, respond with:
 
 ```text
 Project-flow setup read:
-- Docs: project-flow missing, issue-tracker present, triage-labels missing
-- GitHub: labels present, milestones missing, Project needs project auth scope
-- Recommended next: /project-flow-setup docs
+- Contract: defaults, no repo Overrides
+- GitHub: no type: labels (never set up), milestones missing, Project needs project auth scope
+- Recommended next: /project-flow-setup apply
 ```
 
 For apply mode, report what was done, not what is proposed:
@@ -155,7 +160,8 @@ Project-flow setup applied:
 - Labels: created type:feature, type:bug, needs-scope; migrated 10 issues off `enhancement`; deleted 9 stock labels
 - Project fields: Status, Priority, Size, Mode created
 - Milestones: none (none named)
-- Needs you: gh auth refresh -s read:project
+- Overrides: none written (repo follows the defaults)
+- Needs you: gh auth refresh -s project
 - Recommended next: /roadmap next
 ```
 
@@ -164,6 +170,7 @@ List anything the human must run under a `Needs you:` line. Keep it to commands 
 ## Rules
 
 - Use repo-local `LEXICON.md` Lexicon terms when present.
-- Prefer repo-local docs over defaults once they exist.
+- Read the bundled defaults; a repo-local `docs/agents/` Override wins for the doc it shadows.
+- Write an Override only for a real deviation. Never write one to "complete" setup.
 - Run setup to completion; gate only what the Approval Boundary names.
 - Keep this Skill setup-focused. Route operational work to `/to-issues`, `/roadmap`, `/scope`, `/implement`, `/verification-loop`, or `/prep-pr`.

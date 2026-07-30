@@ -17,12 +17,12 @@ describe("project-flow-setup Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("name: project-flow-setup");
-    expect(skill).toContain("argument-hint: \"[audit|docs|apply] [repo]\"");
+    expect(skill).toContain("argument-hint: \"[audit|override|apply] [repo]\"");
     expect(skill).not.toContain("disable-model-invocation");
     expect(skill).toContain("Bare `/project-flow-setup`");
     expect(skill).toContain("guided setup");
     expect(skill).toContain("/project-flow-setup audit");
-    expect(skill).toContain("/project-flow-setup docs");
+    expect(skill).toContain("/project-flow-setup override");
     expect(skill).toContain("/project-flow-setup apply");
   });
 
@@ -41,24 +41,36 @@ describe("project-flow-setup Skill", () => {
     expect(skill).toContain("Always name `project`, never `read:project`");
   });
 
-  it("references bundled templates for repo-local docs", async () => {
+  it("bundles the defaults and reads them in place", async () => {
     const skill = await readFile(skillPath, "utf-8");
 
-    expect(skill).toContain("[project-flow.md](./templates/project-flow.md)");
-    expect(skill).toContain("[issue-tracker.md](./templates/issue-tracker.md)");
-    expect(skill).toContain("[triage-labels.md](./templates/triage-labels.md)");
-    expect(skill).toContain("docs/agents/project-flow.md");
-    expect(skill).toContain("docs/agents/issue-tracker.md");
-    expect(skill).toContain("docs/agents/triage-labels.md");
+    expect(skill).toContain("[project-flow.md](./defaults/project-flow.md)");
+    expect(skill).toContain("[issue-tracker.md](./defaults/issue-tracker.md)");
+    expect(skill).toContain("[triage-labels.md](./defaults/triage-labels.md)");
+    expect(skill).toContain("~/.claude/skills/project-flow-setup/defaults/");
+    expect(skill).toContain("**These are read in place, not copied into repos.**");
   });
 
-  it("is discoverable for projection and Skill Artifacts with templates", async () => {
+  it("writes a docs/agents file only as a deliberate Override", async () => {
+    const skill = await readFile(skillPath, "utf-8");
+
+    // Guided setup used to write all three docs unconditionally. It must not.
+    expect(skill).toContain("Guided setup does not write `docs/agents/` files");
+    expect(skill).toContain("Write an Override only for a real deviation.");
+    expect(skill).toContain("## Override Mode");
+    // An Override is a decision about the repo, so it gates.
+    expect(skill).toContain("**Stop and ask:** writing a `docs/agents/` Override");
+    // The setup signal is the label taxonomy, not the presence of a doc.
+    expect(skill).toContain("gh label list --json name");
+  });
+
+  it("is discoverable for projection and Skill Artifacts with defaults", async () => {
     const skills = await discoverSkillDirs(repoRoot);
     const projectFlowSetup = skills.find((skill) => skill.name === "project-flow-setup");
 
     expect(projectFlowSetup?.files).toContain("SKILL.md");
-    expect(projectFlowSetup?.files).toContain("templates/project-flow.md");
-    expect(projectFlowSetup?.files).toContain("templates/issue-tracker.md");
-    expect(projectFlowSetup?.files).toContain("templates/triage-labels.md");
+    expect(projectFlowSetup?.files).toContain("defaults/project-flow.md");
+    expect(projectFlowSetup?.files).toContain("defaults/issue-tracker.md");
+    expect(projectFlowSetup?.files).toContain("defaults/triage-labels.md");
   });
 });
