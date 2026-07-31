@@ -51,16 +51,17 @@ If the user named a specific Project, milestone, label, issue, or board column, 
 
 **Check the label invariant as you read.** Every issue record carries exactly one
 `type:` category and at most one state label (`needs-scope`, `needs-decision`,
-`blocked`) — see the `triage-labels.md` in force. Name any record that violates it
-and ask, rather than ranking it on a guess:
+`blocked`) — see the `triage-labels.md` in force.
 
-- Two state labels — the record claims to be waiting on two different things, and
-  which one it is changes where it belongs in the order.
-- Two `type:` labels, or none — it was never classified, so its category cannot
-  inform the ranking.
+Label hygiene is AFK bookkeeping: fix violations as a batch immediately —
+missing or duplicate `type:` labels, legacy default labels (e.g. `enhancement`)
+standing in for a `type:`, conflicting state labels — then report the batch in
+one line before the ranking. Never park the fix as a recommendation for the
+human to trigger.
 
-Report violations together in one line before the ranking, not one interruption
-each.
+Ask first only when the fix is genuinely ambiguous — a record whose two state
+labels claim it is waiting on two different things, or whose `type:` cannot be
+inferred from title and body — and rank the rest without waiting.
 
 ### 2. Build the work map
 
