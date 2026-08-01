@@ -1,7 +1,7 @@
 ---
 name: ingest
-description: Ingest a source into the LLM-Wiki knowledge base (Obsidian vault) — read it, discuss takeaways, then update the wiki: a summary page, index.md, entity & concept pages with [[wikilinks]], contradiction flags, and a dated log entry. Use when the user says "ingest this", "add this to my brain / wiki / knowledge base", drops a file into raw-sources, or wants a source, article, paper, conversation, or URL filed into the wiki.
-argument-hint: "[source: a raw-sources file path, a URL, pasted text, or 'this conversation']"
+description: Ingest a source into the LLM-Wiki knowledge base (Obsidian vault) — read it, discuss takeaways, then update the wiki: a summary page, index.md, entity & concept pages with [[wikilinks]], contradiction flags, and a dated log entry. Use when the user says "ingest this", "add this to my brain / wiki / knowledge base", drops a file into raw-sources, or wants a source, article, paper, conversation, or URL filed into the wiki. Also clears a whole inbox backlog one file at a time — "ingest my inbox", "one at a time", "work through the backlog" — and drains the Karakeep phone-capture inbox ("drain karakeep", "ingest my saves / bookmarks").
+argument-hint: "[source: a raw-sources file path, a URL, pasted text, 'inbox', or 'this conversation']"
 disable-model-invocation: false
 ---
 
@@ -32,6 +32,18 @@ what pages already exist.
 `<rawDir>/inbox/` holds sources not yet ingested; `<rawDir>/archived/` holds already-ingested
 sources. New captures land in `inbox/`; Step 6 moves them to `archived/` once ingestion
 completes.
+
+**Two inboxes, two flows:**
+
+- **`<rawDir>/inbox/`** — files in the vault, usually things the user has already engaged
+  with. "Ingest my inbox", "one at a time", "work through the backlog" →
+  [references/inbox-walk.md](./references/inbox-walk.md): enumerate once, then run Steps 2–6
+  per file in a fixed presentation format, stopping for approval before each write.
+- **Karakeep** — the phone share-sheet capture inbox, usually things the user saved but
+  *hasn't* dug into yet. "Drain karakeep", "ingest my saves/bookmarks" →
+  [references/karakeep-drain.md](./references/karakeep-drain.md). Same one-at-a-time loop, but
+  gated by a **four-way triage** — most items become a queue row in `backlog/`, not a wiki
+  page. Filing an un-engaged save as knowledge is the failure mode that flow exists to prevent.
 
 The source (`$ARGUMENTS`) is one of:
 
