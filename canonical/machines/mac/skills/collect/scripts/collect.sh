@@ -45,7 +45,10 @@ mkdir -p "$INBOX"
 # --- Watermark ----------------------------------------------------------------
 # Epoch seconds. --since wins and does not consume the watermark.
 if [ -n "$SINCE" ]; then
-  CUTOFF="$(date -j -f "%Y-%m-%d" "$SINCE" "+%s" 2>/dev/null)" \
+  # Anchor at midnight — BSD date fills unspecified fields from *now*, so a bare
+  # "%Y-%m-%d" would silently cut off at the current time of day and skip that
+  # morning's items.
+  CUTOFF="$(date -j -f "%Y-%m-%d %H:%M:%S" "$SINCE 00:00:00" "+%s" 2>/dev/null)" \
     || die "--since must be YYYY-MM-DD (got: $SINCE)"
 elif [ -f "$STATE" ]; then
   CUTOFF="$(cat "$STATE")"
@@ -56,6 +59,7 @@ note "collecting items modified since $(date -r "$CUTOFF" '+%Y-%m-%d %H:%M')"
 
 FAILED=0
 COLLECTED=0
+SEEN_TITLES=""
 
 # --- Apple Notes --------------------------------------------------------------
 # List name + modification epoch, tab-separated, then filter in bash. Export of
@@ -84,6 +88,16 @@ APPLESCRIPT
       # ISO looks like 2026-07-30T14:22:01; strip the T for BSD date.
       MOD="$(date -j -f "%Y-%m-%d %H:%M:%S" "${ISO/T/ }" "+%s" 2>/dev/null || echo 0)"
       [ "$MOD" -gt "$CUTOFF" ] || continue
+      # notes-to-raw.sh selects by title and takes the first match, so two notes
+      # sharing a title would export the same one twice and lose the other.
+      # Export once and say plainly which note went uncollected.
+      case "$SEEN_TITLES" in
+        *"$(printf '\x1f')$NAME$(printf '\x1f')"*)
+          echo "collect: skipping a second note also titled \"$NAME\" — export it by hand; matching is by title." >&2
+          FAILED=1
+          continue ;;
+      esac
+      SEEN_TITLES="$SEEN_TITLES$(printf '\x1f')$NAME$(printf '\x1f')"
       if [ "$DRY" = 1 ]; then
         echo "  would pull note: $NAME"
       else
@@ -114,10 +128,19 @@ if [ "$DO_MEMOS" = 1 ]; then
 
   if [ -z "$MEMO_DIR" ]; then
     echo "collect: no Voice Memos directory found — skipping memos. (Checked the known macOS locations; if yours differs, add it to this script.)" >&2
+  elif ! ls "$MEMO_DIR" >/dev/null 2>&1; then
+    # The directory exists but won't open: that container is TCC-protected, and
+    # `test -d` passes while every read fails. Distinguish it from "not found",
+    # or a permissions problem reads as "you have no voice memos".
+    echo "collect: found $MEMO_DIR but cannot read it — grant Full Disk Access to this terminal (System Settings > Privacy & Security > Full Disk Access), then retry." >&2
+    FAILED=1
   else
     note "voice memos from: $MEMO_DIR"
     while IFS= read -r SRC; do
       [ -n "$SRC" ] || continue
+      # Filter by mtime here rather than with find -newermt: BSD find rejects
+      # the @epoch form, and failed silently enough to report zero memos.
+      [ "$(stat -f %m "$SRC")" -gt "$CUTOFF" ] || continue
       BASE="$(basename "$SRC")"
       STAMP="$(date -r "$SRC" '+%Y-%m-%d')"
       SLUG="$(printf '%s' "${BASE%.*}" | tr '[:upper:]' '[:lower:]' \
@@ -131,14 +154,20 @@ if [ "$DO_MEMOS" = 1 ]; then
         cp -p "$SRC" "$DEST" && echo "  memo: $(basename "$DEST")" || { FAILED=1; continue; }
       fi
       COLLECTED=$((COLLECTED + 1))
-    done < <(find "$MEMO_DIR" -maxdepth 1 -name '*.m4a' -newermt "@$CUTOFF" 2>/dev/null || true)
+    done < <(find "$MEMO_DIR" -maxdepth 1 -name '*.m4a')
   fi
 fi
 
 # --- Watermark advance --------------------------------------------------------
-# Only on a clean, non-dry run with no explicit --since, so a partial failure
-# doesn't cause the next run to skip what it missed.
-if [ "$DRY" = 0 ] && [ "$FAILED" = 0 ] && [ -z "$SINCE" ]; then
+# Only on a clean, non-dry run that covered both sources: a partial failure must
+# not let the next run skip what it missed, and a --notes-only/--memos-only run
+# would move the mark past items on the side it never looked at.
+#
+# An explicit --since DOES advance the mark. It has to: the first run has no
+# watermark and refuses to run without --since, so anything else deadlocks. Once
+# a run collects everything from its window up to now, "now" is the honest mark
+# however that window was chosen.
+if [ "$DRY" = 0 ] && [ "$FAILED" = 0 ] && [ "$DO_NOTES" = 1 ] && [ "$DO_MEMOS" = 1 ]; then
   mkdir -p "$STATE_DIR"; date +%s > "$STATE"
 elif [ "$FAILED" = 1 ]; then
   echo "collect: some items failed — watermark NOT advanced, so the next run retries them." >&2
