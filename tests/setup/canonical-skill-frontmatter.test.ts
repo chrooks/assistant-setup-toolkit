@@ -20,7 +20,10 @@ describe("canonical Skill frontmatter", () => {
       const frontmatter = frontmatterOf(skill);
 
       expect(frontmatter, `${skillDir.name} must start with YAML frontmatter`).not.toBeNull();
-      expect(frontmatter).toMatch(new RegExp(`(^|\\n)name: ${skillDir.name}(\\n|$)`));
+      // Machine-scoped skills are discovered as `machines/<machine>/<skill>` but
+      // install at `skills/<skill>/`, so the frontmatter carries the bare name.
+      const declaredName = skillDir.name.split("/").pop();
+      expect(frontmatter).toMatch(new RegExp(`(^|\\n)name: ${declaredName}(\\n|$)`));
       expect(frontmatter).toMatch(/(^|\n)description: .+/);
     }
   });
