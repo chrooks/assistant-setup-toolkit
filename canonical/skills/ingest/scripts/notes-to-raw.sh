@@ -4,7 +4,7 @@
 #
 # Reads the vault location from ~/.claude/knowledge-config.json, pulls a note's
 # body out of Apple Notes via AppleScript, converts HTML -> Markdown (pandoc if
-# available, else textutil), and writes it to <vaultPath>/<rawDir>/<slug>.md.
+# available, else textutil), and writes it to <vaultPath>/<rawDir>/inbox/<slug>.md.
 #
 # This is an *import* step only — it lands the note in raw-sources. Running the
 # `ingest` skill afterward integrates it into the wiki.
@@ -40,8 +40,11 @@ TITLE="${1:-}"
 VAULT="$(jq -r '.vaultPath' "$CONFIG")"
 RAWDIR="$(jq -r '.rawDir // "raw-sources"' "$CONFIG")"
 [ -n "$VAULT" ] && [ "$VAULT" != "null" ] || die "vaultPath missing in $CONFIG"
-DEST_DIR="$VAULT/$RAWDIR"
-[ -d "$DEST_DIR" ] || die "raw-sources dir not found: $DEST_DIR"
+# Imports land in inbox/ — that's what marks them not-yet-ingested, and it's
+# where the inbox walk looks. Writing to rawDir root hides them from the drain.
+[ -d "$VAULT/$RAWDIR" ] || die "raw-sources dir not found: $VAULT/$RAWDIR"
+DEST_DIR="$VAULT/$RAWDIR/inbox"
+mkdir -p "$DEST_DIR"
 
 # --- Pull the note body (HTML) via AppleScript --------------------------------
 # Returns the body of the first note whose name matches TITLE exactly.
