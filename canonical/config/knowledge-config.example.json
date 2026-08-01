@@ -3,5 +3,6 @@
   "rawDir": "raw-sources",
   "wikiDir": "wiki",
   "projectsIndex": "/path/to/your/repos/PROJECTS.md",
-  "profileTarget": "/path/to/your/toolkit/canonical/PROFILE.md"
+  "profileTarget": "/path/to/your/toolkit/canonical/PROFILE.md",
+  "collectExcludeFolders": []
 }

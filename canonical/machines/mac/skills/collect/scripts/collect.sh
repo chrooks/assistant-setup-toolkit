@@ -42,6 +42,10 @@ RAWDIR="$(jq -r '.rawDir // "raw-sources"' "$CONFIG")"
 INBOX="$VAULT/$RAWDIR/inbox"
 mkdir -p "$INBOX"
 
+# Notes folders to leave alone, from `collectExcludeFolders` in the config.
+# Pipe-delimited with sentinels so a match is exact, not a substring.
+EXCLUDED="|$(jq -r '(.collectExcludeFolders // []) | join("|")' "$CONFIG")|"
+
 # --- Watermark ----------------------------------------------------------------
 # Epoch seconds. --since wins and does not consume the watermark.
 if [ -n "$SINCE" ]; then
@@ -65,13 +69,19 @@ COLLECTED=0
 # each changed note is delegated to the ingest Skill's notes-to-raw.sh so there
 # is exactly one HTML->Markdown converter in the toolkit.
 if [ "$DO_NOTES" = 1 ]; then
+  # Walk folder by folder so each note carries the folder it came from — some
+  # folders mirror a system that already has its own pipeline into the brain,
+  # and re-importing those as raw captures duplicates the source.
   # id first, title last: a title may contain a tab, and `read` puts every
   # leftover field into the final variable, so only the title can absorb one.
   NOTES_TSV="$(osascript <<'APPLESCRIPT' 2>/dev/null || true
 set out to ""
 tell application "Notes"
-  repeat with n in notes
-    set out to out & (id of n) & tab & ((modification date of n) as «class isot» as string) & tab & (name of n) & linefeed
+  repeat with f in folders
+    set fname to name of f
+    repeat with n in notes of f
+      set out to out & (id of n) & tab & ((modification date of n) as «class isot» as string) & tab & fname & tab & (name of n) & linefeed
+    end repeat
   end repeat
 end tell
 return out
@@ -84,8 +94,11 @@ APPLESCRIPT
   else
     NOTE_SCRIPT="$HOME/.claude/skills/ingest/scripts/notes-to-raw.sh"
     [ -f "$NOTE_SCRIPT" ] || die "expected $NOTE_SCRIPT (from the ingest Skill) — run the Setup Wizard."
-    while IFS=$'\t' read -r ID ISO NAME; do
+    while IFS=$'\t' read -r ID ISO FOLDER NAME; do
       [ -n "${ID:-}" ] || continue
+      case "$EXCLUDED" in
+        *"|$FOLDER|"*) continue ;;
+      esac
       # ISO looks like 2026-07-30T14:22:01; strip the T for BSD date.
       MOD="$(date -j -f "%Y-%m-%d %H:%M:%S" "${ISO/T/ }" "+%s" 2>/dev/null || echo 0)"
       [ "$MOD" -gt "$CUTOFF" ] || continue

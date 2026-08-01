@@ -92,10 +92,16 @@ TITLE="${REST%%"$SEP"*}"
 BODY_HTML="${REST#*"$SEP"}"
 
 # --- HTML -> Markdown ---------------------------------------------------------
+# Apple Notes uses U+2028/U+2029 (LINE/PARAGRAPH SEPARATOR) for soft breaks, and
+# both survive the HTML conversion. Editors flag them as unusual line
+# terminators and plenty of markdown tooling does not treat them as breaks at
+# all, so normalise them to real newlines on the way through.
+normalise() { perl -CSD -pe 's/[\x{2028}\x{2029}]/\n/g'; }
+
 if command -v pandoc >/dev/null 2>&1; then
-  BODY_MD="$(printf '%s' "$BODY_HTML" | pandoc -f html -t markdown_strict 2>/dev/null)"
+  BODY_MD="$(printf '%s' "$BODY_HTML" | pandoc -f html -t markdown_strict 2>/dev/null | normalise)"
 else
-  BODY_MD="$(printf '%s' "$BODY_HTML" | textutil -stdin -format html -convert txt -stdout 2>/dev/null)"
+  BODY_MD="$(printf '%s' "$BODY_HTML" | textutil -stdin -format html -convert txt -stdout 2>/dev/null | normalise)"
 fi
 
 # --- Slug + write -------------------------------------------------------------
@@ -110,9 +116,13 @@ DEST="$DEST_DIR/$SLUG.md"
 # different note, fall back to a suffixed name. The suffix comes from the id
 # rather than a counter so re-exporting the same note keeps overwriting one file
 # instead of piling up -2, -3, -4 on every run.
-if [ -e "$DEST" ] && [ "$(sed -n 's/^note_id: //p' "$DEST" | head -1)" != "$NOTE_ID" ]; then
+EXISTING_ID="$(sed -n 's/^note_id: //p' "$DEST" 2>/dev/null | head -1)"
+if [ -e "$DEST" ] && [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "$NOTE_ID" ]; then
   DEST="$DEST_DIR/$SLUG-${NOTE_ID##*/}.md"
 fi
+# An existing file with NO note_id was written before ids were recorded, not by
+# a different note. Overwriting it upgrades it in place; treating it as a
+# stranger instead forks every previously exported note into a second copy.
 
 # " is the frontmatter string delimiter; a title containing one must not end it.
 YAML_TITLE="${TITLE//\"/\\\"}"
