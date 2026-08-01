@@ -34,8 +34,18 @@ if [ "${1:-}" = "--list" ]; then
   exit 0
 fi
 
-TITLE="${1:-}"
-[ -n "$TITLE" ] || die "usage: notes-to-raw.sh \"Exact Note Title\"  (or --list)"
+# Select by id when given. Titles are not unique in Apple Notes — two notes can
+# share one, and selecting by title silently exports whichever comes first. Ids
+# are unique, and they survive titles containing quotes.
+NOTE_ID=""
+TITLE=""
+if [ "${1:-}" = "--id" ]; then
+  NOTE_ID="${2:-}"
+  [ -n "$NOTE_ID" ] || die "usage: notes-to-raw.sh --id <note-id>"
+else
+  TITLE="${1:-}"
+  [ -n "$TITLE" ] || die "usage: notes-to-raw.sh \"Exact Note Title\"  (or --id <id>, --list)"
+fi
 
 VAULT="$(jq -r '.vaultPath' "$CONFIG")"
 RAWDIR="$(jq -r '.rawDir // "raw-sources"' "$CONFIG")"
@@ -46,19 +56,40 @@ RAWDIR="$(jq -r '.rawDir // "raw-sources"' "$CONFIG")"
 DEST_DIR="$VAULT/$RAWDIR/inbox"
 mkdir -p "$DEST_DIR"
 
-# --- Pull the note body (HTML) via AppleScript --------------------------------
-# Returns the body of the first note whose name matches TITLE exactly.
-BODY_HTML="$(osascript <<APPLESCRIPT 2>/dev/null || true
+# --- Pull the note via AppleScript --------------------------------------------
+# Returns id, then title, then body, separated by a marker line the body will not
+# contain. Fetching the id even in title mode lets the writer below tell "the
+# same note again" from "a different note with the same title".
+SEP="__NOTES_TO_RAW_FIELD__"
+# The selector is interpolated into AppleScript source, so escape backslashes
+# first, then quotes — a note titled  He said "hi"  would otherwise not parse.
+if [ -n "$NOTE_ID" ]; then
+  ESCAPED="${NOTE_ID//\\/\\\\}"; ESCAPED="${ESCAPED//\"/\\\"}"
+  SELECTOR="notes whose id is \"$ESCAPED\""
+  WANTED="note with id $NOTE_ID"
+else
+  ESCAPED="${TITLE//\\/\\\\}"; ESCAPED="${ESCAPED//\"/\\\"}"
+  SELECTOR="notes whose name is \"$ESCAPED\""
+  WANTED="note titled \"$TITLE\""
+fi
+
+RAW="$(osascript <<APPLESCRIPT 2>/dev/null || true
 tell application "Notes"
-  set matches to notes whose name is "$TITLE"
+  set matches to $SELECTOR
   if (count of matches) is 0 then return "__NOT_FOUND__"
-  return body of item 1 of matches
+  set n to item 1 of matches
+  return (id of n) & "$SEP" & (name of n) & "$SEP" & (body of n)
 end tell
 APPLESCRIPT
 )"
 
-[ -n "$BODY_HTML" ] || die "could not read Notes — grant Automation permission (System Settings > Privacy & Security > Automation) and retry."
-[ "$BODY_HTML" != "__NOT_FOUND__" ] || die "no note titled \"$TITLE\". Run with --list to see exact titles."
+[ -n "$RAW" ] || die "could not read Notes — grant Automation permission (System Settings > Privacy & Security > Automation) and retry."
+[ "$RAW" != "__NOT_FOUND__" ] || die "no $WANTED. Run with --list to see exact titles."
+
+NOTE_ID="${RAW%%"$SEP"*}"
+REST="${RAW#*"$SEP"}"
+TITLE="${REST%%"$SEP"*}"
+BODY_HTML="${REST#*"$SEP"}"
 
 # --- HTML -> Markdown ---------------------------------------------------------
 if command -v pandoc >/dev/null 2>&1; then
@@ -74,11 +105,24 @@ SLUG="$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]' \
 TODAY="$(date +%F)"
 DEST="$DEST_DIR/$SLUG.md"
 
+# Two notes sharing a title slug to the same filename, so the second would erase
+# the first. Every export records its note_id; if the file on disk belongs to a
+# different note, fall back to a suffixed name. The suffix comes from the id
+# rather than a counter so re-exporting the same note keeps overwriting one file
+# instead of piling up -2, -3, -4 on every run.
+if [ -e "$DEST" ] && [ "$(sed -n 's/^note_id: //p' "$DEST" | head -1)" != "$NOTE_ID" ]; then
+  DEST="$DEST_DIR/$SLUG-${NOTE_ID##*/}.md"
+fi
+
+# " is the frontmatter string delimiter; a title containing one must not end it.
+YAML_TITLE="${TITLE//\"/\\\"}"
+
 cat > "$DEST" <<MD
 ---
 type: source
-title: "$TITLE"
+title: "$YAML_TITLE"
 source: apple-notes
+note_id: $NOTE_ID
 date_imported: $TODAY
 ---
 

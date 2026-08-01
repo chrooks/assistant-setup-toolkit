@@ -59,18 +59,19 @@ note "collecting items modified since $(date -r "$CUTOFF" '+%Y-%m-%d %H:%M')"
 
 FAILED=0
 COLLECTED=0
-SEEN_TITLES=""
 
 # --- Apple Notes --------------------------------------------------------------
 # List name + modification epoch, tab-separated, then filter in bash. Export of
 # each changed note is delegated to the ingest Skill's notes-to-raw.sh so there
 # is exactly one HTML->Markdown converter in the toolkit.
 if [ "$DO_NOTES" = 1 ]; then
+  # id first, title last: a title may contain a tab, and `read` puts every
+  # leftover field into the final variable, so only the title can absorb one.
   NOTES_TSV="$(osascript <<'APPLESCRIPT' 2>/dev/null || true
 set out to ""
 tell application "Notes"
   repeat with n in notes
-    set out to out & (name of n) & tab & ((modification date of n) as «class isot» as string) & linefeed
+    set out to out & (id of n) & tab & ((modification date of n) as «class isot» as string) & tab & (name of n) & linefeed
   end repeat
 end tell
 return out
@@ -83,25 +84,18 @@ APPLESCRIPT
   else
     NOTE_SCRIPT="$HOME/.claude/skills/ingest/scripts/notes-to-raw.sh"
     [ -f "$NOTE_SCRIPT" ] || die "expected $NOTE_SCRIPT (from the ingest Skill) — run the Setup Wizard."
-    while IFS=$'\t' read -r NAME ISO; do
-      [ -n "${NAME:-}" ] || continue
+    while IFS=$'\t' read -r ID ISO NAME; do
+      [ -n "${ID:-}" ] || continue
       # ISO looks like 2026-07-30T14:22:01; strip the T for BSD date.
       MOD="$(date -j -f "%Y-%m-%d %H:%M:%S" "${ISO/T/ }" "+%s" 2>/dev/null || echo 0)"
       [ "$MOD" -gt "$CUTOFF" ] || continue
-      # notes-to-raw.sh selects by title and takes the first match, so two notes
-      # sharing a title would export the same one twice and lose the other.
-      # Export once and say plainly which note went uncollected.
-      case "$SEEN_TITLES" in
-        *"$(printf '\x1f')$NAME$(printf '\x1f')"*)
-          echo "collect: skipping a second note also titled \"$NAME\" — export it by hand; matching is by title." >&2
-          FAILED=1
-          continue ;;
-      esac
-      SEEN_TITLES="$SEEN_TITLES$(printf '\x1f')$NAME$(printf '\x1f')"
+      # Export by id, not title: Apple Notes titles are not unique, and passing a
+      # title would export whichever note matched first — twice — and drop the
+      # other. notes-to-raw.sh suffixes the filename when slugs collide.
       if [ "$DRY" = 1 ]; then
         echo "  would pull note: $NAME"
       else
-        if bash "$NOTE_SCRIPT" "$NAME" >/dev/null; then
+        if bash "$NOTE_SCRIPT" --id "$ID" >/dev/null; then
           echo "  note: $NAME"
         else
           echo "collect: failed to export note: $NAME" >&2
