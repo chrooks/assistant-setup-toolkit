@@ -50,6 +50,7 @@ Work that changes runtime behavior is done only when the affected flow has been 
 
 - Applies equally to subagent-returned work: never relay an agent's "done" without driving the flow first.
 - Lead the completion report with the proof, then the change detail.
+- **When a target mockup exists, it is the acceptance criterion.** Screenshot the built page, compare it against the reference image, and close the gap — repeat until they match. "It builds" and "it looks like the design" are different claims, and only the second one was asked for. A reference image is the cheapest executable spec a UI change can have; when one exists and no comparison happened, the work is not proven.
 
 Case: ~12 "I don't see it / still broken" corrections in one Cornerstone cycle (2026-07 loop audit).
 
