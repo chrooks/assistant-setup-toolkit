@@ -55,6 +55,15 @@ For each criterion, propose one of:
 
 Propose; do not decide. The verdict is the human's at assess.
 
+**Every `needs-human` criterion gets a recorded clip.** A sentence describing what
+you saw makes the human re-drive the app themselves, which is the expensive thing
+this stage exists to avoid. Record the criterion's flow per
+[`~/.claude/rules/web/demo-recording.md`](../../rules/web/demo-recording.md) — one
+clip per criterion, named for it, landing in the run's `.tasks/<run>/proof/`.
+
+The clip does not change the status. It stays `needs-human`; the clip is what makes
+that status cheap to settle at assess.
+
 ### Step 4 — Write the Proof Ledger
 
 Write one line per criterion into the Throughline's `## Proof Ledger` section:
@@ -63,7 +72,10 @@ the id, the statement, the proposed status, and the evidence. For example:
     ## Proof Ledger
     - ac1 search filters rows — PASS — playwright: typed "char", rows 1010 -> 6
     - ac2 column header sorts — PASS — playwright: clicked #col-bst, first row bst ascending
-    - ac3 column toggle hides column — NEEDS-HUMAN — toggled #toggle-bst, column hidden; confirm visually
+    - ac3 column toggle hides column — NEEDS-HUMAN — toggled #toggle-bst, column hidden — [clip](proof/ac3-column-toggle.webm)
+
+A `needs-human` line without a clip link is incomplete. Link the clip relative to
+the Throughline so the human opens it straight from the ledger.
 
 Also set each criterion's `status` in the frontmatter to your proposed value.
 
@@ -90,7 +102,7 @@ Return the result as a single fenced JSON block — and nothing else outside it:
     {
       "files_changed": [],
       "tests": "the proofs that ran and how",
-      "artifacts": "the evidence",
+      "artifacts": "the evidence, including the clip path for every needs-human criterion",
       "ac_status": {"ac1": "pass", "ac2": "needs-human", ...},
       "suggested_next_action": "/dev assess"
     }
@@ -106,6 +118,10 @@ the Throughline.
 
 - Propose statuses; never render the final verdict. The human disposes at assess.
 - Never mark a criterion `pass` without concrete evidence.
+- Never propose `needs-human` without a clip. That status is a request for the
+  human's eye, so give them something to look at.
+- Do not record clips for criteria you can assert. An assertion is stronger and
+  faster; a clip there is theatre.
 - Prefer Playwright or DOM assertions over headless Google Chrome screenshots,
   which are known to crash on this machine — verify the rendered result another
   way.

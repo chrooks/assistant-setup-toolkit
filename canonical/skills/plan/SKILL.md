@@ -96,6 +96,12 @@ gets an integration test; a pure function gets a unit test. Never write a
 criterion without its proof method — that is the contract the prove stage runs
 against.
 
+Some criteria are genuinely a matter of taste — whether a layout reads right,
+whether a flow feels smooth. Do not invent a brittle assertion for those. Record
+their proof method as a **recorded clip** and let the prove stage hand the human
+something to watch, per
+[`~/.claude/rules/web/demo-recording.md`](../../rules/web/demo-recording.md).
+
 ### Step 5 — Map the work to issue records
 
 Size the breakdown to the tier scope stamped — issue ceremony follows the work,

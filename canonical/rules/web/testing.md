@@ -20,6 +20,7 @@ paths:
 - Test hero sections, scrollytelling sections, and meaningful states
 - Use Playwright screenshots for visual-heavy work
 - If both themes exist, test both
+- When a criterion needs a human's eye rather than an assertion, record a clip — see [demo-recording.md](./demo-recording.md)
 
 ### 2. Accessibility
 
