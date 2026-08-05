@@ -34,7 +34,7 @@ repo is public, and machine rule files are local-only per ADR-0003.
 - Descriptions are edited once and ship everywhere; only paths live per
   machine. A machine with no Variant still learns what exists and that
   claude.ai can reach the brain.
-- Machine-scoped resources (hearth knowledge, the claude-history archive)
+- Machine-scoped resources (homelab knowledge, the claude-history archive)
   live in that machine's file, not the canonical index — the public repo
   never learns about them.
 - Requires the machine rule to actually load in Codex; fixed alongside this

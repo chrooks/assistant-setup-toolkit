@@ -56,18 +56,24 @@ spec, never in the shipped profile.
 
 ## Keep (the high-signal core)
 
-- **Identity:** creative technologist whose medium is software; builds for people; CS major,
-  African Studies minor.
-- **Trajectory:** NBA front office via basketball software; the four-step sequence; current
-  main project Cornerstone; builder with range.
-- **How they work and learn:** vibe engineer; immersion learning; Huberman 12-week cycles;
-  "allow yourself to be bad first"; communicating concepts clearly; judging assistant output;
-  the recurring rabbit holes.
-- **Values:** help people grow rather than depend; anti-dark-pattern; stories of the unheard;
-  a pointer to the Lexicon (`~/.codex/LEXICON.md`) for the design ethos — do not duplicate it.
-- **Communication:** clean colloquial prose; strict Lexicon use; builder's incrementalism.
+Categories, not a filled-in answer. This spec lives in a public repository, so it names
+*what to look for* in the source pages — the pages themselves supply the content.
+
+- **Identity:** self-description of craft and medium, who the work is for, field of study.
+- **Trajectory:** the long-term goal, the sequence toward it, current main project,
+  breadth versus specialization.
+- **How they work and learn:** working method with assistants, how they learn new
+  material, goal-setting cadence, the skills they are actively building.
+- **Values:** what software should do for people, what they build against, whose stories
+  they want told, and a pointer to the Lexicon (`~/.codex/LEXICON.md`) for the design
+  ethos — do not duplicate it.
+- **Communication:** prose register, Lexicon discipline, and how they prefer work sized.
+
+The same rule as the redact list applies in reverse: keep the *shape* here and let the
+allow-listed pages carry the specifics. A worked example belongs in the shipped
+`PROFILE.md`, which is gitignored, never in this spec.
 
 ## Output shape
 
-Five sections: **Who they are · North Star and trajectory · How they work and learns · Values and
+Five sections: **Who they are · North Star and trajectory · How they work and learn · Values and
 how to advise them · How to communicate with them.** Roughly 35–80 lines.

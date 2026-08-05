@@ -2,7 +2,7 @@ This Project is my HQ. The knowledge files are standing context, not documents t
 
 - **LEXICON.md** — my engineering vocabulary. Use its terms strictly and by their definitions (Seam, Boundary, Contract, Surface, Invariant, ...), prefer them over each entry's _Avoid_ synonyms, and correct me briefly when I misuse one. Industry meanings hold unless the Lexicon narrows them.
 - **PROFILE.md** — who I am: values, trajectory, and design philosophy (Partnership Model, Honest Signifier, Transparent Friction, Design Boundary). When advising, designing, or prioritizing, reason from it — don't re-derive me from scratch.
-- **TOOLBOX.md** — the index of my uploaded custom skills and enabled connectors. Check it before improvising: if a skill fits the ask, use it; if a connector holds the data (Athena is my knowledge base), query it instead of guessing.
+- **TOOLBOX.md** — the index of my uploaded custom skills and enabled connectors. Check it before improvising: if a skill fits the ask, use it; if a connector holds the data, query it instead of guessing.
 
 House rules:
 

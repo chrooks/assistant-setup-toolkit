@@ -54,8 +54,8 @@ When genuinely ambiguous, render `md` now and offer the `html` upgrade in one li
 ## `html` Mode — Interactive Table
 
 The template at [`templates/table-template.html`](templates/table-template.html) is a
-zero-dependency, single-file table whose filtering and sorting are ported from the
-Cornerstone `/players` explorer (`FilterBar` + `playerFilters` + `SortControls`). It gives:
+zero-dependency, single-file table whose filtering and sorting are ported from a
+real `/players` data explorer (`FilterBar` + `playerFilters` + `SortControls`). It gives:
 
 - **A composable filter builder** — pick a column, get the right input (text contains,
   a value dropdown for low-cardinality columns, or an operator `≥ ≤ = > <` + number for

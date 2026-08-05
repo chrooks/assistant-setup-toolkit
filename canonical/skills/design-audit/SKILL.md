@@ -1,6 +1,6 @@
 ---
 name: design-audit
-description: Audit an existing product flow, Interface, or UI Surface against the user's design ethos plus HCI/UX principles. Use when reviewing product design, Cornerstone flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test / Nick Test evidence.
+description: Audit an existing product flow, Interface, or UI Surface against the user's design ethos plus HCI/UX principles. Use when reviewing product design, product flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test / Nick Test evidence.
 argument-hint: "<flow, Surface, screenshot, or repo path>"
 user-invocable: true
 ---
@@ -11,13 +11,9 @@ Use this Skill to audit an existing product flow or UI design. Prefer evidence f
 
 ## Audit Targets
 
-Support general Interface and Surface audits, plus these Cornerstone Touchpoints:
-
-- Feedback panel
-- Onboarding
-- Legend selector
-- Evaluate Team explanation
-- Leaderboard Touchpoint
+Audit whatever Interface or Surface the user points at. Typical Touchpoints:
+onboarding, an empty state, a selector or filter control, an explanation panel,
+a leaderboard or results view, and a feedback affordance.
 
 ## Process
 

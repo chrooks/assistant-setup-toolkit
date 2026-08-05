@@ -27,7 +27,7 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
      page-load over the local bridge is the default render path; a fully local
      Plan app (`PLAN_LOCAL_DIR` → `/local-plans/<slug>`) is the documented
      fallback if the company proxy blocks it — not pre-built (YAGNI).
-   - `self-hosted` (personal): Plan app deployed on server per the hearth house
+   - `self-hosted` (personal): Plan app deployed on the home server per the homelab house
      pattern — Docker container (TREK precedent: prod build, read-only,
      cap-drop), data under `/srv/compose/plan/` (restic-backed for free),
      `127.0.0.1` bind fronted by a reverse proxy at the operator's own origin,
@@ -47,6 +47,6 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
 - The work laptop carries zero MCP config, so there is nothing for the company
   block to fight.
 - Plan data on server lands in the existing backup and HTTPS story without new
-  machinery; the cost is the hearth deploy ritual (inventory row, runbook,
-  backup-path check) owned in the hearth repo, not here.
+  machinery; the cost is the homelab deploy ritual (inventory row, runbook,
+  backup-path check) owned in the homelab repo, not here.
 - If the skills' config Seams ever disappear upstream, revisit the no-fork rule.

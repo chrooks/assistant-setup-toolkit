@@ -12,7 +12,7 @@ flow is safe under parallel runs.
 notebooklm auth check --test --json        # need status:ok AND checks.token_fetch:true
 
 # 1. Create notebook, capture id
-NID=$(notebooklm create "Cornerstone — Study" --json | jq -r .notebook.id)
+NID=$(notebooklm create "My Project — Study" --json | jq -r .notebook.id)
 
 # 2. Add sources, wait for processing
 SID=$(notebooklm source add "/path/to/teardown.md" --notebook "$NID" --json | jq -r .source.id)

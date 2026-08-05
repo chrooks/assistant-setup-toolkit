@@ -49,9 +49,9 @@ describe("parseClaudeAiManifest", () => {
 
   it("parses connectors and defaults them to empty", () => {
     const withConnectors = parseClaudeAiManifest(
-      "version: 1\nskills: [wym]\nconnectors:\n  Athena: the brain\n",
+      "version: 1\nskills: [wym]\nconnectors:\n  Brain: the brain\n",
     );
-    expect(withConnectors.connectors).toEqual({ Athena: "the brain" });
+    expect(withConnectors.connectors).toEqual({ Brain: "the brain" });
 
     const without = parseClaudeAiManifest("version: 1\nskills: [wym]\n");
     expect(without.connectors).toEqual({});
@@ -60,9 +60,9 @@ describe("parseClaudeAiManifest", () => {
   it("rejects a connector without a gloss string", () => {
     expect(() =>
       parseClaudeAiManifest(
-        "version: 1\nskills: [wym]\nconnectors:\n  Athena: 3\n",
+        "version: 1\nskills: [wym]\nconnectors:\n  Brain: 3\n",
       ),
-    ).toThrow(/Connector "Athena"/);
+    ).toThrow(/Connector "Brain"/);
   });
 
   it("parses externalSkills and defaults them to empty", () => {
@@ -154,11 +154,11 @@ describe("buildToolboxIndex", () => {
         { name: "grill-me", gloss: "Interviews you." },
         { name: "wym", gloss: "" },
       ],
-      { Athena: "the brain" },
+      { Brain: "the brain" },
     );
     expect(toolbox).toContain("- **grill-me** — Interviews you.");
     expect(toolbox).toContain("- **wym**\n");
-    expect(toolbox).toContain("- **Athena** — the brain");
+    expect(toolbox).toContain("- **Brain** — the brain");
   });
 });
 

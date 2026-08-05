@@ -28,8 +28,8 @@ Design record: `.tasks/loop-audit/design-frame.md` and
 ### Step 1 — Guard
 
 Verify `/srv/claude-history` exists. If it does not, stop: this skill runs on
-the home server only, where the archive lives. Say so and name the runbook (hearth
-`docs/runbooks/15-claude-history-collection.md`).
+the home server only, where the archive lives. Say so and name the runbook (the homelab
+repo's `docs/runbooks/15-claude-history-collection.md`).
 
 ### Step 2 — Extract
 
@@ -95,7 +95,7 @@ change — a diff to `canonical/` or a memory-file draft — and include an
 approximate recurring context cost line: `~N tokens recurring cost` where
 N = ceil(characters ÷ 4), labeled approximate. Present the draft; do not write
 it into the tree unless the user explicitly says to apply it. For each finding they
-rejects, note the rejection in the report so future runs don't re-raise it.
+reject, note the rejection in the report so future runs don't re-raise it.
 
 ### Step 6 — Close
 

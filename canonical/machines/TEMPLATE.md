@@ -22,7 +22,7 @@ session.
      ADR-0004): one line per canonical entry — which access mode is live here
      and at what path. Omit entries this machine can't reach. -->
 
-- **The brain:** <e.g. Athena MCP only · or local vault at ~/vaults/brain-v2>
+- **The brain:** <e.g. the brain MCP connector only · or local vault at ~/vaults/brain-v2>
 - **The toolkit:** <local clone path>
 
 ### Machine-local resources

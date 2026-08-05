@@ -58,7 +58,7 @@ skill to capture mode:
 3. For add, update, or remove: emit the exact formatted entry block (or the
    removal instruction) in a copyable code fence for the user to land in the
    real Lexicon later, and say plainly that nothing has been written yet.
-4. If the Athena connector is available, offer once to file the entry to the
+4. If the brain connector is available, offer once to file the entry to the
    brain's inbox so it lands durably.
 
 ## Lexicon Entry Format

@@ -13,7 +13,7 @@ present → assume only the claude.ai access modes below.
   of wiki pages, raw sources, and entity/concept pages with wikilinks.
 - **For:** durable knowledge: learnings, teardowns, project notes, people,
   concepts. Where "ingest this" filings land and where past context lives.
-- **Access modes:** Athena MCP (claude.ai connector — search, read, inbox
+- **Access modes:** the brain MCP connector on claude.ai (search, read, inbox
   tools) · direct vault read on machines holding a clone.
 - **Local access:** see machine context.
 

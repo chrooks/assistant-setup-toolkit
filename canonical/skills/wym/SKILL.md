@@ -120,7 +120,7 @@ Enter **drill** to go deeper.
 A Team often has more than 5 players, so the engine has to decide which 5 belong on the court together.
 
 ### Human
-In Cornerstone, a Lineup is exactly 5 players on the court together — the atomic
+In basketball analytics, a Lineup is exactly 5 players on the court together — the atomic
 unit the engine scores. When a Team has more than 5 players, the engine evaluates
 every possible group of 5. These are Lineup Combinations: all C(N,5) ways to choose
 5 players from N. A 9-player Rotation produces 126 combinations. A 12-player Roster

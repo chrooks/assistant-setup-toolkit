@@ -28,9 +28,9 @@ skills:
   - idea-to-design # reasons from PROFILE.md — add it as Project knowledge
   - design-audit # reasons from PROFILE.md — add it as Project knowledge
   - nickify # plain-English brief translator
-  - ingest # files to the brain via the Athena connector's inbox tools
+  - ingest # files to the brain via the brain connector's inbox tools
   - handoff # copyable continuation prompt — carries context to the next session
-  - lexicon # capture mode on claude.ai — emits entry blocks / files via Athena, never scaffolds
+  - lexicon # capture mode on claude.ai — emits entry blocks / files via the brain connector, never scaffolds
 # External skills — fetched from install.yaml's skill sources at pack time,
 # not from canonical/. Layering matches the wizard (canonical wins): if one of
 # these is ever vendored into canonical/skills, move it up to `skills` — a
@@ -44,7 +44,7 @@ externalSkills:
 # knows what's at its disposal. The repo can't detect claude.ai account config;
 # update this by hand when connectors change.
 connectors:
-  Athena: the brain — search, read, and inbox filing for the LLM-Wiki knowledge base
+  Brain: the brain — search, read, and inbox filing for the LLM-Wiki knowledge base
   Context7: current library and API docs — check before answering setup or API questions
   Trek: the travel planner — trips, itineraries, packing, budgets
   Gmail / Google Calendar / Google Drive: mail, calendar, and files

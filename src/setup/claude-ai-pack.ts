@@ -278,7 +278,7 @@ ${zipList}
 
 - deep-research: no firecrawl/exa MCPs on claude.ai — it falls back to native
   web search.
-- ingest: needs the Athena connector enabled; it files via the inbox tools
+- ingest: needs the brain connector enabled; it files via the inbox tools
   instead of writing the vault directly.
 - visualize/table/diagram/figure: the html variants render as claude.ai
   Artifacts; cross-skill path references (visual-picker.md) don't resolve, so

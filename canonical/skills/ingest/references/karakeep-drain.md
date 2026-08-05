@@ -6,8 +6,8 @@ which holds files inside the vault. Both feed the same wiki; they need different
 
 Fire on: "drain karakeep", "ingest my saves/bookmarks", "process the capture inbox".
 
-Design authority: hearth `docs/adr/0001-capture-pipeline.md`; operational detail (tool paths,
-cookies, gotchas) lives in hearth runbook `12-karakeep-capture-inbox.md`. **Read the runbook
+Design authority: the homelab repo's `docs/adr/0001-capture-pipeline.md`; operational detail
+(tool paths, cookies, gotchas) lives in its runbook `12-karakeep-capture-inbox.md`. **Read the runbook
 before the first drain in a session** — it holds the proven commands and their failure modes.
 
 ## The thing that makes this different from a file walk
@@ -84,7 +84,7 @@ for "How I'd file it".
 ## Turning media into text
 
 Short-form video and image posts need extraction before there's anything to triage. Full
-commands, install paths, and verified gotchas are in hearth runbook 12 — **do not reconstruct
+commands, install paths, and verified gotchas are in the homelab runbook 12 — **do not reconstruct
 them from memory.** The shape:
 
 - **YouTube** — try captions first (`yt-dlp --skip-download --write-auto-subs`); no download,
