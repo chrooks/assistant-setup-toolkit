@@ -27,7 +27,33 @@ follow, and the triage below exists to prevent them:
 
 So: **not every drained item becomes a wiki page.** Most don't.
 
-## Triage — four outcomes, decided per item, in conversation
+## Lanes — the capture tag picks the path (ADR decision 8)
+
+Saves carry one of three tags, chosen on the phone at save time. **Read the lane before
+you read the item** — it decides how much work the item is worth.
+
+| Tag | Means | What the drain does |
+|---|---|---|
+| `ref` | file it, don't study it | Full ingest. Bulk-friendly — several per session |
+| `study` | this needs an evening | A `to-engage` row. Extraction is worth it here |
+| `curious` | I looked, I'm done | **Never processed.** Archive unread, no page, no row |
+| *(untagged)* | saved in a hurry | Exactly the old behavior — triage in conversation |
+
+Three rules make this safe:
+
+- **`curious` is archived without being opened.** Don't fetch it, don't transcribe it,
+  don't summarise it. Report the count and archive. This bypass is the entire point — the
+  saving comes from not draining, not from draining faster.
+- **A tag is a routing instruction, not a verdict on quality.** If reading a `ref` item
+  shows it is really a `study` item, say so and retag. Lanes are filtered queries, so
+  retagging costs one call and nothing is lost.
+- **Untagged is a first-class lane, not an error.** Never nag about missing tags. The
+  system has to work when the user forgets, or it is friction pretending to be structure.
+
+Default to draining **one lane at a time**, asking which if unstated. `ref` first is
+usually right — it is the fastest to clear and it shrinks the queue visibly.
+
+## Triage — for untagged items, and for retag calls
 
 | Outcome | When | Where it lands |
 |---|---|---|
@@ -35,9 +61,6 @@ So: **not every drained item becomes a wiki page.** Most don't.
 | **To-consume** | Leisure media they'll actually play or watch — a game, show, movie, book, album | A row on `backlog/to-consume.md` |
 | **To-engage** | Anything else worth digging into themselves — an article, talk, repo, paper | A row on `backlog/to-engage.md` |
 | **Discard** | Didn't hold up, or the thought has since been had | Nothing filed; say so |
-
-Routing is decided **at drain time, in conversation** (ADR decision 5) — capture stays
-frictionless, so Karakeep tags and lists are hints only, never instructions.
 
 **In all four cases, archive the item in Karakeep** (never delete). The cached snapshot is
 link-rot insurance for reels that vanish.
@@ -77,9 +100,38 @@ API key: `~/.config/karakeep/ingest.key` (chmod 600 — use it, never print it).
       "http://localhost:8084/api/v1/bookmarks?archived=false&limit=50" | jq .
     # single item with body: /bookmarks/{id}?includeContent=true
 
-Present the queue count first, then walk it **one item at a time** using the presentation
-format in [inbox-walk.md](./inbox-walk.md) — same format, with the triage decision standing in
-for "How I'd file it".
+**Counting the lanes** — do this first, before reading anything. Lane membership is a
+filtered query on the tag id; the bookmark never moves.
+
+    # tag ids (stable, created 2026-08-05)
+    curl -s -H "Authorization: Bearer $KEY" "$BASE/tags" \
+      | jq -r '.tags[] | select(.name|IN("ref","study","curious")) | "\(.name)\t\(.id)"'
+
+    # one lane's queue
+    curl -s -H "Authorization: Bearer $KEY" "$BASE/tags/<tagId>/bookmarks" | jq '.bookmarks|length'
+
+Untagged has no negative filter — pull the full unarchived queue and subtract the three
+lanes client-side.
+
+**Retagging** (when reading shows the lane was wrong) — attach and detach by name:
+
+    curl -s -X POST -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d '{"tags":[{"tagName":"study"}]}' "$BASE/bookmarks/<id>/tags"
+    curl -s -X DELETE -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d '{"tags":[{"tagName":"ref"}]}'   "$BASE/bookmarks/<id>/tags"
+
+Present the **per-lane counts** first, then walk the chosen lane **one item at a time** using
+the presentation format in [inbox-walk.md](./inbox-walk.md) — same format, with the triage
+decision standing in for "How I'd file it".
+
+`curious` is the exception: never walked. Report the count, archive the lane, move on.
+
+    # archive a whole lane without reading it — curious only
+    for id in $(curl -s -H "Authorization: Bearer $KEY" "$BASE/tags/<curiousId>/bookmarks" \
+                | jq -r '.bookmarks[].id'); do
+      curl -s -X PATCH -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+        -d '{"archived":true}' "$BASE/bookmarks/$id" -o /dev/null
+    done
 
 ## Turning media into text
 
