@@ -1,21 +1,38 @@
 ---
 name: wym
-description: "wym (\"what you mean?\") explains a concept in a sandwich: a one-line plain-English intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway. The visual is a caveman ASCII diagram by default, or a /table / /diagram when the concept's shape fits those better (form choice deferred to ~/.claude/skills/visualize/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time."
-argument-hint: "<concept>"
+description: "wym (\"what you mean?\") explains a concept in three sentences or fewer of plain layman English, then offers to drill deeper. Drill mode returns the full sandwich: a plain-English intro that frames the concept, a short human explanation, a best-fit visual, and a terse caveman TLDR last as the takeaway (visual form deferred to ~/.claude/skills/visualize/visual-picker.md). Use when the user invokes /wym, says 'wym' / 'what do you mean', asks to explain a concept, or wants a concise Lexicon-grounded explanation. Also the per-topic illustrator that /walkthrough calls one topic at a time, always in drill mode."
+argument-hint: "<concept> [drill]"
 ---
 
-# /wym — Sandwich Concept Explainer
+# /wym — Concept Explainer
 
-Explains any concept as a sandwich: a one-line plain-English **intro** that frames the concept
-on top, human language and a best-fit **visual** in the middle, and a caveman **TLDR** on the
-bottom as the compressed takeaway the reader keeps. No prompts, immediate output.
-("wym" = *what you mean?*)
+Answers "what you mean?" in three sentences or fewer, then offers to go deeper.
+The deeper form is a sandwich: a plain-English **intro** that frames the concept on top,
+human language and a best-fit **visual** in the middle, and a caveman **TLDR** on the
+bottom as the compressed takeaway the reader keeps.
+
+| Mode | Trigger | Output |
+|---|---|---|
+| **Quick** — default | `/wym <concept>` | 3 sentences or fewer, plain layman English, then the drill offer |
+| **Drill** | Chris replies `drill` · `/wym <concept> drill` · another Skill calls `/wym` | The full sandwich — Intro · Human · Visual · TLDR |
 
 ## Invocation
 
-`/wym <concept>`
+`/wym <concept>` · `/wym <concept> drill`
 
-## Output Format
+## Quick mode — the default
+
+- **Three sentences or fewer.** Plain layman English. No headings, no visual, no caveman.
+- Assume no familiarity with the domain. Define an unavoidable term inline, in one short clause.
+- **Answer the question.** Quick mode is a complete short answer, not a teaser for drill mode.
+- Close with exactly this line, on its own, and write nothing after it:
+
+      Enter **drill** to go deeper.
+
+## Drill mode
+
+Reached three ways: Chris replies `drill`, Chris invokes `/wym <concept> drill`, or another
+Skill calls `/wym` — `/walkthrough` always needs the full sandwich per topic.
 
 Always this structure, always all four parts in this order:
 
@@ -71,17 +88,30 @@ limit, light expertise taper). Do not restate that cheat sheet here.
 
 ## Behavior
 
-- No confirmation prompts. `/wym X` → sandwich immediately.
+- No confirmation prompts. `/wym X` → quick answer immediately; `drill` → sandwich immediately.
+- The drill offer is the only prompt wym ever writes. It is an offer, not a question — never wait for it, never ask a follow-up instead.
 - The intro frames; the TLDR lands last. Never open with the conclusion — that is the TLDR's job at the bottom.
 - If concept ambiguous, pick most likely interpretation in context. Note alternatives at bottom.
-- Keep total output under ~40 lines. Brevity is point.
+- Keep drill output under ~40 lines. Brevity is point.
 - Default to in-chat visuals (ASCII, `/table md`, `/diagram md`) so the sandwich stays immediate; only reach for `/table html` or `/diagram html` when Chris will want to explore interactively.
 - If project has `LEXICON.md`, check it for domain-specific definitions of concept.
 - If concept is a Lexicon term, use Lexicon definition as ground truth for Human layer.
 
-## Example
+## Example — quick mode
 
 `/wym Lineup Combinations`
+
+```
+A Lineup is the 5 players on the court together, and a Team usually carries more than 5.
+Lineup Combinations are every possible group of 5 you could pick from that Team — 126 of
+them for a 9-player Team. The engine scores each group so it can rank which 5 fit best.
+
+Enter **drill** to go deeper.
+```
+
+## Example — drill mode
+
+`drill`
 
 ```
 ## Lineup Combinations, explained

@@ -114,8 +114,8 @@ Diff coverage rules:
 After the core verification phases, ask the user whether they want a
 `/wym`-style code report for the code that was written.
 
-If they accept, use the `/wym` Skill's three-layer shape and adapt it to the
-diff:
+If they accept, use the `/wym` Skill's drill-mode sandwich shape and adapt it to
+the diff:
 
 ```markdown
 ## Code report, explained

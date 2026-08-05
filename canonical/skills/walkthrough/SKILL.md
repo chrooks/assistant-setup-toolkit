@@ -36,9 +36,10 @@ This is the core behavior — a grill-style one-at-a-time march, not a single du
 2. **Show the agenda first.** Present it as a numbered list so Chris sees the map and can
    steer — reorder, drop, add, or merge topics — before the walk starts.
 3. **March one topic at a time.** For topic N:
-   - Invoke **`/wym <topic>`**, handing it the topic plus one line of grounding context
-     from the source. `/wym` returns the caveman sandwich (Intro · Human · best-fit
-     Visual · TLDR) and makes the single best-fit visual choice itself.
+   - Invoke **`/wym <topic> drill`**, handing it the topic plus one line of grounding context
+     from the source. Drill mode returns the caveman sandwich (Intro · Human · best-fit
+     Visual · TLDR) and makes the single best-fit visual choice itself. Always pass `drill` —
+     wym's default quick mode is three sentences, which is too thin for a walkthrough topic.
    - Wrap it in a minimal `## §N — [title]` header so the position in the agenda is clear.
    - Then **pause** with an advance affordance and **wait** for Chris before the next topic.
 4. **Wrap up.** After the last topic, synthesize — see [The wrap-up](#the-wrap-up).
@@ -72,6 +73,9 @@ then wrap up.
   `/table`, `/diagram`, chart, list, or prose — whichever single form fits that topic).
 - Give `/wym` the topic title **plus one line of context** pulled from the source so its
   explanation is grounded in *this* document, not generic.
+- **Always call it in drill mode.** `/wym <topic> drill` — the default quick mode returns
+  three sentences and a drill offer, which is not a walkthrough topic. Drop wym's drill
+  offer line; `walkthrough`'s own advance affordance replaces it.
 - Keep `walkthrough`'s own wrapper thin: the `§N — title` header, the `/wym` sandwich, the
   advance affordance. Nothing else per topic.
 
