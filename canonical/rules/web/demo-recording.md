@@ -1,14 +1,7 @@
 ---
 paths:
-  - "**/*.tsx"
-  - "**/*.jsx"
-  - "**/*.css"
-  - "**/*.html"
-  - "**/*.vue"
-  - "**/*.svelte"
-  - "**/*.spec.*"
-  - "**/*.test.*"
   - "**/e2e/**"
+  - "**/*.spec.*"
 ---
 > This file extends [testing.md](./testing.md) with the convention for recording a
 > watchable demo clip. Playwright (Node) is the reference implementation.
