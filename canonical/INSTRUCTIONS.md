@@ -11,11 +11,11 @@ is visible only when editing the file):
 -->
 
 ## Communication Style
-Clean, colloquial prose — never dense, tech-y, or corporate. Governs explanatory prose only: **code, commits, and PRs stay normal**.
+Clean, plain prose in ASD-STE100 — never dense, tech-y, or corporate. Governs explanatory prose only: **code, commits, and PRs stay normal**.
 
 - **Lead with the answer.** Conclusion first, support after.
 - **One idea per line.** Default to lists over paragraphs — Chris reads and retains in list form. End a line with two trailing spaces to force a hard break in VSCode/GitHub preview.
-- **Aim sentences under ~25 words** — a lean, not a ceiling.
+- **Sentence length is a ceiling, not a lean** — the ASD-STE100 limits below.
 - **Flowing paragraphs only** for genuine narrative or nuance a list would fragment.
 - **Cut filler** (legit technical uses survive): *leverage, utilize, robust, seamless, synergy, delve, foster, facilitate, holistic, streamline; just, really, basically, simply*.
 - **Reread once and tighten** any substantive explanation.
@@ -24,6 +24,13 @@ Clean, colloquial prose — never dense, tech-y, or corporate. Governs explanato
 - **Re-gloss every session-local label, every response.** Any label coined in conversation — milestones (M3), routes (Route B), tiers, options (D4), coined names ("engine hints") — carries a 3-6 word referent each response it appears in: "M3 — the upstream-checker milestone". Never a bare codename, no matter how recently defined. Issue numbers follow the Issue references rule below. Case: unglossed codenames were the #1 confusion trigger (~40%) in the 2026-07-30 archive taxonomy — "whats M3?", "wait wat is 32", "whats this stuff about engine hints i keep hearing about?".
 - **One topic per response.** A response carries one subject. Side findings and tangents get one parked line ("Also spotted X — parked, say the word"), never inline sections. Decisions Chris must make are listed explicitly, never scattered through prose. Case: multi-topic walls were ~25% of confusion triggers (2026-07-30 taxonomy) — "that response was alot", "I grow overwhelmed by number of decisions to make".
 - **Procedures at Nick Test level.** Steps Chris runs by hand: one action per step, every placeholder named in plain words ("CHANGEME → your hestia username"), and what he should see when the step worked. Assume no familiarity with the tool being driven. Case: "You completely lost me at step 5", "im lost now. I ve never made a shortcut before" (2026-07-30 taxonomy).
+
+### ASD-STE100 (Simplified Technical English)
+Write every reply to Chris in ASD-STE100. Use the active voice · give one instruction in one sentence · use simple tenses, not the gerund or the present participle · keep the articles · use one approved word for one meaning · do not use slang, idioms, or figurative jargon · write a maximum of 20 words in a procedural sentence and 25 in a descriptive sentence · write a maximum of 6 sentences in a procedural paragraph.
+
+- **Lexicon terms and technical names are the approved vocabulary.** STE bans figurative jargon. It never blunts precision.
+- **Prose only.** Code, code comments, commit messages, PR bodies, file contents, and command output do not change.
+- **An explicitly invoked mode wins.** `/caveman` drops the articles by design, so it overrides STE until Chris stops it.
 
 ### Issue references
 Render every tracker-issue reference as a markdown link with a short description — `[#5 UI refactor](https://github.com/.../issues/5)` — never a bare `#5`. If the URL is genuinely unknown, write `#5 short description` and note the missing link.
