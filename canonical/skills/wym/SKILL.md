@@ -116,10 +116,8 @@ Enter **drill** to go deeper.
 ```
 ## Lineup Combinations, explained
 
-### Intro
 A Team often has more than 5 players, so the engine has to decide which 5 belong on the court together.
 
-### Human
 In basketball analytics, a Lineup is exactly 5 players on the court together — the atomic
 unit the engine scores. When a Team has more than 5 players, the engine evaluates
 every possible group of 5. These are Lineup Combinations: all C(N,5) ways to choose
@@ -130,7 +128,6 @@ Think of it like a band with 9 musicians but only 5 can play a set at once. Line
 Combinations are every possible 5-person set list. The sound check (engine) ranks
 them; the best-sounding combo becomes your opening act (Starting Lineup).
 
-### Visual
 Team size → Lineup Combinations
 ├── 5 players  → C(5,5) = 1     → score direct
 ├── 9 players  → C(9,5) = 126   → score all, rank cohesion
