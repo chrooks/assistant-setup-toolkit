@@ -6,29 +6,29 @@ crosses this boundary matters. When in doubt, leave it out — the brain is one 
 
 ## Read allow-list (read ONLY these)
 
-Under `<vaultPath>/<wikiDir>/`:
+The `selfPages` entries from `~/.codex/knowledge-config.json`, resolved under
+`<vaultPath>/<wikiDir>/`. A typical allow-list holds four pages:
 
-- `chris.md`
-- `chris-trajectory.md`
+- an identity page — identity, day job, background
+- a trajectory page — North Star, sequence, direction
 - `learning-goals.md`
 - `values.md`
 
 ## The allow-list is the binding guard
 
-Read only the four allowed pages. Anything outside them is out of scope regardless of where
+Read only the allowed pages. Anything outside them is out of scope regardless of where
 it lives — so a sensitive note filed in the wiki root is excluded by default, not by luck.
 
-**Do not follow `[[wikilinks]]`.** The allowed pages embed links to other pages (e.g.
-`[[chris-faith]]`, `[[chris-inner-life]]`, `[[jan-2026-notes]]`). Treat every `[[...]]` as
-opaque text and never open the target. Chasing wikilinks is the main way the allow-list leaks.
+**Do not follow `[[wikilinks]]`.** The allowed pages embed links to other pages (faith,
+inner life, monthly journal notes, and so on). Treat every `[[...]]` as opaque text and
+never open the target. Chasing wikilinks is the main way the allow-list leaks.
 
 ## Never read (belt-and-suspenders for if the allow-list is bypassed)
 
 - Anything under any `_SENSITIVE/` path (therapy, health) — hard rule, no exceptions.
 - Monthly journal notes: `jan-2026-notes.md`, `feb-…`, `mar-…`, `apr-…`, `may-…`, etc.
-- Personal/taste/creative pages: `chris-inner-life`, `chris-faith`, `chris-aspirations`,
-  `chris-backlog`, `chris-songwriting`, `chris-creative-projects`, `chris-gaming`,
-  `chris-music-taste`, `chris-basketball-takes`, `chris-pokemon-team`.
+- Personal, taste, and creative pages: inner life, faith, aspirations, backlog,
+  songwriting, creative projects, gaming, music taste, sports takes, and the like.
 
 ## Redact (exclude even when an allowed page mentions it)
 
@@ -60,7 +60,7 @@ spec, never in the shipped profile.
   African Studies minor.
 - **Trajectory:** NBA front office via basketball software; the four-step sequence; current
   main project Cornerstone; builder with range.
-- **How he works and learns:** vibe engineer; immersion learning; Huberman 12-week cycles;
+- **How they work and learn:** vibe engineer; immersion learning; Huberman 12-week cycles;
   "allow yourself to be bad first"; communicating concepts clearly; judging assistant output;
   the recurring rabbit holes.
 - **Values:** help people grow rather than depend; anti-dark-pattern; stories of the unheard;
@@ -69,5 +69,5 @@ spec, never in the shipped profile.
 
 ## Output shape
 
-Five sections: **Who he is · North Star and trajectory · How he works and learns · Values and
-how to advise him · How to communicate with him.** Roughly 35–80 lines.
+Five sections: **Who they are · North Star and trajectory · How they work and learns · Values and
+how to advise them · How to communicate with them.** Roughly 35–80 lines.

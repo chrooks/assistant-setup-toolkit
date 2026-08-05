@@ -117,7 +117,7 @@ so, thread design through every stage:
   (screenshot/assertion) and, for anything non-trivial, a `/design-audit` pass
   against the ethos (Signifiers, Affordances, Progressive Disclosure, Feedback,
   Hierarchy, Empty/Error States, Mom Test / Nick Test). "Tests pass" is never
-  proof for a Surface — the human assesses what he can see.
+  proof for a Surface — the human assesses what they can see.
 
 Backend-only work skips all of this. The trigger is a user-facing Surface, not
 the mere presence of a frontend in the repo.

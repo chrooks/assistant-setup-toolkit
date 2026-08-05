@@ -2,7 +2,7 @@
 
 ## Branching — Solo-Dev Default
 
-Chris works solo in almost every repo. **Default: commit directly to `main`. No feature branches, no PRs.**
+The user works solo in almost every repo. **Default: commit directly to `main`. No feature branches, no PRs.**
 
 - Branches and PRs exist mostly to coordinate multiple people — that value is absent solo, so the ceremony is pure friction.
 - The thing that actually protects future-you is **commit hygiene, not branches.** Keep each commit one logical scope; `/commit` splits mixed work — lean on it. Every future-regret scenario (`git bisect`, clean `git revert`, readable `git log`/blame, auto-changelog) is solved by scoped commits, none by branches.
@@ -13,12 +13,12 @@ Chris works solo in almost every repo. **Default: commit directly to `main`. No 
 - **Deploy gate** — once a repo auto-deploys from `main` and you don't want half-done work shipping. Prefer **release tags on `main`** over a long-lived `develop` branch unless a true staging/prod split exists.
 - **Throwaway experiment** you expect to delete wholesale (`git stash` is often lighter).
 
-Do NOT nudge Chris toward branches or PRs outside these cases.
+Do NOT nudge the user toward branches or PRs outside these cases.
 
 ## Push Discipline
 
-- **Push after every commit by default** — Chris works across multiple devices; an unpushed commit is invisible on the next machine.
-- When Chris says he is **switching computers**: commit, push, and leave a durable pointer to the next piece of work (a note on the relevant tracker issue, or `/handoff`) so the other machine's session can pick up cold.
+- **Push after every commit by default** — the user works across multiple devices; an unpushed commit is invisible on the next machine.
+- When the user says they are **switching computers**: commit, push, and leave a durable pointer to the next piece of work (a note on the relevant tracker issue, or `/handoff`) so the other machine's session can pick up cold.
 
 ## Commit Message Format
 ```

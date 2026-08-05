@@ -15,7 +15,7 @@ set -euo pipefail
 
 RESULTS_JSON="${1:-}"
 CWD_SKILLS_DIR="${SKILL_STOCKTAKE_PROJECT_DIR:-${2:-$PWD/.claude/skills}}"
-GLOBAL_DIR="${SKILL_STOCKTAKE_GLOBAL_DIR:-/Users/cdbrooks/Development/Software/Repositories/toolkit/canonical/skills}"
+GLOBAL_DIR="${SKILL_STOCKTAKE_GLOBAL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
 if [[ -z "$RESULTS_JSON" || ! -f "$RESULTS_JSON" ]]; then
   echo "Error: RESULTS_JSON not found: ${RESULTS_JSON:-<empty>}" >&2

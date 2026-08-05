@@ -144,7 +144,7 @@ _AKA_: thread
 
 - The **Lexicon** holds conversation-shaping engineering terms, not plain technology names.
 - Terms align with established industry usage; HCI terms preserve prior-art meanings unless a project `LEXICON.md` narrows them.
-- Chris-specific design terms — **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, **Software as Education** — should be used when they clarify design intent.
+- User-specific design terms — **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, **Software as Education** — should be used when they clarify design intent.
 - The **Lexicon** stays lean because it lives in the assistant's context window.
 
 ## Example dialogue

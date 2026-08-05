@@ -35,7 +35,7 @@ describe("ship Skill", () => {
     // dies. Invert it and the mode stops grilling on architecture while still
     // asking where files go — strictly worse than no mode at all.
     expect(skill).toContain(
-      "**Stop converting your uncertainty into his decisions.**",
+      "**Stop converting your uncertainty into their decisions.**",
     );
     expect(skill).toContain("**Keep asking**");
     expect(skill).toContain("**Stop asking**");
@@ -56,7 +56,7 @@ describe("ship Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("Needs you:");
-    expect(skill).toContain("A command only he can run");
+    expect(skill).toContain("A command only they can run");
     expect(skill).toContain("invalidates the task as scoped");
   });
 
@@ -64,7 +64,7 @@ describe("ship Skill", () => {
     const skill = await readFile(skillPath, "utf-8");
 
     expect(skill).toContain("## When NOT to compress");
-    expect(skill).toMatch(/Explanation he explicitly asked for/);
+    expect(skill).toMatch(/Explanation they explicitly asked for/);
     expect(skill).toMatch(/shortens the response, never the reading/);
   });
 

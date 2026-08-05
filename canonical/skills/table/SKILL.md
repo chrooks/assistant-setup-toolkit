@@ -1,12 +1,12 @@
 ---
 name: table
-description: "Render tabular data as a table — `/table md` for a quick read-only Markdown table, `/table html` for a self-contained interactive table with sort, filter, search, and column toggles. Use when showing comparative or multi-attribute data, lists of records, query results, or anything Chris should scan or manipulate as a table instead of prose."
+description: "Render tabular data as a table — `/table md` for a quick read-only Markdown table, `/table html` for a self-contained interactive table with sort, filter, search, and column toggles. Use when showing comparative or multi-attribute data, lists of records, query results, or anything the user should scan or manipulate as a table instead of prose."
 argument-hint: "[md|html] <data, file, or description of what to tabulate>"
 ---
 
 # /table — Markdown or Interactive Table Renderer
 
-Chris reads and retains in table form. This skill turns tabular data into one of two
+The user reads and retains in table form. This skill turns tabular data into one of two
 outputs, chosen by need:
 
 - **`md`** — a read-only Markdown table, rendered inline in the response. The common case:
@@ -14,7 +14,7 @@ outputs, chosen by need:
   carries comparative or multi-attribute data.
 - **`html`** — a single self-contained HTML file with sort, per-column filter, global
   search, and column toggles, opened in the browser. For data that needs to be
-  *manipulated*: many rows, exploratory comparison, or something Chris will keep.
+  *manipulated*: many rows, exploratory comparison, or something the user will keep.
 
 ## Invocation
 
@@ -35,8 +35,8 @@ Default to **`md`** — it is cheaper and covers most needs. Choose **`html`** o
 at least one is true:
 
 - More than ~25 rows, or enough columns that scanning needs filtering.
-- Chris will sort, filter, or search the data, not just read it once.
-- Chris signals he wants to keep or revisit it ("a tool", "let me filter", "sortable").
+- The user will sort, filter, or search the data, not just read it once.
+- The user signals they want to keep or revisit it ("a tool", "let me filter", "sortable").
 
 When genuinely ambiguous, render `md` now and offer the `html` upgrade in one line.
 
@@ -92,7 +92,7 @@ hostile value cannot break the page, HTML-escapes the title, and writes a self-c
    It fills the template, escapes `</script>`/`<!--` in the data, HTML-escapes the title,
    writes to `<cwd>/.exports/table/<slug>.html`, and prints the absolute path.
 4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
-   and report it so Chris can find, move, or re-open it.
+   and report it so the user can find, move, or re-open it.
 
 ### Notes
 

@@ -19,7 +19,7 @@ tests/.tmp/
 # Legacy name for .tasks/ — keeps stale local copies on other machines ignored.
 feature_requests/
 
-# Personal self-profile: local-only, generated from "Chris's Brain" via /sync-self.
+# Personal self-profile: local-only, generated from the personal knowledge base via /sync-self.
 canonical/PROFILE.md
 
 # Only the *.example.* templates under canonical/config/ are tracked. A filled-in

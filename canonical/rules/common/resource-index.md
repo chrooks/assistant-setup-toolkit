@@ -1,6 +1,6 @@
 # Resource Index
 
-Chris's durable resources — what exists, what each is for, and every known way
+The user's durable resources — what exists, what each is for, and every known way
 in. **Local access** for each entry lives in the machine context
 (`rules/machine.md`, ADR-0003): its "Resource access" section says which mode
 is live on this machine and at what path. The machine file may also list
@@ -9,7 +9,7 @@ present → assume only the claude.ai access modes below.
 
 ## The brain
 
-- **What:** Chris's LLM-Wiki knowledge base — an Obsidian vault (`brain-v2`)
+- **What:** the user's LLM-Wiki knowledge base — an Obsidian vault (`brain-v2`)
   of wiki pages, raw sources, and entity/concept pages with wikilinks.
 - **For:** durable knowledge: learnings, teardowns, project notes, people,
   concepts. Where "ingest this" filings land and where past context lives.
@@ -39,10 +39,10 @@ present → assume only the claude.ai access modes below.
 
 ## The profile
 
-- **What:** the distilled profile of who Chris is — values, trajectory,
+- **What:** the distilled profile of who the user is — values, trajectory,
   design philosophy (Partnership Model, Honest Signifier, Transparent
   Friction).
-- **For:** reasoning from who Chris is when advising, designing, or
+- **For:** reasoning from who the user is when advising, designing, or
   prioritizing — the design-ethos source for `/design-audit` and
   `/idea-to-design`.
 - **Access modes:** installed at `~/.claude/PROFILE.md` (local-only; missing

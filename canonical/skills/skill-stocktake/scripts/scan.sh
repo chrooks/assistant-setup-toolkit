@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-GLOBAL_DIR="${SKILL_STOCKTAKE_GLOBAL_DIR:-/Users/cdbrooks/Development/Software/Repositories/toolkit/canonical/skills}"
+GLOBAL_DIR="${SKILL_STOCKTAKE_GLOBAL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 CWD_SKILLS_DIR="${SKILL_STOCKTAKE_PROJECT_DIR:-${1:-$PWD/.claude/skills}}"
 # Path to JSONL file containing tool-use observations (optional; used for usage frequency counts).
 # Override via SKILL_STOCKTAKE_OBSERVATIONS env var if your setup uses a different path.

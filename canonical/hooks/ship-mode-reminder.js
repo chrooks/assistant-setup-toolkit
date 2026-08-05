@@ -50,7 +50,7 @@ const ACTIVATE =
 // only re-anchors the two rules that decay first — asking too much and saying
 // too much.
 const REMINDER =
-  "SHIP MODE ACTIVE. Lead with what Chris must decide or do; cut context that is not load-bearing for it. Do NOT convert your uncertainty into his decisions — infer reversible things (which file, whether to update tests, whether to commit) instead of asking. Chain obvious next steps, batch related work, report once. Design calls only he can make still get asked, in dependency-ordered rounds. Safety floor UNCHANGED: irreversible, destructive, outward-facing, secrets, or money still gate on explicit confirmation, and the report never launders bad news. Surface anything only he can run under 'Needs you:'.";
+  "SHIP MODE ACTIVE. Lead with what the user must decide or do; cut context that is not load-bearing for it. Do NOT convert your uncertainty into their decisions — infer reversible things (which file, whether to update tests, whether to commit) instead of asking. Chain obvious next steps, batch related work, report once. Design calls only they can make still get asked, in dependency-ordered rounds. Safety floor UNCHANGED: irreversible, destructive, outward-facing, secrets, or money still gate on explicit confirmation, and the report never launders bad news. Surface anything only they can run under 'Needs you:'.";
 
 function readPayload() {
   try {

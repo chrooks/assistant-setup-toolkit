@@ -131,7 +131,7 @@ A per-machine flavor choice for a Toolkit Component, recorded as plain data on t
 _Avoid_: flavor, mode, edition
 
 **Resource Index**:
-A canonical, always-loaded table of contents of Chris's durable resources (brain, toolkit, Lexicon, profile) — what each is, what it's for, and every known access mode — with machine-local access paths deferred to the machine Variant rule (ADR-0003). Machine rule files may add machine-local entries other machines never see.
+A canonical, always-loaded table of contents of the user's durable resources (brain, toolkit, Lexicon, profile) — what each is, what it's for, and every known access mode — with machine-local access paths deferred to the machine Variant rule (ADR-0003). Machine rule files may add machine-local entries other machines never see.
 _Avoid_: table of contents, sitemap, registry
 
 **Preset**:

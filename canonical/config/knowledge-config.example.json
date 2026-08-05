@@ -4,5 +4,6 @@
   "wikiDir": "wiki",
   "projectsIndex": "/path/to/your/repos/PROJECTS.md",
   "profileTarget": "/path/to/your/toolkit/canonical/PROFILE.md",
+  "selfPages": ["you.md", "you-trajectory.md", "learning-goals.md", "values.md"],
   "collectExcludeFolders": []
 }

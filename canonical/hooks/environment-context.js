@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // SessionStart hook: tell the assistant what machine it's actually on.
 //
-// Chris works across several machines (MacBook, PC, work laptop, Hestia) and
+// The user works across several machines (MacBook, PC, work laptop, Hestia) and
 // often connects via VS Code Remote-SSH. Without this, the assistant has no
-// way to know it isn't sitting on his local machine and can suggest the wrong
+// way to know it isn't sitting on their local machine and can suggest the wrong
 // OS commands/paths. This fires every session, unconditionally, with one
 // additionalContext line: hostname, OS, and whether the session is remote —
 // plus a directive so the assistant actually adjusts its behavior instead of
@@ -34,14 +34,14 @@ function buildMessage() {
   if (isRemoteSsh()) {
     return (
       `You are running on ${hostname} (${platform}), connected via a remote SSH session ` +
-      "(likely VS Code Remote-SSH). This is not Chris's local machine — use " +
+      "(likely VS Code Remote-SSH). This is not the user's local machine — use " +
       `${platform}-appropriate commands and paths.`
     );
   }
 
   return (
     `You are running locally on ${hostname} (${platform}). Use ${platform}-appropriate ` +
-    "commands and paths, and don't assume this is a different one of Chris's machines."
+    "commands and paths, and don't assume this is a different one of the user's machines."
   );
 }
 

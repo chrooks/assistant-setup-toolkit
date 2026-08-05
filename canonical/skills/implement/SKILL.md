@@ -115,7 +115,7 @@ matters, told as a short narrative, not a bullet dump of files. Include real
 code snippets from the landed diff, a visual (diagram or table) when the
 concept has a shape one carries, and the actual verified command outputs as
 evidence. Surprises and corrections (a number that moved, a spec typo caught)
-are the best part of the story — lead with them, never bury them. Case: Chris
+are the best part of the story — lead with them, never bury them. Case: The user
 asked for exactly this after the move-ladder M1 recap (2026-07-25).
 
 ## Rules

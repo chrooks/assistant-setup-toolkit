@@ -5,15 +5,15 @@ description: "Translate a technical concept, issue, or task into a plain-English
 
 # /nickify — Brief Nick, not Teach Nick
 
-Nick doesn't want to learn how the site works. He wants to know what to do and
-why he should care. This is NOT the Mom Test teaching posture (no explaining
-concepts, no building his mental model) — it's a work order.
+Nick doesn't want to learn how the site works. They want to know what to do and
+why they should care. This is NOT the Mom Test teaching posture (no explaining
+concepts, no building their mental model) — it's a work order.
 
 ## Output contract (always exactly these three parts, in this order)
 
 1. **What it is** — one line, plain English, zero jargon.
 2. **Why you care** — one line, tied to something Nick actually cares about
-   (the site working, fans finding him, money, looking legit — not "system
+   (the site working, fans finding them, money, looking legit — not "system
    integrity" or "technical debt").
 3. **Exactly what to do** — numbered steps. Each step is a physical action:
    tap this, go to this URL, forward this email, reply with this info. No
@@ -28,8 +28,8 @@ question with the choices spelled out.
 1. Take the input (an issue, a task, a concept) and strip every technical
    term to what it actually means for Nick's site/business.
 2. Draft the three-part brief per the contract above.
-3. Read it back as if Nick is holding his phone, distracted, mid-day. If any
-   line needs him to know what "DNS" or "repo" or "deploy" means, rewrite it
+3. Read it back as if Nick is holding their phone, distracted, mid-day. If any
+   line needs them to know what "DNS" or "repo" or "deploy" means, rewrite it
    as an action instead of a concept.
 4. Output the brief. Nothing else wraps it — no meta-commentary about the
    translation.
@@ -64,5 +64,5 @@ Output:
 
 - Forwarding a nick-homework issue (DNS setup, asset collection, JotForm
   signup, Shopify signup) — nickify the issue body before sending.
-- Release-day checklists Nick has to execute himself.
+- Release-day checklists Nick has to execute themselves.
 - Any time a technical decision needs Nick's plain-English input.

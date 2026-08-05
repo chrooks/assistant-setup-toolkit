@@ -14,7 +14,7 @@ bottom as the compressed takeaway the reader keeps.
 | Mode | Trigger | Output |
 |---|---|---|
 | **Quick** — default | `/wym <concept>` | 3 sentences or fewer, plain layman English, then the drill offer |
-| **Drill** | Chris replies `drill` · `/wym <concept> drill` · another Skill calls `/wym` | The full sandwich — Intro · Human · Visual · TLDR |
+| **Drill** | The user replies `drill` · `/wym <concept> drill` · another Skill calls `/wym` | The full sandwich — Intro · Human · Visual · TLDR |
 
 ## Invocation
 
@@ -31,7 +31,7 @@ bottom as the compressed takeaway the reader keeps.
 
 ## Drill mode
 
-Reached three ways: Chris replies `drill`, Chris invokes `/wym <concept> drill`, or another
+Reached three ways: the user replies `drill`, the user invokes `/wym <concept> drill`, or another
 Skill calls `/wym` — `/walkthrough` always needs the full sandwich per topic.
 
 Always this structure, always all four parts in this order:
@@ -77,7 +77,7 @@ limit, light expertise taper). Do not restate that cheat sheet here.
   - Tree diagrams: `├──` and `└──`  ·  Box diagrams: `┌─┐ │ │ └─┘`  ·  Arrow flows: `──▶` and `──┤`
   - Technical terms stay exact. Terse labels, no filler words.
 - When the shared rule points to a comparative/multi-attribute shape → render a `/table md` instead of ASCII.
-- When it points to a richer structural/process shape than ASCII can carry → use `/diagram md` (ASCII sketch + auto-rendered Mermaid). Offer `/diagram html` if Chris will want to click through it.
+- When it points to a richer structural/process shape than ASCII can carry → use `/diagram md` (ASCII sketch + auto-rendered Mermaid). Offer `/diagram html` if the user will want to click through it.
 - 2-4 caveman bullet takeaways below the visual are fine.
 
 ### TLDR (bottom bread — caveman, the takeaway)
@@ -93,7 +93,7 @@ limit, light expertise taper). Do not restate that cheat sheet here.
 - The intro frames; the TLDR lands last. Never open with the conclusion — that is the TLDR's job at the bottom.
 - If concept ambiguous, pick most likely interpretation in context. Note alternatives at bottom.
 - Keep drill output under ~40 lines. Brevity is point.
-- Default to in-chat visuals (ASCII, `/table md`, `/diagram md`) so the sandwich stays immediate; only reach for `/table html` or `/diagram html` when Chris will want to explore interactively.
+- Default to in-chat visuals (ASCII, `/table md`, `/diagram md`) so the sandwich stays immediate; only reach for `/table html` or `/diagram html` when the user will want to explore interactively.
 - If project has `LEXICON.md`, check it for domain-specific definitions of concept.
 - If concept is a Lexicon term, use Lexicon definition as ground truth for Human layer.
 

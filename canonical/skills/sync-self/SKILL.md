@@ -1,13 +1,13 @@
 ---
 name: sync-self
-description: "Re-distill Chris's self-profile from the brain into the toolkit's canonical/PROFILE.md — read only the allow-listed self-pages, distill the lean professional core, diff against the current profile, and write only on explicit approval. Use when the user says \"sync self\", \"refresh my profile\", \"update PROFILE.md\", or after meaningful changes to the brain's self-pages."
+description: "Re-distill the user's self-profile from the brain into the toolkit's canonical/PROFILE.md — read only the allow-listed self-pages, distill the lean professional core, diff against the current profile, and write only on explicit approval. Use when the user says \"sync self\", \"refresh my profile\", \"update PROFILE.md\", or after meaningful changes to the brain's self-pages."
 disable-model-invocation: false
 ---
 
 # Sync Self
 
 Keep the always-on self-profile fresh. The brain (the LLM-Wiki knowledge base) is the
-source of truth for who Chris is; the toolkit's `canonical/PROFILE.md` is a distilled,
+source of truth for who the user is; the toolkit's `canonical/PROFILE.md` is a distilled,
 lean projection of it that the Setup Wizard installs into every harness. This skill is the
 **inverse of `sync-projects`**: it reads the brain and regenerates the profile.
 
@@ -18,30 +18,32 @@ in `reference.md` next to this file — read it before distilling.
 
 ## Step 0 — Resolve paths
 
-Read `~/.codex/knowledge-config.json` for `vaultPath` and `wikiDir`, and for `profileTarget`
-(the absolute path to the toolkit's `canonical/PROFILE.md`).
+Read `~/.codex/knowledge-config.json` for `vaultPath` and `wikiDir`, for `profileTarget`
+(the absolute path to the toolkit's `canonical/PROFILE.md`), and for `selfPages` (the
+allow-listed self-page filenames under `<vaultPath>/<wikiDir>/`).
 
 ```bash
 cat ~/.codex/knowledge-config.json
 ```
 
-If `profileTarget` is missing, ask the user for the path to their toolkit's
-`canonical/PROFILE.md` before continuing. Do not guess.
+If `profileTarget` or `selfPages` is missing, ask the user for the path to their toolkit's
+`canonical/PROFILE.md` and for the self-page filenames before continuing. Do not guess.
 
 ## Step 1 — Read ONLY the allow-listed self-pages
 
-Read exactly these four pages under `<vaultPath>/<wikiDir>/` and nothing else:
+Read exactly the `selfPages` entries under `<vaultPath>/<wikiDir>/` and nothing else. A
+typical allow-list holds four pages:
 
-- `chris.md` — identity, day job (generalized), background
-- `chris-trajectory.md` — North Star, sequence, builder-with-range
-- `learning-goals.md` — what he's learning, recurring interests
+- an identity page — identity, day job (generalized), background
+- a trajectory page — North Star, sequence, builder-with-range
+- `learning-goals.md` — what they're learning, recurring interests
 - `values.md` — values and the design ethos (points at the Lexicon)
 
-**The allow-list is the binding guard.** Read those four files and nothing else — whatever
+**The allow-list is the binding guard.** Read those files and nothing else — whatever
 lives outside them is out of scope no matter where it sits. Two reinforcing rules:
 
-- **Do not follow `[[wikilinks]]`.** The allowed pages link to other pages (e.g.
-  `[[chris-faith]]`, `[[chris-inner-life]]`, `[[jan-2026-notes]]`). Treat every `[[...]]` as
+- **Do not follow `[[wikilinks]]`.** The allowed pages link to other pages (faith, inner
+  life, monthly notes, and so on). Treat every `[[...]]` as
   opaque text — never open the page it points to. Chasing links is how the allow-list leaks.
 - **Never read anything under a `_SENSITIVE/` path** (therapy, health) — belt-and-suspenders
   for if the allow-list is ever bypassed. Also never read the monthly notes or the
@@ -53,8 +55,8 @@ If an allowed page mentions sensitive detail inline, do not carry it forward. Se
 ## Step 2 — Distill the lean professional core
 
 Produce a candidate profile in the same shape as the current `profileTarget`:
-**Who he is · North Star and trajectory · How he works and learns · Values and how to advise
-him.** No communication-style section — CLAUDE.md and the Lexicon already govern style
+**Who they are · North Star and trajectory · How they work and learn · Values and how to advise
+them.** No communication-style section — CLAUDE.md and the Lexicon already govern style
 always-on; duplicating them here pays the tokens twice. No interest/rabbit-hole
 inventories — that's biographical trivia by the standard below.
 
@@ -91,5 +93,5 @@ Lexicon) into `~/.codex/AGENTS.md`.
 ## Scheduling
 
 A weekly routine runs this skill in **propose-only** mode: it regenerates the candidate,
-shows the diff, and notifies Chris for approval — it never writes `canonical/PROFILE.md`
+shows the diff, and notifies the user for approval — it never writes `canonical/PROFILE.md`
 unattended. Running it here on demand does the same distillation now.

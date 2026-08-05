@@ -12,18 +12,18 @@ before the first drain in a session** — it holds the proven commands and their
 
 ## The thing that makes this different from a file walk
 
-Items in `<rawDir>/inbox/` are usually things Chris has **already engaged with** — his own
+Items in `<rawDir>/inbox/` are usually things the user has **already engaged with** — their own
 notes, sermons, conversations. Filing them is bookkeeping.
 
-Karakeep items are usually things he **saved but hasn't dug into yet**. Two failure modes
+Karakeep items are usually things they **saved but have not dug into yet**. Two failure modes
 follow, and the triage below exists to prevent them:
 
-- **The wiki becomes a graveyard of intentions** — pages about things he never actually
-  watched, indistinguishable from pages about things he knows cold. That corrupts the wiki's
-  core promise: that it reflects what he actually holds.
-- **The assistant does the engaging instead of him** — summarising a talk he saved *because it
-  looked worth his time* means he gets the digest and never watches it. That is the
-  dependency pattern he explicitly builds against.
+- **The wiki becomes a graveyard of intentions** — pages about things they never actually
+  watched, indistinguishable from pages about things they know cold. That corrupts the wiki's
+  core promise: that it reflects what they actually hold.
+- **The assistant does the engaging instead of them** — summarising a talk they saved *because it
+  looked worth their time* means they get the digest and never watch it. That is the
+  dependency pattern they explicitly build against.
 
 So: **not every drained item becomes a wiki page.** Most don't.
 
@@ -32,8 +32,8 @@ So: **not every drained item becomes a wiki page.** Most don't.
 | Outcome | When | Where it lands |
 |---|---|---|
 | **Ingest now** | Reference-shaped — a technique, recipe, checklist, explainer. *Knowing it* is the whole point; there's nothing to "experience" | Wiki page, normal Steps 2–6 |
-| **To-consume** | Leisure media he'll actually play or watch — a game, show, movie, book, album | A row on `backlog/to-consume.md` |
-| **To-engage** | Anything else worth digging into himself — an article, talk, repo, paper | A row on `backlog/to-engage.md` |
+| **To-consume** | Leisure media they'll actually play or watch — a game, show, movie, book, album | A row on `backlog/to-consume.md` |
+| **To-engage** | Anything else worth digging into themselves — an article, talk, repo, paper | A row on `backlog/to-engage.md` |
 | **Discard** | Didn't hold up, or the thought has since been had | Nothing filed; say so |
 
 Routing is decided **at drain time, in conversation** (ADR decision 5) — capture stays
@@ -51,19 +51,19 @@ it carries what a bookmark can't:
 |---|---|---|---|---|
 
 - **What it is** — the kind of thing first (talk, repo, article), then the one-line substance.
-- **Why I saved it** — reconstruct the hook past-Chris had. The most valuable column.
+- **Why I saved it** — reconstruct the hook the user had at save time. The most valuable column.
 - **Size** — honest cost: runtime for video, rough read time otherwise.
 - **Saved** — capture date, so a lint pass can surface six-month-old untouched rows.
 
 Reading the source enough to fill those four columns is the *work* of the drain. A row that
-just restates the title has done nothing for him.
+just restates the title has done nothing for them.
 
 ### Provenance marker on pages born from un-engaged saves
 
-A wiki page created from something Chris hasn't personally engaged with carries a line under
+A wiki page created from something the user hasn't personally engaged with carries a line under
 its title:
 
-    > _Filed from a save — Chris hasn't engaged with the source directly._
+    > _Filed from a save — the user hasn't engaged with the source directly._
 
 Cheap, honest, and it lets a later lint ask whether a long-untouched page still earns space.
 

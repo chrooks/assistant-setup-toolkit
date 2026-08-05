@@ -40,7 +40,7 @@ function main() {
     /* no stdin — fine */
   }
 
-  // /home/chrooks/projects/Toolkit -> -home-chrooks-projects-Toolkit
+  // /home/user/projects/Toolkit -> -home-user-projects-Toolkit
   const encoded = process.cwd().replace(/[/.]/g, "-");
   const projDir = path.join(home, ".claude", "projects", encoded);
   if (!fs.existsSync(projDir)) return; // no prior sessions in this repo

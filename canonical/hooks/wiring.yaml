@@ -76,7 +76,7 @@ hooks:
     scope: project
     targets: [claude-code, codex-cli]
   # Session-done / needs-input notifier — macOS banner + Pushover push.
-  # Lets Chris run many windows/terminals and get pinged instead of
+  # Lets the user run many windows/terminals and get pinged instead of
   # manually checking which session has come back. Secrets stay in a
   # private chmod-600 file (see Next Steps); never committed.
   - file: claude-notify.js

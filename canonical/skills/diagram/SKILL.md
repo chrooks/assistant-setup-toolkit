@@ -1,12 +1,12 @@
 ---
 name: diagram
-description: "Render a diagram — `/diagram md` for an in-chat ASCII sketch plus an auto-rendered Mermaid picture, `/diagram html` for a self-contained interactive graph (pan/zoom, drag, hover, click-to-explain). Use when explaining architecture, a pipeline, a user flow, a sequence, a state machine, or any nodes-and-edges structure, especially when bringing Chris along on something he is not yet deep in."
+description: "Render a diagram — `/diagram md` for an in-chat ASCII sketch plus an auto-rendered Mermaid picture, `/diagram html` for a self-contained interactive graph (pan/zoom, drag, hover, click-to-explain). Use when explaining architecture, a pipeline, a user flow, a sequence, a state machine, or any nodes-and-edges structure, especially when bringing the user along on something they are not yet deep in."
 argument-hint: "[md|html] [kind] <what to diagram>"
 ---
 
 # /diagram — ASCII + Mermaid + Interactive Diagram Renderer
 
-Chris learns visually. When you explain a structure or a process, show it as a diagram
+The user learns visually. When you explain a structure or a process, show it as a diagram
 instead of (or alongside) prose. One skill, one model, two fidelities — same pattern as
 `/table`.
 
@@ -47,14 +47,14 @@ Author the structure once as nodes + edges, then render it at either fidelity:
 ## Mode Selection (bare `/diagram`)
 
 Default to **`md`** — it lands in the conversation. Choose **`html`** when the structure
-is big or exploratory (more than ~12 nodes), or when Chris will want to click around and
+is big or exploratory (more than ~12 nodes), or when the user will want to click around and
 read the parts. When unsure, do `md` and offer the `html` upgrade in one line.
 
 ## `md` Mode — ASCII in chat + Mermaid picture
 
 Do BOTH, every time:
 
-1. **Print an ASCII/Unicode sketch inline** so Chris sees the shape immediately in the
+1. **Print an ASCII/Unicode sketch inline** so the user sees the shape immediately in the
    chat. Use box-drawing characters; keep it scannable. Conventions:
    - Boxes: `┌─┐ │ │ └─┘`  · Flows: `──▶`  `──┤`  · Trees: `├──` `└──`
    - Lead each box with the node label; keep it to the essential nodes if the graph is large.
@@ -66,9 +66,9 @@ Do BOTH, every time:
    - `er` → `erDiagram`
    - `mindmap` → `mindmap`
    Put edge labels on the arrows (`A -->|SetupProfile| B`).
-3. **Render and open the Mermaid picture** (Chris chose auto-open): if `mmdc` is on PATH,
+3. **Render and open the Mermaid picture** (the user chose auto-open): if `mmdc` is on PATH,
    run `mmdc -i <slug>.mmd -o <slug>.svg` then `open "<slug>.svg"`. If `mmdc` is missing
-   or the browser renderer fails, skip the picture, keep the `.mmd`, and tell Chris it is
+   or the browser renderer fails, skip the picture, keep the `.mmd`, and tell the user it is
    ready to preview (VSCode Markdown Preview Enhanced / Mermaid Chart render it).
 
 `.exports/` is the shared generated-output root for visual skills (`table/`,
@@ -90,7 +90,7 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 1. **Shape the model** into `nodes` and `edges` arrays (same shape as above). Node `group`
    controls the detail-panel tag; `description` powers hover + click.
 2. **Write the model** to a JSON file: `{ "title", "kind", "nodes", "edges", "options", "zones" }`.
-   `zones` (optional) draws labeled background bands behind the graph — Chris conceives
+   `zones` (optional) draws labeled background bands behind the graph — the user conceives
    software in layers, so **default to zones for `architecture` kind**: horizontal bands
    stacked top→bottom (Client → Frontend → API → Services → Data), externals in a side
    band. Shape: `[{ "label": "Frontend", "x0": -760, "y0": -480, "x1": 560, "y1": -330,
@@ -98,8 +98,8 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
    keep runtime data flow and deploy-time concerns in separate bands, not mixed edges).
    **Default to free 2D dragging**: set
    `"options": { "layout": { "hierarchical": { "enabled": false } }, "physics": false }`
-   and give every node pinned `x`/`y` coordinates (a rough grid is fine — Chris drags
-   nodes where he wants them, and free layout keeps them where he put them). Only fall
+   and give every node pinned `x`/`y` coordinates (a rough grid is fine — the user drags
+   nodes where they want them, and free layout keeps them where they put them). Only fall
    back to the kind-driven auto layout (omit `options` and coordinates) when hand-placing
    is genuinely impractical, e.g. a big auto-generated graph nobody will rearrange.
 3. **Run the fill script** (it lives in `scripts/` next to this SKILL.md; `templates/` and
@@ -157,4 +157,4 @@ For issue/milestone maps (the twn.com pattern). Conventions:
   it renders the model you give it. (For deep code-graph extraction, that is a different
   job; this is the lightweight "show me what we're building" view.)
 - Reach for `/diagram md` proactively when explaining architecture, a pipeline, a user
-  flow, or a sequence — especially when Chris is working on something he is not yet deep in.
+  flow, or a sequence — especially when the user is working on something they are not yet deep in.

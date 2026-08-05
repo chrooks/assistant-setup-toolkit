@@ -33,7 +33,7 @@ This is the core behavior — a grill-style one-at-a-time march, not a single du
 1. **Build the agenda.** Resolve the source into a short list of the **meaningful topics**
    worth walking — for a plan or a set of options, this is the list of **decisions to
    resolve** (mirror `/grill-me`'s decision tree). See [Building the agenda](#building-the-agenda).
-2. **Show the agenda first.** Present it as a numbered list so Chris sees the map and can
+2. **Show the agenda first.** Present it as a numbered list so the user sees the map and can
    steer — reorder, drop, add, or merge topics — before the walk starts.
 3. **March one topic at a time.** For topic N:
    - Invoke **`/wym <topic> drill`**, handing it the topic plus one line of grounding context
@@ -41,7 +41,7 @@ This is the core behavior — a grill-style one-at-a-time march, not a single du
      Visual · TLDR) and makes the single best-fit visual choice itself. Always pass `drill` —
      wym's default quick mode is three sentences, which is too thin for a walkthrough topic.
    - Wrap it in a minimal `## §N — [title]` header so the position in the agenda is clear.
-   - Then **pause** with an advance affordance and **wait** for Chris before the next topic.
+   - Then **pause** with an advance affordance and **wait** for the user before the next topic.
 4. **Wrap up.** After the last topic, synthesize — see [The wrap-up](#the-wrap-up).
 
 ### Advance affordance (between topics)
@@ -53,7 +53,7 @@ After each topic, offer the next move and stop:
 `next` → §N+1   ·   `all` → walk the rest straight through   ·   `drill` → go deeper here   ·   `skip` → jump a topic
 ```
 
-Default is **one at a time, pausing between** (grill-style). If Chris says **"all" / "just
+Default is **one at a time, pausing between** (grill-style). If the user says **"all" / "just
 walk it" / "go straight through"**, run the remaining topics back-to-back without pausing,
 then wrap up.
 
@@ -97,7 +97,7 @@ Pick the wrap-up visual to show **connection**, not to repeat the per-topic visu
 
 ## Behavior
 
-- Always show the agenda before the first topic so Chris can steer the walk.
+- Always show the agenda before the first topic so the user can steer the walk.
 - Default to one topic at a time with a pause between; honor "all" for a continuous walk.
 - Stay faithful to the source — `walkthrough` re-presents and clarifies; it does not invent
   claims or silently correct the source. Flag a real error in one line; don't rewrite it.

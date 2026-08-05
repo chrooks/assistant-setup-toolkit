@@ -1,14 +1,14 @@
 ---
 name: loop-audit
-description: Mine the Claude Code history archive on hestia for recurring human guidance — corrections and instructions Chris has had to give more than once — and turn each approved finding into a drafted (never auto-applied) toolkit change. Use at 12-week cycle boundaries, when the user invokes /loop-audit, or asks to audit his loops / interventions / ways of working.
+description: Mine the Claude Code history archive on hestia for recurring human guidance — corrections and instructions the user has had to give more than once — and turn each approved finding into a drafted (never auto-applied) toolkit change. Use at 12-week cycle boundaries, when the user invokes /loop-audit, or asks to audit their loops / interventions / ways of working.
 user-invocable: true
 ---
 
 # Loop Audit
 
 Analyze the cross-device Claude Code history archive for **recurring human
-guidance** — anything Chris has had to say to the harness more than once, in one
-session or across many — and convert each finding he approves into a drafted
+guidance** — anything the user has had to say to the harness more than once, in one
+session or across many — and convert each finding they approve into a drafted
 harness change. The goal is loop engineering: fewer interventions per unit of
 shipped work, cycle over cycle.
 
@@ -19,7 +19,7 @@ Design record: `.tasks/loop-audit/design-frame.md` and
 
 - The archive at `/srv/claude-history/` is **read-only input**.
 - Draft fixes; **never apply them**. No file outside `artifacts/loop-audit/`
-  changes without Chris approving that specific change. Applying an approved
+  changes without the user approving that specific change. Applying an approved
   draft happens through the normal commit flow, as a separate explicit step.
 - Approval is **per finding** — never offer "apply all".
 
@@ -41,7 +41,7 @@ Note the printed stats (transcripts scanned/in-window, turns kept, sessions,
 per-device counts) — they become the report's Coverage section verbatim. The
 corpus lands at `artifacts/loop-audit/corpus.jsonl`, one JSON object per human
 turn: `device`, `project`, `sessionId`, `timestamp`, `cwd`, `gitBranch`, `text`.
-Default window is 84 days; pass `-- --days N` to override when Chris asks.
+Default window is 84 days; pass `-- --days N` to override when the user asks.
 
 ### Step 3 — Detect
 
@@ -90,11 +90,11 @@ sections, then present it conversationally:
 
 ### Step 5 — Approval loop
 
-Walk findings one at a time. For each one Chris approves, draft the concrete
+Walk findings one at a time. For each one the user approves, draft the concrete
 change — a diff to `canonical/` or a memory-file draft — and include an
 approximate recurring context cost line: `~N tokens recurring cost` where
 N = ceil(characters ÷ 4), labeled approximate. Present the draft; do not write
-it into the tree unless Chris explicitly says to apply it. For each finding he
+it into the tree unless the user explicitly says to apply it. For each finding they
 rejects, note the rejection in the report so future runs don't re-raise it.
 
 ### Step 6 — Close

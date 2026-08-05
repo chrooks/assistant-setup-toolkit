@@ -28,7 +28,7 @@
 set -euo pipefail
 
 BASE_URL="https://raw.githubusercontent.com/mattpocock/skills/refs/heads/main/skills"
-OUT_DIR="/Users/cdbrooks/Development/Software/Repositories/code-assistant-context/artifacts"
+OUT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/artifacts"
 DEFAULT_SKILLS=(
   "engineering/to-prd"
   "engineering/grill-with-docs"

@@ -5,7 +5,7 @@ Status: accepted
 
 ## Context
 
-Agents on any machine should always know Chris's durable resources exist —
+Agents on any machine should always know the user's durable resources exist —
 the brain, the toolkit, the Lexicon, the profile — what each is for, and how
 to reach it *from here*. Access paths differ per machine (hestia has a local
 vault clone; the work laptop may only reach the brain via claude.ai), the

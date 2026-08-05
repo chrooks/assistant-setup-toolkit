@@ -1,6 +1,6 @@
 ---
 name: design-audit
-description: Audit an existing product flow, Interface, or UI Surface against Chris's design ethos plus HCI/UX principles. Use when reviewing product design, Cornerstone flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test / Nick Test evidence.
+description: Audit an existing product flow, Interface, or UI Surface against the user's design ethos plus HCI/UX principles. Use when reviewing product design, Cornerstone flows, screenshots, prototypes, or implemented UI for Signifiers, Affordances, Progressive Disclosure, Transparent Friction, Design Boundaries, Feedback, Hierarchy, Information Architecture, Error States, Empty States, and Mom Test / Nick Test evidence.
 argument-hint: "<flow, Surface, screenshot, or repo path>"
 user-invocable: true
 ---

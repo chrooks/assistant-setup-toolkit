@@ -5,7 +5,7 @@ Status: accepted
 
 ## Context
 
-Chris wants BuilderIO's `/visual-plan` and `/visual-recap` skills without depending
+The user wants BuilderIO's `/visual-plan` and `/visual-recap` skills without depending
 on the hosted `plan.agent-native.com` database. Two machine classes with different
 constraints: the work laptop blocks adding MCP servers entirely; the personal
 devices (Mac, PC, WSL) reach hestia over the tailnet. The Plan app itself is MIT

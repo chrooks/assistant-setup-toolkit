@@ -10,7 +10,8 @@ Crystallize an idea into reviewable project scaffolding. **Scaffolding only — 
 implement business logic.** The output is the seed plus a BRIEF that a downstream
 Claude Code / Codex harness picks up via `/scope`.
 
-Target folder: `/Users/cdbrooks/Development/Software/Repositories/`
+Target folder: the repo workspace — the directory holding the `projectsIndex`
+`PROJECTS.md` named in `~/.codex/knowledge-config.json`.
 
 ## Step 1 — Capture the idea
 
@@ -65,7 +66,7 @@ cd <Repositories>/<slug> && git init -q && git add -A
 Run the shared index script so the new repo lands in `PROJECTS.md`:
 
 ```sh
-python3 /Users/cdbrooks/Development/Software/Repositories/.repo-index/index.py
+python3 "$(dirname "<projectsIndex>")/.repo-index/index.py"
 ```
 
 The script adds the row with `(NEW — needs description)`. Because this Skill already
