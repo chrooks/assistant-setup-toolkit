@@ -80,6 +80,7 @@ Changed files:
 - Use repo-relative paths in the handoff body unless the user explicitly asks for absolute paths.
 - When referring to specific files or lines of code, [include a link to the file](some/path/to/file):<line number start>-<line number end>.
 - Do not include internal chain-of-thought or speculation.
+- Emit the stop gate in all three places the format calls for — the block under the title, the "do not start these" steps heading, and the closing reminder. The next session ignores the handoff's boundary when only the closing line survives.
 - Ask a concise follow-up only when the source-of-truth file, the exact next step, or the authority of a prior handoff cannot be inferred safely.
 
 </supporting-info>

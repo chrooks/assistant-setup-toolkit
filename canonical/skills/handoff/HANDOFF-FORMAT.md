@@ -7,6 +7,16 @@ When a handoff is written to disk (only when genuinely needed — default is the
 ````md
 # <Previous Convo Summary> -> <Next Step> Handoff
 
+## READ THIS FIRST — THIS IS A BRIEFING, NOT A WORK ORDER
+**Do not create, edit, or delete any file in this session until I tell you to start.**
+Everything below is context. The steps are a proposed plan, not a task list to execute.
+
+Your only job this turn:
+1. Read this handoff.
+2. Explore the repo for the context it points to.
+3. Reply with your understanding of the current state and the direction you propose.
+4. Stop and wait for my instruction.
+
 ## Context
 Read and follow <plan-file> as the source of truth. Also respect <questions-file>.
 
@@ -21,7 +31,7 @@ Read and follow <plan-file> as the source of truth. Also respect <questions-file
 - <instruction>
 - <instruction>
 
-## Next 3 Steps
+## Proposed Next 3 Steps — do not start these
 1. <the next narrow step>
 2. <the next narrow step>
 3. <the next narrow step>
@@ -35,11 +45,17 @@ Use the repo `.venv` interpreter. Preserve passing tests for:
 - <test module>
 - <test module>
 
-**DO NOT PROCEED WITH IMPLEMENTING ANY NEXT STEPS YET**
-Acknowledge the receipt of this handoff, explore the repo for relevant context, propose a direction, and wait for further instruction.
+---
+**Reminder — do not implement anything yet.** Acknowledge this handoff, explore the repo, propose a direction, then wait.
 ````
 
 ## Section guidance
+
+### The stop gate (top and bottom)
+- Keep it in **both** places. Do not collapse it into one.
+- The top copy is the one that works: it sets the mode before the reader meets the numbered steps. A directive that arrives only after a to-do list reads as a footnote to the list.
+- Keep "do not start these" attached to the steps heading. The heading is where a model decides the message is a work order.
+- Codex is the strictest test of this. If the handoff is being pasted into Codex, do not soften any of the three markers.
 
 ### Title line
 - Format: `# <couple-word summary of previous convo> -> <next step> Handoff`
