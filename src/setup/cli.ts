@@ -96,7 +96,7 @@ Shorthand
 Examples
   npm run setup -- --claude --default
   npm run setup -- --claude --write overwrite --artifacts
-  npm run setup -- --preset hestia --default --dry-run
+  npm run setup -- --preset server --default --dry-run
 `;
 
 /**

@@ -6,7 +6,7 @@ Status: accepted
 ## Context
 
 The first `/loop-audit` run found the top recurring intervention (~12×) was
-The user re-declaring machine context — "we're on hestia via Remote SSH",
+The user re-declaring machine context — "we're on server via Remote SSH",
 localhost URLs that don't resolve in their browser, "don't kill anything on this
 server". The fix is a rule, but it is true on exactly one machine class; the
 `rules` component ships wholesale to every machine, and ADR-0002 Presets
@@ -16,7 +16,7 @@ select components and Variants, not individual rule files.
 
 1. **Machine-scoped rules live at `canonical/rules/machines/<name>.md`.**
    They are excluded from every install by default.
-2. **A `machine` Variant names the machine class** (e.g. `machine: hestia`),
+2. **A `machine` Variant names the machine class** (e.g. `machine: server`),
    carried by the existing Variant pipeline (preset → profile → payload →
    receipt) — no new Preset field, honoring ADR-0002's "new identity fields
    are added deliberately" rule by not adding one.

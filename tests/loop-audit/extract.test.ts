@@ -177,7 +177,7 @@ describe("extractArchive", () => {
   beforeAll(() => {
     root = mkdtempSync(join(tmpdir(), "loop-audit-test-"));
     const projA = join(root, "macbook", "projects", "-Users-x-proj");
-    const projB = join(root, "hestia", "projects", "-home-x-other");
+    const projB = join(root, "server", "projects", "-home-x-other");
     mkdirSync(projA, { recursive: true });
     mkdirSync(projB, { recursive: true });
     copyFileSync(join(FIXTURES, "session-basic.jsonl"), join(projA, "fix-basic.jsonl"));
@@ -200,7 +200,7 @@ describe("extractArchive", () => {
     expect(stats.filesInWindow).toBe(2);
     expect(stats.turnsKept).toBe(3);
     expect(stats.turnsDropped).toBe(4);
-    expect(stats.perDevice).toEqual({ macbook: 2, hestia: 1 });
+    expect(stats.perDevice).toEqual({ macbook: 2, server: 1 });
     expect(stats.sessions).toBe(2);
 
     const texts = turns.map((t) => t.text).sort();
@@ -210,7 +210,7 @@ describe("extractArchive", () => {
       "real guidance in a noisy session",
     ]);
     const noisy = turns.find((t) => t.sessionId === "fix-noise")!;
-    expect(noisy.device).toBe("hestia");
+    expect(noisy.device).toBe("server");
     expect(noisy.project).toBe("-home-x-other");
   });
 });

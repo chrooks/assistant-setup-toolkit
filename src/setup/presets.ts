@@ -238,7 +238,7 @@ export interface PresetEffect {
  * Compares the Preset's declared fields against the RESOLVED profile, so it
  * reports the same truth whichever path built that profile (flags or prompts),
  * and marks any field a flag overrode. Naming a Preset is otherwise an act of
- * faith — the run says "preset hestia" and never says what that bought you.
+ * faith — the run says "preset server" and never says what that bought you.
  *
  * Pure: takes the resolved profile, returns lines.
  */
@@ -308,7 +308,7 @@ export function describePresetEffects(
 
 /**
  * Translate a Variant value into its visible consequence. A bare
- * `machine=hestia` says nothing about what changed; "installs rules/machine.md"
+ * `machine=server` says nothing about what changed; "installs rules/machine.md"
  * does. Unknown Variants get no gloss rather than a wrong one.
  */
 function describeVariant(key: string, value: string | undefined): string {

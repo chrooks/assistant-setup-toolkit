@@ -1,6 +1,6 @@
 # Migration notes — 2026-07-25 restructure
 
-Three renames landed on `main` (commits `22392aa`…`f7751c7`). hestia is fully
+Three renames landed on `main` (commits `22392aa`…`f7751c7`). server is fully
 migrated. **Each other machine (pc, pc-wsl, mac, work) must do the steps below
 once after pulling.** Delete this file when every machine has migrated.
 

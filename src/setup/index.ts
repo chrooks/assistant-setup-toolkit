@@ -473,7 +473,7 @@ export async function runSetupWizard(
     summary(`Targets: ${targetSummary}`);
 
     // Say what naming a Preset actually bought this run. Without this the run
-    // announces "preset hestia" and never explains what changed because of it.
+    // announces "preset server" and never explains what changed because of it.
     if (profile.presetName && presets[profile.presetName]) {
       const effects = describePresetEffects(
         profile,

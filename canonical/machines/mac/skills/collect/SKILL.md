@@ -18,7 +18,7 @@ later `/ingest` drain on any machine sees them.
 ## Why this is macOS-only, and machine-scoped
 
 Apple Notes needs `osascript`; Voice Memos lives in a local container. Neither is
-reachable from hestia or any Linux box, so this Skill installs **only** on the
+reachable from the home server or any Linux box, so this Skill installs **only** on the
 `mac` machine class (ADR-0003) — the `mac` Preset in `manifests/presets.yaml`
 already declares `machine: mac`. Karakeep is deliberately *not* handled here —
 it has a REST API and is drained server-side by `/ingest`.
@@ -46,9 +46,9 @@ if nothing failed, so a partial run doesn't silently skip items next time.
 | Source | Lands as | Notes |
 |---|---|---|
 | Apple Note | `inbox/<slug>.md` with frontmatter | Reuses `notes-to-raw.sh` from the `ingest` Skill — one converter, not two |
-| Voice Memo | `inbox/<date>-<name>.m4a` | Audio copied as-is; **transcribed at drain time** by `/ingest` using hestia's `faster-whisper`, not here |
+| Voice Memo | `inbox/<date>-<name>.m4a` | Audio copied as-is; **transcribed at drain time** by `/ingest` using the home server's `faster-whisper`, not here |
 
-Voice memos stay audio on purpose: transcription machinery already exists on hestia
+Voice memos stay audio on purpose: transcription machinery already exists on the home server
 for reels, and duplicating it on the laptop would mean two models to keep current.
 
 ## After it runs

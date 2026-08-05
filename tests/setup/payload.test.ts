@@ -271,7 +271,7 @@ describe("payload", () => {
       });
       const canonicalFiles = [
         rule("rules/common/coding-style.md"),
-        rule("machines/hestia/rules.md"),
+        rule("machines/server/rules.md"),
         rule("machines/work/rules.md"),
         rule("machines/TEMPLATE.md"),
       ];
@@ -283,7 +283,7 @@ describe("payload", () => {
           externalFiles: [],
           canonicalFiles,
           projectionFiles: [],
-          variants: { machine: "hestia" },
+          variants: { machine: "server" },
         });
 
         const files = result.payloads[0].files.map((f) => f.relativePath).sort();
@@ -291,7 +291,7 @@ describe("payload", () => {
         const machineRule = result.payloads[0].files.find(
           (f) => f.relativePath === "rules/machine.md",
         );
-        expect(machineRule!.sourcePath).toBe("/repo/canonical/machines/hestia/rules.md");
+        expect(machineRule!.sourcePath).toBe("/repo/canonical/machines/server/rules.md");
       });
 
       it("drops every machine rule when no machine Variant is set", () => {
@@ -319,7 +319,7 @@ describe("payload", () => {
       const canonicalFiles = [
         skill("skills/commit/SKILL.md"),
         skill("machines/work/skills/timesheet/SKILL.md"),
-        skill("machines/hestia/skills/deploy/SKILL.md"),
+        skill("machines/server/skills/deploy/SKILL.md"),
         skill("machines/work/skills/.gitkeep"),
       ];
 

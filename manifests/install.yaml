@@ -114,7 +114,7 @@ externalSources:
         skill edits.
       - The review surface is chosen per machine by the visual-plans Variant
         (--visual-plans local-files | self-hosted | none). self-hosted uses
-        the user's self-hosted Plan app at https://plan.hestia.chrooks.com (hearth runbook 13);
+        the user's own Plan deployment, whose origin is machine-local ($TOOLKIT_PLAN_ORIGIN);
         local-files uses the skills' no-MCP privacy mode. Never the Builder
         hosted database.
 

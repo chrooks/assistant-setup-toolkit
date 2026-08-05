@@ -361,7 +361,7 @@ describe("hook-wiring", () => {
       const plans = planHookWiring(
         gatedEntries,
         { "claude-code": "/home/u/.claude" },
-        { variants: { machine: "hestia" } },
+        { variants: { machine: "server" } },
       );
       expect(plans).toHaveLength(0);
     });
@@ -399,7 +399,7 @@ describe("hook-wiring", () => {
       const plans = planHookWiring(
         ungated,
         { "claude-code": "/home/u/.claude" },
-        { variants: { machine: "hestia" } },
+        { variants: { machine: "server" } },
       );
       expect(plans).toHaveLength(1);
     });

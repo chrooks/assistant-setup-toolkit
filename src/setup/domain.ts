@@ -49,8 +49,21 @@ export const VISUAL_PLANS_VARIANTS: readonly VisualPlansVariant[] = [
 /** Non-interactive default: every non-work machine is a personal machine. */
 export const DEFAULT_VISUAL_PLANS_VARIANT: VisualPlansVariant = "self-hosted";
 
-/** Origin of the self-hosted Plan app (hearth deploy on hestia). */
-export const SELF_HOSTED_PLAN_URL = "https://plan.hestia.chrooks.com";
+/**
+ * Origin of the self-hosted Plan app. Machine-local by nature — a home-server
+ * hostname is not shared configuration, so it comes from the environment and
+ * never from this repository. Unset is the normal case on a fresh clone; the
+ * next-step then tells the operator to set it.
+ */
+export const SELF_HOSTED_PLAN_ORIGIN_ENV = "TOOLKIT_PLAN_ORIGIN";
+
+/** The configured Plan origin, or undefined when the operator has not set one. */
+export function selfHostedPlanOrigin(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  const raw = env[SELF_HOSTED_PLAN_ORIGIN_ENV]?.trim();
+  return raw ? raw.replace(/\/+$/, "") : undefined;
+}
 
 /**
  * The Variant key naming which machine class this install is (ADR-0003).

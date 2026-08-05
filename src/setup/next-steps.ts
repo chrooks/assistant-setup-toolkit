@@ -6,7 +6,7 @@
  */
 
 import type { AssistantTargetId, VisualPlansVariant } from "./domain.js";
-import { SELF_HOSTED_PLAN_URL } from "./domain.js";
+import { SELF_HOSTED_PLAN_ORIGIN_ENV, selfHostedPlanOrigin } from "./domain.js";
 import type { ExternalSource } from "./manifest.js";
 
 /** The kind of Next Step — determines how it's presented. */
@@ -92,17 +92,28 @@ export function planVisualPlansNextSteps(
   if (variant === "none") return [];
 
   if (variant === "self-hosted") {
+    // The origin is a home-server hostname: machine-local, never in the repo.
+    const origin = selfHostedPlanOrigin();
+    if (origin === undefined) {
+      return [
+        {
+          kind: "manual-action",
+          description: `Set ${SELF_HOSTED_PLAN_ORIGIN_ENV} to your Plan deployment's origin (for example in ~/.zshrc), then re-run setup to get the exact MCP registration command`,
+        },
+      ];
+    }
+
     const steps: NextStep[] = [];
     if (targets.includes("claude-code")) {
       steps.push({
         kind: "manual-action",
-        description: `Register the self-hosted Plan MCP for Claude Code: claude mcp add --transport http plan ${SELF_HOSTED_PLAN_URL}/_agent-native/mcp`,
+        description: `Register the self-hosted Plan MCP for Claude Code: claude mcp add --transport http plan ${origin}/_agent-native/mcp`,
       });
     }
     if (targets.includes("codex-cli")) {
       steps.push({
         kind: "manual-action",
-        description: `Register the self-hosted Plan MCP for Codex CLI: add an mcp_servers entry for ${SELF_HOSTED_PLAN_URL}/_agent-native/mcp to ~/.codex/config.toml`,
+        description: `Register the self-hosted Plan MCP for Codex CLI: add an mcp_servers entry for ${origin}/_agent-native/mcp to ~/.codex/config.toml`,
       });
     }
     return steps;

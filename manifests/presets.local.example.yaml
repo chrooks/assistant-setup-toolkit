@@ -21,3 +21,13 @@ presets:
     selectedExternalSourceIds:
       - matt-pocock-engineering
       - matt-pocock-productivity
+
+  # A Preset named after a specific machine belongs HERE, not in presets.yaml —
+  # a hostname is machine-local identity, not shared configuration. Define it
+  # once on that box and keep using `--preset <its-name>` exactly as before.
+  my-home-server:
+    variants:
+      visual-plans: self-hosted
+      # ADR-0003: installs canonical/machines/my-home-server/rules.md as
+      # rules/machine.md. That file is gitignored — author it on the box itself.
+      machine: my-home-server

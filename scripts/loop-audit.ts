@@ -25,7 +25,7 @@ if (!Number.isFinite(days) || days <= 0) {
   process.exit(1);
 }
 if (!existsSync(values.archive!)) {
-  console.error(`Archive not found: ${values.archive} (this tool runs on hestia)`);
+  console.error(`Archive not found: ${values.archive} (this tool runs on the home server, where the archive lives)`);
   process.exit(1);
 }
 

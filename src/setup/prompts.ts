@@ -207,7 +207,7 @@ async function promptVisualPlansVariant(): Promise<VisualPlansVariant> {
     message: "Visual plans backend (/visual-plan, /visual-recap):",
     choices: [
       {
-        name: "Self-hosted — Plan app on hestia via MCP (personal devices)",
+        name: "Self-hosted — Plan app on your own server via MCP (personal devices)",
         value: "self-hosted",
       },
       {

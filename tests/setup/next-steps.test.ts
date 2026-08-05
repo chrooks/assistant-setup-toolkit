@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import {
   formatNextStepsSection,
   planConfigNextSteps,
@@ -87,12 +87,36 @@ describe("next-steps", () => {
   });
 
   describe("planVisualPlansNextSteps", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
     it("self-hosted emits the exact claude mcp add command for claude-code", () => {
+      vi.stubEnv("TOOLKIT_PLAN_ORIGIN", "https://plan.example.test");
       const steps = planVisualPlansNextSteps("self-hosted", ["claude-code"]);
       expect(steps).toHaveLength(1);
       expect(steps[0].description).toContain(
-        "claude mcp add --transport http plan https://plan.hestia.chrooks.com/_agent-native/mcp",
+        "claude mcp add --transport http plan https://plan.example.test/_agent-native/mcp",
       );
+    });
+
+    it("self-hosted strips a trailing slash rather than doubling it", () => {
+      vi.stubEnv("TOOLKIT_PLAN_ORIGIN", "https://plan.example.test/");
+      const steps = planVisualPlansNextSteps("self-hosted", ["claude-code"]);
+      expect(steps[0].description).toContain(
+        "https://plan.example.test/_agent-native/mcp",
+      );
+      expect(steps[0].description).not.toContain("test//");
+    });
+
+    // The origin is machine-local, so a fresh clone has none. Say what to set
+    // instead of printing a broken command with an empty host.
+    it("self-hosted asks for the origin when the env var is unset", () => {
+      vi.stubEnv("TOOLKIT_PLAN_ORIGIN", "");
+      const steps = planVisualPlansNextSteps("self-hosted", ["claude-code"]);
+      expect(steps).toHaveLength(1);
+      expect(steps[0].description).toContain("TOOLKIT_PLAN_ORIGIN");
+      expect(steps[0].description).not.toContain("mcp add");
     });
 
     it("local-files emits the env-var step and no MCP command", () => {
@@ -118,7 +142,7 @@ describe("next-steps", () => {
     });
 
     it("emits no steps when the rule file exists", () => {
-      expect(planMachineRuleNextSteps("hestia", true)).toEqual([]);
+      expect(planMachineRuleNextSteps("server", true)).toEqual([]);
     });
 
     it("emits no steps when no machine Variant is set", () => {

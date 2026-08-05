@@ -8,7 +8,7 @@ Status: accepted
 The user wants BuilderIO's `/visual-plan` and `/visual-recap` skills without depending
 on the hosted `plan.agent-native.com` database. Two machine classes with different
 constraints: the work laptop blocks adding MCP servers entirely; the personal
-devices (Mac, PC, WSL) reach hestia over the tailnet. The Plan app itself is MIT
+devices (Mac, PC, WSL) reach server over the tailnet. The Plan app itself is MIT
 (`templates/plan` in BuilderIO/agent-native) and self-hostable, and the skills
 already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
 
@@ -27,16 +27,17 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
      page-load over the local bridge is the default render path; a fully local
      Plan app (`PLAN_LOCAL_DIR` → `/local-plans/<slug>`) is the documented
      fallback if the company proxy blocks it — not pre-built (YAGNI).
-   - `self-hosted` (personal): Plan app deployed on hestia per the hearth house
+   - `self-hosted` (personal): Plan app deployed on server per the hearth house
      pattern — Docker container (TREK precedent: prod build, read-only,
      cap-drop), data under `/srv/compose/plan/` (restic-backed for free),
-     `127.0.0.1` bind fronted by Caddy at `https://plan.hestia.chrooks.com`,
+     `127.0.0.1` bind fronted by a reverse proxy at the operator's own origin,
      reachable LAN + tailnet via existing split-DNS. MCP entry points at
-     `https://plan.hestia.chrooks.com/_agent-native/mcp`. One local account,
+     `<origin>/_agent-native/mcp`, where `<origin>` comes from the
+     `TOOLKIT_PLAN_ORIGIN` environment variable. One local account,
      signups closed (Karakeep posture); no dev twin; no Cloudflare tunnel
      (private infra).
 3. **The global CLAUDE.md hosted-mode note flips in the same verified commit**
-   that proves the hestia instance works from the Mac — no window where
+   that proves the server instance works from the Mac — no window where
    instructions contradict reality.
 
 ## Consequences
@@ -45,7 +46,7 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
   published versions) and we inherit improvements cheaply.
 - The work laptop carries zero MCP config, so there is nothing for the company
   block to fight.
-- Plan data on hestia lands in the existing backup and HTTPS story without new
+- Plan data on server lands in the existing backup and HTTPS story without new
   machinery; the cost is the hearth deploy ritual (inventory row, runbook,
   backup-path check) owned in the hearth repo, not here.
 - If the skills' config Seams ever disappear upstream, revisit the no-fork rule.

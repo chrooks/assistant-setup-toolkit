@@ -164,12 +164,7 @@ describe("presets", () => {
       const seeded = await loadPresets(
         path.resolve(__dirname, "../../manifests/presets.yaml"),
       );
-      expect(Object.keys(seeded).sort()).toEqual([
-        "hestia",
-        "mac",
-        "personal",
-        "work",
-      ]);
+      expect(Object.keys(seeded).sort()).toEqual(["mac", "personal", "work"]);
       expect(seeded.work.variants?.["visual-plans"]).toBe("local-files");
       expect(seeded.personal.variants?.["visual-plans"]).toBe("self-hosted");
     });
@@ -178,11 +173,11 @@ describe("presets", () => {
   describe("describePresetEffects", () => {
     it("reports each Variant with its visible consequence", () => {
       const preset: Preset = {
-        variants: { "visual-plans": "self-hosted", machine: "hestia" },
+        variants: { "visual-plans": "self-hosted", machine: "server" },
       };
       const profile: SetupProfile = {
         ...BASE_PROFILE,
-        variants: { "visual-plans": "self-hosted", machine: "hestia" },
+        variants: { "visual-plans": "self-hosted", machine: "server" },
       };
 
       const effects = describePresetEffects(profile, preset);
@@ -193,7 +188,7 @@ describe("presets", () => {
         overridden: false,
       });
       expect(effects[1].field).toBe("variants.machine");
-      // The gloss is the point — "machine = hestia" alone says nothing.
+      // The gloss is the point — "machine = server" alone says nothing.
       expect(effects[1].effect).toContain("rules/machine.md");
     });
 

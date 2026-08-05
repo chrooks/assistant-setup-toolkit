@@ -86,11 +86,11 @@ Run `npm run setup -- --help` for this table at the terminal. Unknown flags are 
 The console shows a per-step summary; the full narration goes to a run log under `.setup/logs/`, linked in the footer. The 10 newest logs are kept.
 
 ```
-Setup Wizard — dry-run · Default Install · Safe Merge · preset hestia
+Setup Wizard — dry-run · Default Install · Safe Merge · preset server
 Targets: Claude Code -> ~/.claude
-Preset: hestia (from Install Receipt)
+Preset: server (from Install Receipt)
     variants.visual-plans = self-hosted — visual-plan/visual-recap via the Plan MCP
-    variants.machine = hestia — installs rules/machine.md from canonical/machines/hestia/rules.md
+    variants.machine = server — installs rules/machine.md from canonical/machines/server/rules.md
 
   Sources    0 to fetch, 8 skipped, 2 manual (MCP)
   Writes     0 would write, 163 would skip, 0 would remove

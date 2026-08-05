@@ -135,7 +135,7 @@ A canonical, always-loaded table of contents of the user's durable resources (br
 _Avoid_: table of contents, sitemap, registry
 
 **Preset**:
-A named, repo-declared partial Setup Profile in `manifests/presets.yaml`, keyed by machine class (for example work, personal, hestia), that pre-answers Setup Wizard questions. The Install Receipt remembers only the Preset name; contents always re-resolve from the repo, and explicit CLI flags win as one-off overrides.
+A named, repo-declared partial Setup Profile in `manifests/presets.yaml`, keyed by machine class (for example work, personal, server), that pre-answers Setup Wizard questions. The Install Receipt remembers only the Preset name; contents always re-resolve from the repo, and explicit CLI flags win as one-off overrides.
 _Avoid_: profile, device config, machine template
 
 ## Relationships

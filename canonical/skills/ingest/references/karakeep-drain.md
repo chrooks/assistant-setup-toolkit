@@ -1,6 +1,6 @@
 # Karakeep drain — the phone-capture inbox
 
-Karakeep (`keep.chrooks.com`, self-hosted on hestia) is the **Capture Inbox of record** for
+Karakeep (self-hosted on the home server) is the **Capture Inbox of record** for
 phone share-sheet saves: IG reels, shorts, articles, repos. Distinct from `<rawDir>/inbox/`,
 which holds files inside the vault. Both feed the same wiki; they need different handling.
 
@@ -70,7 +70,7 @@ Cheap, honest, and it lets a later lint ask whether a long-untouched page still 
 ## Getting the queue
 
 API key: `~/.config/karakeep/ingest.key` (chmod 600 — use it, never print it). Base URL
-`http://localhost:8084/api/v1` from hestia.
+`http://localhost:8084/api/v1` from the home server itself.
 
     KEY=$(cat ~/.config/karakeep/ingest.key)
     curl -s -H "Authorization: Bearer $KEY" \

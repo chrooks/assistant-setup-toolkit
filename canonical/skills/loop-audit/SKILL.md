@@ -1,6 +1,6 @@
 ---
 name: loop-audit
-description: Mine the Claude Code history archive on hestia for recurring human guidance — corrections and instructions the user has had to give more than once — and turn each approved finding into a drafted (never auto-applied) toolkit change. Use at 12-week cycle boundaries, when the user invokes /loop-audit, or asks to audit their loops / interventions / ways of working.
+description: Mine the Claude Code history archive on the home server for recurring human guidance — corrections and instructions the user has had to give more than once — and turn each approved finding into a drafted (never auto-applied) toolkit change. Use at 12-week cycle boundaries, when the user invokes /loop-audit, or asks to audit their loops / interventions / ways of working.
 user-invocable: true
 ---
 
@@ -28,7 +28,7 @@ Design record: `.tasks/loop-audit/design-frame.md` and
 ### Step 1 — Guard
 
 Verify `/srv/claude-history` exists. If it does not, stop: this skill runs on
-hestia only, where the archive lives. Say so and name the runbook (hearth
+the home server only, where the archive lives. Say so and name the runbook (hearth
 `docs/runbooks/15-claude-history-collection.md`).
 
 ### Step 2 — Extract

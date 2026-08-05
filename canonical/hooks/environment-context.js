@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SessionStart hook: tell the assistant what machine it's actually on.
 //
-// The user works across several machines (MacBook, PC, work laptop, Hestia) and
+// The user works across several machines (MacBook, PC, work laptop, Server) and
 // often connects via VS Code Remote-SSH. Without this, the assistant has no
 // way to know it isn't sitting on their local machine and can suggest the wrong
 // OS commands/paths. This fires every session, unconditionally, with one

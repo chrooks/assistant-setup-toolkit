@@ -5,7 +5,7 @@ Status: accepted
 
 ## Context
 
-Every machine class (work laptop, personal Mac/PC/WSL, hestia) needs a different
+Every machine class (work laptop, personal Mac/PC/WSL, server) needs a different
 Setup Wizard selection, and the visual-plans Variant (ADR-0001) was deliberately
 built as plain `SetupProfile` data so a preset system could absorb it. Without
 presets, each machine re-answers the same questions and per-machine drift is
@@ -14,7 +14,7 @@ invisible.
 ## Decision
 
 1. **Presets live in the repo.** `manifests/presets.yaml` holds named Presets
-   (`work`, `personal`, `hestia`, …). A Preset is a declaration of intent —
+   (`work`, `personal`, `server`, …). A Preset is a declaration of intent —
    versioned, reviewable, shared by git like the rest of the Canonical
    Assistant Source. Editing a Preset updates every machine of that class on
    its next sync.

@@ -7,6 +7,9 @@
 #
 # A machine that cannot push (the work laptop) overrides its own Preset in
 # manifests/presets.local.yaml — gitignored, merged over this file per field.
+# That overlay may also DEFINE a Preset this file has never heard of, which is
+# where a Preset named after a specific box belongs: a hostname is machine-local
+# identity, not shared configuration.
 # See presets.local.example.yaml and the ADR-0002 amendment.
 
 version: 1
@@ -21,11 +24,6 @@ presets:
   personal:
     variants:
       visual-plans: self-hosted
-  hestia:
-    variants:
-      visual-plans: self-hosted
-      # ADR-0003: installs canonical/machines/hestia/rules.md as rules/machine.md
-      machine: hestia
   mac:
     variants:
       visual-plans: self-hosted

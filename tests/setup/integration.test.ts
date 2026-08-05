@@ -150,7 +150,7 @@ describe("integration", () => {
 
     it("discovers machine-scoped skills nested under machines/<machine>/skills/<skill>/", async () => {
       await writeFile("canonical/skills/commit/SKILL.md", "# Commit");
-      await writeFile("canonical/machines/hestia/skills/deploy/SKILL.md", "# Deploy");
+      await writeFile("canonical/machines/server/skills/deploy/SKILL.md", "# Deploy");
       // A machine skills dir with no skill subdirectories yet (holding only
       // a .gitkeep so it survives on clone) must not blow up discovery.
       await writeFile("canonical/machines/work/skills/.gitkeep", "");
@@ -158,20 +158,20 @@ describe("integration", () => {
       const skillDirs = await discoverSkillDirs(tmpDir);
       const names = skillDirs.map((d) => d.name).sort();
 
-      expect(names).toEqual(["commit", "machines/hestia/deploy"]);
-      const deploy = skillDirs.find((d) => d.name === "machines/hestia/deploy")!;
+      expect(names).toEqual(["commit", "machines/server/deploy"]);
+      const deploy = skillDirs.find((d) => d.name === "machines/server/deploy")!;
       expect(deploy.files).toEqual(["SKILL.md"]);
     });
 
     it("projects a machine-scoped skill to Codex and gates it by the machine Variant", () => {
       const projectionMappings = planCodexProjection({
         claudeFiles: [],
-        skillDirs: [{ name: "machines/hestia/deploy", files: ["SKILL.md"] }],
+        skillDirs: [{ name: "machines/server/deploy", files: ["SKILL.md"] }],
       });
 
       expect(projectionMappings).toHaveLength(1);
       expect(projectionMappings[0].target).toBe(
-        ".agents/machines/hestia/skills/deploy/SKILL.md",
+        ".agents/machines/server/skills/deploy/SKILL.md",
       );
 
       // Mirror index.ts's projectionFiles transform: strip the .codex/.agents
@@ -190,7 +190,7 @@ describe("integration", () => {
         externalFiles: [],
         canonicalFiles: [],
         projectionFiles,
-        variants: { machine: "hestia" },
+        variants: { machine: "server" },
       });
       const matchingPaths = matching.payloads
         .find((p) => p.homeId === "agents-home")!
