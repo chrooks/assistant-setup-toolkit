@@ -34,11 +34,23 @@ Machine rules are a different shape: one `rules.md` per machine class, not a dir
 
     @~/.claude/rules/common/git-workflow.md
 
-**The trap:** a rule with neither `paths:` nor an `@` import is a dead file. It installs, it looks correct, and it is never loaded. Nothing warns you.
+**The trap runs the opposite way from what you would expect.** `paths:` is an opt-in *gate*, not a switch that turns loading on. A rule with no `paths:` block loads into **every session, unconditionally** — whether or not anything imports it. There is no such thing as a dead rule file. An ungated rule you forgot about is not inert; it is permanently live.
 
-The current state is a clean invariant worth preserving — exactly four rules have no `paths:` block, and those are exactly the four imported from `INSTRUCTIONS.md`: `common/resource-index.md`, `common/coding-style.md`, `common/git-workflow.md`, `common/development-workflow.md`. Every other rule under `canonical/rules/` is path-gated.
+Verified 2026-08-05: ten ECC-era rule files with no frontmatter and no `@` import loaded into every session for months, while `~/.claude/CLAUDE.md` never mentioned them. Two sessions hunted for the hook injecting them. There is no hook — this is native Claude Code behavior, and the frontmatter is the only thing that scopes it.
 
-So: **write `paths:` unless you are also adding the `@` import line.** An always-on rule costs context in every session, which makes it an instruction-budget decision wearing a rule's clothing — read [authoring-instruction.md](authoring-instruction.md) before choosing that branch.
+The `@` import does a different job: it carries the rule to **Codex**, which reads the projected file but does not glob-gate it. On Claude the file would load either way.
+
+The current state is a clean invariant worth preserving — exactly four rules have no `paths:` block, and those are exactly the four imported from `INSTRUCTIONS.md`: `common/resource-index.md`, `common/coding-style.md`, `common/git-workflow.md`, `common/development-workflow.md`. Every other rule under `canonical/rules/` is path-gated. `tests/setup/toolkit-skill.test.ts` enforces this — add an ungated rule and the suite fails.
+
+So: **write `paths:` unless you intend the rule to load in every session, everywhere.** An always-on rule costs context in every session, which makes it an instruction-budget decision wearing a rule's clothing — read [authoring-instruction.md](authoring-instruction.md) before choosing that branch.
+
+## Gate on the right axis
+
+Gate on **what the file is**, not on **what the task is**. A convention about writing Python belongs on `**/*.py`. A procedure for recording a demo video does not belong on `**/*.tsx` — the trigger for that work is a person deciding to record a demo, not a component file being opened, and a task-shaped rule on a file-type gate fires constantly and irrelevantly.
+
+If you cannot name the file type the rule is about, it is probably a Skill or an instruction, not a rule.
+
+Watch the stacking cost too. Gates compose: opening one `.tsx` file currently pulls `typescript/`, `react/`, and `web/` together — sixteen files, roughly 12k tokens. That layering is intentional, but every broad gate you add is paid on every matching file, forever.
 
 ## Glob syntax
 

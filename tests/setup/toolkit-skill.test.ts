@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { discoverSkillDirs } from "../../src/setup/index.js";
@@ -106,14 +106,59 @@ describe("toolkit Skill — the rule authoring branch (AC10)", () => {
     expect(branch).toContain("canonical/machines/<name>/rules.md");
   });
 
-  it("explains paths: gating and the dead-file trap", async () => {
+  it("explains paths: gating and which way the trap actually runs", async () => {
     const branch = await readFile(authoringRulePath, "utf-8");
 
     expect(branch).toMatch(/paths:/);
     expect(branch).toContain('"**/*.py"');
-    // A rule with neither paths: nor an @ import installs and never loads.
-    expect(branch).toMatch(/neither `paths:` nor an `@` import is a dead file/i);
-    expect(branch).toMatch(/write `paths:` unless you are also adding the `@` import/i);
+    // An ungated rule is not dead — it loads in every session, unconditionally.
+    // Ten ECC-era orphans hid behind the opposite belief for months.
+    expect(branch).toMatch(/every session, unconditionally/i);
+    expect(branch).toMatch(/no such thing as a dead rule file/i);
+    expect(branch).toMatch(/write `paths:` unless you intend the rule to load in every session/i);
+  });
+
+  it("tells the author to gate on file type, not on task", async () => {
+    const branch = await readFile(authoringRulePath, "utf-8");
+
+    expect(branch).toMatch(/Gate on \*\*what the file is\*\*, not on \*\*what the task is\*\*/i);
+  });
+});
+
+/**
+ * Seam B — the invariant itself, asserted against the tree rather than the prose.
+ * The doc can claim "exactly four rules are ungated"; this is what makes it true.
+ * An ungated rule loads in every session on every machine, so a new one must be
+ * a deliberate act, not an omitted frontmatter block.
+ */
+describe("canonical/rules — the always-on invariant", () => {
+  const ALWAYS_ON = [
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/resource-index.md",
+  ];
+
+  it("gates every rule except the four imported by INSTRUCTIONS.md", async () => {
+    const rulesDir = path.join(repoRoot, "canonical", "rules");
+    const entries = await readdir(rulesDir, { recursive: true });
+    const ruleFiles = entries.filter((e) => e.endsWith(".md")).sort();
+
+    const ungated: string[] = [];
+    for (const rel of ruleFiles) {
+      const body = await readFile(path.join(rulesDir, rel), "utf-8");
+      if (!body.startsWith("---\npaths:")) ungated.push(rel.split(path.sep).join("/"));
+    }
+
+    expect(ungated.sort()).toEqual(ALWAYS_ON);
+  });
+
+  it("imports each always-on rule from INSTRUCTIONS.md, so Codex gets it too", async () => {
+    const instructions = await readFile(instructionsPath, "utf-8");
+
+    for (const rel of ALWAYS_ON) {
+      expect(instructions).toContain(`@~/.claude/rules/${rel}`);
+    }
   });
 });
 
