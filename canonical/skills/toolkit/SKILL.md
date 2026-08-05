@@ -47,7 +47,9 @@ Ask before writing, not after. The answer changes how many files land.
 
 **Sub-agents.** The Setup Wizard walks `hooks`, `commands`, `skills`, `rules`, and `config` under `canonical/` — there is no `canonical/agents/`. Adding one is a new component kind and its own piece of work. Say so rather than improvising a location.
 
-**MCP servers.** Live external tool or data access is an MCP server, configured per machine, not a canonical artifact. Route the user to `claude mcp` or `/mcp`.
+**MCP servers.** Live external tool or data access is an MCP server. It is **registered per machine** — route the user to `claude mcp add` or `/mcp`; there is no canonical artifact that installs one.
+
+But a server the toolkit expects to exist still gets **recorded** in `manifests/install.yaml` as `kind: mcp-server` (see `playwright-mcp`, `context7`, `chrome-devtools-mcp`). Those entries install nothing — the wizard reports them as *manual (MCP)* and surfaces the command in Next Steps, so a fresh machine learns what it is missing. Registering without recording means the next machine never finds out.
 
 ## Scope — always stated, never inferred
 

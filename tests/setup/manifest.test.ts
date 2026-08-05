@@ -159,7 +159,7 @@ externalSources:
 
       expect(manifest.version).toBe(1);
       // All sources tracked in manifests/install.yaml
-      expect(manifest.externalSources).toHaveLength(12);
+      expect(manifest.externalSources).toHaveLength(13);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
@@ -178,6 +178,7 @@ externalSources:
       expect(ids).toContain("everything-claude-code");
       expect(ids).toContain("codex-plugin-cc");
       expect(ids).toContain("playwright-mcp");
+      expect(ids).toContain("chrome-devtools-mcp");
       expect(ids).toContain("context7");
       expect(ids).toContain("agent-native-visual-plans");
 

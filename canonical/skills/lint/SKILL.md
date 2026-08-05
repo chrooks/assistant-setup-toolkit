@@ -69,6 +69,35 @@ Respect the ingest skill's `[inferred]` provenance tags: an `[inferred]` claim t
 sources don't support is a prime stale-claim candidate. (Lint surfaces these tags; it
 doesn't own the convention — see the ingest skill's "Claim provenance".)
 
+### Schema drift — frontmatter and relations
+
+Two mechanical checks the structural script doesn't cover. Both are pure greps; run them
+every pass.
+
+**1. `type:` values.** Every page's `type:` must be one the vault's CLAUDE.md declares.
+
+    grep -h "^type:" $(find <wikiDir> -name '*.md') | sort | uniq -c | sort -rn
+
+A value appearing **once or twice** is the tell — it usually means someone invented a type
+rather than reaching for the existing one. Report the singletons and the pages carrying
+them; propose a merge target rather than a new type. Adding to the approved set is a
+deliberate decision the human makes, never a lint fix.
+
+Watch for the inverse too: a *folder* whose pages disagree with each other. One domain using
+three types for the same kind of page is drift even when every value is individually legal.
+
+**2. Relation keywords.** Every typed relation must use an approved keyword.
+
+    grep -rhoE '^- [a-z_]+ \[\[' --include='*.md' <wikiDir> | awk '{print $2}' | sort -u
+
+Anything outside the approved set is either a typo or an unsanctioned new relation type —
+both worth surfacing. Also flag relations pointing at pages that don't exist: a typed edge
+to a missing target is a stronger signal than a bare broken link, because someone asserted a
+specific relationship to something that was never written.
+
+**Do not fix either of these silently.** Schema drift is a signal about how the vault is
+being written, and the human should see the pattern before it's normalised away.
+
 ## Step 3 — Triage to the top findings
 
 Don't dump every nit. Lead with the highest-signal problems — a hub citing a stale claim,

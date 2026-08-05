@@ -85,8 +85,35 @@ Apply the formats in [references/page-formats.md](./references/page-formats.md):
 1. **Summary page** — one page per source in `<wikiDir>/`. Create it, or revise it if this source was ingested before.
 2. **index.md** — add (or update) the catalog line for the summary page under the right category.
 3. **Entity & concept pages** — for each significant entity/concept, create its page if absent or fold the new facts into the existing one. Add `[[wikilinks]]` both directions (the new page links out; hub pages link back).
-4. **Contradictions & provenance** — where the source conflicts with an existing claim, don't silently overwrite. Flag it inline on the affected page with the date and both sources. When you write a claim that isn't stated directly in any one source but is your own synthesis across several, mark it `[inferred]` so it reads as a conclusion, not a quote. See [references/page-formats.md](./references/page-formats.md) ("Claim provenance").
-5. **log.md** — append one dated entry (see format reference).
+4. **Typed relations** — when the relationship between two pages is *explicit*, name it. A relation is a keyword prefixed onto a wikilink inside `## Related`:
+
+       ## Related
+
+       - supersedes [[old-approach]] — replaced after the 2026-07 reorg
+       - applied_in [[cornerstone]] — versioning-as-idempotency for non-deterministic evals
+       - [[ordinary-link]] — plain see-also, no keyword
+
+   Exactly six keywords, and the list does not grow without a deliberate decision:
+
+   | Keyword | Means | Inverse |
+   |---|---|---|
+   | `supersedes` | this replaced that | `superseded_by` |
+   | `contradicts` | conflicting claims, unresolved | symmetric |
+   | `derived_from` | page born from a source or session | — |
+   | `part_of` | belongs to a hub or cluster | — |
+   | `alternative_to` | considered and not chosen | symmetric |
+   | `applied_in` | concept → the project where it was used | — |
+
+   **Only type a relation the source or the page actually states. Never infer one from topic
+   similarity** — a guessed relation puts a false claim into a graph that gets queried and
+   trusted later, which is worse than leaving the link bare. Bare `[[X]]` is the untyped
+   default and is the correct outcome for most links.
+
+   Hub membership is now *computed* from inbound `part_of`, so don't declare a page a hub —
+   point its members at it.
+
+5. **Contradictions & provenance** — where the source conflicts with an existing claim, don't silently overwrite. Flag it inline on the affected page with the date and both sources, and add `contradicts [[other-page]]` to `## Related` so the conflict is findable rather than buried in prose. When you write a claim that isn't stated directly in any one source but is your own synthesis across several, mark it `[inferred]` so it reads as a conclusion, not a quote. See [references/page-formats.md](./references/page-formats.md) ("Claim provenance").
+6. **log.md** — append one dated entry (see format reference).
 
 Prefer many small focused pages over few large ones. Reuse existing pages over creating near-duplicates — search the wiki first.
 

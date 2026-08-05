@@ -203,6 +203,24 @@ externalSources:
       - codex-cli
     requiresConfirmation: true
 
+  - id: chrome-devtools-mcp
+    name: Chrome DevTools MCP
+    kind: mcp-server
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    default: false
+    targets:
+      - claude-code
+      - codex-cli
+    requiresConfirmation: true
+    notes:
+      - Google's DevTools team. Lets an agent drive a real Chrome — DOM, console,
+        network, performance traces — instead of inferring behavior from source.
+      - "Install: claude mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest"
+      - This is what backs the "target mockup is the acceptance criterion" clause in
+        rules/common/development-workflow.md — without a real browser that rule has no
+        mechanism. Overlaps playwright-mcp; this one is for inspecting and comparing,
+        Playwright for scripted flows.
+
   - id: context7
     name: Context7
     kind: mcp-server
