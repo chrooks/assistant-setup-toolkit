@@ -135,22 +135,52 @@ decision standing in for "How I'd file it".
 
 ## Turning media into text
 
-Short-form video and image posts need extraction before there's anything to triage. Full
-commands, install paths, and verified gotchas are in the homelab runbook 12 — **do not reconstruct
-them from memory.** The shape:
+Short-form video and image posts need extraction before there's anything to triage.
 
-- **YouTube** — try captions first (`yt-dlp --skip-download --write-auto-subs`); no download,
-  no cookies.
-- **Video without captions / Instagram** — download with burner-account cookies, transcribe
-  with local `faster-whisper` (CPU, `small`).
+### Video → `/watch-video`, always
+
+**Anything with a video track goes through the `watch-video` Skill.** This is Step 1 of the
+parent Skill and it is not optional here — the drain does not hand-roll video extraction.
+
+    node ~/.claude/skills/watch-video/scripts/video.mjs "<url-or-file>" \
+      --cookies ~/.config/yt-dlp/ig-cookies.txt
+
+Pass `--cookies` **every time**. Without it the script falls back to the operator's own
+logged-in Chrome profile, and a drain is bulk automation over saved bookmarks — exactly what
+the burner account exists to keep off the real session.
+
+Why this and not a bare `yt-dlp | whisper` chain: **`watch-video` reads the picture as well
+as the audio.** It pulls captions or a transcript *and* samples frames — at 1 fps for clips
+under two minutes, which is nearly every reel. Read the `grids[]` from its manifest, not the
+individual frames.
+
+That matters because **short-form video routinely carries its content as burned-in captions
+over silent or music-only audio.** An audio-only path returns an empty transcript on those
+and reports success. Learned the hard way on 2026-08-06: two items in one drain were written
+off as unrecoverable, and both came back complete on a second pass through `watch-video` —
+eight pressure cues and five named exercises, all of them on-screen text.
+
+A `transcript.status` of `none` is therefore **not** a reason to give up on a reel. Check the
+grids before concluding an item has no content.
+
+### Images → `gallery-dl`
+
+Still the right tool; `watch-video` handles video, not image slides.
+
 - **Single image post** — fetch Karakeep's cached `imageAssetId` (never `screenshotAssetId`,
   which catches IG's login-wall overlay) and read it with vision.
 - **Carousel** — Karakeep caches only slide 1; pull every slide with `gallery-dl`, ordered by
   `{num}` and never by filename (IG slide IDs are not monotonic).
+- **A carousel with video slides is both jobs.** `gallery-dl` gets the slides; each `.mp4`
+  among them then goes through `watch-video` as a local file path. That two-stage shape is
+  what recovered the posture carousel.
+
+Install paths, cookie-file format, and verified gotchas are in the homelab runbook 12 —
+**do not reconstruct them from memory.**
 
 **Failure is graceful and always non-blocking:** link + caption + note always land; the
 transcript is best-effort. A dead extraction downgrades the item to link-only, it does not
-stop the drain.
+stop the drain. But "the audio was empty" is not a dead extraction — see above.
 
 ## Cross-repo hand-off is propose/dispose
 

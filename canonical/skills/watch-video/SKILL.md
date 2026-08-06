@@ -66,6 +66,22 @@ in the current project, matching where `/diagram` and `/table` write. Only pass
 prints it to stdout. Pass `--force` only when the user explicitly asks
 for a re-extract; otherwise a second run on the same video reuses the first extraction.
 
+### Authentication — `--cookies`
+
+Where a site needs a login, the script falls back to the **Chrome profile**
+(`--cookies-from-browser chrome`), i.e. the user's own logged-in session.
+
+That default is right for a video the user is watching and wrong for scraping. Pass
+`--cookies <file>` with a Netscape-format export to authenticate as some other account
+instead — the cookie file then replaces the browser rung entirely, so the real session is
+never sent.
+
+    node ~/.claude/skills/watch-video/scripts/video.mjs "<url>" --cookies ~/.config/yt-dlp/ig-cookies.txt
+
+**Automated pipelines must pass it.** `/ingest`'s Karakeep drain runs unattended over
+someone's saved bookmarks; using the live session there would put the user's real account
+behind bulk requests. That drain has a burner-account cookie file for exactly this reason.
+
 ### The manifest
 
 Everything downstream reads this one object:

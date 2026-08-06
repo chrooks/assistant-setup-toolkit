@@ -31,6 +31,9 @@ Options:
   --focus <from>-<to>   Sample densely across one span instead of the whole
                         video, e.g. --focus 5:09-5:36. Use when hunting for a
                         specific moment the whole-video pass may have skipped.
+  --cookies <file>      Authenticate with a Netscape-format cookie file instead
+                        of the browser profile. Use a burner account's export
+                        for scraping so the real logged-in session is never sent.
   --help                Print this message.
 
 Writes <cache-dir>/manifest.json and prints it to stdout.`;
@@ -120,7 +123,10 @@ const CELL_HEIGHT = 362;
  * has three options and does not need an arg-parsing dependency.
  */
 export function parseArgs(argv) {
-  const options = { source: null, cacheDir: null, force: false, help: false, openai: false, focus: null };
+  const options = {
+    source: null, cacheDir: null, force: false, help: false,
+    openai: false, focus: null, cookies: null,
+  };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -133,6 +139,9 @@ export function parseArgs(argv) {
     } else if (arg === "--focus") {
       i += 1;
       options.focus = argv[i] ?? null;
+    } else if (arg === "--cookies") {
+      i += 1;
+      options.cookies = argv[i] ?? null;
     } else if (arg === "--cache-dir") {
       i += 1;
       options.cacheDir = argv[i] ?? null;
@@ -183,13 +192,27 @@ export function normalizeUrl(value) {
 }
 
 /**
+ * yt-dlp arguments for an explicit cookie file, or nothing when none was given.
+ *
+ * Kept as one helper because every yt-dlp call site needs the same treatment —
+ * a run that authenticates for the download but not for the metadata probe
+ * fails halfway through with a confusing error.
+ */
+export function cookieArgs(cookies) {
+  return cookies ? ["--cookies", cookies] : [];
+}
+
+/**
  * Stable cache key. Remote videos use the site's own id. Local files hash their
  * absolute path plus byte size, so the same file yields the same key across
  * runs while an edited file correctly misses the cache.
  */
-export function videoIdFor(source) {
+export function videoIdFor(source, cookies = null) {
   if (source.kind === "url") {
-    return run("yt-dlp", ["--no-playlist", "--print", "id", "--skip-download", source.value]).trim();
+    return run("yt-dlp", [
+      "--no-playlist", ...cookieArgs(cookies),
+      "--print", "id", "--skip-download", source.value,
+    ]).trim();
   }
 
   const { size } = fs.statSync(source.value);
@@ -234,13 +257,14 @@ export function readManifest(cacheDir) {
  * Title and channel. Local files have no metadata worth probing, so the
  * filename stands in — it is what the person will recognize anyway.
  */
-export function describeSource(source) {
+export function describeSource(source, cookies = null) {
   if (source.kind === "file") {
     return { title: path.basename(source.value), channel: null };
   }
 
   const out = run("yt-dlp", [
     "--no-playlist",
+    ...cookieArgs(cookies),
     "--print", "%(title)s\n%(channel)s",
     "--skip-download",
     source.value,
@@ -254,18 +278,25 @@ export function describeSource(source) {
  * path to the written .vtt, or null when the video has no captions.
  *
  * The acquisition ladder is deliberately shallow: plain auto-sub first, then
- * browser cookies. A third rung exists (a PO-token provider service YouTube's
+ * cookies. A third rung exists (a PO-token provider service YouTube's
  * 2025-26 hardening may demand) but costs a Node build and ~65 MB, so it is not
  * built until these two demonstrably fail. See the plan's Decision Log.
+ *
+ * The second rung uses the caller's cookie file when one was given, and falls
+ * back to the Chrome profile otherwise. That order matters: passing --cookies is
+ * an explicit instruction not to touch the real logged-in session, so reaching
+ * for the browser afterwards would defeat the point of asking.
  */
-export function fetchSubtitles(url, cacheDir) {
+export function fetchSubtitles(url, cacheDir, cookies = null) {
   fs.mkdirSync(cacheDir, { recursive: true });
   const stem = path.join(cacheDir, "sub");
 
+  const base = ["--no-playlist", "--write-auto-sub", "--sub-format", "vtt", "--skip-download"];
+  const authRung = cookies ? cookieArgs(cookies) : ["--cookies-from-browser", "chrome"];
+
   const attempts = [
-    ["--no-playlist", "--write-auto-sub", "--sub-format", "vtt", "--skip-download", "-o", stem, url],
-    ["--no-playlist", "--write-auto-sub", "--sub-format", "vtt", "--skip-download",
-     "--cookies-from-browser", "chrome", "-o", stem, url],
+    [...base, "-o", stem, url], // unauthenticated — sends nothing either way
+    [...base, ...authRung, "-o", stem, url],
   ];
 
   for (const args of attempts) {
@@ -510,11 +541,11 @@ export function hasBinary(bin) {
  * A `none` status is not a failure here — the Skill turns it into a question for
  * the user rather than silently loading a video with no words.
  */
-export async function buildTranscript(source, mediaPath, cacheDir, { useOpenAI = false } = {}) {
+export async function buildTranscript(source, mediaPath, cacheDir, { useOpenAI = false, cookies = null } = {}) {
   let segments = null;
 
   if (source.kind === "url") {
-    const vttPath = fetchSubtitles(source.value, cacheDir);
+    const vttPath = fetchSubtitles(source.value, cacheDir, cookies);
     if (vttPath) {
       segments = parseVtt(vttPath);
       if (segments.length > 0) {
@@ -961,12 +992,13 @@ export function requireBinary(bin, installHint) {
  * for whisper; caption-only runs never reach this. Capped at 720p — frames are
  * downscaled to 1568px anyway, so a 4K download would be wasted bandwidth.
  */
-export function downloadMedia(url, cacheDir) {
+export function downloadMedia(url, cacheDir, cookies = null) {
   fs.mkdirSync(cacheDir, { recursive: true });
   const stem = path.join(cacheDir, "media");
 
   run("yt-dlp", [
     "--no-playlist",
+    ...cookieArgs(cookies),
     "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
     "--merge-output-format", "mp4",
     "-o", `${stem}.%(ext)s`,
@@ -1003,7 +1035,7 @@ export async function main(argv) {
     requireBinary("yt-dlp", "brew install yt-dlp");
   }
 
-  const videoId = videoIdFor(source);
+  const videoId = videoIdFor(source, options.cookies);
   const cacheDir = options.cacheDir ?? path.join(process.cwd(), ...DEFAULT_CACHE_SEGMENTS, videoId);
 
   if (!options.force) {
@@ -1014,8 +1046,8 @@ export async function main(argv) {
     }
   }
 
-  const { title, channel } = describeSource(source);
-  const mediaPath = source.kind === "file" ? source.value : downloadMedia(source.value, cacheDir);
+  const { title, channel } = describeSource(source, options.cookies);
+  const mediaPath = source.kind === "file" ? source.value : downloadMedia(source.value, cacheDir, options.cookies);
 
   const durationSec = probeDuration(mediaPath);
   const focus = options.focus ? parseFocus(options.focus) : null;
@@ -1052,7 +1084,7 @@ export async function main(argv) {
     title,
     channel,
     durationSec,
-    transcript: await buildTranscript(source, mediaPath, cacheDir, { useOpenAI: options.openai }),
+    transcript: await buildTranscript(source, mediaPath, cacheDir, { useOpenAI: options.openai, cookies: options.cookies }),
     frames,
     grids,
     budget: {

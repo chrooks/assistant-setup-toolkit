@@ -27,6 +27,7 @@ import {
   extractFrames,
   formatTimestamp,
   framePolicy,
+  cookieArgs,
   isPlaylistUrl,
   normalizeUrl,
   spaceOut,
@@ -806,5 +807,15 @@ describe("watch-video script — argument handling", () => {
 
   it("treats a bare --help as a request for usage", () => {
     expect(parseArgs(["--help"]).help).toBe(true);
+  });
+
+  it("defaults --cookies to null and reads its value when given", () => {
+    expect(parseArgs(["clip.mp4"]).cookies).toBeNull();
+    expect(parseArgs(["clip.mp4", "--cookies", "/tmp/ig.txt"]).cookies).toBe("/tmp/ig.txt");
+  });
+
+  it("emits yt-dlp cookie args only when a file was given", () => {
+    expect(cookieArgs(null)).toEqual([]);
+    expect(cookieArgs("/tmp/ig.txt")).toEqual(["--cookies", "/tmp/ig.txt"]);
   });
 });

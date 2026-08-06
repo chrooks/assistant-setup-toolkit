@@ -14,6 +14,7 @@ export interface ParsedArgs {
   help: boolean;
   openai: boolean;
   focus: string | null;
+  cookies: string | null;
 }
 
 export interface TranscriptInfo {
@@ -86,11 +87,12 @@ export declare function extractFrames(
 export declare function parseArgs(argv: string[]): ParsedArgs;
 export declare function resolveSource(arg: string): Source;
 export declare function isPlaylistUrl(value: string): boolean;
-export declare function videoIdFor(source: Source): string;
+export declare function cookieArgs(cookies: string | null): string[];
+export declare function videoIdFor(source: Source, cookies?: string | null): string;
 export declare function probeDuration(filePath: string): number;
 export declare function writeManifest(cacheDir: string, manifest: Manifest): string;
 export declare function readManifest(cacheDir: string): Manifest | null;
-export declare function describeSource(source: Source): { title: string; channel: string | null };
+export declare function describeSource(source: Source, cookies?: string | null): { title: string; channel: string | null };
 export declare function requireBinary(bin: string, installHint: string): void;
 export declare function hasBinary(bin: string): boolean;
 export declare function main(argv: string[]): Promise<number>;
@@ -100,8 +102,8 @@ export interface Segment {
   text: string;
 }
 
-export declare function downloadMedia(url: string, cacheDir: string): string;
-export declare function fetchSubtitles(url: string, cacheDir: string): string | null;
+export declare function downloadMedia(url: string, cacheDir: string, cookies?: string | null): string;
+export declare function fetchSubtitles(url: string, cacheDir: string, cookies?: string | null): string | null;
 export declare function vttTimeToSeconds(stamp: string): number;
 export declare function parseVtt(vttPath: string): Segment[];
 export declare function formatTimestamp(seconds: number): string;
