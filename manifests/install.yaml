@@ -11,10 +11,14 @@ externalSources:
   # knowingly half-built; expect churn and rough edges there.
   #
   # Overlaps are safe: payload.ts layers external files first and canonical
-  # files last, so a local skills/<name>/SKILL.md always wins. The seven
-  # overlapping skills (grill-me, grill-with-docs, implement, tdd, handoff,
-  # writing-great-skills) keep their local versions; the wizard prints one
-  # "local wins" line each.
+  # files last, so a local skills/<name>/SKILL.md always wins. The overlapping
+  # skills (grill-me, grill-with-docs, implement, tdd, handoff) keep their
+  # local versions; the wizard prints one "local wins" line each.
+  #
+  # Safe Merge never overwrites an existing file, so upstream updates only
+  # propagate on a `--write overwrite` run; use `--write prune` when upstream
+  # renames or removes a skill (e.g. writing-great-skills -> writing-for-agents,
+  # 2026-07) so the stale copy is deleted.
   #
   # improve-codebase-architecture is deliberately NOT local: upstream moved its
   # vocabulary into codebase-design, added an HTML report, and delegates to
@@ -63,11 +67,13 @@ externalSources:
       - codex-cli
     notes:
       - >-
-        Upstream's half-built skills, fetched knowingly: batch-grill-me,
-        claude-handoff, loop-me, setup-ts-deep-modules, to-questionnaire,
-        wizard, writing-beats, writing-fragments, writing-shape. No name
-        collisions with canonical/skills as of 2026-07; if one appears,
-        the local copy wins via the normal payload layering.
+        Upstream's half-built skills, fetched knowingly: claude-handoff,
+        loop-me, setup-ts-deep-modules, writing-beats, writing-fragments,
+        writing-shape (as of 2026-08; skills graduate out of this group —
+        wizard to engineering, to-questionnaire and wait-what to productivity,
+        batch-grill-me dropped upstream). No name collisions with
+        canonical/skills; if one appears, the local copy wins via the normal
+        payload layering.
 
   - id: find-skills
     name: find-skills
