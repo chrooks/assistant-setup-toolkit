@@ -141,7 +141,8 @@ Output, tight:
    transcript to `/ingest` or open a frame themselves.
 5. **Acknowledge** — state plainly that the video is **loaded and ready**, and offer 2-3
    concrete next moves (discuss a section, pull a specific slide at full resolution, hand
-   the transcript path to `/ingest`).
+   the transcript path to `/ingest`, or tighten the recording with `/cut-video`, which
+   renders spans of `media.mp4` into a trimmed clip).
 
 Stop there. Wait for the user to pick the direction.
 
