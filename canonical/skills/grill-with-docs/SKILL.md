@@ -23,6 +23,23 @@ here; read those skills.
 Everything below is deliberate local divergence. It lives here, in a file this
 repo owns, precisely so both upstream skills can keep tracking upstream.
 
+## Override: lettered options, one per line
+
+When a question has discrete options, break them out of the body — one lettered
+option per line, then the recommendation as a `Rec:` on the `➡️` line, exactly as
+`/grill-me` does:
+
+```
+❓ **Q1** - **<question title>**: <question body>
+A) <option>
+B) <option>
+C) <option>
+
+➡️ Rec: A + C — <one-line justification>
+```
+
+Questions with no discrete options keep upstream's format unchanged.
+
 ## Override: the glossary is `LEXICON.md`, not `CONTEXT.md`
 
 `domain-modeling` names the project glossary `CONTEXT.md` throughout — the file

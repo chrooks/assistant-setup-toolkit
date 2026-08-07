@@ -19,6 +19,25 @@ to be a local override; upstream adopted it in July 2026, so it now lives there.
 Everything below is deliberate local divergence. It lives here, in a file this
 repo owns, precisely so `grilling` can keep tracking upstream.
 
+## Override: lettered options, one per line
+
+When a question has discrete options, break them out of the body — one lettered
+option per line, then the recommendation as a `Rec:` on the `➡️` line:
+
+```
+❓ **Q1** - **<question title>**: <question body>
+A) <option>
+B) <option>
+C) <option>
+
+➡️ Rec: A + C — <one-line justification>
+```
+
+This replaces upstream's "multiple choices" folded into the question body. Letters
+let a reply say "A" or "B but with X"; keep options mutually scannable and the
+justification to one line. Questions with no discrete options keep upstream's
+format unchanged.
+
 ## Override: no confirmation gate before the next stage
 
 `grilling` ends by waiting for confirmation before acting. In the DevOS lifecycle
