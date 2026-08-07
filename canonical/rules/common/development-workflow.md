@@ -49,6 +49,7 @@ The Feature Implementation Workflow describes the development pipeline: research
 Work that changes runtime behavior is done only when the affected flow has been driven for real — UI changes get driven in a browser (`/verify`; Playwright screenshot or assertion). A compile, lint, or unit-test pass is not proof.
 
 - Applies equally to subagent-returned work: never relay an agent's "done" without driving the flow first.
+- **Browser drives run headless, always** — chrome-devtools MCP, Playwright, and any subagent driving a browser must pass the headless flag; a Chrome window must never appear on the user's screen. Headed only when the user explicitly asks to watch. Case: a headed prove run popped a window mid-game (2026-08-06).
 - Lead the completion report with the proof, then the change detail.
 - **When a target mockup exists, it is the acceptance criterion.** Screenshot the built page, compare it against the reference image, and close the gap — repeat until they match. "It builds" and "it looks like the design" are different claims, and only the second one was asked for. A reference image is the cheapest executable spec a UI change can have; when one exists and no comparison happened, the work is not proven.
 
