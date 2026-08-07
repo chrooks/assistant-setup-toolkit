@@ -96,6 +96,10 @@ Return a concise plan:
 
 For demos with ≤3 minutes total time, collapse the output to `Demo Promise`, `Shape`, `Timed Walkthrough`, `Ask`, and `Backup`.
 
+## Deck handoff
+
+Never build slides here. When the user wants slides, a deck, or a PowerPoint — or the demo is formal enough that slides would help — finish the plan, then offer in one line to run `/make-deck` on it. That skill owns PowerPoint generation.
+
 ## Guardrails
 
 - Fit the plan to the available time; cut scope before compressing everything.
