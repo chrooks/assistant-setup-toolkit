@@ -401,9 +401,23 @@ async function walkAsPayload(
       const full = path.join(currentDir, entry.name);
       // Skip git metadata + node_modules; they're not part of the payload.
       if (entry.name === ".git" || entry.name === "node_modules") continue;
-      if (entry.isDirectory()) {
+      // Resolve symlinks by their target type — some upstreams (e.g. blader/humanizer)
+      // symlink skills/<name>/SKILL.md to a repo-root file, and a dirent-only check
+      // drops those silently (0 files fetched, no error).
+      let isDirectory = entry.isDirectory();
+      let isFile = entry.isFile();
+      if (entry.isSymbolicLink()) {
+        try {
+          const target = await fs.stat(full);
+          isDirectory = target.isDirectory();
+          isFile = target.isFile();
+        } catch {
+          continue; // broken symlink — nothing to install
+        }
+      }
+      if (isDirectory) {
         await walk(full);
-      } else if (entry.isFile()) {
+      } else if (isFile) {
         const rel = path.relative(fromDir, full);
         const stat = await fs.stat(full);
         out.push({
