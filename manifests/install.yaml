@@ -240,3 +240,32 @@ externalSources:
     requiresConfirmation: true
     requiredSecrets:
       - CONTEXT7_API_KEY
+
+  - id: stop-slop
+    name: Hardik Pandya — stop-slop
+    kind: skill
+    url: https://github.com/hardikpandya/stop-slop
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - >-
+        Removes AI tells from prose — slop phrases, filler structures, and
+        LLM cadence. The repo root is the skill (SKILL.md plus references/).
+        Fetched, not vendored: upstream is maintained.
+
+  - id: humanizer
+    name: Siqi Chen — humanizer
+    kind: skill
+    url: https://github.com/blader/humanizer/tree/main/skills/humanizer
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - >-
+        Removes signs of AI-generated writing from text. Companion to
+        stop-slop — the two overlap on phrases/structures but each catches
+        tells the other misses. Scoped to skills/humanizer; the repo root is
+        plugin packaging, not the skill.

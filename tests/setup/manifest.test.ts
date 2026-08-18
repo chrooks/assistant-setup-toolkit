@@ -159,7 +159,7 @@ externalSources:
 
       expect(manifest.version).toBe(1);
       // All sources tracked in manifests/install.yaml
-      expect(manifest.externalSources).toHaveLength(13);
+      expect(manifest.externalSources).toHaveLength(15);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
@@ -181,6 +181,8 @@ externalSources:
       expect(ids).toContain("chrome-devtools-mcp");
       expect(ids).toContain("context7");
       expect(ids).toContain("agent-native-visual-plans");
+      expect(ids).toContain("stop-slop");
+      expect(ids).toContain("humanizer");
 
       const caveman = manifest.externalSources.find((s) => s.id === "caveman")!;
       expect(caveman.kind).toBe("plugin");
