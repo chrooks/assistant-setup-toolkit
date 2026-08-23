@@ -269,3 +269,26 @@ externalSources:
         stop-slop — the two overlap on phrases/structures but each catches
         tells the other misses. Scoped to skills/humanizer; the repo root is
         plugin packaging, not the skill.
+
+  - id: eli5
+    name: Thariq Shihipar — eli5
+    kind: plugin
+    url: https://github.com/anthropics/claude-plugins-community/tree/main/eli5
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    installCommands:
+      claude-code:
+        - claude plugin marketplace add anthropics/claude-plugins-community
+        - claude plugin install eli5@claude-community
+    notes:
+      - >-
+        /eli5 <topic> explains anything as a picture-first HTML artifact — big
+        visuals, very few words. Complements /wym, which stays in chat and
+        stays terse; reach for eli5 when the concept wants a page, not a line.
+      - >-
+        Monorepo — the plugin lives at eli5/, not the repo root, and the single
+        skill sits under eli5/skills/eli5. Claude Code needs the two install
+        commands sent as separate prompts; the fetched copy is the flat
+        fallback and the only path for Codex.
