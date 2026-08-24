@@ -21,6 +21,8 @@ of the lifecycle can trust it.
 - **Effort Tier** — a runtime-agnostic label, `light` or `heavy`, for how strong
   a model and how much effort the work needs. Pair it with an `effort` of
   `low`, `medium`, or `high`.
+- **Surface** — the exposed area a user interacts with. Work **touches a
+  Surface** when it changes what a person sees or does. You stamp this too.
 
 ## When to Use
 
@@ -50,6 +52,33 @@ Produce a sizing verdict, always:
 - **Set the Effort Tier.** Mechanical or small and well-defined → `light`,
   `effort: low`. A first project slice, cross-cutting change, or many decisions
   → `heavy`, `effort: high`. In between → `medium`.
+- **Stamp the Surface.** Ask one question: **does this change what a user sees
+  or does?** Yes → `surface: true`. This is the detector the whole lifecycle
+  reads; sizing is where it belongs, because everything downstream trusts your
+  verdict and nothing downstream re-derives it.
+
+**When `surface: true`, design decisions are Meaningful Decisions — count them
+in the same list as the technical ones.** An unstated interaction is as open a
+choice as an unstated API, so it changes the Grillable verdict:
+
+- the **Hierarchy** — what the user is meant to notice first
+- the primary **Affordance** and its **Signifier**
+- the **Empty State** and the **Error State**
+- what **Progressive Disclosure** hides, and when it reveals
+
+A user-facing change with none of these settled is grillable even when the
+engineering is obvious. Counting them is what stops design from arriving as a
+finishing coat.
+
+For a genuinely new user-facing feature, the route runs `/idea-to-design`
+first — it produces the design frame (intent, user, Design Boundary, first
+Vertical Slice) that `/plan` otherwise assumes it was handed. For a change to an
+existing Surface, name the design intent in one line and carry it forward.
+
+> The full treatment of design across the lifecycle lives in the `dev` Skill,
+> "User-facing work: design is a first-class thread, not a finishing coat."
+> This step is that section's detector, pulled down to where routing happens so
+> it fires whether or not the run goes through `/dev`.
 
 ### Step 3: Declare the route and proceed
 
@@ -78,7 +107,7 @@ Only when the user explicitly asks for options, present exactly three with a
 one-line rationale each, led by the sizing verdict, and wait for the pick:
 
 ```
-Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, <N> open decision(s).
+Sizing: grillable=<true|false>, tier=<light|heavy>, effort=<low|medium|high>, surface=<true|false>, <N> open decision(s).
 
 1. /plan — [why: concrete steps, enforcement, test strategy]
 2. /grill-me — [why: fuzzy scope, unstated assumptions, needs sharpening]
@@ -91,9 +120,14 @@ When the work is part of a DevOS run — there is a Throughline at
 `.tasks/*/throughline.md` with `status: in_progress`, or the Conductor
 dispatched you — record the sizing instead of only presenting it:
 
-1. Set the frontmatter fields `grillable`, `tier`, and `effort` to your verdict.
+1. Set the frontmatter fields `grillable`, `tier`, `effort`, and `surface` to
+   your verdict. `surface` is what tells every later stage whether design is a
+   live thread — it travels in the Throughline so a compacted or resumed run
+   cannot lose it.
 2. Under `## Decision Ledger`, list each Meaningful Decision you counted as an
-   open item (the question, marked open). Grill resolves these later.
+   open item (the question, marked open). Grill resolves these later. **When
+   `surface: true`, the design decisions are in this list too** — Hierarchy,
+   primary Affordance, Empty and Error States, Progressive Disclosure.
 3. Set `next_action`:
    - `grillable: true` → `/grill-me <issue>`.
    - `grillable: false` and the work needs a plan → `/plan <issue>`.

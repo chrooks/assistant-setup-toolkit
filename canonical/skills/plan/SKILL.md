@@ -102,6 +102,25 @@ their proof method as a **recorded clip** and let the prove stage hand the human
 something to watch, per
 [`~/.claude/rules/web/demo-recording.md`](../../rules/web/demo-recording.md).
 
+**When the work touches a Surface, the criteria carry the design, not only the
+logic.** This Skill's job is to turn *a resolved design* into an ExecPlan — so
+first check that there is one. If `surface: true` and no design frame arrived
+from `/idea-to-design` or a grill, **stop and get it** rather than planning
+around the hole; a plan that never names the states is how design becomes a
+finishing coat.
+
+Write criteria for the things a user actually meets:
+
+- the **Hierarchy** the screen establishes, and the primary **Affordance**
+- the **Signifier** for each action, and the **Feedback** it gives
+- the **Empty State** and the **Error State** — both are behavior, and both are
+  where a Surface is most often unfinished
+- what **Progressive Disclosure** hides, and what reveals it
+
+Each still gets a `proof_method`, and for a Surface that means **driving the
+flow in a browser** — a Playwright or DOM assertion, or a recorded clip for the
+taste-based ones. **"Tests pass" is never proof for something a human looks at.**
+
 ### Step 5 — Map the work to issue records
 
 Size the breakdown to the tier scope stamped — issue ceremony follows the work,

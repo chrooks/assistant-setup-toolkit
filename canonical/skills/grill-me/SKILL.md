@@ -44,6 +44,35 @@ format unchanged.
 the plan stage carries its own approval gate, so stopping twice is friction — see
 the routing rule at the end of the next section.
 
+## When the work touches a Surface, grill the design too
+
+If the work changes what a user sees or does — `surface: true` from `/scope`, or
+plainly true from the request — then **an unstated interaction is as open a
+decision as an unstated API**, and it gets the same relentless treatment. Do not
+let design questions pass as "we'll figure that out when we build it"; that is
+the sentence this section exists to catch.
+
+Grill these alongside the technical branches:
+
+- **Hierarchy** — what should the user notice first, and what did you make loud
+  that does not deserve it?
+- **Affordance and Signifier** — what is the primary action, and what visible cue
+  tells them it is available? Is that cue **honest** about what happens next?
+- **Empty State** — what is on screen before there is any data, and does it teach
+  or just apologize?
+- **Error State** — what does the user see when it fails, and can they recover
+  without leaving?
+- **Feedback** — how do they know the action worked?
+- **Progressive Disclosure** — what is hidden, and what reveals it?
+- **Design Boundary** — what does this do *for* the user, and what does it do
+  *with* them? Anything the second question catches is a decision, not a detail.
+
+Two tests to push a vague answer with: **the Mom Test** — could someone
+non-technical work it out unaided? — and **the Nick Test** — does the value land
+before the user invests any effort? "It's intuitive" is not an answer to either.
+
+Resolve these into the Decision Ledger exactly like technical decisions.
+
 ## DevOS: record decisions into the Throughline
 
 When this is the DevOS grill stage — there is a Throughline at
