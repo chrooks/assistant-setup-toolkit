@@ -1,6 +1,6 @@
 ---
 name: ingest
-description: Ingest a source into the LLM-Wiki knowledge base (Obsidian vault) — read it, discuss takeaways, then update the wiki: a summary page, index.md, entity & concept pages with [[wikilinks]], contradiction flags, and a dated log entry. Use when the user says "ingest this", "add this to my brain / wiki / knowledge base", drops a file into raw-sources, or wants a source, article, paper, conversation, or URL filed into the wiki. Also clears a whole inbox backlog one file at a time — "ingest my inbox", "one at a time", "work through the backlog" — and drains the Karakeep phone-capture inbox ("drain karakeep", "ingest my saves / bookmarks").
+description: Ingest a source into the LLM-Wiki knowledge base (Obsidian vault) — read it, discuss takeaways, then update the wiki: a summary page, index.md, entity & concept pages with [[wikilinks]], contradiction flags, and a dated log entry. Use when the user says "ingest this", "add this to my brain / wiki / knowledge base", drops a file into raw-sources, or wants a source, article, paper, conversation, or URL filed into the wiki. Also clears a whole inbox backlog one file at a time — "ingest my inbox", "one at a time", "work through the backlog" — and drains the Karakeep phone-capture inbox ("drain karakeep", "ingest my saves / bookmarks"). "Preprocess my inbox / my saves" stages drafts plus a review packet unattended; "review my packet" walks the staged decisions at the sit-down.
 argument-hint: "[source: a raw-sources file path, a URL, pasted text, 'inbox', or 'this conversation']"
 disable-model-invocation: false
 ---
@@ -44,6 +44,12 @@ completes.
   [references/karakeep-drain.md](./references/karakeep-drain.md). Same one-at-a-time loop, but
   gated by a **four-way triage** — most items become a queue row in `backlog/`, not a wiki
   page. Filing an un-engaged save as knowledge is the failure mode that flow exists to prevent.
+
+**Both inboxes also run split-shift** — "preprocess my inbox / my saves" does the mechanical
+half unattended (read, extract, triage, draft into `<vaultPath>/staging/`), and "review my
+packet" turns the user's sit-down into a walk of finished drafts with one decision per item →
+[references/preprocess-review.md](./references/preprocess-review.md). Nothing reaches the wiki
+without a reviewed approval.
 
 The source (`$ARGUMENTS`) is one of:
 
