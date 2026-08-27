@@ -292,3 +292,45 @@ externalSources:
         skill sits under eli5/skills/eli5. Claude Code needs the two install
         commands sent as separate prompts; the fetched copy is the flat
         fallback and the only path for Codex.
+
+  - id: archify
+    name: tt-a1i — archify
+    kind: skill
+    url: https://github.com/tt-a1i/archify/tree/main/archify
+    default: true
+    targets:
+      - claude-code
+      - codex-cli
+    notes:
+      - >-
+        Architecture, workflow, sequence, data-flow, and lifecycle diagrams as
+        self-contained HTML with inline SVG, light/dark themes, optional motion,
+        and PNG/SVG/WebM export. Also converts pasted Mermaid.
+      - >-
+        Overlaps /diagram html, which stays the general nodes-and-edges sketch.
+        Reach for archify when the diagram is one of its five typed kinds and
+        should survive review; reach for /diagram when a quick picture is the
+        point. /visualize routing is a separate decision, not made here.
+      - >-
+        Earns its keep through the validator, not the renderer — the skill
+        writes a typed JSON spec, then validate and deliver gate the artifact
+        on a 9-check showcase pass, so a bad diagram fails loudly rather than
+        shipping crooked. That gate is the thing /diagram has no answer for.
+      - >-
+        Zero-install — bin/archify.mjs runs on plain Node 18+; ajv, parse5, and
+        saxes are devDependencies for the repo's own tests, never the render
+        path. Verified by running validate against a bundled example with no
+        node_modules present.
+      - >-
+        Heavy for a single skill: 166 files, 6.6MB, most of it examples/ and
+        test/. The SKILL.md reads schemas/ and examples/ on the authoring path
+        so neither can be dropped, and exclude only applies to a skill-pack.
+      - >-
+        Scoped to the archify/ subdirectory; the repo root is docs, product
+        write-ups, and CI. MIT, and itself based on
+        Cocoon-AI/architecture-diagram-generator.
+      - >-
+        Optional Chrome use is local only — visual-check drives headless
+        Chrome over a loopback DevTools socket for containment screenshots, and
+        preview serves on 127.0.0.1. The single outbound fetch is brand-mark
+        capture, which runs only from an explicit user-supplied URL.
