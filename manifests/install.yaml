@@ -307,10 +307,17 @@ externalSources:
         self-contained HTML with inline SVG, light/dark themes, optional motion,
         and PNG/SVG/WebM export. Also converts pasted Mermaid.
       - >-
-        Overlaps /diagram html, which stays the general nodes-and-edges sketch.
-        Reach for archify when the diagram is one of its five typed kinds and
-        should survive review; reach for /diagram when a quick picture is the
-        point. /visualize routing is a separate decision, not made here.
+        /diagram html delegates to this Skill as of 2026-08-27 — disabling this
+        group leaves that mode with only its vis-network fallback, which is
+        scoped to roadmap/er/mindmap kinds, reader-draggable nodes, and authored
+        per-node prose. /diagram md is unaffected. /visualize routes here
+        through /diagram html; the picker names the case.
+      - >-
+        Chosen head to head on the same 12-node architecture. It blocked a
+        layout that would have rendered node text at 3.3px on a laptop and
+        flagged 14 findings across 5 rounds; the vis-network path shipped a
+        clipped zone label and a struck-through edge label on identical content
+        and reported nothing.
       - >-
         Earns its keep through the validator, not the renderer — the skill
         writes a typed JSON spec, then validate and deliver gate the artifact

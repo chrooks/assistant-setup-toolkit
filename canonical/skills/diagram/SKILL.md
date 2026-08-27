@@ -1,30 +1,32 @@
 ---
 name: diagram
-description: "Render a diagram — `/diagram md` for an in-chat ASCII sketch plus an auto-rendered Mermaid picture, `/diagram html` for a self-contained interactive graph (pan/zoom, drag, hover, click-to-explain). Use when explaining architecture, a pipeline, a user flow, a sequence, a state machine, or any nodes-and-edges structure, especially when bringing the user along on something they are not yet deep in."
+description: "Render a diagram — `/diagram md` for an in-chat ASCII sketch plus an auto-rendered Mermaid picture, `/diagram html` for a validated interactive diagram (delegates to the archify Skill). Use when explaining architecture, a pipeline, a user flow, a sequence, a state machine, or any nodes-and-edges structure, especially when bringing the user along on something they are not yet deep in."
 argument-hint: "[md|html] [kind] <what to diagram>"
 ---
 
 # /diagram — ASCII + Mermaid + Interactive Diagram Renderer
 
 The user learns visually. When you explain a structure or a process, show it as a diagram
-instead of (or alongside) prose. One skill, one model, two fidelities — same pattern as
-`/table`.
+instead of (or alongside) prose. Two fidelities: a sketch that lands in the chat, and a
+built artifact someone else can open.
 
 ## Invocation
 
 ```
 /diagram            <what>   → pick the fidelity by judgment (see below)
 /diagram md         <what>   → ASCII in chat + auto-rendered Mermaid picture
-/diagram html       <what>   → self-contained interactive graph in the browser
+/diagram html       <what>   → call the archify Skill (see below)
 ```
 
 You may name a `kind` after the mode: `flow` (default), `architecture`, `sequence`,
 `state`, `er`, `mindmap`, `roadmap`. The kind drives layout and node vocabulary, not a
 separate tool.
 
-## The Diagram Model (one source, two renders)
+## The Diagram Model (`md` mode, and the vis-network fallback)
 
-Author the structure once as nodes + edges, then render it at either fidelity:
+Author the structure once as nodes + edges. `md` mode renders from this; so does the
+vis-network fallback described under `html` Mode. Archify does **not** — it authors its own
+typed spec.
 
 ```json
 {
@@ -46,9 +48,10 @@ Author the structure once as nodes + edges, then render it at either fidelity:
 
 ## Mode Selection (bare `/diagram`)
 
-Default to **`md`** — it lands in the conversation. Choose **`html`** when the structure
-is big or exploratory (more than ~12 nodes), or when the user will want to click around and
-read the parts. When unsure, do `md` and offer the `html` upgrade in one line.
+Default to **`md`** — it lands in the conversation, and most diagrams should stay there.
+Choose **`html`** when the diagram will outlive the conversation: it goes in a README, a
+review, a handoff, or a doc someone reads later. When unsure, do `md` and offer the `html`
+upgrade in one line.
 
 ## `md` Mode — ASCII in chat + Mermaid picture
 
@@ -75,7 +78,48 @@ Do BOTH, every time:
 `diagram/`, `figure/`). If the project does not ignore it, add `.exports/` to its
 `.gitignore` — one entry covers every visual skill.
 
-## `html` Mode — Interactive Graph
+## `html` Mode — call the archify Skill
+
+**Call the Skill tool with "archify" and hand it the subject.** Do not restate its contract
+here; it owns the authoring path, the schema, and the validator.
+
+Archify wins this job outright, measured head to head on the same 12-node architecture
+(2026-08-27). It refuses to ship what it cannot vouch for — including one layout that would
+have rendered node text at 3.3px on a laptop — and it carries light/dark themes, presentation
+mode, PNG/SVG/WebM export, and a Semantic Passport that opens on any node **or edge** with
+its type, boundary, tag, every relationship in and out, reach counts, and a deep link. The
+vis-network path shipped a clipped label and a struck-through edge label on the same content
+and said nothing.
+
+Archify is a **fetched External Source**, not a local Skill. If it is missing, the `archify`
+entry in `manifests/install.yaml` was disabled — re-enable it and re-run the wizard rather
+than hand-rolling a replacement.
+
+### `kind` mapping
+
+Archify's five typed kinds cover almost everything this skill used to render:
+
+| `/diagram` kind | archify type |
+|---|---|
+| `architecture` | `architecture` |
+| `flow`, process, pipeline | `workflow` |
+| `sequence` | `sequence` |
+| data pipeline, ETL, lineage | `dataflow` |
+| `state` | `lifecycle` |
+| `roadmap`, `er`, `mindmap` | none — use the fallback below |
+
+### The vis-network fallback
+
+Kept for the three cases archify genuinely cannot serve. Reach for it **only** when one
+applies, and say which one:
+
+1. **`roadmap`, `er`, or `mindmap` kind** — not among archify's five types.
+2. **The reader must drag the nodes.** Archify positions are authored in the spec; the
+   renderer has no drag handlers at all.
+3. **The value is a paragraph you wrote about each node.** An archify component takes eleven
+   fields under `additionalProperties: false` and none is a description — its passport only
+   reports structure it derived. Authored prose caps at five `meta.views` notes plus the
+   summary cards.
 
 The template at [`templates/diagram-template.html`](templates/diagram-template.html) wraps
 the vendored, offline `vis-network` library ([`vendor/`](vendor/)). It gives pan/zoom,
@@ -85,7 +129,7 @@ node's or edge's full `description` + `meta`.
 Build it with the bundled fill script — it injects the model, inlines the vendored library,
 escapes `</script>` (in both the data and the minified lib), and HTML-escapes the title.
 
-### Steps
+#### Steps
 
 1. **Shape the model** into `nodes` and `edges` arrays (same shape as above). Node `group`
    controls the detail-panel tag; `description` powers hover + click.
@@ -113,7 +157,7 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 4. **Open** the printed path: `open "<path>"` on macOS (`xdg-open` Linux, `start` Windows),
    and report it.
 
-### Notes
+#### Notes
 
 - Use the script, not a hand-rolled fill: it is the tested path
   (`tests/setup/skill-html-fill.test.ts`) that guarantees the `</script>` escaping.
@@ -121,20 +165,24 @@ escapes `</script>` (in both the data and the minified lib), and HTML-escapes th
 - The detail panel reads `description` and `meta`, so write those for the nodes/edges that
   carry the teaching value, not just labels.
 
-## Living Diagrams (committed model, update-on-change)
+## Living Diagrams (committed source, update-on-change)
 
 Some diagrams are not one-off explanations but durable project surfaces — a roadmap, an
 architecture map that tracks reality. For those:
 
-- **Commit the model** in the project (e.g. `docs/roadmap/<name>-model.json`), not in
-  `.exports/diagram/`. The JSON model is the source of truth; the HTML is a build product
-  regenerated next to it with `build-diagram.py <model>.json <out>.html`.
+- **Commit the source** in the project (e.g. `docs/architecture/<name>.architecture.json`),
+  not in `.exports/diagram/`. The JSON is the source of truth; the HTML is a build product
+  regenerated beside it.
+- A living diagram is the strongest case for archify: `deliver` freezes the spec, renders it,
+  and reports SHA-256 for both files, so a rebuild that drifts is visible rather than quiet.
+  Authored positions survive every rebuild by construction.
 - **Update loop**: whenever the underlying facts change (an issue closes, a component
-  lands), edit the model and rebuild in the same pass — a stale living diagram is worse
+  lands), edit the source and rebuild in the same pass — a stale living diagram is worse
   than none. Note the update trigger in the project's CLAUDE.md or memory so future
   sessions keep it current.
-- Living diagrams always use the free-layout default above — pinned coordinates are what
-  make hand-arranged positions survive rebuilds.
+- A living **roadmap** stays on the vis-network fallback (case 1 above) and keeps the
+  free-layout default — pinned coordinates are what make hand-arranged positions survive
+  rebuilds there.
 
 ### `roadmap` kind
 

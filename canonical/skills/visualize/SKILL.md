@@ -27,7 +27,7 @@ No confirmation prompts. `/visualize X` → pick the form, render it immediately
 2. **Render with the form's skill:**
    - Comparison / multi-attribute, or looking up exact values → **`/table`** (`md` for a quick read-only table, `html` for sort/filter/search).
    - Quantitative shape — trend, magnitude comparison, ranking, distribution, correlation → **`/figure`** (`md` for inline ASCII bars, `html` for an interactive D3 chart).
-   - Architecture, pipeline, user flow, sequence, state machine → **`/diagram`** (`md` for ASCII + Mermaid, `html` for an interactive graph).
+   - Architecture, pipeline, user flow, sequence, state machine → **`/diagram`** (`md` for ASCII + Mermaid; `html` when it must outlive the conversation, which calls `archify`).
    - Hierarchy / part-whole, or a short parallel/sequential set → an **inline ASCII tree or list** (no separate file).
    - Genuine narrative, nuance, or "why" → **prose** — say so and skip the visual.
 3. **Introduce the figure in the sentence before it**, then render.

@@ -17,6 +17,7 @@ decorative one only costs attention. Match the form to the concept's shape, then
 | Process / pipeline / linear steps | **Numbered list** (linear) or **flowchart** (branches/loops) — `/diagram` |
 | Architecture / how parts connect | **Node-and-edge diagram** — `/diagram` |
 | State machine / lifecycle | **State diagram** — `/diagram` |
+| Any of the three above, when it must **outlive the conversation** — a README, a review, a handoff | **Validated interactive diagram** — `/diagram html`, which calls `archify` |
 | Hierarchy / part-whole / containment | **Tree** (inline ASCII; treemap if quantitative) |
 | Short set of parallel/sequential points | **Bulleted / numbered list** |
 | Genuine narrative, nuance, "why," trade-off reasoning | **Prose** (no visual) |
