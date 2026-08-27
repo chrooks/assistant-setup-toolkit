@@ -92,6 +92,10 @@ decision. Summary table first, then one section per item:
     - **Why saved** _(guess — confirm)_: <study/untagged items only>
     - **Open question**: <only when a real decision is open>
 
+**Every entry carries its source link — discards included.** A proposed discard is a
+verdict the user may want to double-check against the actual item, and a one-liner with
+no link forces them to ask. (Learned 2026-08-27, first review pass.)
+
 ## The review pass
 
 The sit-down. Same pacing discipline as an inbox walk — one item at a time, approval
