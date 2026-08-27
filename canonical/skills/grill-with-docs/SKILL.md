@@ -4,7 +4,7 @@ description: Grilling session that challenges your plan against the existing dom
 upstream:
   repo: mattpocock/skills
   path: skills/engineering/grill-with-docs/SKILL.md
-  ref: 84fdeffd12f2ee307994d1eb6feb48173b6e0502
+  ref: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
   relationship: wrapper
 ---
 

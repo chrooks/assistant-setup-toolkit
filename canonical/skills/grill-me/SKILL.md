@@ -4,7 +4,7 @@ description: Interview the user relentlessly about a plan or design until reachi
 upstream:
   repo: mattpocock/skills
   path: skills/productivity/grilling/SKILL.md
-  ref: 84fdeffd12f2ee307994d1eb6feb48173b6e0502
+  ref: 6654f6b60cd9d5be8b54c6fafe44346dabeb3b76
   relationship: wrapper
 ---
 
