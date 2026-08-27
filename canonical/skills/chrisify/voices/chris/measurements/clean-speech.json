@@ -1,0 +1,352 @@
+{
+  "register": "speech",
+  "corpus_stats": {
+    "word_count": 5593,
+    "sentence_count": 225,
+    "paragraph_count": 41,
+    "char_count": 33674
+  },
+  "lexical": {
+    "mattr_window100": 0.7379,
+    "hapax_ratio": 0.1202,
+    "distinctive_content_words": [
+      {
+        "word": "police",
+        "count": 43,
+        "per_1000": 7.688
+      },
+      {
+        "word": "one",
+        "count": 26,
+        "per_1000": 4.649
+      },
+      {
+        "word": "speech",
+        "count": 22,
+        "per_1000": 3.933
+      },
+      {
+        "word": "george",
+        "count": 18,
+        "per_1000": 3.218
+      },
+      {
+        "word": "point",
+        "count": 17,
+        "per_1000": 3.04
+      },
+      {
+        "word": "money",
+        "count": 16,
+        "per_1000": 2.861
+      },
+      {
+        "word": "players",
+        "count": 15,
+        "per_1000": 2.682
+      },
+      {
+        "word": "law",
+        "count": 15,
+        "per_1000": 2.682
+      },
+      {
+        "word": "three",
+        "count": 14,
+        "per_1000": 2.503
+      },
+      {
+        "word": "enforcement",
+        "count": 14,
+        "per_1000": 2.503
+      },
+      {
+        "word": "think",
+        "count": 13,
+        "per_1000": 2.324
+      },
+      {
+        "word": "shot",
+        "count": 13,
+        "per_1000": 2.324
+      },
+      {
+        "word": "time",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "nba",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "line",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "country",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "health",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "lamar",
+        "count": 12,
+        "per_1000": 2.146
+      },
+      {
+        "word": "don",
+        "count": 11,
+        "per_1000": 1.967
+      },
+      {
+        "word": "people",
+        "count": 11,
+        "per_1000": 1.967
+      },
+      {
+        "word": "crime",
+        "count": 11,
+        "per_1000": 1.967
+      },
+      {
+        "word": "better",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "teams",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "situations",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "public",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "city",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "budget",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "defunding",
+        "count": 10,
+        "per_1000": 1.788
+      },
+      {
+        "word": "way",
+        "count": 9,
+        "per_1000": 1.609
+      },
+      {
+        "word": "album",
+        "count": 9,
+        "per_1000": 1.609
+      }
+    ],
+    "function_word_profile": {
+      "the": 54.354,
+      "to": 32.183,
+      "of": 29.501,
+      "a": 26.462,
+      "and": 19.846,
+      "that": 18.595,
+      "in": 16.628,
+      "i": 12.516,
+      "is": 11.085,
+      "on": 9.297,
+      "this": 9.119,
+      "for": 8.761,
+      "it": 7.509,
+      "with": 7.152,
+      "as": 6.973,
+      "so": 6.973,
+      "his": 6.079,
+      "was": 5.721,
+      "not": 5.543,
+      "you": 5.364,
+      "are": 5.364,
+      "he": 5.006,
+      "be": 4.827,
+      "but": 4.827,
+      "has": 4.649,
+      "my": 4.649,
+      "at": 4.47,
+      "more": 4.47,
+      "who": 4.291,
+      "have": 4.112,
+      "an": 3.755,
+      "would": 3.397,
+      "from": 3.397,
+      "there": 3.218,
+      "about": 3.218,
+      "when": 3.04,
+      "no": 2.861,
+      "all": 2.861,
+      "your": 2.861,
+      "being": 2.861,
+      "by": 2.682,
+      "do": 2.682,
+      "like": 2.682,
+      "only": 2.682,
+      "how": 2.682,
+      "well": 2.682,
+      "him": 2.503,
+      "up": 2.503,
+      "been": 2.503,
+      "what": 2.324
+    }
+  },
+  "syntactic": {
+    "sentence_stats": {
+      "sentence_count": 225,
+      "mean_words": 24.85,
+      "median_words": 18,
+      "stdev_words": 52.6,
+      "q1_words": 11,
+      "q3_words": 25,
+      "min_words": 1,
+      "max_words": 550,
+      "pct_short_le5": 0.12,
+      "pct_long_ge30": 0.191
+    },
+    "sentence_initial_patterns": [
+      {
+        "word": "the",
+        "count": 17
+      },
+      {
+        "word": "there",
+        "count": 10
+      },
+      {
+        "word": "in",
+        "count": 10
+      },
+      {
+        "word": "so",
+        "count": 9
+      },
+      {
+        "word": "and",
+        "count": 8
+      },
+      {
+        "word": "but",
+        "count": 7
+      },
+      {
+        "word": "i",
+        "count": 7
+      },
+      {
+        "word": "a",
+        "count": 7
+      },
+      {
+        "word": "as",
+        "count": 7
+      },
+      {
+        "word": "it",
+        "count": 6
+      },
+      {
+        "word": "one",
+        "count": 5
+      },
+      {
+        "word": "that",
+        "count": 4
+      },
+      {
+        "word": "this",
+        "count": 4
+      },
+      {
+        "word": "you",
+        "count": 4
+      },
+      {
+        "word": "according",
+        "count": 4
+      },
+      {
+        "word": "chance",
+        "count": 3
+      },
+      {
+        "word": "especially",
+        "count": 3
+      },
+      {
+        "word": "for",
+        "count": 3
+      },
+      {
+        "word": "well",
+        "count": 3
+      },
+      {
+        "word": "defund",
+        "count": 3
+      }
+    ],
+    "paragraph_stats": {
+      "paragraph_count": 40,
+      "mean_words": 139.82,
+      "median_words": 55.5,
+      "stdev_words": 239.43
+    },
+    "concession_rate": 0.151
+  },
+  "punctuation": {
+    "comma_per_sentence": 1.413,
+    "comma_per_1000w": 56.857,
+    "em_dash_per_1000w": 0.894,
+    "semicolon_per_1000w": 0.358,
+    "colon_per_1000w": 2.861,
+    "parenthetical_per_1000w": 2.682,
+    "question_per_1000w": 1.609,
+    "exclamation_per_1000w": 1.252,
+    "ellipsis_per_1000w": 0.715,
+    "en_dash_per_1000w": 0.536
+  },
+  "hedging_booster": {
+    "hedge_per_100w": 1.001,
+    "boost_per_100w": 0.215,
+    "hedge_boost_ratio": 4.667
+  },
+  "pronouns": {
+    "first_sg_per_100w": 1.806,
+    "first_pl_per_100w": 0.411,
+    "second_per_100w": 0.84,
+    "third_per_100w": 2.843,
+    "first_pl_to_sg_ratio": 0.228
+  },
+  "structural": {
+    "total_lines": 436,
+    "bullet_lines": 91,
+    "heading_lines": 0,
+    "code_fences": 0,
+    "bullet_ratio": 0.2087,
+    "heading_density_per_1000_words": 0.0
+  }
+}

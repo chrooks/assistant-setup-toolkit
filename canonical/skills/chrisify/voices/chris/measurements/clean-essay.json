@@ -1,0 +1,352 @@
+{
+  "register": "essay",
+  "corpus_stats": {
+    "word_count": 27041,
+    "sentence_count": 973,
+    "paragraph_count": 94,
+    "char_count": 171558
+  },
+  "lexical": {
+    "mattr_window100": 0.7185,
+    "hapax_ratio": 0.0952,
+    "distinctive_content_words": [
+      {
+        "word": "black",
+        "count": 208,
+        "per_1000": 7.692
+      },
+      {
+        "word": "people",
+        "count": 130,
+        "per_1000": 4.808
+      },
+      {
+        "word": "one",
+        "count": 84,
+        "per_1000": 3.106
+      },
+      {
+        "word": "students",
+        "count": 69,
+        "per_1000": 2.552
+      },
+      {
+        "word": "race",
+        "count": 63,
+        "per_1000": 2.33
+      },
+      {
+        "word": "education",
+        "count": 57,
+        "per_1000": 2.108
+      },
+      {
+        "word": "white",
+        "count": 50,
+        "per_1000": 1.849
+      },
+      {
+        "word": "work",
+        "count": 47,
+        "per_1000": 1.738
+      },
+      {
+        "word": "computer",
+        "count": 46,
+        "per_1000": 1.701
+      },
+      {
+        "word": "human",
+        "count": 45,
+        "per_1000": 1.664
+      },
+      {
+        "word": "health",
+        "count": 42,
+        "per_1000": 1.553
+      },
+      {
+        "word": "racial",
+        "count": 41,
+        "per_1000": 1.516
+      },
+      {
+        "word": "lamar",
+        "count": 41,
+        "per_1000": 1.516
+      },
+      {
+        "word": "both",
+        "count": 40,
+        "per_1000": 1.479
+      },
+      {
+        "word": "game",
+        "count": 39,
+        "per_1000": 1.442
+      },
+      {
+        "word": "identity",
+        "count": 39,
+        "per_1000": 1.442
+      },
+      {
+        "word": "life",
+        "count": 38,
+        "per_1000": 1.405
+      },
+      {
+        "word": "community",
+        "count": 38,
+        "per_1000": 1.405
+      },
+      {
+        "word": "social",
+        "count": 36,
+        "per_1000": 1.331
+      },
+      {
+        "word": "data",
+        "count": 34,
+        "per_1000": 1.257
+      },
+      {
+        "word": "king",
+        "count": 34,
+        "per_1000": 1.257
+      },
+      {
+        "word": "research",
+        "count": 33,
+        "per_1000": 1.22
+      },
+      {
+        "word": "employee",
+        "count": 33,
+        "per_1000": 1.22
+      },
+      {
+        "word": "time",
+        "count": 31,
+        "per_1000": 1.146
+      },
+      {
+        "word": "two",
+        "count": 30,
+        "per_1000": 1.109
+      },
+      {
+        "word": "way",
+        "count": 30,
+        "per_1000": 1.109
+      },
+      {
+        "word": "paper",
+        "count": 30,
+        "per_1000": 1.109
+      },
+      {
+        "word": "field",
+        "count": 28,
+        "per_1000": 1.035
+      },
+      {
+        "word": "study",
+        "count": 28,
+        "per_1000": 1.035
+      },
+      {
+        "word": "science",
+        "count": 28,
+        "per_1000": 1.035
+      }
+    ],
+    "function_word_profile": {
+      "the": 56.951,
+      "of": 36.463,
+      "to": 32.95,
+      "and": 28.29,
+      "a": 23.002,
+      "in": 19.674,
+      "that": 16.493,
+      "is": 10.244,
+      "as": 9.504,
+      "this": 8.358,
+      "it": 8.099,
+      "for": 8.025,
+      "i": 7.174,
+      "be": 6.657,
+      "with": 6.435,
+      "by": 5.732,
+      "on": 5.399,
+      "their": 5.214,
+      "was": 4.844,
+      "from": 4.327,
+      "not": 4.29,
+      "an": 3.994,
+      "are": 3.772,
+      "they": 3.587,
+      "at": 3.439,
+      "my": 3.402,
+      "or": 3.254,
+      "but": 3.254,
+      "you": 3.032,
+      "more": 2.995,
+      "what": 2.885,
+      "were": 2.885,
+      "can": 2.848,
+      "how": 2.811,
+      "have": 2.811,
+      "about": 2.626,
+      "he": 2.589,
+      "his": 2.589,
+      "all": 2.441,
+      "these": 2.441,
+      "who": 2.441,
+      "being": 2.33,
+      "like": 2.293,
+      "which": 2.256,
+      "we": 2.219,
+      "than": 2.182,
+      "so": 2.071,
+      "also": 1.886,
+      "has": 1.886,
+      "them": 1.849
+    }
+  },
+  "syntactic": {
+    "sentence_stats": {
+      "sentence_count": 973,
+      "mean_words": 27.79,
+      "median_words": 24,
+      "stdev_words": 38.58,
+      "q1_words": 16,
+      "q3_words": 33,
+      "min_words": 1,
+      "max_words": 972,
+      "pct_short_le5": 0.045,
+      "pct_long_ge30": 0.334
+    },
+    "sentence_initial_patterns": [
+      {
+        "word": "the",
+        "count": 93
+      },
+      {
+        "word": "in",
+        "count": 59
+      },
+      {
+        "word": "this",
+        "count": 49
+      },
+      {
+        "word": "i",
+        "count": 37
+      },
+      {
+        "word": "it",
+        "count": 30
+      },
+      {
+        "word": "as",
+        "count": 27
+      },
+      {
+        "word": "he",
+        "count": 20
+      },
+      {
+        "word": "to",
+        "count": 17
+      },
+      {
+        "word": "for",
+        "count": 16
+      },
+      {
+        "word": "but",
+        "count": 16
+      },
+      {
+        "word": "and",
+        "count": 15
+      },
+      {
+        "word": "if",
+        "count": 14
+      },
+      {
+        "word": "however",
+        "count": 13
+      },
+      {
+        "word": "so",
+        "count": 13
+      },
+      {
+        "word": "at",
+        "count": 12
+      },
+      {
+        "word": "there",
+        "count": 12
+      },
+      {
+        "word": "a",
+        "count": 11
+      },
+      {
+        "word": "they",
+        "count": 11
+      },
+      {
+        "word": "by",
+        "count": 11
+      },
+      {
+        "word": "while",
+        "count": 11
+      }
+    ],
+    "paragraph_stats": {
+      "paragraph_count": 94,
+      "mean_words": 287.67,
+      "median_words": 56.5,
+      "stdev_words": 524.84
+    },
+    "concession_rate": 0.148
+  },
+  "punctuation": {
+    "comma_per_sentence": 1.546,
+    "comma_per_1000w": 55.619,
+    "em_dash_per_1000w": 1.405,
+    "semicolon_per_1000w": 0.666,
+    "colon_per_1000w": 4.142,
+    "parenthetical_per_1000w": 7.137,
+    "question_per_1000w": 1.405,
+    "exclamation_per_1000w": 0.148,
+    "ellipsis_per_1000w": 0.222,
+    "en_dash_per_1000w": 0.296
+  },
+  "hedging_booster": {
+    "hedge_per_100w": 0.577,
+    "boost_per_100w": 0.148,
+    "hedge_boost_ratio": 3.9
+  },
+  "pronouns": {
+    "first_sg_per_100w": 1.172,
+    "first_pl_per_100w": 0.477,
+    "second_per_100w": 0.459,
+    "third_per_100w": 2.951,
+    "first_pl_to_sg_ratio": 0.407
+  },
+  "structural": {
+    "total_lines": 825,
+    "bullet_lines": 208,
+    "heading_lines": 0,
+    "code_fences": 0,
+    "bullet_ratio": 0.2521,
+    "heading_density_per_1000_words": 0.0
+  }
+}

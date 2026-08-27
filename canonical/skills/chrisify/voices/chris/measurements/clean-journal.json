@@ -1,0 +1,352 @@
+{
+  "register": "journal",
+  "corpus_stats": {
+    "word_count": 10700,
+    "sentence_count": 461,
+    "paragraph_count": 18,
+    "char_count": 63974
+  },
+  "lexical": {
+    "mattr_window100": 0.7259,
+    "hapax_ratio": 0.1279,
+    "distinctive_content_words": [
+      {
+        "word": "black",
+        "count": 94,
+        "per_1000": 8.785
+      },
+      {
+        "word": "one",
+        "count": 50,
+        "per_1000": 4.673
+      },
+      {
+        "word": "white",
+        "count": 44,
+        "per_1000": 4.112
+      },
+      {
+        "word": "people",
+        "count": 41,
+        "per_1000": 3.832
+      },
+      {
+        "word": "race",
+        "count": 33,
+        "per_1000": 3.084
+      },
+      {
+        "word": "experience",
+        "count": 31,
+        "per_1000": 2.897
+      },
+      {
+        "word": "privilege",
+        "count": 28,
+        "per_1000": 2.617
+      },
+      {
+        "word": "oppression",
+        "count": 25,
+        "per_1000": 2.336
+      },
+      {
+        "word": "time",
+        "count": 24,
+        "per_1000": 2.243
+      },
+      {
+        "word": "social",
+        "count": 22,
+        "per_1000": 2.056
+      },
+      {
+        "word": "group",
+        "count": 22,
+        "per_1000": 2.056
+      },
+      {
+        "word": "cassius",
+        "count": 22,
+        "per_1000": 2.056
+      },
+      {
+        "word": "museum",
+        "count": 20,
+        "per_1000": 1.869
+      },
+      {
+        "word": "identity",
+        "count": 19,
+        "per_1000": 1.776
+      },
+      {
+        "word": "movie",
+        "count": 19,
+        "per_1000": 1.776
+      },
+      {
+        "word": "jim",
+        "count": 19,
+        "per_1000": 1.776
+      },
+      {
+        "word": "crow",
+        "count": 19,
+        "per_1000": 1.776
+      },
+      {
+        "word": "see",
+        "count": 18,
+        "per_1000": 1.682
+      },
+      {
+        "word": "never",
+        "count": 18,
+        "per_1000": 1.682
+      },
+      {
+        "word": "think",
+        "count": 18,
+        "per_1000": 1.682
+      },
+      {
+        "word": "life",
+        "count": 18,
+        "per_1000": 1.682
+      },
+      {
+        "word": "racial",
+        "count": 17,
+        "per_1000": 1.589
+      },
+      {
+        "word": "young",
+        "count": 17,
+        "per_1000": 1.589
+      },
+      {
+        "word": "use",
+        "count": 16,
+        "per_1000": 1.495
+      },
+      {
+        "word": "first",
+        "count": 16,
+        "per_1000": 1.495
+      },
+      {
+        "word": "found",
+        "count": 15,
+        "per_1000": 1.402
+      },
+      {
+        "word": "society",
+        "count": 15,
+        "per_1000": 1.402
+      },
+      {
+        "word": "class",
+        "count": 14,
+        "per_1000": 1.308
+      },
+      {
+        "word": "learning",
+        "count": 14,
+        "per_1000": 1.308
+      },
+      {
+        "word": "system",
+        "count": 14,
+        "per_1000": 1.308
+      }
+    ],
+    "function_word_profile": {
+      "the": 49.252,
+      "of": 35.607,
+      "to": 32.804,
+      "and": 25.047,
+      "a": 22.897,
+      "i": 21.963,
+      "that": 21.963,
+      "in": 19.065,
+      "my": 14.112,
+      "it": 10.748,
+      "was": 9.439,
+      "as": 9.252,
+      "for": 8.224,
+      "with": 7.85,
+      "this": 7.57,
+      "is": 7.383,
+      "about": 6.355,
+      "me": 5.794,
+      "on": 5.794,
+      "be": 4.86,
+      "but": 4.673,
+      "at": 4.393,
+      "from": 4.112,
+      "an": 4.019,
+      "not": 4.019,
+      "we": 3.832,
+      "being": 3.832,
+      "all": 3.738,
+      "how": 3.738,
+      "what": 3.551,
+      "have": 3.364,
+      "so": 3.364,
+      "like": 3.084,
+      "more": 2.991,
+      "who": 2.991,
+      "his": 2.991,
+      "there": 2.991,
+      "he": 2.897,
+      "which": 2.804,
+      "when": 2.71,
+      "or": 2.71,
+      "also": 2.71,
+      "were": 2.617,
+      "by": 2.523,
+      "are": 2.523,
+      "our": 2.43,
+      "you": 2.43,
+      "had": 2.243,
+      "other": 2.243,
+      "has": 2.243
+    }
+  },
+  "syntactic": {
+    "sentence_stats": {
+      "sentence_count": 448,
+      "mean_words": 23.87,
+      "median_words": 23.0,
+      "stdev_words": 14.67,
+      "q1_words": 13,
+      "q3_words": 33,
+      "min_words": 1,
+      "max_words": 130,
+      "pct_short_le5": 0.121,
+      "pct_long_ge30": 0.339
+    },
+    "sentence_initial_patterns": [
+      {
+        "word": "i",
+        "count": 44
+      },
+      {
+        "word": "it",
+        "count": 38
+      },
+      {
+        "word": "the",
+        "count": 27
+      },
+      {
+        "word": "in",
+        "count": 24
+      },
+      {
+        "word": "as",
+        "count": 10
+      },
+      {
+        "word": "but",
+        "count": 10
+      },
+      {
+        "word": "there",
+        "count": 10
+      },
+      {
+        "word": "one",
+        "count": 9
+      },
+      {
+        "word": "my",
+        "count": 8
+      },
+      {
+        "word": "this",
+        "count": 8
+      },
+      {
+        "word": "we",
+        "count": 8
+      },
+      {
+        "word": "adams",
+        "count": 8
+      },
+      {
+        "word": "routledge",
+        "count": 8
+      },
+      {
+        "word": "and",
+        "count": 7
+      },
+      {
+        "word": "for",
+        "count": 6
+      },
+      {
+        "word": "chris",
+        "count": 5
+      },
+      {
+        "word": "to",
+        "count": 5
+      },
+      {
+        "word": "another",
+        "count": 5
+      },
+      {
+        "word": "with",
+        "count": 5
+      },
+      {
+        "word": "references",
+        "count": 5
+      }
+    ],
+    "paragraph_stats": {
+      "paragraph_count": 18,
+      "mean_words": 594.44,
+      "median_words": 59.0,
+      "stdev_words": 943.06
+    },
+    "concession_rate": 0.152
+  },
+  "punctuation": {
+    "comma_per_sentence": 1.364,
+    "comma_per_1000w": 58.785,
+    "em_dash_per_1000w": 1.495,
+    "semicolon_per_1000w": 0.28,
+    "colon_per_1000w": 2.43,
+    "parenthetical_per_1000w": 8.411,
+    "question_per_1000w": 0.561,
+    "exclamation_per_1000w": 0.28,
+    "ellipsis_per_1000w": 0.561,
+    "en_dash_per_1000w": 0.748
+  },
+  "hedging_booster": {
+    "hedge_per_100w": 0.598,
+    "boost_per_100w": 0.308,
+    "hedge_boost_ratio": 1.939
+  },
+  "pronouns": {
+    "first_sg_per_100w": 4.374,
+    "first_pl_per_100w": 0.832,
+    "second_per_100w": 0.383,
+    "third_per_100w": 2.86,
+    "first_pl_to_sg_ratio": 0.19
+  },
+  "structural": {
+    "total_lines": 206,
+    "bullet_lines": 15,
+    "heading_lines": 0,
+    "code_fences": 0,
+    "bullet_ratio": 0.0728,
+    "heading_density_per_1000_words": 0.0
+  }
+}
