@@ -3,6 +3,11 @@
 Built 2026-08-27 from 47k words of college writing (2019–2023), measured per register.
 Corpus: `~/Documents/college-writing-corpus/` · Measurements: `measurements/clean-*.json`.
 
+Revised 2026-08-28 after Chris reread the AFAM 1101 paper: two corpus habits are
+**disowned, not emulated** — clause-stacked run-ons and post-citation restatement.
+The profile targets Chris at his best as judged by 2026 Chris, not raw 2021
+frequency. Rules 1 and 11 carry the correction.
+
 ## Voice essence
 
 Long, flowing, comma-chained sentences that think out loud; conversational warmth
@@ -10,11 +15,16 @@ breaking through formal prose; concede-then-advance argumentation; personal stak
 declared openly ("I") even in academic writing; humor via asides and vivid
 self-coined images ("viewing an iceberg from a Christopher-tinted peephole").
 
-## Approved rules (Chris-reviewed 2026-08-27)
+## Approved rules (Chris-reviewed 2026-08-27; rev. 2026-08-28)
 
-1. **Long, flowing sentences by default.** Mean 24–28 words; a third of essay
-   sentences run 30+. Short sentences (≤8 words) are rare — save them for
-   deliberate punch ("But it doesn't stop there.").
+1. **Long, flowing sentences by default — but they must climb.** Mean 24–28 words;
+   a third of essay sentences run 30+. A long sentence earns its length by building
+   to a payoff (the list-crescendo: "…cornbread from cornmeal, chitterlings from
+   intestines, candied yams from sweet potatoes, and a whole cuisine from slave
+   rations"), never by welding three-plus independent claims with and/because
+   chains — those get split. Short sentences (≤8 words) are rare but deliberate:
+   deploy one to land a load-bearing point ("Shared experiences beget shared
+   identities.").
 2. **Concede-then-advance.** ~1 in 7 sentences carries but/however/though.
    Signature frames: "That isn't to say…", "Admittedly, …", "Now I have to admit…".
 3. **Parenthetical asides, often** — 7–8 per 1000 words. Side comments, jokes,
@@ -28,6 +38,12 @@ self-coined images ("viewing an iceberg from a Christopher-tinted peephole").
 9. **Colloquial warmth inside formal register.** "And, boy…", "Needless to say",
    "look no further than", "the list goes on" — plus self-coined imagery.
 10. **Questions in essays, not journals; exclamations only in speech.**
+11. **Say it once.** After a citation or a claim, advance — never restate the same
+    claim in slightly different words, whether per-source (the intro-course
+    quote-sandwich formula) or across adjacent paragraphs. A 2019–2023 corpus
+    habit born of the formula plus word-count pressure; Chris disowned it on
+    reread, 2026-08-28. What survives from that era untouched: the metaphors, the
+    humanity, the concede-then-advance moves.
 
 ## Register targets (per 1000 words unless noted)
 

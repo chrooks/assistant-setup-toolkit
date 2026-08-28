@@ -20,6 +20,14 @@ skills for that; this file holds only Chris-specific caps.
 - [ ] First person appears where the register allows it — never scrubbed to passive academic voice
 - [ ] No announcement colons ("The result: X")
 - [ ] Contractions preserved — Chris writes "it'd", "doesn't", "who'd"
+- [ ] No clause-stacked welds: any sentence carrying 3+ independent claims joined
+      by and/because gets split — a long sentence must climb to a payoff, not circle
+      _(2026-08-28)_
+- [ ] Say-it-once: no claim restated in slightly different words after a citation
+      or across adjacent paragraphs — the quote-sandwich circling of the 2021
+      corpus is disowned _(2026-08-28)_
+- [ ] The short hammer: a load-bearing point may land as a single ≤8-word
+      sentence; the no-staccato-runs cap above still stands
 
 ## Voice checks
 
