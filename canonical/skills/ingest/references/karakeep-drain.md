@@ -27,33 +27,28 @@ follow, and the triage below exists to prevent them:
 
 So: **not every drained item becomes a wiki page.** Most don't.
 
-## Lanes — the capture tag picks the path (ADR decision 8)
+## Every item gets read (ADR decision 9)
 
-Saves carry one of three tags, chosen on the phone at save time. **Read the lane before
-you read the item** — it decides how much work the item is worth.
+Capture carries **no routing metadata**. There are no lanes and no capture tags — the
+three that once existed (`ref`, `study`, `curious`) were removed 2026-09-14 and nothing
+reads them.
 
-| Tag | Means | What the drain does |
-|---|---|---|
-| `ref` | file it, don't study it | Full ingest. Bulk-friendly — several per session |
-| `study` | this needs an evening | A `to-engage` row. Extraction is worth it here |
-| `curious` | I looked, I'm done | **Never processed.** Archive unread, no page, no row |
-| *(untagged)* | saved in a hurry | Exactly the old behavior — triage in conversation |
+The reason is worth keeping, because it will be proposed again: Karakeep's iOS share
+extension cannot tag at save time, and tagging afterwards in the app costs a context
+switch out of whatever the user was doing. In 40 days it happened zero times out of 153
+saves. More decisively, the scheme assumed most saves were throwaway — and the user's
+own account is the opposite: *"If I saved something to Karakeep then I probably wanted
+the contents."*
 
-Three rules make this safe:
+**So treat every unarchived item as wanted.** Never propose a tagging scheme, never nag
+about metadata, and never skip an item unread to save time. The drain's cost is real and
+it is handled on the other side — by the **preprocess pass**
+([preprocess-review.md](./preprocess-review.md)), which moves extraction and drafting to
+unattended time so the user's sit-down is decisions only.
 
-- **`curious` is archived without being opened.** Don't fetch it, don't transcribe it,
-  don't summarise it. Report the count and archive. This bypass is the entire point — the
-  saving comes from not draining, not from draining faster.
-- **A tag is a routing instruction, not a verdict on quality.** If reading a `ref` item
-  shows it is really a `study` item, say so and retag. Lanes are filtered queries, so
-  retagging costs one call and nothing is lost.
-- **Untagged is a first-class lane, not an error.** Never nag about missing tags. The
-  system has to work when the user forgets, or it is friction pretending to be structure.
+Drain **one item at a time**, oldest first unless told otherwise.
 
-Default to draining **one lane at a time**, asking which if unstated. `ref` first is
-usually right — it is the fastest to clear and it shrinks the queue visibly.
-
-## Triage — for untagged items, and for retag calls
+## Triage — the four outcomes
 
 | Outcome | When | Where it lands |
 |---|---|---|
@@ -96,42 +91,42 @@ API key: `~/.config/karakeep/ingest.key` (chmod 600 — use it, never print it).
 `http://localhost:8084/api/v1` from the home server itself.
 
     KEY=$(cat ~/.config/karakeep/ingest.key)
-    curl -s -H "Authorization: Bearer $KEY" \
-      "http://localhost:8084/api/v1/bookmarks?archived=false&limit=50" | jq .
+    BASE=http://localhost:8084/api/v1
+    curl -s -H "Authorization: Bearer $KEY" "$BASE/bookmarks?limit=100" | jq .
     # single item with body: /bookmarks/{id}?includeContent=true
 
-**Counting the lanes** — do this first, before reading anything. Lane membership is a
-filtered query on the tag id; the bookmark never moves.
+**Two API traps, both of which fail silently as an empty queue. Verified 2026-09-14.**
 
-    # tag ids (stable, created 2026-08-05)
-    curl -s -H "Authorization: Bearer $KEY" "$BASE/tags" \
-      | jq -r '.tags[] | select(.name|IN("ref","study","curious")) | "\(.name)\t\(.id)"'
+- **`limit` caps at 100.** A higher value returns `{"success":false,"error":{"name":
+  "ZodError",...}}` with HTTP 200 and no `bookmarks` key — so `jq '.bookmarks|length'`
+  reports **0**, and the drain looks finished when it has not started.
+- **`?archived=false` does not filter on this version.** It returns the same empty
+  shape. Pull unfiltered and filter client-side on `.archived`.
 
-    # one lane's queue
-    curl -s -H "Authorization: Bearer $KEY" "$BASE/tags/<tagId>/bookmarks" | jq '.bookmarks|length'
+Always page to the end rather than trusting one response — 44 unarchived items sat
+behind a `nextCursor` on the first page:
 
-Untagged has no negative filter — pull the full unarchived queue and subtract the three
-lanes client-side.
-
-**Retagging** (when reading shows the lane was wrong) — attach and detach by name:
-
-    curl -s -X POST -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-      -d '{"tags":[{"tagName":"study"}]}' "$BASE/bookmarks/<id>/tags"
-    curl -s -X DELETE -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-      -d '{"tags":[{"tagName":"ref"}]}'   "$BASE/bookmarks/<id>/tags"
-
-Present the **per-lane counts** first, then walk the chosen lane **one item at a time** using
-the presentation format in [inbox-walk.md](./inbox-walk.md) — same format, with the triage
-decision standing in for "How I'd file it".
-
-`curious` is the exception: never walked. Report the count, archive the lane, move on.
-
-    # archive a whole lane without reading it — curious only
-    for id in $(curl -s -H "Authorization: Bearer $KEY" "$BASE/tags/<curiousId>/bookmarks" \
-                | jq -r '.bookmarks[].id'); do
-      curl -s -X PATCH -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-        -d '{"archived":true}' "$BASE/bookmarks/$id" -o /dev/null
+    : > all.json; cursor=""
+    while :; do
+      url="$BASE/bookmarks?limit=100"; [ -n "$cursor" ] && url="$url&cursor=$cursor"
+      curl -s -H "Authorization: Bearer $KEY" "$url" > p.json
+      jq -c '.bookmarks[]' p.json >> all.json
+      cursor=$(jq -r '.nextCursor // empty' p.json); [ -z "$cursor" ] && break
     done
+    jq -s '{total:length, unarchived:[.[]|select(.archived==false)]|length}' all.json
+
+**Sanity-check the count before reporting it.** An empty queue and a malformed request
+look identical through `jq`. If the queue reads as 0, confirm against the unfiltered
+total before telling the user they are caught up.
+
+Present the **unarchived count** first, then walk the queue **one item at a time**,
+oldest first, using the presentation format in [inbox-walk.md](./inbox-walk.md) — same
+format, with the triage decision standing in for "How I'd file it".
+
+**Archive after processing** (never delete — the cached snapshot is link-rot insurance):
+
+    curl -s -X PATCH -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+      -d '{"archived":true}' "$BASE/bookmarks/<id>" -o /dev/null
 
 ## Turning media into text
 

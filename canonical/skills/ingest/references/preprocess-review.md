@@ -45,21 +45,24 @@ out of `<rawDir>/inbox/`, and never asks a question — open questions go in the
 1. **Resolve the vault** (Step 0 of the parent skill). Read the existing packet if one
    exists — the packet is **additive**: new items get appended, undecided rows are left
    alone, and an item already in the packet is never re-staged.
-2. **Karakeep lanes** (mechanics and lane semantics: [karakeep-drain.md](./karakeep-drain.md)):
-   - `curious` — archive the lane unread, exactly as the drain specifies. Report the
-     count in the packet header. Never open the items.
-   - `ref` — full extraction (video via `watch-video`, images via `gallery-dl`, per the
-     drain reference), then draft the wiki page(s) into `staging/drafts/` with the
-     "filed from a save" provenance marker. One packet entry per item.
-   - `study` — **no summarizing, no extraction beyond what the row needs.** Draft the
-     `to-engage` row (What it is / Why I saved it / Size / Saved) into the packet. Mark
-     the "Why I saved it" cell as a guess — the user confirms or rewrites it at review.
-   - untagged — read enough to propose one of the four triage outcomes; the proposal
-     goes in the packet flagged as proposed, decision deferred to review.
+2. **Karakeep** (mechanics: [karakeep-drain.md](./karakeep-drain.md)). There are no
+   lanes — **every unarchived item is read and staged** (ADR decision 9). Per item:
+   - **Extract first** — video via `watch-video`, images via `gallery-dl`, per the drain
+     reference. This is the expensive half and it is exactly what the preprocess exists
+     to move off the user's sit-down.
+   - **Then stage by proposed outcome**, one packet entry each:
+     - *ingest* → draft the wiki page(s) into `staging/drafts/` with the "filed from a
+       save" provenance marker.
+     - *to-engage / to-consume* → draft the row (What it is / Why I saved it / Size /
+       Saved) into the packet. **Do not summarize the source** — a row helps the user
+       choose when to spend the evening; it never replaces spending it.
+     - *discard* → propose it with the source link, never a bare one-liner.
+   - Mark every "Why I saved it" cell as a guess — the user confirms or rewrites it at
+     review.
    - **Archive each Karakeep item after its packet entry (and draft, if any) is
      written** — the packet becomes the queue of record for staged items, and the next
      preprocess sees only new saves. Every entry carries the bookmark id, so undoing is
-     one PATCH. `curious` aside, never archive an item that failed to stage.
+     one PATCH. **Never archive an item that failed to stage.**
 3. **Vault inbox** (`<rawDir>/inbox/`): read each file fully and stage it — new-page
    drafts into `staging/drafts/`, existing-page folds described in the packet. These are
    usually self-authored, so the proposed disposition is normally "ingest"; the packet
@@ -69,7 +72,7 @@ out of `<rawDir>/inbox/`, and never asks a question — open questions go in the
 4. **Extraction failures are non-blocking** — link + caption + a note always stage;
    mark the entry "extraction failed, link-only" and keep going. One dead reel never
    stops the pass.
-5. **Close**: one `log.md` entry (`## [date] preprocess | N staged, M curious archived`),
+5. **Close**: one `log.md` entry (`## [date] preprocess | N staged`),
    then remind the user to run the LiveSync publish step (`Scan storage and database
    again` → `Replicate now`) so the packet reaches their other devices.
 
@@ -80,7 +83,7 @@ decision. Summary table first, then one section per item:
 
     # Review packet
 
-    _N items awaiting decision · M curious saves archived unread · last preprocess YYYY-MM-DD_
+    _N items awaiting decision · last preprocess YYYY-MM-DD_
 
     | # | Item | From | Proposed | Size |
     |---|------|------|----------|------|
@@ -89,7 +92,7 @@ decision. Summary table first, then one section per item:
     - **Source**: [raw file or original link] (karakeep: <id> where applicable)
     - **What it is**: <kind first, then one-clause substance — a report, not a pitch>
     - **Proposed**: ingest → [draft](drafts/<name>.md) · fold into [[page]] · to-engage row · to-consume row · discard
-    - **Why saved** _(guess — confirm)_: <study/untagged items only>
+    - **Why saved** _(guess — confirm)_: <queue-row items only>
     - **Open question**: <only when a real decision is open>
 
 **Every entry carries its source link — discards included.** A proposed discard is a
