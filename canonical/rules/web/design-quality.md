@@ -47,8 +47,39 @@ Every meaningful frontend surface should demonstrate at least four of these:
 1. Pick a specific style direction. Avoid vague defaults like "clean minimal".
 2. Define a palette intentionally.
 3. Choose typography deliberately.
-4. Gather at least a small set of real references.
+4. Gather at least a small set of real references — see the Reference Shelf below.
 5. Use ECC design/frontend skills where relevant.
+
+## Reference Shelf
+
+Source of record is the brain page `design-craft-resources`; this is the working subset.
+
+**Look before designing** — steal decisions, not layouts.
+
+- [refero.design](https://refero.design) — references pulled from real shipped products. How others solved this exact page.
+- [land-book.com](https://land-book.com) — filters down to a single component. Study one pricing block twenty ways.
+- [mobbin.com](https://mobbin.com) — real app flows, screen by screen. Teaches hierarchy through sequence, not one frame.
+- [siteinspire.com](https://siteinspire.com) — a fifteen-year archive. Shows how type and grid systems moved over time.
+- [godly.website](https://godly.website) — hand-picked direction. Stop browsing once you have one.
+- [awwwards.com](https://awwwards.com) — the ceiling, not the template. Skip it for a working product page.
+
+**Craft writing** — interaction detail at the component level.
+
+- [devouringdetails.com](https://devouringdetails.com) — Rauno, Vercel. 23 chapters with downloadable working React components.
+- [emilkowal.ski](https://emilkowal.ski) — Emil Kowalski, Linear. Animation and UI taste; author of Sonner and Vaul.
+- [interfacecraft.dev](https://interfacecraft.dev) — Josh Puckett. Paid; 40+ deep dives on interface craft.
+
+**Motion and components** — pick one lane, not three.
+
+- [motion.dev](https://motion.dev) — the library behind considered hover, drag, and layout transitions. Motion is a budget, not a free upgrade.
+- [skiper-ui.com](https://skiper-ui.com) and [cult-ui.com](https://cult-ui.com) — animated shadcn/ui components.
+- [reactbits.dev](https://reactbits.dev) — use for one signature motion moment. Skip once 3+ elements already animate.
+
+**Tools**
+
+- [fontjoy.com](https://fontjoy.com) — font-pairing generator. Breaks the Inter-for-everything reflex.
+- [colorhunt.co](https://colorhunt.co) — starting palettes when there is no brand. Check contrast yourself; curation is aesthetic, not accessible.
+- [haikei.app](https://haikei.app) — SVG backgrounds and organic shapes. Skip if the page already has a signature visual.
 
 ## Worthwhile Style Directions
 
