@@ -72,7 +72,10 @@ Source of record is the brain page `design-craft-resources`; this is the working
 **Motion and components** — pick one lane, not three.
 
 - [motion.dev](https://motion.dev) — the library behind considered hover, drag, and layout transitions. Motion is a budget, not a free upgrade.
-- [skiper-ui.com](https://skiper-ui.com) and [cult-ui.com](https://cult-ui.com) — animated shadcn/ui components.
+- [skiper-ui.com](https://skiper-ui.com) — animated shadcn/ui components. Two unrelated sources named it independently, which is the strongest signal on the shelf.
+- [cult-ui.com](https://cult-ui.com) — animated shadcn/ui components, plus premium template add-ons.
+- **Animaster Lib** — 250+ motion primitives: scroll, hover, effects. Reach for breadth of primitives, not whole sections. URL unresolved.
+- **ThreeUI** — 3D and WebGL. The only entry that changes the performance budget, not just the look. Signature moments only, never a default. URL unresolved.
 - [reactbits.dev](https://reactbits.dev) — use for one signature motion moment. Skip once 3+ elements already animate.
 
 **Tools**
@@ -80,6 +83,32 @@ Source of record is the brain page `design-craft-resources`; this is the working
 - [fontjoy.com](https://fontjoy.com) — font-pairing generator. Breaks the Inter-for-everything reflex.
 - [colorhunt.co](https://colorhunt.co) — starting palettes when there is no brand. Check contrast yourself; curation is aesthetic, not accessible.
 - [haikei.app](https://haikei.app) — SVG backgrounds and organic shapes. Skip if the page already has a signature visual.
+
+## Motion Vocabulary
+
+Names for the moves, and the discipline over them. Source of record is the brain page `web-animation-patterns`. `/impeccable animate` owns the motion thesis, the timing table, and the implementation; this is the vocabulary it does not carry.
+
+Four triggers, each doing one job:
+
+| Trigger | Job | Moves |
+|---|---|---|
+| Scroll | Storytelling | Parallax · Scrub · Pin + Transform |
+| Reveal | Hierarchy | Fade + Lift · Stagger · Clip Reveal |
+| Hover | Feedback | Magnetic CTA · Image Zoom · Text Shift |
+| Click | Confirmation | Press + Spring · State Change |
+
+Good animation is not decoration. It is Feedback. A move that reports nothing back to the user must justify itself as decoration rather than pass as craft.
+
+**Three of these can never be the focal moment.** Fade + Lift, Parallax, and a plain scroll reveal are supporting moves only. Reaching for one as the authored moment is the exact failure `/impeccable animate` calls "not a thesis".
+
+**Motion is a budget.** Eleven moves is a menu, not a checklist. Each animated element spends the attention the previous one bought.
+
+Constraints that are easy to miss:
+
+- Stagger order *is* a hierarchy claim. A stagger that fights the visual hierarchy is worse than no stagger.
+- Image Zoom moves the image, not the layout. A hover that reflows the page is a bug in a costume.
+- Magnetic CTA is spatial movement. It needs a `prefers-reduced-motion` path that drops the cursor-follow and keeps the affordance.
+- State Change (`Send → Sending → Sent ✓`) is the only move here that can report failure. Do not downgrade it to a spinner.
 
 ## Worthwhile Style Directions
 
