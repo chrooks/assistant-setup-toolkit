@@ -30,9 +30,12 @@ try {
 }
 
 const root = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+// Optional args: paths that count as the Canon. Default is the whole tree (a docs repo).
+// A code repo passes its Canon paths so half-done code never trips the hook.
+const scope = process.argv.slice(2);
 let lines;
 try {
-  lines = execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" })
+  lines = execFileSync("git", ["status", "--porcelain", "--", ...scope], { cwd: root, encoding: "utf8" })
     .split("\n")
     .filter(Boolean);
 } catch {

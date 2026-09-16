@@ -49,6 +49,7 @@ A Beat carries a ceiling, the highest level it may reach. Ceilings default per f
 2. Install the two hooks. Copy from this skill's `scripts/` into `<repo>/scripts/hooks/`, then wire `.claude/settings.json`:
    - `SessionStart` → `bash "$CLAUDE_PROJECT_DIR/scripts/hooks/inbox-nudge-session-start.sh"`: names unprocessed captures in inbox/ and says to chronicle them first. Silent when empty.
    - `Stop` → `node "$CLAUDE_PROJECT_DIR/scripts/hooks/log-owed-stop.cjs"`: blocks a session ending with an uncommitted Canon, once; yields on the second pass.
+   - In a code repo, append the Canon paths so half-done code never trips it: `node "$CLAUDE_PROJECT_DIR/scripts/hooks/log-owed-stop.cjs" decisions.md learning-log.md checklist.md personas inbox archive`. A docs repo passes nothing; the whole tree is the Canon.
 3. Ignore capture media in `.gitignore`, scoped to `inbox/` and `archive/`: `*.m4a *.mp3 *.wav *.jpg *.jpeg *.png *.heic`. The transcript or the Beat is the record.
 4. Run both checks: `bash scripts/hooks/test-inbox-nudge.sh` and `bash scripts/hooks/test-log-owed-stop.sh`.
 5. Report in one line: the files created and both check results. No Personas yet; `add` makes them.
