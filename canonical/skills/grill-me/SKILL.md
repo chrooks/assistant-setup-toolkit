@@ -8,7 +8,7 @@ upstream:
   relationship: wrapper
 ---
 
-Run a `/grilling` session, with the one change below.
+Run a `/grilling` session, with the two changes below.
 
 `grilling` is fetched from upstream and carries the interview itself — the
 round-by-round frontier interview, numbered questions with a recommended answer
