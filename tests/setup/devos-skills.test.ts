@@ -219,13 +219,14 @@ describe("DevOS-conformed stage skills", () => {
     });
 
     it("keeps local divergence in the wrapper, not in the fetched primitive", () => {
-      // Rounds, not one-at-a-time: batch independent questions, take one reply,
-      // build the next round from it. Dependency ordering is what keeps it safe.
-      // This contradicts `grilling` on purpose, so it must be stated as an
-      // override here rather than by editing the fetched skill.
-      expect(skill).toMatch(/dependency-ordered rounds/i);
-      expect(skill).toMatch(/not one question at a time/i);
-      expect(skill).toMatch(/override/i);
+      // Every divergence from `grilling` is stated here as an explicit override
+      // rather than by editing the fetched skill. Rounds are no longer one:
+      // upstream adopted dependency-ordered rounds in July 2026, so the wrapper
+      // points at upstream for them instead of restating them.
+      expect(skill).toMatch(/^## Override: lettered options/im);
+      expect(skill).toMatch(/^## Override: no confirmation gate/im);
+      expect(skill).toMatch(/rounds behavior used\s+to be a local override/i);
+      expect(skill).not.toMatch(/^## Override: ask in rounds/im);
     });
 
     it("teaches appending resolved decisions to the Decision Ledger", () => {

@@ -3,8 +3,10 @@ name: chrisify
 description: Rewrite or draft prose in Chris's own voice, built from stylometric analysis of his authentic college writing (2019-2023). Use when the user says "chrisify this", "make this sound like me", "write this in my voice", "my voice", or wants AI-drafted prose to read as Chris rather than as a chatbot. Supports three registers — essay, speech, journal — plus a verify mode that measures a draft against his profile.
 argument-hint: "<text-or-file> [essay|speech|journal] | verify <file> | rebuild"
 upstream:
-  repo: https://github.com/Hiro-Inagawa/write-like-me
+  repo: Hiro-Inagawa/write-like-me
+  path: SKILL.md
   ref: 3878d9dbfb57a28ea414c891623b57612b6e1734
+  relationship: rewrite
   license: MIT
   harvested: scripts/, references/, templates/, pipeline design
 ---
