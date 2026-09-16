@@ -4,6 +4,17 @@
 
 The Feature Implementation Workflow describes the development pipeline: research, planning, TDD, code review, and then committing to git.
 
+## Four principles for every problem → solution
+
+Name what each demands before building; give a build order that proves the first case by hand without blocking the rest.
+
+- **Human-centered design**: meet people where they are and help them get where they need to go.
+- **Solution architecture**: one home per responsibility. Name the Boundaries and the Seams.
+- **Solve at scale, three levels**: this case, all cases, the pattern. Design the Contracts generically first; write code after the first case lands by hand. Plan the build chronology with all three in view.
+- **Separation of concerns**: honor every Boundary the work sits inside — data, money, record. One repo per context, one machine per repo; no cross-repo read.
+
+Case: a classifier built for one account, then re-planned for all accounts and for reuse across the business (2026-09-15).
+
 ## Feature Implementation Workflow
 
 0. **Research & Reuse** _(mandatory before any new implementation)_
