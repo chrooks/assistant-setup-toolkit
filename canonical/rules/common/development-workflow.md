@@ -62,7 +62,7 @@ Work that changes runtime behavior is done only when the affected flow has been 
 - Applies equally to subagent-returned work: never relay an agent's "done" without driving the flow first.
 - **Browser drives run headless, always** — chrome-devtools MCP, Playwright, and any subagent driving a browser must pass the headless flag; a Chrome window must never appear on the user's screen. Headed only when the user explicitly asks to watch. Case: a headed prove run popped a window mid-game (2026-08-06).
 - **Name the Surface you proved on, and prove on the one the user opens.** State the exact URL or screen before you drive anything — `https://dex.hestia.chrooks.com`, not `localhost:3000`, not a local build, not a staging copy. Proved somewhere else, or nowhere? Say so in the same sentence and call the work unproven. A proof on a Surface the user does not open is a dishonest **Signifier**, not a proof. Case: "Photos are on the site — driven in a headless browser" → "I dont see it. Im on https://twn.hestia.chrooks.com/" (2026-08-02), then the identical failure on dex.hestia.chrooks.com (2026-08-27).
-- Lead the completion report with the proof, then the change detail.
+- Lead the completion report with a `Proof:` line, then the change detail.
 - **When a target mockup exists, it is the acceptance criterion.** Screenshot the built page, compare it against the reference image, and close the gap — repeat until they match. "It builds" and "it looks like the design" are different claims, and only the second one was asked for. A reference image is the cheapest executable spec a UI change can have; when one exists and no comparison happened, the work is not proven.
 
 Case: ~12 "I don't see it / still broken" corrections in one project cycle (2026-07 loop audit).
