@@ -85,8 +85,12 @@ knowledge base. Never commit them.
 | How often do you… | When did you last? And before that? |
 | What would you want… | What did you do when it went wrong? |
 
-Five to eight questions for thirty minutes; silence fills the rest. One idea per
-question, never compound, never leading. This is the **Mom Test** and the **Nick
+**Three to five questions for fifteen to thirty minutes.** One good question plus its
+follow-ups eats five minutes, and the follow-ups are where the real answer lives. Eight
+questions is a survey, not an interview — it forces you to move on exactly when they
+start telling you the truth. Silence fills the rest. Anything that does not survive the
+cut goes under `## Ask next time`, not into the guide.
+One idea per question, never compound, never leading. This is the **Mom Test** and the **Nick
 Test** made executable, not cited.
 
 ### The guide format
