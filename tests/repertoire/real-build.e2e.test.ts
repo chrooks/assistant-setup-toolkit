@@ -1,8 +1,8 @@
 // Builds the skills page from this machine's real ~/.claude with `npm run skills`
 // and drives it in headless Chromium. Skips where ~/.claude or Chromium is missing.
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -15,6 +15,53 @@ const hasChromium = existsSync(chromium.executablePath());
 const hasClaudeHome = existsSync(path.join(claudeHome, "skills"));
 if (!hasChromium) console.log(`real-build.e2e skipped: no Chromium at ${chromium.executablePath()}`);
 if (!hasClaudeHome) console.log(`real-build.e2e skipped: no skills folder at ${path.join(claudeHome, "skills")}`);
+
+/**
+ * The skill count from plain fs, independent of collectRepertoire: every
+ * skills/*\/SKILL.md, then desktop-only names under skills/synced/, then
+ * enabled-plugin skills not already present. Names are folder names.
+ */
+function countSkillsOnDisk(home: string): number {
+  const dirs = (dir: string) => {
+    try {
+      return readdirSync(dir);
+    } catch {
+      return [];
+    }
+  };
+  const hasSkill = (dir: string) => {
+    try {
+      return statSync(path.join(dir, "SKILL.md")).isFile();
+    } catch {
+      return false;
+    }
+  };
+  const json = (file: string): Record<string, unknown> => {
+    try {
+      return JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  };
+  const names = new Set<string>();
+  const skillsDir = path.join(home, "skills");
+  for (const name of dirs(skillsDir)) if (hasSkill(path.join(skillsDir, name))) names.add(name);
+  const synced = path.join(skillsDir, "synced");
+  for (const id of dirs(synced)) {
+    for (const name of dirs(path.join(synced, id))) if (hasSkill(path.join(synced, id, name))) names.add(name);
+  }
+  const enabled = (json(path.join(home, "settings.json")).enabledPlugins ?? {}) as Record<string, unknown>;
+  const installed = (json(path.join(home, "plugins", "installed_plugins.json")).plugins ?? {}) as Record<string, { installPath?: string }[]>;
+  for (const [id, on] of Object.entries(enabled)) {
+    if (on !== true) continue;
+    for (const record of installed[id] ?? []) {
+      if (typeof record.installPath !== "string") continue;
+      const pluginSkills = path.join(path.resolve(home, "plugins", record.installPath), "skills");
+      for (const name of dirs(pluginSkills)) if (hasSkill(path.join(pluginSkills, name))) names.add(name);
+    }
+  }
+  return names.size;
+}
 
 describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's real skills)", () => {
   let tmp: string;
@@ -50,12 +97,18 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
     await page.waitForSelector("#result-listbox .r");
   }, 60_000);
 
+  // The tests share one page: a failed test must not leave its query behind.
+  afterEach(async () => {
+    await page?.fill("#search-input", "");
+  });
+
   afterAll(async () => {
     await browser?.close();
     rmSync(tmp, { recursive: true, force: true });
   });
 
-  it("lists every skill the collector finds", async () => {
+  it("lists every skill the collector finds, and the count matches an independent count of the disk", async () => {
+    expect(expectedTotal).toBe(countSkillsOnDisk(claudeHome));
     expect(await page.$$eval("#result-listbox .r", (n) => n.length)).toBe(expectedTotal);
     expect(await page.textContent("#filter-status-text")).toBe(`Showing ${expectedTotal} of ${expectedTotal}`);
   });
@@ -68,6 +121,15 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
   it("'watch a video' puts /watch-video first", async () => {
     await page.fill("#search-input", "watch a video");
     expect(await page.textContent("#results-name-group .r .nm")).toBe("/watch-video");
+    expect(await page.$$eval("#result-listbox .r", (n) => n.length)).toBeLessThan(15);
+    await page.fill("#search-input", "");
+  });
+
+  it("'commit' puts /commit first, before /caveman-commit", async () => {
+    await page.fill("#search-input", "commit");
+    expect(await page.textContent("#result-listbox .r .nm")).toBe("/commit");
+    await page.fill("#search-input", "watch-video");
+    expect(await page.textContent("#result-listbox .r .nm")).toBe("/watch-video");
     await page.fill("#search-input", "");
   });
 
