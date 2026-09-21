@@ -54,6 +54,9 @@ async function main(): Promise<void> {
   for (const skill of rep.unreadable) {
     console.error(`Couldn't read ${skill.name} (${skill.path}): ${skill.error.split("\n")[0]}`);
   }
+  for (const copy of rep.unreadableCopies) {
+    console.error(`Couldn't read ${copy.name} (${copy.path}): ${copy.error.split("\n")[0]}; listed ${copy.listed} instead`);
+  }
   const uncategorized = rep.skills.filter((s) => s.uncategorized).map((s) => s.name);
   if (uncategorized.length) {
     console.error(`Uncategorized (add to manifests/skill-map.yaml): ${uncategorized.join(", ")}`);

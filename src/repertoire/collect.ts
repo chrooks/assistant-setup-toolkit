@@ -26,6 +26,8 @@ export interface SkillEntry {
   body: string;
 }
 export interface Unreadable { name: string; path: string; error: string }
+/** An unreadable copy of a skill that is listed from another, readable copy (`listed`). */
+export interface UnreadableCopy extends Unreadable { listed: string }
 export interface Lane { name: string; stages: string[] }
 export interface Neighbor { a: string; b: string; difference: string }
 export interface Repertoire {
@@ -33,6 +35,7 @@ export interface Repertoire {
   generatedAt: string;
   skills: SkillEntry[];
   unreadable: Unreadable[];
+  unreadableCopies: UnreadableCopy[];
   categories: string[];
   lanes: Lane[];
   neighbors: Neighbor[];
@@ -209,7 +212,7 @@ export async function collectRepertoire(opts: {
   }
 
   const skills: SkillEntry[] = [];
-  const unreadable: Unreadable[] = [];
+  const failed: Unreadable[] = [];
   const seen = new Set<string>();
   for (const candidate of candidates) {
     const file = path.join(candidate.dir, "SKILL.md");
@@ -235,10 +238,17 @@ export async function collectRepertoire(opts: {
         body,
       });
     } catch (error) {
-      if (seen.has(candidate.folder)) continue;
-      seen.add(candidate.folder);
-      unreadable.push({ name: candidate.folder, path: file, error: errorText(error) });
+      // A later readable copy (plugin or desktop) of the same name still gets listed.
+      failed.push({ name: candidate.folder, path: file, error: errorText(error) });
     }
+  }
+  const listedPath = new Map(skills.map((s) => [s.name, s.path]));
+  const unreadable: Unreadable[] = [];
+  const unreadableCopies: UnreadableCopy[] = [];
+  for (const entry of failed) {
+    const listed = listedPath.get(entry.name);
+    if (listed !== undefined) unreadableCopies.push({ ...entry, listed });
+    else if (!unreadable.some((u) => u.name === entry.name)) unreadable.push(entry);
   }
 
   // Map order within categories; Uncategorized last, alphabetical.
@@ -259,6 +269,7 @@ export async function collectRepertoire(opts: {
     generatedAt: opts.now.toISOString(),
     skills,
     unreadable,
+    unreadableCopies,
     categories,
     lanes,
     neighbors,

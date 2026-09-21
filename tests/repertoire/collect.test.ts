@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
 import os from "node:os";
 import path from "node:path";
@@ -214,6 +215,46 @@ describe("collectRepertoire", () => {
       { a: "cut-video", b: "watch-video", difference: "Trims and joins a video vs loads one to discuss" },
     ]);
   });
+
+  it("lists a readable plugin or desktop copy when the skills/ copy is unreadable, and still reports the bad file", async () => {
+    const home = mkdtempSync(path.join(os.tmpdir(), "claude-home-"));
+    const write = (file: string, content: string) => {
+      mkdirSync(path.dirname(path.join(home, file)), { recursive: true });
+      writeFileSync(path.join(home, file), content);
+    };
+    const skill = (name: string) => `---\nname: ${name}\ndescription: A readable ${name}.\n---\n\n# /${name}\n`;
+    const broken = "---\ndescription: [not: valid\n---\n";
+    try {
+      write("settings.json", JSON.stringify({ enabledPlugins: { "tools@x": true } }));
+      write("plugins/installed_plugins.json", JSON.stringify({ plugins: { "tools@x": [{ installPath: "cache/tools" }] } }));
+      write("skills/from-plugin/SKILL.md", broken);
+      write("plugins/cache/tools/skills/from-plugin/SKILL.md", skill("from-plugin"));
+      write("skills/from-desktop/SKILL.md", broken);
+      write("skills/synced/sync-01/from-desktop/SKILL.md", skill("from-desktop"));
+      write("skills/only-broken/SKILL.md", broken);
+      const rep = await collectRepertoire({ claudeHome: home, toolkitRoot, skillMap: loadSkillMap(fixtureMap), machine: "m", now: new Date() });
+      const byName = new Map(rep.skills.map((s) => [s.name, s]));
+      expect(byName.get("from-plugin")).toMatchObject({ source: "plugin", path: path.join(home, "plugins/cache/tools/skills/from-plugin/SKILL.md") });
+      expect(byName.get("from-desktop")).toMatchObject({ source: "desktop" });
+      expect(rep.unreadable.map((u) => u.name)).toEqual(["only-broken"]);
+      expect(rep.unreadableCopies.map((u) => u.path).sort()).toEqual(
+        [path.join(home, "skills/from-desktop/SKILL.md"), path.join(home, "skills/from-plugin/SKILL.md")],
+      );
+      expect(rep.counts).toMatchObject({ total: 3, plugin: 1, desktop: 1 });
+
+      const build = spawnSync(
+        path.join(toolkitRoot, "node_modules", ".bin", "tsx"),
+        ["scripts/skills-page.ts", "--claude-home", home, "--skill-map", fixtureMap, "--out", path.join(home, "out", "index.html")],
+        { cwd: toolkitRoot, encoding: "utf8", env: { ...process.env, SSH_CONNECTION: "test" } },
+      );
+      expect(build.status).toBe(0);
+      expect(build.stderr).toContain(`Couldn't read from-plugin (${path.join(home, "skills/from-plugin/SKILL.md")})`);
+      expect(build.stderr).toContain(`listed ${path.join(home, "plugins/cache/tools/skills/from-plugin/SKILL.md")} instead`);
+      expect(build.stderr).toContain(`Couldn't read only-broken (${path.join(home, "skills/only-broken/SKILL.md")})`);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  }, 30_000);
 
   it("works without settings.json, plugins, or synced/", async () => {
     const empty = mkdtempSync(path.join(os.tmpdir(), "claude-home-"));
