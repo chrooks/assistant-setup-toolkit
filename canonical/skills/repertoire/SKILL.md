@@ -31,14 +31,17 @@ From the clone, run `npm run -s skills`. The `-s` keeps npm's banner off standar
 The user's browser is on another device, so a file path or a `localhost` address will not open. Never return either.
 
 - Address: the one the machine context gives for an ad-hoc dev server. No such address → return the file path, say the page must be opened on this machine, and stop.
-- Port: try 4747, then 4748 through 4757. For each port:
-  1. Run `curl -s --max-time 2 http://<address>:<port>/`.
-  2. Output contains `id="repertoire-data"` → a repertoire server already runs there. Reuse it; it serves the rebuilt file with no restart.
-  3. Connection fails → the port is free. Start the server there, detached so it outlives this turn:
+- **First pass — reuse.** Check every port from 4747 through 4757 with
+  `curl -s --max-time 2 http://<address>:<port>/`. The first one whose output contains
+  `id="repertoire-data"` already runs a repertoire server: reuse it — it serves the rebuilt
+  file with no restart — and go to step 4. Check them all before starting anything, because
+  a free 4747 does not mean no server is running on 4748.
+- **Second pass — start.** No repertoire server found → take the ports again in order:
+  1. Connection fails → the port is free. Start the server there, detached so it outlives this turn:
      `setsid nohup python3 -m http.server <port> --bind <address> --directory "$HOME/.cache/repertoire" >/dev/null 2>&1 &`
      Then repeat the `curl` until it shows `id="repertoire-data"` (a few tries, one second apart).
      It never shows `id="repertoire-data"` (the bind failed, or another process took the port) → try the next port.
-  4. Anything else answers → another service owns the port. Never stop or kill it. Try the next port.
+  2. Anything else answers → another service owns the port. Never stop or kill it. Try the next port.
 - No port gives a repertoire server → say so, give the reason, and return the file path.
 
 ## 4. Reply
