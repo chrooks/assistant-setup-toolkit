@@ -1,6 +1,6 @@
 ---
 name: sketch
-description: "Make a UI decision concrete and comparable before the plan is final — name the top five Affordances a Surface must enable, harvest proven interaction patterns and platform conventions from real products that already solved them, then draw three lo-fi layouts to pick and mix into one. Use when shaping a new screen or rethinking an existing one; when the user says 'what should this look like', 'show me some options', 'wireframe this', 'give me a few layouts', 'what should a user be able to do here', or 'find me good examples of this'; or before /plan on any user-facing work. Structure only — aesthetics, color, and type are /impeccable. Not for auditing a built flow — that is /design-audit."
+description: "Make a UI decision concrete and comparable before the plan is final — name the top five Affordances a Surface must enable, harvest proven interaction patterns and platform conventions from real products that already solved them, then build three lo-fi HTML layouts to pick and mix into one. Use when shaping a new screen or rethinking an existing one; when the user says 'what should this look like', 'show me some options', 'wireframe this', 'give me a few layouts', 'what should a user be able to do here', or 'find me good examples of this'; or before /plan on any user-facing work. Structure only — aesthetics, color, and type are /impeccable. Not for auditing a built flow — that is /design-audit."
 argument-hint: "<surface or feature> [existing]"
 user-invocable: true
 disable-model-invocation: false
@@ -13,7 +13,7 @@ One move, three steps: decide what the Surface must let people do, find out how 
 products already do it, then draw three different answers and keep the best parts.
 
 Everything here is cheap to throw away. That is the point. A layout argued over as
-three ASCII boxes costs a minute. The same argument after the build costs a week.
+three gray HTML pages costs a minute. The same argument after the build costs a week.
 
 **It lands before `/plan` is final** — the acceptance criteria get written against the
 chosen layout, not the other way round. Arriving at implement is too late: by then the
@@ -27,7 +27,7 @@ They compose. This one goes first.
 |---|---|---|
 | Settles | **structure** — what exists, where, and in what order | **aesthetics** — color, type, visual direction |
 | References | **functional** patterns: how a proven product solved the interaction | **aesthetic** anchors: mood and brand |
-| Options | **three lo-fi layouts**, always, to pick and mix | visual probes, when image generation exists |
+| Options | **three lo-fi HTML layouts**, always, to pick and mix | visual probes, when image generation exists |
 | Actions | **top five** Affordances | one primary user action |
 
 Hand the chosen layout to `/impeccable shape` as the structure it must dress.
@@ -71,18 +71,35 @@ take what is proven, not to invent.
 - Two or three patterns per action at most. The same discipline `/build-or-buy` applies
   to repositories, pointed at interactions.
 
-## Step 3 — Three lo-fi layouts
+## Step 3 — Three lo-fi layouts, as HTML
 
-Draw **three genuinely different** layouts. Different in **structure** — what sits
-where, what is grouped, what is one step versus two — not in styling.
+Build **three genuinely different** layouts as self-contained HTML files. Different in
+**structure** — what sits where, what is grouped, what is one step versus two — not in
+styling.
 
-- **ASCII boxes by default.** A throwaway HTML page only when the layout depends on real
-  proportions or real scrolling. No color, no type choices, no polish — those belong to
-  `/impeccable` and they bias the choice toward whichever option looks finished.
-- Under each layout: which of the five it serves best, which it serves worst, and which
+HTML, not ASCII, because a layout lives or dies on real proportions: how much fits above
+the fold, how a column collapses, how far the eye travels between related things. ASCII
+hides all of it.
+
+**Keep them lo-fi on purpose.** HTML makes polish tempting, and polish biases the pick
+toward whichever option looks finished. So:
+
+- Grayscale only. One `system-ui` font. Size is the only type variation.
+- Regions are bordered boxes with a plain label. Body text is gray bars, not copy. Real
+  words only on buttons, headings, and nav — those are structure.
+- Images are gray boxes with an ✕. No icons, shadows, gradients, rounding, or motion.
+- Inline CSS, no external requests, no framework. Each file opens straight from disk.
+- **Every region gets a readable `id`** — `primary-action`, `order-list`, `filter-bar` —
+  so the user can say "move `#filter-bar` above `#order-list`" and mean one thing.
+- Tag each region with the Affordance it serves: a small `A1`–`A5` in its corner.
+- A short header in each file: which of the five it serves best, which worst, and which
   harvested pattern it borrows.
+- Mark a deliberate convention break inside the region that breaks it.
 - Make them disagree. If two layouts answer the same question the same way, one of them
   is wasted.
+
+Write `layout-a.html`, `layout-b.html`, `layout-c.html`, then tell the user how to open
+them. On a remote machine, follow the machine context for serving — never a localhost URL.
 
 ## Step 4 — Pick and mix
 
@@ -90,13 +107,14 @@ Ask the user which parts of which layout to keep. This is **taste** — their si
 Division of Responsibility. Offer a recommendation and its one reason, never a neutral
 menu.
 
-Then draw the amalgamation as a fourth lo-fi layout and confirm it before anything moves
-to `/plan`.
+Then build the amalgamation as `chosen.html`, same lo-fi rules, and confirm it before
+anything moves to `/plan`.
 
 ## Where it lands
 
-`.tasks/<issue#>-<slug>/sketch.md` — the five, the patterns with links, the three
-layouts, and the chosen one. `/plan` reads it.
+`.tasks/<issue#>-<slug>/sketch.md` — the five, the patterns with links, and the pick.
+The layouts sit beside it in `sketch/`: `layout-a.html` through `layout-c.html`, and
+`chosen.html`. `/plan` reads both.
 
 ## Handoffs
 
@@ -109,5 +127,6 @@ layouts, and the chosen one. `/plan` reads it.
 - [ ] Five or fewer Affordances, ranked, in the user's words — sourced or marked `unsourced`
 - [ ] Every harvested pattern names a real product, the interaction, why it works, and a link
 - [ ] Every platform convention is named, and every deliberate break is marked
-- [ ] Three layouts that differ in structure, not styling
+- [ ] Three self-contained HTML layouts that differ in structure, not styling
+- [ ] Every region has a readable `id` and an Affordance tag
 - [ ] The user chose, and the amalgamation was confirmed before `/plan`
