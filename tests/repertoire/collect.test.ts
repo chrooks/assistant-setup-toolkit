@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { parse as parseYaml } from "yaml";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -223,5 +224,29 @@ describe("collectRepertoire", () => {
     } finally {
       rmSync(empty, { recursive: true, force: true });
     }
+  });
+});
+
+describe("canonical skills frontmatter", () => {
+  it("every canonical/skills/*/SKILL.md parses as strict YAML, with no lenient retry", () => {
+    const skillsDir = path.join(toolkitRoot, "canonical", "skills");
+    const bad: string[] = [];
+    for (const name of readdirSync(skillsDir)) {
+      let text: string;
+      try {
+        text = readFileSync(path.join(skillsDir, name, "SKILL.md"), "utf8");
+      } catch {
+        continue; // Not a skill folder.
+      }
+      const block = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1];
+      try {
+        if (block === undefined) throw new Error("no frontmatter block");
+        const value: unknown = parseYaml(block);
+        if (value === null || typeof value !== "object") throw new Error("not a mapping");
+      } catch (error) {
+        bad.push(`${name}: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+      }
+    }
+    expect(bad).toEqual([]);
   });
 });

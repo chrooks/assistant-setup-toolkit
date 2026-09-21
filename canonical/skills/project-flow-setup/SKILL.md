@@ -1,6 +1,6 @@
 ---
 name: project-flow-setup
-description: Configure a repository for the project-flow workflow by auditing its GitHub setup and applying the missing issue, milestone, label, and Project setup. The workflow Contract lives in bundled defaults that /roadmap and /to-issues read in place; a repo only gets a docs/agents/ file when it deviates. Use when adopting /to-issues and /roadmap, when a repo has no type: labels, or when a repo needs to deviate from the default workflow.
+description: "Configure a repository for the project-flow workflow by auditing its GitHub setup and applying the missing issue, milestone, label, and Project setup. The workflow Contract lives in bundled defaults that /roadmap and /to-issues read in place; a repo only gets a docs/agents/ file when it deviates. Use when adopting /to-issues and /roadmap, when a repo has no type: labels, or when a repo needs to deviate from the default workflow."
 argument-hint: "[audit|override|apply] [repo]"
 ---
 
