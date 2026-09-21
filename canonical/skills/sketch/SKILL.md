@@ -1,0 +1,113 @@
+---
+name: sketch
+description: "Make a UI decision concrete and comparable before the plan is final — name the top five Affordances a Surface must enable, harvest proven interaction patterns and platform conventions from real products that already solved them, then draw three lo-fi layouts to pick and mix into one. Use when shaping a new screen or rethinking an existing one; when the user says 'what should this look like', 'show me some options', 'wireframe this', 'give me a few layouts', 'what should a user be able to do here', or 'find me good examples of this'; or before /plan on any user-facing work. Structure only — aesthetics, color, and type are /impeccable. Not for auditing a built flow — that is /design-audit."
+argument-hint: "<surface or feature> [existing]"
+user-invocable: true
+disable-model-invocation: false
+allowed-tools: Read, Write, Glob, Grep, WebSearch, WebFetch
+---
+
+# /sketch — concrete before it is expensive
+
+One move, three steps: decide what the Surface must let people do, find out how good
+products already do it, then draw three different answers and keep the best parts.
+
+Everything here is cheap to throw away. That is the point. A layout argued over as
+three ASCII boxes costs a minute. The same argument after the build costs a week.
+
+**It lands before `/plan` is final** — the acceptance criteria get written against the
+chosen layout, not the other way round. Arriving at implement is too late: by then the
+plan has already committed to a shape nobody saw.
+
+## Boundary with `/impeccable shape`
+
+They compose. This one goes first.
+
+| | `/sketch` | `/impeccable shape` |
+|---|---|---|
+| Settles | **structure** — what exists, where, and in what order | **aesthetics** — color, type, visual direction |
+| References | **functional** patterns: how a proven product solved the interaction | **aesthetic** anchors: mood and brand |
+| Options | **three lo-fi layouts**, always, to pick and mix | visual probes, when image generation exists |
+| Actions | **top five** Affordances | one primary user action |
+
+Hand the chosen layout to `/impeccable shape` as the structure it must dress.
+
+## Quick start
+
+    /sketch the order-review screen existing
+
+Read the arguments positionally. The first is the Surface. `existing` means the screen
+already exists and the job is to reconsider it, not invent it.
+
+## Step 1 — The top five Affordances
+
+What must this Surface let a person do? Name **five**, ranked. Not features — actions,
+in the user's words: *"see what I still owe,"* not *"balance widget."*
+
+- **Requirements exist** (`.tasks/<issue#>-<slug>/research/requirements.md`, from
+  `/discover`) → derive the five from them, and name the requirement ID behind each.
+  This is the bridge from what people said to what the screen does.
+- **Existing Surface** → read the current screen first. List what people actually do
+  there today, then re-rank. An action the screen makes easy and nobody needs is a
+  finding.
+- **Neither** → derive from the design frame, and mark all five `unsourced`.
+
+Five is a ceiling, not a target. If only three matter, stop at three. The ranking is the
+**Hierarchy** — the first action gets the most prominent place in every layout below.
+
+## Step 2 — Harvest proven patterns
+
+For each of the top five, find **how a good product already solved it**. The goal is to
+take what is proven, not to invent.
+
+- Search for real products doing the same action well. Prefer products the user already
+  admires, then well-known ones in the same domain.
+- For each pattern: the product, the specific interaction, **why it works**, and a link.
+  "Stripe's invoice list" is a reference. "Clean and modern" is not.
+- **Name the platform convention** each action is expected to follow — close in the top
+  corner, primary action bottom-right in a dialog, destructive actions separated and
+  confirmed, search at the top. Breaking a convention is allowed, but only on purpose,
+  and the sketch must say so. An unmarked break is a bug.
+- Two or three patterns per action at most. The same discipline `/build-or-buy` applies
+  to repositories, pointed at interactions.
+
+## Step 3 — Three lo-fi layouts
+
+Draw **three genuinely different** layouts. Different in **structure** — what sits
+where, what is grouped, what is one step versus two — not in styling.
+
+- **ASCII boxes by default.** A throwaway HTML page only when the layout depends on real
+  proportions or real scrolling. No color, no type choices, no polish — those belong to
+  `/impeccable` and they bias the choice toward whichever option looks finished.
+- Under each layout: which of the five it serves best, which it serves worst, and which
+  harvested pattern it borrows.
+- Make them disagree. If two layouts answer the same question the same way, one of them
+  is wasted.
+
+## Step 4 — Pick and mix
+
+Ask the user which parts of which layout to keep. This is **taste** — their side of the
+Division of Responsibility. Offer a recommendation and its one reason, never a neutral
+menu.
+
+Then draw the amalgamation as a fourth lo-fi layout and confirm it before anything moves
+to `/plan`.
+
+## Where it lands
+
+`.tasks/<issue#>-<slug>/sketch.md` — the five, the patterns with links, the three
+layouts, and the chosen one. `/plan` reads it.
+
+## Handoffs
+
+- Chosen layout → `/plan`. Each acceptance criterion names the Affordance it serves.
+- Structure settled → `/impeccable shape` dresses it.
+- Built → `/design-audit` checks the result against these five.
+
+## Completion criteria
+
+- [ ] Five or fewer Affordances, ranked, in the user's words — sourced or marked `unsourced`
+- [ ] Every harvested pattern names a real product, the interaction, why it works, and a link
+- [ ] Every platform convention is named, and every deliberate break is marked
+- [ ] Three layouts that differ in structure, not styling
+- [ ] The user chose, and the amalgamation was confirmed before `/plan`

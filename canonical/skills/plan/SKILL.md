@@ -22,7 +22,8 @@ an explicit approval gate before any code is written.
 1. Read the inputs: the ask/issue, and — if a Throughline exists — its resolved
    `## Decision Ledger`. When `research/requirements.md` exists, read it too: an
    acceptance criterion derived from a requirement names that requirement ID, and a
-   criterion built on a `pending` requirement says so.
+   criterion built on a `pending` requirement says so. When `sketch.md` exists, write the
+   criteria against its chosen layout, and name the Affordance each one serves.
 2. Write an ExecPlan to `.tasks/<issue#>-<slug>/plan.md`.
 3. Define acceptance criteria, each with a `proof_method`.
 4. Walk the human through it and wait for approval before implementing.

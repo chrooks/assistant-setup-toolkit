@@ -110,7 +110,9 @@ so, thread design through every stage:
   unstated interaction or state is as much an open decision as an unstated API.
 - **plan** — the acceptance criteria carry the design, not just the logic: name
   the Signifiers, the states, the Feedback each action gives. Each still gets a
-  `proof_method` — for UI, a browser-driven assertion, not a unit test.
+  `proof_method` — for UI, a browser-driven assertion, not a unit test. Run `/sketch`
+  first when the Surface's structure is not settled — the criteria are written
+  against its chosen layout, not the layout against the criteria.
 - **implement** — route the UI build through `/impeccable`; it is not optional
   polish, it is how user-facing work gets built here.
 - **prove / assess** — a design AC is proven by driving the flow in a browser
