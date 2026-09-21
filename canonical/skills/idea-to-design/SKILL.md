@@ -23,6 +23,8 @@ Conversation Threads or immediate project work.
 2. Identify what is already knowable before interviewing:
    - Existing product language, target users, constraints, and comparable
      workflows.
+   - `.tasks/<issue#>-<slug>/research/requirements.md` when it exists — stakeholder
+     evidence beats invention. A frame built on a real quote is not a guess.
    - Any established Design Boundary, Vertical Slice, or Interface patterns.
    - Questions that repo/docs cannot answer.
 

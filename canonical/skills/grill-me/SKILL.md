@@ -75,6 +75,12 @@ Resolve these into the Decision Ledger exactly like technical decisions.
 
 ## DevOS: record decisions into the Throughline
 
+Before the first question, read `.tasks/<run>/research/requirements.md` when it
+exists. Any Meaningful Decision a quote ID already answers is **resolved** — append
+it to the Decision Ledger citing that ID, and do not re-ask it. Grilling a decision
+a real user already settled wastes the human's time and invites them to overrule
+their own evidence.
+
 When this is the DevOS grill stage — there is a Throughline at
 `.tasks/*/throughline.md` with `status: in_progress` — the grill is
 not just conversation; it is how the Decision Ledger gets filled.

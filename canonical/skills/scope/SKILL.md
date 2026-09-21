@@ -70,7 +70,9 @@ A user-facing change with none of these settled is grillable even when the
 engineering is obvious. Counting them is what stops design from arriving as a
 finishing coat.
 
-For a genuinely new user-facing feature, the route runs `/idea-to-design`
+For a genuinely new user-facing feature, the route runs `/idea-to-design` —
+preceded by `/discover` when the frame belongs to people the user has not talked to
+yet
 first — it produces the design frame (intent, user, Design Boundary, first
 Vertical Slice) that `/plan` otherwise assumes it was handed. For a change to an
 existing Surface, name the design intent in one line and carry it forward.

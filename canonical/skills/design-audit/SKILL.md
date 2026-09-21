@@ -63,7 +63,9 @@ Return concise sections:
 ## Rules
 
 - Use Lexicon terms exactly: Tool, Skill, Interface, Surface, Affordance, Signifier, Honest Signifier, Transparent Friction, Progressive Disclosure, Design Boundary, Partnership Model, Software as Education, Mom Test, Nick Test, Touchpoint, Feedback, Hierarchy, Information Architecture, Error State, Empty State.
-- Do not invent screenshots, analytics, or user research. Mark assumptions clearly.
+- Do not invent screenshots, analytics, or user research. Read
+  `.tasks/<issue#>-<slug>/research/requirements.md` when it exists — that is real user
+  research and it outranks any inference. Mark assumptions clearly.
 - Prefer concrete observations over taste statements.
 - Keep questions singular and answerable.
 - Do not redesign the entire product unless the audit shows the Design Boundary itself is wrong.
