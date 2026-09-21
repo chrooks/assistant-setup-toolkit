@@ -67,6 +67,18 @@ Work that changes runtime behavior is done only when the affected flow has been 
 
 Case: ~12 "I don't see it / still broken" corrections in one project cycle (2026-07 loop audit).
 
+## Quote Every Add
+
+Quoting is project management — the assistant's side of the **Division of Responsibility**. Scope the user adds mid-work gets a price before work starts, so cutting becomes possible.
+
+- **An add is new behavior, a new Surface, or a new case** beyond the agreed task. A clarification, a correction, or a fix to the current work is not an add.
+- **Quote in one line, then recommend:** its size in sessions, what it pushes back, and keep or park. "About one session; the export work moves to after this. Recommend: park it."
+- **The user answers keep or cut.** Cut → park it as a tracker issue, so cutting loses nothing.
+- **Small enough to finish this turn and displaces nothing?** Do it, and name it in one line — no quote, no decision.
+- **Never ask the user for an estimate.** The studio quotes; the user decides.
+
+Case: ~370 adds against ~11 scope cuts and zero estimates in 5,584 turns (2026-09 archive sweep).
+
 ## Close the Loop
 
 After completing a unit of work, run the capture pass — do not wait to be asked:
