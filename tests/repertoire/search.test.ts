@@ -48,4 +48,18 @@ describe("search", () => {
   it("matches case-insensitively and by word prefix", () => {
     expect(names(search("TRANSCRIB", skills).intentMatches)).toContain("listen-audio");
   });
+
+  it("ranks an exact whole-name match first, then a name-prefix match, then the rest", () => {
+    const skill = (name: string, description: string) => ({ name, description }) as SkillEntry;
+    const list = [
+      skill("caveman-commit", "Write a commit message, commit message commit style."),
+      skill("commit-lint", "Lint a commit."),
+      skill("commit", "Stage and save work."),
+    ];
+    expect(names(search("commit", list).nameMatches)).toEqual(["commit", "commit-lint", "caveman-commit"]);
+    expect(names(search("/commit", list).nameMatches)[0]).toBe("commit");
+    const videos = [skill("cut-video", "Trim a watch video video."), skill("watch-video", "Load a video.")];
+    expect(names(search("watch-video", videos).nameMatches)[0]).toBe("watch-video");
+    expect(names(search("video", videos).nameMatches)).toEqual(["cut-video", "watch-video"]);
+  });
 });
