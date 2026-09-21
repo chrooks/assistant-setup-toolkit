@@ -8,6 +8,8 @@ categories:
 lanes:
   - name: "Video load then trim"
     stages: [watch-video, ghost-skill, cut-video]
+  - name: "Audio then video"
+    stages: [listen-audio, watch-video, cut-video]
 
 neighbors:
   - a: watch-video
@@ -16,3 +18,6 @@ neighbors:
   - a: watch-video
     b: ghost-skill
     difference: "Skipped: ghost-skill is not installed"
+  - a: cut-video
+    b: watch-video
+    difference: "Trims and joins a video vs loads one to discuss"

@@ -21,6 +21,7 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
   let browser: Browser;
   let page: Page;
   let expectedTotal: number;
+  let rep: Awaited<ReturnType<typeof collectRepertoire>>;
 
   beforeAll(async () => {
     tmp = mkdtempSync(path.join(os.tmpdir(), "repertoire-real-"));
@@ -34,7 +35,7 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
     if (build.status !== 0) throw new Error(`npm run skills failed: ${build.stderr}`);
     expect(build.stdout.split("\n")[0]).toBe(out);
 
-    const rep = await collectRepertoire({
+    rep = await collectRepertoire({
       claudeHome,
       toolkitRoot: repoRoot,
       skillMap: loadSkillMap(path.join(repoRoot, "manifests", "skill-map.yaml")),
@@ -68,5 +69,31 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
     await page.fill("#search-input", "watch a video");
     expect(await page.textContent("#results-name-group .r .nm")).toBe("/watch-video");
     await page.fill("#search-input", "");
+  });
+
+  it("grill-me compares with both neighbors, then every Compare control is disabled", async () => {
+    await page.click("#row-grill-me");
+    const buttons = await page.$$("#confused-with-list .compare-btn");
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
+    await buttons[0]!.click();
+    await buttons[1]!.click();
+    expect(await page.$$eval("#compare-table thead th.col", (n) => n.length)).toBe(3);
+    expect(await page.$$eval("#confused-with-list .compare-btn", (n) => n.every((b) => (b as HTMLButtonElement).disabled))).toBe(true);
+    expect(await page.isDisabled("#compare-any-input")).toBe(true);
+    expect(await page.$$eval("#compare-options option", (n) => n.length)).toBe(rep.skills.length);
+  });
+
+  it("sketch's handoff strip shows its neighbors; See full chain lists the lane in order", async () => {
+    await page.click("#row-sketch");
+    const lane = rep.lanes.find((l) => l.stages.includes("sketch"))!;
+    const at = lane.stages.indexOf("sketch");
+    const strips = await page.$$eval("#handoff-strip .lane", (lanes) =>
+      lanes.map((l) => [...l.querySelectorAll(".n")].map((n) => n.textContent)),
+    );
+    expect(strips).toContainEqual([lane.stages[at - 1], "sketch", lane.stages[at + 1]]);
+    await page.click(`#full-chain-${lane.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`);
+    expect(await page.$$eval("#result-listbox .r .nm", (n) => n.map((x) => x.textContent))).toEqual(lane.stages.map((s) => `/${s}`));
+    await page.click("#clear-filters");
+    expect(await page.$$eval("#result-listbox .r", (n) => n.length)).toBe(expectedTotal);
   });
 });

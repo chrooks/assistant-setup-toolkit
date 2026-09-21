@@ -20,15 +20,18 @@ const SOURCE_LABEL = { own: "mine", pulled: "pulled", plugin: "plugin", desktop:
 
 let showWeak = false;
 let activeName = null;
-// Filters: source is "all" | "own" | "pulled" (plugin and desktop count as pulled in); category is null for all.
+// Filters: source is "all" | "own" | "pulled" (plugin and desktop count as pulled in); category and lane are null for all.
 let sourceFilter = "all";
 let categoryFilter = null;
+let laneFilter = null;
 
 const isOwn = (skill) => skill.source === "own";
 const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const laneStages = (name) => data.lanes.find((lane) => lane.name === name)?.stages ?? [];
 const passesFilters = (skill) =>
   (sourceFilter === "all" || (sourceFilter === "own") === isOwn(skill)) &&
-  (categoryFilter === null || skill.category === categoryFilter);
+  (categoryFilter === null || skill.category === categoryFilter) &&
+  (laneFilter === null || laneStages(laneFilter).includes(skill.name));
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -102,7 +105,12 @@ function render() {
 
   const visible = skills.filter(passesFilters);
   let shown;
-  if (!query) {
+  if (!query && laneFilter !== null) {
+    // A lane: its installed stages in lane order.
+    const list = laneStages(laneFilter).map((name) => visible.find((s) => s.name === name)).filter(Boolean);
+    if (list.length) listbox.append(group("group-lane", `Lane: ${laneFilter}`, list));
+    shown = list.length;
+  } else if (!query) {
     // The catalog: every skill by category, in the collector's order.
     shown = 0;
     for (const category of data.categories) {
@@ -111,7 +119,7 @@ function render() {
       shown += list.length;
     }
     // Unreadable skills have no source or category, so any filter hides them.
-    if (unreadable.length && sourceFilter === "all" && categoryFilter === null) {
+    if (unreadable.length && sourceFilter === "all" && categoryFilter === null && laneFilter === null) {
       listbox.append(group("group-couldnt-read", COULDNT_READ, unreadable, String(unreadable.length), unreadableRow));
       shown += unreadable.length;
     }
@@ -138,12 +146,16 @@ function render() {
   }
   $("filter-status-text").textContent = query ? `Showing ${shown} of ${total} · "${query}"` : `Showing ${shown} of ${total}`;
   const sourceName = { all: "All", own: "Mine", pulled: "Pulled in" }[sourceFilter];
-  $("filter-status-detail").textContent = `Source: ${sourceName} · Category: ${categoryFilter ?? "All"}`;
+  $("filter-status-detail").textContent =
+    `Source: ${sourceName} · Category: ${categoryFilter ?? "All"}` + (laneFilter === null ? "" : ` · Lane: ${laneFilter}`);
   for (const button of document.querySelectorAll("#source-filter button")) {
     button.setAttribute("aria-pressed", String(button.dataset.source === sourceFilter));
   }
   for (const button of document.querySelectorAll("#category-list button")) {
-    button.setAttribute("aria-pressed", String((button.dataset.category ?? null) === categoryFilter));
+    button.setAttribute("aria-pressed", String(laneFilter === null && (button.dataset.category ?? null) === categoryFilter));
+  }
+  for (const button of document.querySelectorAll("#lane-list button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.lane === laneFilter));
   }
   setActive(rows().some((r) => r.dataset.name === activeName) ? activeName : null);
 }
@@ -176,15 +188,23 @@ function move(step) {
   setActive(list[next].dataset.name);
 }
 
+const PANE_PARTS = ["usage-line", "detail-tabs", "trigger-phrases", "confused-with", "compare-panel", "handoff-strip"];
+const MAX_COMPARE = 3;
+let openName = null;
+let compared = [];
+
 function openSkill(name) {
   const skill = skills.find((s) => s.name === name);
   const broken = skill ? null : unreadable.find((u) => u.name === name);
   if (!skill && !broken) return;
+  openName = name;
+  compared = [];
   $("detail-empty").hidden = true;
   $("detail-header").hidden = false;
-  $("detail-body").hidden = false;
   $("detail-source").hidden = !skill;
   $("mode-badge").hidden = !skill;
+  for (const id of PANE_PARTS) $(id).hidden = !skill;
+  selectTab("overview");
   if (broken) {
     $("detail-crumb").textContent = `All › ${COULDNT_READ} › ${broken.name}`;
     $("detail-name").textContent = `/${broken.name}`;
@@ -197,7 +217,191 @@ function openSkill(name) {
   $("detail-source").className = `src ${skill.source}`;
   $("mode-badge").textContent = MODE_LABEL[skill.mode];
   $("mode-badge").className = `m ${skill.mode}`;
+  $("usage-code").textContent = usage(skill);
+  $("copy-feedback").textContent = "";
   $("detail-description").textContent = skill.description;
+  $("detail-trigger").textContent = skill.firesWhen;
+  $("skill-source-path").textContent = skill.path;
+  $("skill-source").textContent = skill.body;
+  renderConfusedWith(skill);
+  renderCompare();
+  renderHandoffs(skill);
+}
+
+const usage = (skill) => `/${skill.name}${skill.argumentHint ? ` ${skill.argumentHint}` : ""}`;
+
+function selectTab(which) {
+  for (const [tab, panel] of [["overview", "overview-panel"], ["source", "source-panel"]]) {
+    const on = tab === which;
+    $(`tab-${tab}`).setAttribute("aria-selected", String(on));
+    $(`tab-${tab}`).tabIndex = on ? 0 : -1;
+    $(panel).hidden = !on;
+  }
+}
+$("tab-overview").addEventListener("click", () => selectTab("overview"));
+$("tab-source").addEventListener("click", () => selectTab("source"));
+$("detail-tabs").addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  const next = $("tab-overview").getAttribute("aria-selected") === "true" ? "source" : "overview";
+  selectTab(next);
+  $(`tab-${next}`).focus();
+});
+
+// Copy: the async clipboard API needs a secure context, which a plain-http
+// Tailscale link is not; fall back to execCommand, then to selecting the text.
+async function copyUsage() {
+  const text = $("usage-code").textContent;
+  const feedback = $("copy-feedback");
+  try {
+    await navigator.clipboard.writeText(text);
+    feedback.textContent = "Copied";
+    return;
+  } catch {
+    // No clipboard API here, or it refused: try the older path.
+  }
+  const area = el("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.append(area);
+  area.select();
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch {
+    copied = false;
+  }
+  area.remove();
+  if (copied) {
+    feedback.textContent = "Copied";
+    return;
+  }
+  const range = document.createRange();
+  range.selectNodeContents($("usage-code"));
+  getSelection().removeAllRanges();
+  getSelection().addRange(range);
+  feedback.textContent = "Press Ctrl+C to copy";
+}
+$("copy-usage").addEventListener("click", copyUsage);
+
+function renderConfusedWith(skill) {
+  const list = $("confused-with-list");
+  list.replaceChildren();
+  for (const n of data.neighbors) {
+    if (n.a !== skill.name && n.b !== skill.name) continue;
+    const other = n.a === skill.name ? n.b : n.a;
+    const pair = el("div", "pair");
+    const button = el("button", "compare-btn", "Compare");
+    button.type = "button";
+    button.id = `compare-${other}`;
+    button.dataset.name = other;
+    button.addEventListener("click", () => addCompare(other));
+    pair.append(el("span", "other", `/${other}`), el("span", "diff", n.difference), button);
+    list.append(pair);
+  }
+  if (!list.children.length) list.append(el("div", "hint", "No curated neighbors."));
+}
+
+function addCompare(name) {
+  if (name === openName || compared.includes(name) || compared.length >= MAX_COMPARE - 1) return;
+  if (!skills.some((s) => s.name === name)) return;
+  compared = [...compared, name];
+  renderCompare();
+}
+
+// The next stage in every lane the skill sits in.
+const handsOffTo = (name) => {
+  const next = data.lanes.flatMap((lane) => {
+    const at = lane.stages.indexOf(name);
+    return at === -1 || at === lane.stages.length - 1 ? [] : [lane.stages[at + 1]];
+  });
+  return [...new Set(next)].join(", ") || "—";
+};
+const COMPARE_ROWS = [
+  ["When it fires", (s) => s.firesWhen],
+  ["What it does", (s) => s.description],
+  ["Input / args", (s) => s.argumentHint ?? "—"],
+  ["Hands off to", (s) => handsOffTo(s.name)],
+  ["How it runs", (s) => MODE_LABEL[s.mode]],
+  ["Source", (s) => (s.origin ? `${SOURCE_LABEL[s.source]} (${s.origin})` : SOURCE_LABEL[s.source])],
+];
+
+function renderCompare() {
+  const columns = [openName, ...compared].map((name) => skills.find((s) => s.name === name));
+  const placeholder = columns.length < MAX_COMPARE;
+  const head = el("tr");
+  head.append(el("td"));
+  for (const skill of columns) {
+    const th = el("th", "col", `/${skill.name}`);
+    th.scope = "col";
+    head.append(th);
+  }
+  if (placeholder) head.append(el("td", "empty", "Compare from the list above"));
+  const body = COMPARE_ROWS.map(([label, value]) => {
+    const tr = el("tr");
+    const th = el("th", "", label);
+    th.scope = "row";
+    tr.append(th, ...columns.map((skill) => el("td", "", value(skill))));
+    if (placeholder) tr.append(el("td", "empty"));
+    return tr;
+  });
+  $("compare-table").tHead.replaceChildren(head);
+  $("compare-table").tBodies[0].replaceChildren(...body);
+  const full = compared.length >= MAX_COMPARE - 1;
+  for (const button of document.querySelectorAll("#confused-with-list .compare-btn")) {
+    const done = compared.includes(button.dataset.name);
+    button.textContent = done ? "Compared" : "Compare";
+    button.disabled = done || full;
+  }
+  $("compare-any-input").disabled = full;
+}
+
+const compareInput = $("compare-any-input");
+$("compare-options").append(...skills.map((s) => {
+  const option = el("option");
+  option.value = s.name;
+  return option;
+}));
+compareInput.addEventListener("change", () => {
+  const name = compareInput.value.trim().replace(/^\//, "");
+  if (skills.some((s) => s.name === name)) {
+    addCompare(name);
+    compareInput.value = "";
+  }
+});
+
+function renderHandoffs(skill) {
+  const box = $("handoff-lanes");
+  box.replaceChildren();
+  for (const lane of data.lanes) {
+    const at = lane.stages.indexOf(skill.name);
+    if (at === -1) continue;
+    const node = (name, fallback, cls = "n") => el("div", name ? cls : "n none", name ?? fallback);
+    const strip = el("div", "strip");
+    strip.append(
+      node(lane.stages[at - 1], "nothing before"), el("div", "", "→"),
+      node(skill.name, "", "n me"), el("div", "", "→"),
+      node(lane.stages[at + 1], "nothing after"),
+    );
+    const chain = el("button", "", "See full chain →");
+    chain.type = "button";
+    chain.id = `full-chain-${slug(lane.name)}`;
+    chain.addEventListener("click", () => showLane(lane.name));
+    const foot = el("div", "foot");
+    foot.append(el("span", "", `Lane: ${lane.name}`), chain);
+    const wrap = el("div", "lane");
+    wrap.append(strip, foot);
+    box.append(wrap);
+  }
+  if (!box.children.length) box.append(el("div", "hint", "Not in any curated lane."));
+}
+
+function showLane(name) {
+  input.value = "";
+  showWeak = false;
+  writeHash();
+  setFilters("all", null, name);
 }
 
 function writeHash() {
@@ -265,9 +469,10 @@ window.addEventListener("hashchange", () => {
   }
 });
 
-function setFilters(source, category) {
+function setFilters(source, category, lane = null) {
   sourceFilter = source;
   categoryFilter = category;
+  laneFilter = lane;
   render();
 }
 
@@ -277,7 +482,7 @@ setCount("source-own", "Mine", counts.own);
 setCount("source-pulled", "Pulled in", counts.pulled + counts.plugin + counts.desktop);
 setCount("source-all", "All", total);
 for (const button of document.querySelectorAll("#source-filter button")) {
-  button.addEventListener("click", () => setFilters(button.dataset.source, categoryFilter));
+  button.addEventListener("click", () => setFilters(button.dataset.source, categoryFilter, laneFilter));
 }
 $("clear-filters").addEventListener("click", () => setFilters("all", null));
 
@@ -299,6 +504,18 @@ for (const category of data.categories) {
   categoryList.append(categoryButton(`category-${slug(category)}`, category, `${own} · ${inCategory.length - own}`, category));
 }
 categoryList.append(el("div", "hint", "counts = mine · pulled in"));
+
+const laneList = $("lane-list");
+for (const lane of data.lanes) {
+  const button = el("button");
+  button.type = "button";
+  button.id = `lane-${slug(lane.name)}`;
+  button.dataset.lane = lane.name;
+  button.setAttribute("aria-pressed", "false");
+  button.append(el("span", "", lane.name), el("small", "", String(lane.stages.length)));
+  button.addEventListener("click", () => showLane(lane.name));
+  laneList.append(button);
+}
 
 const stamp = $("machine-stamp");
 stamp.append(

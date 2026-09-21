@@ -195,8 +195,14 @@ describe("collectRepertoire", () => {
   it("skips map names that are not installed, in lanes and neighbors too", async () => {
     const rep = await collect();
     expect(rep.skills.some((s) => s.name === "ghost-skill")).toBe(false);
-    expect(rep.lanes).toEqual([{ name: "Video load then trim", stages: ["watch-video", "cut-video"] }]);
-    expect(rep.neighbors).toEqual([{ a: "watch-video", b: "listen-audio", difference: "Video with scene frames vs audio only" }]);
+    expect(rep.lanes).toEqual([
+      { name: "Video load then trim", stages: ["watch-video", "cut-video"] },
+      { name: "Audio then video", stages: ["listen-audio", "watch-video", "cut-video"] },
+    ]);
+    expect(rep.neighbors).toEqual([
+      { a: "watch-video", b: "listen-audio", difference: "Video with scene frames vs audio only" },
+      { a: "cut-video", b: "watch-video", difference: "Trims and joins a video vs loads one to discuss" },
+    ]);
   });
 
   it("works without settings.json, plugins, or synced/", async () => {

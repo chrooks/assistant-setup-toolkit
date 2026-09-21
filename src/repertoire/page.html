@@ -63,7 +63,32 @@ button[aria-pressed="true"]{background:#000;color:#fff}
 #detail-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0 10px}
 #detail-name{font-size:20px;margin:0;overflow-wrap:anywhere}
 .lbl{font-size:10px;color:#666;letter-spacing:.04em;margin:10px 0 2px}
-#detail-description{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#detail-description,#detail-trigger{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#detail-pane section,#detail-tabs{margin-bottom:10px}
+#usage-line .row{display:flex;align-items:center;gap:8px}
+#usage-code{flex:1;font-size:13px;padding:5px 8px;border:1px solid #000;background:#f4f4f4;overflow-wrap:anywhere}
+#copy-feedback{font-size:11px;color:#555}
+#mode-legend{font-size:11px;color:#444;margin-top:4px}
+#detail-tabs{display:flex}
+#detail-tabs button + button{border-left:0}
+#detail-tabs button[aria-selected="true"]{background:#000;color:#fff}
+#skill-source-path{font-size:11px;color:#555;overflow-wrap:anywhere}
+#skill-source{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f6f6f6;border:1px solid #ccc;padding:8px;margin:4px 0 0}
+#confused-with .pair{display:grid;grid-template-columns:110px 1fr 78px;gap:8px;align-items:center;border-bottom:1px solid #ddd;padding:4px 0}
+#confused-with .other{font-weight:600;overflow-wrap:anywhere}
+#compare-any{display:flex;gap:6px;align-items:center;padding-top:6px}
+#compare-any-input{flex:1;font:inherit;border:1px solid #000;padding:3px 6px}
+#compare-table{border-collapse:collapse;width:100%;table-layout:fixed}
+#compare-table th,#compare-table td{border:1px solid #000;padding:4px;vertical-align:top;font-size:12px;overflow-wrap:anywhere;text-align:left}
+#compare-table thead th{background:#eee}
+#compare-table tbody th{width:96px;background:#f6f6f6;font-size:11px;font-weight:normal}
+#compare-table .empty{color:#777;font-size:11px}
+#handoff-strip .strip{display:grid;grid-template-columns:1fr 18px 1fr 18px 1fr;align-items:center;text-align:center;margin-top:4px}
+#handoff-strip .n{border:1px solid #000;padding:6px 2px;font-size:12px;overflow-wrap:anywhere}
+#handoff-strip .n.me{background:#000;color:#fff}
+#handoff-strip .n.none{border-style:dashed;color:#777}
+#handoff-strip .foot{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:6px 0 10px;font-size:11px;color:#555}
+#lane-list button{display:flex;justify-content:space-between;gap:6px;width:100%;padding:4px;border:0;border-top:1px solid #ddd;text-align:left;font-size:11px}
 </style>
 </head>
 <body>
@@ -91,6 +116,9 @@ button[aria-pressed="true"]{background:#000;color:#fff}
       <div class="sub"><span id="filter-status-detail"></span> <button id="clear-filters" type="button">Clear</button></div>
     </div>
     <div id="category-list" role="group" aria-label="Categories"></div>
+    <div id="lane-list" role="group" aria-label="Lanes">
+      <div class="hint">Click a lane: shows its stages in order</div>
+    </div>
     <div id="machine-stamp"></div>
   </aside>
 
@@ -117,10 +145,45 @@ button[aria-pressed="true"]{background:#000;color:#fff}
       <div id="detail-crumb"></div>
       <div id="detail-title"><h2 id="detail-name"></h2><span><span id="detail-source" class="src"></span> <span id="mode-badge" class="m"></span></span></div>
     </section>
-    <section id="detail-body" hidden>
-      <div class="lbl">WHAT IT DOES</div>
-      <p id="detail-description"></p>
+    <section id="usage-line" hidden>
+      <div class="row"><code id="usage-code"></code><button id="copy-usage" type="button">Copy</button></div>
+      <div id="copy-feedback" role="status" aria-live="polite"></div>
+      <div id="mode-legend"><span class="m auto">auto</span> = you + Claude · <span class="m typed-only">typed only</span> = you · <span class="m claude-only">Claude only</span> = Claude</div>
     </section>
+    <div id="detail-tabs" role="tablist" aria-label="Skill views" hidden>
+      <button id="tab-overview" type="button" role="tab" aria-selected="true" aria-controls="overview-panel">Overview</button><button id="tab-source" type="button" role="tab" aria-selected="false" aria-controls="source-panel">SKILL.md</button>
+    </div>
+    <div id="overview-panel" role="tabpanel" aria-labelledby="tab-overview" hidden>
+      <section id="detail-body">
+        <div class="lbl">WHAT IT DOES</div>
+        <p id="detail-description"></p>
+      </section>
+      <section id="trigger-phrases">
+        <div class="lbl">FIRES WHEN YOU SAY</div>
+        <p id="detail-trigger"></p>
+      </section>
+      <section id="confused-with">
+        <div class="lbl">OFTEN CONFUSED WITH</div>
+        <div id="confused-with-list"></div>
+        <div id="compare-any">
+          <label for="compare-any-input">+ Compare with any skill</label>
+          <input id="compare-any-input" list="compare-options" autocomplete="off" spellcheck="false" placeholder="skill name">
+          <datalist id="compare-options"></datalist>
+        </div>
+      </section>
+      <section id="compare-panel">
+        <div class="lbl">COMPARE</div>
+        <table id="compare-table"><thead></thead><tbody></tbody></table>
+      </section>
+      <section id="handoff-strip">
+        <div class="lbl">HANDS OFF</div>
+        <div id="handoff-lanes"></div>
+      </section>
+    </div>
+    <div id="source-panel" role="tabpanel" aria-labelledby="tab-source" hidden>
+      <div id="skill-source-path"></div>
+      <pre id="skill-source"></pre>
+    </div>
   </aside>
 </div>
 
