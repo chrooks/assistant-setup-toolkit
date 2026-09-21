@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skills repertoire</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 system-ui,sans-serif;color:#000;background:#fff}
+button{font:inherit;font-size:12px;border:1px solid #000;background:#fff;padding:3px 8px;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid #0a5bd8;outline-offset:2px}
+[hidden]{display:none !important}
+.kbd{display:inline-block;border:1px solid #666;padding:0 5px;font-size:11px;background:#f3f3f3}
+.m{display:inline-block;font-size:10px;border:1px solid #666;text-align:center;padding:0 3px;white-space:nowrap}
+.m.typed-only{background:#000;color:#fff}
+.m.claude-only{border-style:dashed}
+.src{font-size:10px;border:1px solid #999;padding:0 3px;text-align:center;white-space:nowrap}
+.src.pulled,.src.plugin,.src.desktop{background:#000;color:#fff;border-color:#000}
+
+/* ask region: the hero, the loudest thing on the page */
+#ask-region{margin:12px;padding:20px 40px 12px;border:2px solid #000}
+#ask-region label{display:block;font-size:20px;margin-bottom:8px}
+#search-input{width:100%;height:58px;font-size:24px;border:2px solid #000;padding:0 16px}
+#shortcut-hint{margin-top:8px;font-size:12px;color:#444;display:flex;gap:14px;flex-wrap:wrap}
+
+/* three columns */
+#cols{display:grid;grid-template-columns:240px 1fr 480px;margin:0 12px 12px;height:calc(100vh - 190px);min-height:400px}
+#category-sidebar,#result-list,#detail-pane{overflow:auto;border:1px solid #000;padding:8px}
+#result-list{border-left:0;border-right:0;padding:0}
+#filter-status{font-size:12px;margin-bottom:10px}
+#machine-stamp{font-size:11px;color:#444;border-top:1px solid #ddd;padding-top:6px}
+#machine-stamp div{margin:2px 0}
+
+/* result list */
+#result-legend{font-size:11px;padding:6px 8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #999}
+.gh{position:sticky;top:0;background:#e6e6e6;border-top:1px solid #000;border-bottom:1px solid #999;padding:3px 8px;font-size:12px;display:flex;justify-content:space-between}
+.gh small{color:#555}
+.r{display:grid;grid-template-columns:200px 52px 1fr 76px;align-items:center;gap:8px;width:100%;min-height:26px;padding:2px 8px;border:0;border-bottom:1px solid #eee;background:#fff;text-align:left;font-size:12px}
+.r .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r .desc{color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r[aria-selected="true"]{background:#d8d8d8;outline:2px solid #000;outline-offset:-2px}
+#more-matches{margin:6px 8px;font-size:11px}
+#no-results{padding:16px 12px}
+#no-results-message{font-size:16px;margin:0 0 10px}
+#no-results-weak .gh{position:static}
+#no-results-pointer{margin-top:12px;color:#333}
+
+/* detail pane */
+#detail-pane{border-left:2px solid #000}
+#detail-empty{color:#555}
+#detail-crumb{font-size:11px;color:#555}
+#detail-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0 10px}
+#detail-name{font-size:20px;margin:0;overflow-wrap:anywhere}
+.lbl{font-size:10px;color:#666;letter-spacing:.04em;margin:10px 0 2px}
+#detail-description{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+
+<header id="ask-region">
+  <label for="search-input">What are you trying to do?</label>
+  <input id="search-input" type="search" role="combobox" autocomplete="off" spellcheck="false"
+    aria-controls="result-listbox" aria-expanded="true" aria-autocomplete="list"
+    placeholder="watch a video, review my code, plan a feature…">
+  <div id="shortcut-hint">
+    <span><span class="kbd">⌘K</span> or <span class="kbd">/</span> focus</span>
+    <span><span class="kbd">↑</span><span class="kbd">↓</span> move</span>
+    <span><span class="kbd">Enter</span> open</span>
+    <span><span class="kbd">Esc</span> clear</span>
+  </div>
+</header>
+
+<div id="cols">
+  <aside id="category-sidebar" aria-label="Filters and machine">
+    <div id="filter-status" aria-live="polite"><span id="filter-status-text"></span></div>
+    <div id="machine-stamp"></div>
+  </aside>
+
+  <main id="result-list">
+    <div id="result-legend" aria-hidden="true">
+      <span>name</span>
+      <span>source: <span class="src own">mine</span> <span class="src pulled">pulled</span></span>
+      <span>what it does</span>
+      <span style="margin-left:auto">how it runs: <span class="m auto">auto</span> <span class="m typed-only">typed only</span> <span class="m claude-only">Claude only</span></span>
+    </div>
+    <div id="result-listbox" role="listbox" aria-label="Skills"></div>
+    <button id="more-matches" type="button" hidden></button>
+    <section id="no-results" hidden>
+      <p id="no-results-message"></p>
+      <div id="no-results-weak" role="listbox" aria-label="Weak matches" hidden></div>
+      <button id="browse-all" type="button">Browse all</button>
+      <p id="no-results-pointer"><code>/find-skills</code> looks beyond your toolkit · <code>/toolkit</code> makes a new one</p>
+    </section>
+  </main>
+
+  <aside id="detail-pane" aria-label="Skill detail">
+    <p id="detail-empty">Select a skill to see what it does.</p>
+    <section id="detail-header" hidden>
+      <div id="detail-crumb"></div>
+      <div id="detail-title"><h2 id="detail-name"></h2><span><span id="detail-source" class="src"></span> <span id="mode-badge" class="m"></span></span></div>
+    </section>
+    <section id="detail-body" hidden>
+      <div class="lbl">WHAT IT DOES</div>
+      <p id="detail-description"></p>
+    </section>
+  </aside>
+</div>
+
+<!-- repertoire:script -->
+<!-- repertoire:data -->
+</body>
+</html>

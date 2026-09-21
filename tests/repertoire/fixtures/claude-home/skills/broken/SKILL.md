@@ -1,0 +1,7 @@
+---
+name: broken
+description: [this is: not valid
+  yaml: {
+---
+
+# /broken
