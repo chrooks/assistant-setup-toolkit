@@ -419,6 +419,18 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await page.close();
   });
 
+  it("a query arriving by #q= link after See full chain also searches every skill", async () => {
+    await open();
+    await openRow("listen-audio");
+    await page.click("#full-chain-audio-then-video");
+    expect(await rowCount()).toBe(3);
+    await page.evaluate(() => { location.hash = "#q=plain"; });
+    await page.waitForFunction(() => (document.getElementById("search-input") as HTMLInputElement).value === "plain");
+    expect(await rowNames("#results-name-group")).toEqual(["/plain"]);
+    expect(await pressed("lane-audio-then-video")).toBe("false");
+    await page.close();
+  });
+
   it("the rail's lane list filters to installed stages in order", async () => {
     await open();
     expect(await ids("#lane-list button")).toEqual(["lane-video-load-then-trim", "lane-audio-then-video"]);
@@ -457,6 +469,14 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await page.focus(`#${lanes[lanes.length - 1]}`);
     await page.keyboard.press("Tab");
     expect(await activeId()).toBe("copy-usage"); // The next control after the list.
+    // An overflowing list must not become its own unnamed Tab stop: Chromium makes a scroller
+    // focusable once none of its children are. The 12-row fixture overflows only when short.
+    await page.setViewportSize({ width: 1440, height: 400 });
+    expect(await page.$eval("#result-list", (el) => el.scrollHeight > el.clientHeight)).toBe(true);
+    await page.focus(`#${lanes[lanes.length - 1]}`);
+    await page.keyboard.press("Tab");
+    expect(await activeId()).toBe("copy-usage");
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.focus("#search-input");
     await page.keyboard.press("Escape"); // No active row: the first ArrowDown lands on the first row.
     const arrowed = new Set<string>();

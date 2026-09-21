@@ -476,6 +476,8 @@ window.addEventListener("hashchange", () => {
   const query = readHash();
   if (query !== input.value.trim()) {
     input.value = query;
+    // Same rule as typing: a new query searches every skill, not only the active lane.
+    laneFilter = null;
     render();
   }
 });
