@@ -1,14 +1,14 @@
 // `npm run skills` — build the skills repertoire page for this machine, print
 // its path, and open it when the session is local.
 //
-//   npm run skills [-- --out <file>] [-- --claude-home <dir>]
+//   npm run skills [-- --out <file>] [-- --claude-home <dir>] [-- --skill-map <file>]
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { collectRepertoire, type Repertoire } from "../src/repertoire/collect.js";
+import { collectRepertoire, loadSkillMap, type Repertoire } from "../src/repertoire/collect.js";
 
 const toolkitRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pageDir = path.join(toolkitRoot, "src", "repertoire");
@@ -42,14 +42,21 @@ async function main(): Promise<void> {
     options: {
       out: { type: "string" },
       "claude-home": { type: "string" },
+      "skill-map": { type: "string" },
     },
   });
   const out = path.resolve(values.out ?? path.join(os.homedir(), ".cache", "repertoire", "index.html"));
   const claudeHome = path.resolve(values["claude-home"] ?? path.join(os.homedir(), ".claude"));
 
-  const rep = await collectRepertoire({ claudeHome, toolkitRoot, machine: os.hostname(), now: new Date() });
+  const skillMap = loadSkillMap(path.resolve(values["skill-map"] ?? path.join(toolkitRoot, "manifests", "skill-map.yaml")));
+
+  const rep = await collectRepertoire({ claudeHome, toolkitRoot, skillMap, machine: os.hostname(), now: new Date() });
   for (const skill of rep.unreadable) {
     console.error(`Couldn't read ${skill.name} (${skill.path}): ${skill.error.split("\n")[0]}`);
+  }
+  const uncategorized = rep.skills.filter((s) => s.uncategorized).map((s) => s.name);
+  if (uncategorized.length) {
+    console.error(`Uncategorized (add to manifests/skill-map.yaml): ${uncategorized.join(", ")}`);
   }
 
   mkdirSync(path.dirname(out), { recursive: true });

@@ -27,7 +27,18 @@ button{font:inherit;font-size:12px;border:1px solid #000;background:#fff;padding
 #cols{display:grid;grid-template-columns:240px 1fr 480px;margin:0 12px 12px;height:calc(100vh - 190px);min-height:400px}
 #category-sidebar,#result-list,#detail-pane{overflow:auto;border:1px solid #000;padding:8px}
 #result-list{border-left:0;border-right:0;padding:0}
-#filter-status{font-size:12px;margin-bottom:10px}
+#category-sidebar > div{margin-bottom:12px}
+#source-filter{display:flex}
+#source-filter button{flex:1 1 auto;padding:3px 4px;font-size:11px}
+#source-filter button + button{border-left:0}
+button[aria-pressed="true"]{background:#000;color:#fff}
+#filter-status{font-size:12px}
+#filter-status .sub{font-size:11px;color:#555;display:flex;align-items:center;gap:4px;margin-top:3px;flex-wrap:wrap}
+#filter-status .sub button{font-size:10px;padding:0 4px}
+#category-list button{display:flex;justify-content:space-between;gap:6px;width:100%;padding:4px;border:0;border-top:1px solid #ddd;text-align:left}
+#category-list small{color:#777;white-space:nowrap}
+#category-list button[aria-pressed="true"] small{color:#ccc}
+.hint{font-size:10px;color:#666;padding:2px 0}
 #machine-stamp{font-size:11px;color:#444;border-top:1px solid #ddd;padding-top:6px}
 #machine-stamp div{margin:2px 0}
 
@@ -72,14 +83,21 @@ button{font:inherit;font-size:12px;border:1px solid #000;background:#fff;padding
 
 <div id="cols">
   <aside id="category-sidebar" aria-label="Filters and machine">
-    <div id="filter-status" aria-live="polite"><span id="filter-status-text"></span></div>
+    <div id="source-filter" role="group" aria-label="Source">
+      <button id="source-own" type="button" data-source="own" aria-pressed="false"></button><button id="source-pulled" type="button" data-source="pulled" aria-pressed="false"></button><button id="source-all" type="button" data-source="all" aria-pressed="true"></button>
+    </div>
+    <div id="filter-status" aria-live="polite">
+      <span id="filter-status-text"></span>
+      <div class="sub"><span id="filter-status-detail"></span> <button id="clear-filters" type="button">Clear</button></div>
+    </div>
+    <div id="category-list" role="group" aria-label="Categories"></div>
     <div id="machine-stamp"></div>
   </aside>
 
   <main id="result-list">
     <div id="result-legend" aria-hidden="true">
       <span>name</span>
-      <span>source: <span class="src own">mine</span> <span class="src pulled">pulled</span></span>
+      <span>source: <span class="src own">mine</span> <span class="src pulled">pulled</span> <span class="src plugin">plugin</span> <span class="src desktop">desktop</span></span>
       <span>what it does</span>
       <span style="margin-left:auto">how it runs: <span class="m auto">auto</span> <span class="m typed-only">typed only</span> <span class="m claude-only">Claude only</span></span>
     </div>

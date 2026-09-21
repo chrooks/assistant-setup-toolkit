@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "plugins": {
+    "fixture-tools@fixtures": [
+      { "scope": "user", "installPath": "cache/fixture-tools/1.0.0", "version": "1.0.0" }
+    ],
+    "disabled-tools@fixtures": [
+      { "scope": "user", "installPath": "cache/disabled-tools/1.0.0", "version": "1.0.0" }
+    ]
+  }
+}

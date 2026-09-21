@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { collectRepertoire, type SkillEntry } from "../../src/repertoire/collect.js";
+import { collectRepertoire, loadSkillMap, type SkillEntry } from "../../src/repertoire/collect.js";
 import { search } from "../../src/repertoire/search.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -11,6 +11,7 @@ beforeAll(async () => {
   const rep = await collectRepertoire({
     claudeHome: path.join(here, "fixtures", "claude-home"),
     toolkitRoot: path.resolve(here, "..", ".."),
+    skillMap: loadSkillMap(path.join(here, "fixtures", "skill-map.yaml")),
     machine: "test-box",
     now: new Date(),
   });

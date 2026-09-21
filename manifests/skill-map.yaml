@@ -1,0 +1,76 @@
+# Curated data for the skills page (`npm run skills`), keyed by skill name.
+# categories: category -> skills in display order (mine first, then pulled in).
+# lanes: workflows in stage order; the detail pane shows the stage before and after.
+# neighbors: skills most often confused with each other, with the one-line difference.
+# Names not installed on a machine are skipped; installed skills missing here show
+# under Uncategorized. Mode (auto / typed only / Claude only) always comes from the
+# skill's real frontmatter, never from this file.
+
+categories:
+  "Plan & decide": [dev, scope, grill-me, grill-with-docs, plan, roadmap, to-issues, project-flow-setup, build-or-buy, seed-project, handoff, ask-matt, grilling, loop-me, to-questionnaire, to-spec, to-tickets, triage, wayfinder, claude-handoff, domain-modeling]
+  "Build & ship": [implement, tdd, diagnose, commit, prep-pr, prove-it, verification-loop, security-review, review-fanout, code-review, implement-spec, lean-build, surgical-patch, safe-refactor, migration, investigate-first, diagnosing-bugs, resolving-merge-conflicts, verify-and-stop, codebase-design, improve-codebase-architecture, setup-ts-deep-modules, prototype, wizard, setup-matt-pocock-skills]
+  "Design": [discover, idea-to-design, sketch, design-audit, make-interfaces-feel-better, impeccable, design-an-interface]
+  "Explain & visualize": [visualize, table, diagram, figure, wym, walkthrough, recap, visual-plan, visual-recap, quiz-me, prep-demo, make-deck, nickify, eli5, teach, wait-what]
+  "Knowledge & memory": [ingest, lint, sync-projects, sync-self, lexicon, note, notebooklm-export, canon, deep-research, research]
+  "Writing & voice": [chrisify, draft-email, letterhead, stop-slop, writing-fragments, writing-beats, writing-shape]
+  "Media": [watch-video, listen-audio, cut-video, load-song]
+  "Toolkit upkeep": [toolkit, skill-stocktake, context-budget, loop-audit, write-skill, writing-great-skills, writing-for-agents, consult, find-skills, codex-cli-runtime, codex-result-handling, gpt-5-4-prompting]
+  "Modes": [ship, caveman, cavecrew, caveman-commit, caveman-compress, caveman-discover, caveman-evidence-review, caveman-explore, caveman-help, caveman-learn, caveman-manage, caveman-optimize, caveman-review, caveman-setup, caveman-stats, ponytail, ponytail-audit, ponytail-debt, ponytail-gain, ponytail-help, ponytail-review]
+
+lanes:
+  - name: "DevOS lifecycle"
+    stages: [dev, scope, grill-me, plan, implement, prove-it]
+  - name: "Inside implement"
+    stages: [implement, verification-loop, review-fanout, tdd, commit]
+  - name: "Human-centered design"
+    stages: [discover, idea-to-design, sketch, plan, impeccable, design-audit]
+  - name: "Matt Pocock spec-to-tickets flow"
+    stages: [wayfinder, to-spec, to-tickets, implement]
+  - name: "PR prep"
+    stages: [prep-pr, review-fanout, commit]
+  - name: "Video load then trim"
+    stages: [watch-video, cut-video]
+  - name: "Stakeholder audio to requirements"
+    stages: [listen-audio, discover]
+  - name: "Walkthrough"
+    stages: [walkthrough, wym, recap]
+  - name: "Visual router"
+    stages: [visualize, table, diagram, figure]
+
+neighbors:
+  - a: watch-video
+    b: listen-audio
+    difference: "watch-video loads a video (transcript plus scene frames) for discussion; listen-audio transcribes an audio file locally with whisper and files nothing."
+  - a: grill-me
+    b: grilling
+    difference: "grill-me is his own and writes each resolved decision into the DevOS Throughline's Decision Ledger; grilling is Matt Pocock's plain grill with no ledger."
+  - a: grill-me
+    b: grill-with-docs
+    difference: "grill-me resolves the decision tree of a plan; grill-with-docs tests the plan against the project's LEXICON.md and ADRs and updates them inline."
+  - a: code-review
+    b: review-fanout
+    difference: "code-review reviews changes since a fixed point on two axes, Standards and Spec; review-fanout runs concurrent read-only reviewers, then synthesizes concerns and routes fix-forward."
+  - a: diagnose
+    b: diagnosing-bugs
+    difference: "Near-duplicates: diagnose is his own reproduce → minimise → hypothesise → instrument → fix → regression-test loop; diagnosing-bugs is the external version of the same loop (investigate-first is the evidence-only sibling that does not edit)."
+  - a: handoff
+    b: claude-handoff
+    difference: "handoff writes a copyable markdown continuation prompt for a later session; claude-handoff (typed-only) passes the work to a fresh background agent that starts now."
+  - a: visual-plan
+    b: visual-recap
+    difference: "visual-plan turns a text plan (before the build) into an interactive visual plan; visual-recap turns a PR, branch, commit, or diff (after the build) into an interactive visual recap."
+  - a: prove-it
+    b: verify-and-stop
+    difference: "prove-it runs each acceptance criterion's recorded proof method from the Throughline and writes a Proof Ledger; verify-and-stop is a generic validation-only check that adds no scope (verification-loop is the broad post-change check)."
+  - a: to-issues
+    b: to-tickets
+    difference: "to-issues creates, updates, and closes tracker records or TODO.md tasks; to-tickets (typed-only) splits a plan or spec into tracer-bullet tickets with blocking edges."
+  - a: deep-research
+    b: research
+    difference: "deep-research gives a cited multi-source web report through firecrawl and exa; research checks high-trust primary sources and saves the findings as a Markdown file in the repo."
+  - a: wym
+    b: eli5
+    difference: "wym explains in three sentences or fewer with a Lexicon grounding and can drill into intro + visual + TLDR; eli5 gives a dead-simple picture explainer for a five-year-old."
+  - a: sketch
+    b: design-audit
+    difference: "sketch shapes a Surface before the build (five Affordances, harvested patterns, three lo-fi layouts); design-audit checks a flow that already exists against the design ethos."

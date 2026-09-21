@@ -1,0 +1,18 @@
+# Skill map for the fixture ~/.claude home. multiline-folded, desktop-only, and
+# plugin-only stay out on purpose (Uncategorized); ghost-skill is not installed.
+categories:
+  "Media": [watch-video, cut-video, listen-audio, ghost-skill]
+  "Writing": [plain, multiline-pipe, script-tag]
+  "Modes": [typed-only, claude-only]
+
+lanes:
+  - name: "Video load then trim"
+    stages: [watch-video, ghost-skill, cut-video]
+
+neighbors:
+  - a: watch-video
+    b: listen-audio
+    difference: "Video with scene frames vs audio only"
+  - a: watch-video
+    b: ghost-skill
+    difference: "Skipped: ghost-skill is not installed"

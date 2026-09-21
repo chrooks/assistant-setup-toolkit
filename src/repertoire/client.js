@@ -4,7 +4,9 @@
 
 const data = JSON.parse(document.getElementById("repertoire-data").textContent);
 const skills = data.skills;
+const unreadable = data.unreadable;
 const total = data.counts.total;
+const COULDNT_READ = "Couldn't read";
 
 const $ = (id) => document.getElementById(id);
 const input = $("search-input");
@@ -18,6 +20,15 @@ const SOURCE_LABEL = { own: "mine", pulled: "pulled", plugin: "plugin", desktop:
 
 let showWeak = false;
 let activeName = null;
+// Filters: source is "all" | "own" | "pulled" (plugin and desktop count as pulled in); category is null for all.
+let sourceFilter = "all";
+let categoryFilter = null;
+
+const isOwn = (skill) => skill.source === "own";
+const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const passesFilters = (skill) =>
+  (sourceFilter === "all" || (sourceFilter === "own") === isOwn(skill)) &&
+  (categoryFilter === null || skill.category === categoryFilter);
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -33,9 +44,11 @@ function row(skill) {
   button.setAttribute("role", "option");
   button.setAttribute("aria-selected", "false");
   button.dataset.name = skill.name;
+  const source = el("span", `src ${skill.source}`, SOURCE_LABEL[skill.source]);
+  if (skill.origin) source.title = skill.origin;
   button.append(
     el("span", "nm", `/${skill.name}`),
-    el("span", `src ${skill.source}`, SOURCE_LABEL[skill.source]),
+    source,
     el("span", "desc", skill.description),
     el("span", `m ${skill.mode}`, MODE_LABEL[skill.mode]),
   );
@@ -46,15 +59,35 @@ function row(skill) {
   return button;
 }
 
-function group(id, title, list) {
+function unreadableRow(entry) {
+  const button = el("button", "r");
+  button.type = "button";
+  button.id = `row-${entry.name}`;
+  button.setAttribute("role", "option");
+  button.setAttribute("aria-selected", "false");
+  button.dataset.name = entry.name;
+  button.append(el("span", "nm", `/${entry.name}`), el("span", ""), el("span", "desc", entry.path), el("span", "m", "unreadable"));
+  button.addEventListener("click", () => {
+    setActive(entry.name);
+    openSkill(entry.name);
+  });
+  return button;
+}
+
+function catalogGroup(category, list) {
+  const own = list.filter(isOwn).length;
+  return group(`group-${slug(category)}`, category, list, `${list.length} · ${own} mine · ${list.length - own} pulled in`);
+}
+
+function group(id, title, list, count = String(list.length), makeRow = row) {
   const wrap = el("div", "grp");
   wrap.id = id;
   wrap.setAttribute("role", "group");
   const header = el("div", "gh");
   header.id = `${id}-label`;
-  header.append(el("span", "", title), el("small", "", String(list.length)));
+  header.append(el("span", "", title), el("small", "", count));
   wrap.setAttribute("aria-labelledby", header.id);
-  wrap.append(header, ...list.map(row));
+  wrap.append(header, ...list.map(makeRow));
   return wrap;
 }
 
@@ -67,14 +100,23 @@ function render() {
   noResultsWeak.hidden = true;
   listbox.hidden = false;
 
+  const visible = skills.filter(passesFilters);
   let shown;
   if (!query) {
-    // Slice 1: one alphabetical list; the category catalog replaces it in slice 2.
-    const all = [...skills].sort((a, b) => a.name.localeCompare(b.name));
-    listbox.append(group("results-all-group", "All skills", all));
-    shown = all.length;
+    // The catalog: every skill by category, in the collector's order.
+    shown = 0;
+    for (const category of data.categories) {
+      const list = visible.filter((s) => s.category === category);
+      if (list.length) listbox.append(catalogGroup(category, list));
+      shown += list.length;
+    }
+    // Unreadable skills have no source or category, so any filter hides them.
+    if (unreadable.length && sourceFilter === "all" && categoryFilter === null) {
+      listbox.append(group("group-couldnt-read", COULDNT_READ, unreadable, String(unreadable.length), unreadableRow));
+      shown += unreadable.length;
+    }
   } else {
-    const { nameMatches, intentMatches, weak } = search(query, skills);
+    const { nameMatches, intentMatches, weak } = search(query, visible);
     shown = nameMatches.length + intentMatches.length;
     if (shown > 0) {
       if (nameMatches.length) listbox.append(group("results-name-group", "Name matches", nameMatches));
@@ -95,6 +137,14 @@ function render() {
     }
   }
   $("filter-status-text").textContent = query ? `Showing ${shown} of ${total} · "${query}"` : `Showing ${shown} of ${total}`;
+  const sourceName = { all: "All", own: "Mine", pulled: "Pulled in" }[sourceFilter];
+  $("filter-status-detail").textContent = `Source: ${sourceName} · Category: ${categoryFilter ?? "All"}`;
+  for (const button of document.querySelectorAll("#source-filter button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.source === sourceFilter));
+  }
+  for (const button of document.querySelectorAll("#category-list button")) {
+    button.setAttribute("aria-pressed", String((button.dataset.category ?? null) === categoryFilter));
+  }
   setActive(rows().some((r) => r.dataset.name === activeName) ? activeName : null);
 }
 
@@ -128,10 +178,19 @@ function move(step) {
 
 function openSkill(name) {
   const skill = skills.find((s) => s.name === name);
-  if (!skill) return;
+  const broken = skill ? null : unreadable.find((u) => u.name === name);
+  if (!skill && !broken) return;
   $("detail-empty").hidden = true;
   $("detail-header").hidden = false;
   $("detail-body").hidden = false;
+  $("detail-source").hidden = !skill;
+  $("mode-badge").hidden = !skill;
+  if (broken) {
+    $("detail-crumb").textContent = `All › ${COULDNT_READ} › ${broken.name}`;
+    $("detail-name").textContent = `/${broken.name}`;
+    $("detail-description").textContent = `Couldn't read ${broken.path}\n${broken.error}`;
+    return;
+  }
   $("detail-crumb").textContent = `All › ${skill.category} › ${skill.name}`;
   $("detail-name").textContent = `/${skill.name}`;
   $("detail-source").textContent = SOURCE_LABEL[skill.source];
@@ -206,7 +265,41 @@ window.addEventListener("hashchange", () => {
   }
 });
 
+function setFilters(source, category) {
+  sourceFilter = source;
+  categoryFilter = category;
+  render();
+}
+
 const counts = data.counts;
+const setCount = (id, label, n) => { $(id).textContent = `${label} ${n}`; };
+setCount("source-own", "Mine", counts.own);
+setCount("source-pulled", "Pulled in", counts.pulled + counts.plugin + counts.desktop);
+setCount("source-all", "All", total);
+for (const button of document.querySelectorAll("#source-filter button")) {
+  button.addEventListener("click", () => setFilters(button.dataset.source, categoryFilter));
+}
+$("clear-filters").addEventListener("click", () => setFilters("all", null));
+
+function categoryButton(id, label, countText, category) {
+  const button = el("button");
+  button.type = "button";
+  button.id = id;
+  button.setAttribute("aria-pressed", "false");
+  if (category !== null) button.dataset.category = category;
+  button.append(el("span", "", label), el("small", "", countText));
+  button.addEventListener("click", () => setFilters(sourceFilter, category));
+  return button;
+}
+const categoryList = $("category-list");
+categoryList.append(categoryButton("category-all", "All categories", String(total), null));
+for (const category of data.categories) {
+  const inCategory = skills.filter((s) => s.category === category);
+  const own = inCategory.filter(isOwn).length;
+  categoryList.append(categoryButton(`category-${slug(category)}`, category, `${own} · ${inCategory.length - own}`, category));
+}
+categoryList.append(el("div", "hint", "counts = mine · pulled in"));
+
 const stamp = $("machine-stamp");
 stamp.append(
   el("div", "", `Machine: ${data.machine}`),

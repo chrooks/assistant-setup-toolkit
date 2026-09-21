@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "fixture-tools@fixtures": true,
+    "disabled-tools@fixtures": false
+  }
+}
