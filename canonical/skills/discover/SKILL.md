@@ -56,7 +56,11 @@ one exist, or a design frame depends on people not in the room.
 Check before writing, every time — never ask the user:
 
 1. `.tasks/` exists **and** is gitignored → write there.
-2. Otherwise → write to `../<repo>-research/`, outside the repo, and say so in one line.
+2. Otherwise → `../<repo>-research/`, outside the repo, and say so in one line.
+3. **That path not writable** → the session scratchpad, naming the full path in the
+   report so the user can move it. Never give up and write inside the repo instead.
+   Found by the first proof run: a vault symlinked into a service data directory is
+   not writable by the user, and branch 2 assumed it always would be.
 
 These are a named person's words about their job. Never file them into the user's
 knowledge base. Never commit them.
@@ -121,6 +125,12 @@ A correction here is worth more than the whole rest of the session.
    Skill can produce.
 2. Number anything typed that is unnumbered. `Q<n>` for an answer under guide
    question *n*; `T<n>` for a turn in a raw transcript. Never renumber an existing ID.
+   **Live notes are often typed inside the user's own draft block, not after it.** A
+   line sitting within a draft that answers, corrects, or adds to the text around it
+   belongs to the other person. Tell the two apart by **content, never by position** —
+   a sub-bullet under the user's own point is the most commonly missed evidence there
+   is. When it is genuinely ambiguous, mark the span `attribution: unclear` and raise
+   it in the report. Never silently assign it to either side.
 3. **Verify every quote.** Grep the exact span back against the notes file before
    writing it into a Quotes column. No match, no row. Grep one line at a time — a
    span crossing a line break is split and each part checked.
@@ -170,3 +180,4 @@ A correction here is worth more than the whole rest of the session.
 - [ ] Non-English evidence is in the original, with the gloss marked as gloss
 - [ ] The research folder is gitignored, or lives outside the repo
 - [ ] The distinct-people count was reported
+- [ ] Notes typed inside the user's own draft blocks were checked, not assumed to be theirs
