@@ -98,8 +98,17 @@ toward whichever option looks finished. So:
 - Make them disagree. If two layouts answer the same question the same way, one of them
   is wasted.
 
-Write `layout-a.html`, `layout-b.html`, `layout-c.html`, then tell the user how to open
-them. On a remote machine, follow the machine context for serving — never a localhost URL.
+Write `layout-a.html`, `layout-b.html`, `layout-c.html`.
+
+**Render each one at the target viewport and look at it before handing off** — headless,
+never a window on the user's screen. Overflow, a region pushed below the fold, and a
+ranked-higher Affordance sitting under a lower one only show in a render; the markup
+reads fine. Found by the first run: a lane map whose tags overflowed at 1440px, and a
+merged detail pane that put A4 above A2 and sank A2 below the fold. No headless browser
+available → say so, and call the layouts unrendered.
+
+Then tell the user how to open them. On a remote machine, follow the machine context for
+serving — never a localhost URL.
 
 ## Step 4 — Pick and mix
 
@@ -129,4 +138,5 @@ The layouts sit beside it in `sketch/`: `layout-a.html` through `layout-c.html`,
 - [ ] Every platform convention is named, and every deliberate break is marked
 - [ ] Three self-contained HTML layouts that differ in structure, not styling
 - [ ] Every region has a readable `id` and an Affordance tag
+- [ ] Each layout was rendered at the target viewport and looked at, and `chosen.html` too
 - [ ] The user chose, and the amalgamation was confirmed before `/plan`
