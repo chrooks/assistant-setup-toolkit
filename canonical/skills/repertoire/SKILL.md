@@ -19,7 +19,7 @@ In this order, stop at the first that gives a path:
 
 ## 2. Rebuild the page
 
-From the clone, run `npm run skills`.
+From the clone, run `npm run -s skills`. The `-s` keeps npm's banner off standard output.
 
 - The first line of standard output is the page's path (`$HOME/.cache/repertoire/index.html`).
 - Warnings on standard error (unreadable skills, Uncategorized skills) are for you — mention them in one line, never block on them.
@@ -37,8 +37,9 @@ The user's browser is on another device, so a file path or a `localhost` address
   3. Connection fails → the port is free. Start the server there, detached so it outlives this turn:
      `setsid nohup python3 -m http.server <port> --bind <address> --directory "$HOME/.cache/repertoire" >/dev/null 2>&1 &`
      Then repeat the `curl` until it shows `id="repertoire-data"` (a few tries, one second apart).
+     It never shows `id="repertoire-data"` (the bind failed, or another process took the port) → try the next port.
   4. Anything else answers → another service owns the port. Never stop or kill it. Try the next port.
-- All eleven ports are taken by other services → say so and return the file path.
+- No port gives a repertoire server → say so, give the reason, and return the file path.
 
 ## 4. Reply
 

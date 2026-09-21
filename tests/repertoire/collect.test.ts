@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +38,15 @@ describe("loadSkillMap", () => {
     const real = loadSkillMap(realMap);
     expect(Object.keys(real.categories)).toContain("Media");
     expect(real.lanes.length).toBeGreaterThan(0);
+  });
+
+  it("puts every canonical skill in a category, so no toolkit skill shows as Uncategorized", () => {
+    const real = loadSkillMap(realMap);
+    const mapped = new Set(Object.values(real.categories).flat());
+    const canonical = readdirSync(path.join(toolkitRoot, "canonical", "skills"), { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name);
+    expect(canonical.filter((name) => !mapped.has(name))).toEqual([]);
   });
 
   it("rejects a malformed map with the file path and the bad field", () => {

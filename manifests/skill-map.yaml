@@ -14,7 +14,7 @@ categories:
   "Knowledge & memory": [ingest, lint, sync-projects, sync-self, lexicon, note, notebooklm-export, canon, deep-research, research]
   "Writing & voice": [chrisify, draft-email, letterhead, stop-slop, writing-fragments, writing-beats, writing-shape]
   "Media": [watch-video, listen-audio, cut-video, load-song]
-  "Toolkit upkeep": [toolkit, skill-stocktake, context-budget, loop-audit, write-skill, writing-great-skills, writing-for-agents, consult, find-skills, codex-cli-runtime, codex-result-handling, gpt-5-4-prompting]
+  "Toolkit upkeep": [toolkit, repertoire, skill-stocktake, context-budget, loop-audit, write-skill, writing-great-skills, writing-for-agents, consult, find-skills, codex-cli-runtime, codex-result-handling, gpt-5-4-prompting]
   "Modes": [ship, caveman, cavecrew, caveman-commit, caveman-compress, caveman-discover, caveman-evidence-review, caveman-explore, caveman-help, caveman-learn, caveman-manage, caveman-optimize, caveman-review, caveman-setup, caveman-stats, ponytail, ponytail-audit, ponytail-debt, ponytail-gain, ponytail-help, ponytail-review]
 
 lanes:
