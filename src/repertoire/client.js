@@ -46,6 +46,7 @@ function row(skill) {
   button.id = `row-${skill.name}`;
   button.setAttribute("role", "option");
   button.setAttribute("aria-selected", "false");
+  button.tabIndex = -1;
   button.dataset.name = skill.name;
   const source = el("span", `src ${skill.source}`, SOURCE_LABEL[skill.source]);
   if (skill.origin) source.title = skill.origin;
@@ -55,6 +56,7 @@ function row(skill) {
     el("span", "desc", skill.description),
     el("span", `m ${skill.mode}`, MODE_LABEL[skill.mode]),
   );
+  keepFocusInSearch(button);
   button.addEventListener("click", () => {
     setActive(skill.name);
     openSkill(skill.name);
@@ -68,14 +70,20 @@ function unreadableRow(entry) {
   button.id = `row-${entry.name}`;
   button.setAttribute("role", "option");
   button.setAttribute("aria-selected", "false");
+  button.tabIndex = -1;
   button.dataset.name = entry.name;
   button.append(el("span", "nm", `/${entry.name}`), el("span", ""), el("span", "desc", entry.path), el("span", "m", "unreadable"));
+  keepFocusInSearch(button);
   button.addEventListener("click", () => {
     setActive(entry.name);
     openSkill(entry.name);
   });
   return button;
 }
+
+// Options are not Tab stops: focus stays in the search box (the combobox) and the
+// arrow keys move the active option through aria-activedescendant.
+const keepFocusInSearch = (button) => button.addEventListener("mousedown", (event) => event.preventDefault());
 
 function catalogGroup(category, list) {
   const own = list.filter(isOwn).length;
@@ -104,29 +112,23 @@ function render() {
   listbox.hidden = false;
 
   const visible = skills.filter(passesFilters);
-  let shown;
   if (!query && laneFilter !== null) {
     // A lane: its installed stages in lane order.
     const list = laneStages(laneFilter).map((name) => visible.find((s) => s.name === name)).filter(Boolean);
     if (list.length) listbox.append(group("group-lane", `Lane: ${laneFilter}`, list));
-    shown = list.length;
   } else if (!query) {
     // The catalog: every skill by category, in the collector's order.
-    shown = 0;
     for (const category of data.categories) {
       const list = visible.filter((s) => s.category === category);
       if (list.length) listbox.append(catalogGroup(category, list));
-      shown += list.length;
     }
     // Unreadable skills have no source or category, so any filter hides them.
     if (unreadable.length && sourceFilter === "all" && categoryFilter === null && laneFilter === null) {
       listbox.append(group("group-couldnt-read", COULDNT_READ, unreadable, String(unreadable.length), unreadableRow));
-      shown += unreadable.length;
     }
   } else {
     const { nameMatches, intentMatches, weak } = search(query, visible);
-    shown = nameMatches.length + intentMatches.length;
-    if (shown > 0) {
+    if (nameMatches.length + intentMatches.length > 0) {
       if (nameMatches.length) listbox.append(group("results-name-group", "Name matches", nameMatches));
       if (intentMatches.length) listbox.append(group("results-intent-group", "Matches what it does", intentMatches));
       if (weak.length && showWeak) listbox.append(group("results-weak-group", "Weaker matches", weak));
@@ -144,6 +146,12 @@ function render() {
       }
     }
   }
+  // Every row on screen, weaker matches included once they show.
+  const shown = rows().length;
+  // The combobox is expanded while a list of options is on screen.
+  const openBox = [listbox, noResultsWeak].find((box) => !box.hidden && box.querySelector(".r"));
+  input.setAttribute("aria-expanded", String(Boolean(openBox)));
+  input.setAttribute("aria-controls", (openBox ?? listbox).id);
   $("filter-status-text").textContent = query ? `Showing ${shown} of ${total} · "${query}"` : `Showing ${shown} of ${total}`;
   const sourceName = { all: "All", own: "Mine", pulled: "Pulled in" }[sourceFilter];
   $("filter-status-detail").textContent =
@@ -172,9 +180,8 @@ function setActive(name) {
     r.setAttribute("aria-selected", String(on));
     if (on) activeRow = r;
   }
-  for (const box of [listbox, noResultsWeak, input]) box.removeAttribute("aria-activedescendant");
+  input.removeAttribute("aria-activedescendant");
   if (activeRow) {
-    activeRow.closest("[role=listbox]").setAttribute("aria-activedescendant", activeRow.id);
     input.setAttribute("aria-activedescendant", activeRow.id);
     activeRow.scrollIntoView({ block: "nearest" });
   }
@@ -426,12 +433,16 @@ function readHash() {
 function clearSearch() {
   input.value = "";
   showWeak = false;
+  activeName = null;
   writeHash();
   render();
+  $("result-list").scrollTop = 0;
 }
 
 input.addEventListener("input", () => {
   showWeak = false;
+  // A lane is a browse view; a new query searches every skill again.
+  laneFilter = null;
   writeHash();
   render();
 });
@@ -479,7 +490,9 @@ function setFilters(source, category, lane = null) {
 const counts = data.counts;
 const setCount = (id, label, n) => { $(id).textContent = `${label} ${n}`; };
 setCount("source-own", "Mine", counts.own);
-setCount("source-pulled", "Pulled in", counts.pulled + counts.plugin + counts.desktop);
+// Plugin and desktop skills count as pulled in, here and in the stamp.
+const pulledIn = counts.pulled + counts.plugin + counts.desktop;
+setCount("source-pulled", "Pulled in", pulledIn);
 setCount("source-all", "All", total);
 for (const button of document.querySelectorAll("#source-filter button")) {
   button.addEventListener("click", () => setFilters(button.dataset.source, categoryFilter, laneFilter));
@@ -521,7 +534,9 @@ const stamp = $("machine-stamp");
 stamp.append(
   el("div", "", `Machine: ${data.machine}`),
   el("div", "", `Built: ${new Date(data.generatedAt).toLocaleString()}`),
-  el("div", "", `${counts.own} mine · ${counts.pulled} pulled in · ${counts.plugin} plugin · ${counts.desktop} desktop`),
+  el("div", "", unreadable.length
+    ? `${counts.own} mine + ${pulledIn} pulled in (${counts.desktop} desktop, ${counts.plugin} plugin) + ${unreadable.length} couldn't read = ${total} all`
+    : `${counts.own} mine · ${pulledIn} pulled in (${counts.desktop} desktop, ${counts.plugin} plugin)`),
 );
 stamp.lastChild.id = "machine-stamp-counts";
 

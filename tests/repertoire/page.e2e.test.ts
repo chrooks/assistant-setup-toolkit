@@ -100,7 +100,9 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     const stamp = await page.textContent("#machine-stamp");
     expect(stamp).toContain(`Machine: ${os.hostname()}`);
     expect(stamp).toContain("Built:");
-    expect(await page.textContent("#machine-stamp-counts")).toBe("3 mine · 6 pulled in · 1 plugin · 1 desktop");
+    expect(await page.textContent("#machine-stamp-counts")).toBe(
+      "3 mine + 8 pulled in (1 desktop, 1 plugin) + 1 couldn't read = 12 all",
+    );
     await page.close();
   });
 
@@ -116,6 +118,7 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     expect(page.url()).toContain("#q=watch%20a%20video");
     await page.click("#more-matches");
     expect(await rowNames("#results-weak-group")).toEqual(["/plain"]);
+    expect(await page.textContent("#filter-status-text")).toBe('Showing 4 of 12 · "watch a video"');
     expect(await page.isHidden("#more-matches")).toBe(true);
     await page.close();
   });
@@ -124,9 +127,10 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await open();
     await page.fill("#search-input", "watch a video");
     await page.keyboard.press("ArrowDown");
-    expect(await page.getAttribute("#result-listbox", "aria-activedescendant")).toBe("row-watch-video");
+    expect(await page.getAttribute("#search-input", "aria-activedescendant")).toBe("row-watch-video");
     await page.keyboard.press("ArrowDown");
-    expect(await page.getAttribute("#result-listbox", "aria-activedescendant")).toBe("row-cut-video");
+    expect(await page.getAttribute("#search-input", "aria-activedescendant")).toBe("row-cut-video");
+    expect(await activeId()).toBe("search-input");
     await page.keyboard.press("ArrowUp");
     await page.keyboard.press("Enter");
     expect(await page.textContent("#detail-name")).toBe("/watch-video");
@@ -134,13 +138,32 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await page.keyboard.press("Escape");
     expect(await page.inputValue("#search-input")).toBe("");
     expect(await page.$$eval("#result-listbox .r", (n) => n.length)).toBe(12);
+    expect(await page.getAttribute("#search-input", "aria-activedescendant")).toBeNull();
+    expect(await page.$$("#result-list .r[aria-selected=true]")).toHaveLength(0);
+    await page.close();
+  });
+
+  it("Esc clears the active row and scrolls the list back to the top", async () => {
+    await open();
+    await page.setViewportSize({ width: 1440, height: 400 });
+    await page.fill("#search-input", "video");
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("ArrowUp"); // The last row: the list scrolls down to it.
+    expect(await page.getAttribute("#search-input", "aria-activedescendant")).toBe("row-broken");
+    expect(await page.$eval("#result-list", (n) => n.scrollTop)).toBeGreaterThan(0);
+    await page.keyboard.press("Escape");
+    expect(await page.getAttribute("#search-input", "aria-activedescendant")).toBeNull();
+    expect(await page.$$("#result-list .r[aria-selected=true]")).toHaveLength(0);
+    expect(await page.$eval("#result-list", (n) => n.scrollTop)).toBe(0);
     await page.close();
   });
 
   it("a query with no match shows the message, Browse all, and the pointer, without a weak list", async () => {
     await open();
+    expect(await page.getAttribute("#search-input", "aria-expanded")).toBe("true");
     await page.fill("#search-input", "bake sourdough");
     expect(await page.textContent("#no-results-message")).toBe("No skill matches 'bake sourdough'");
+    expect(await page.getAttribute("#search-input", "aria-expanded")).toBe("false");
     expect(await page.textContent("#no-results-pointer")).toBe("/find-skills looks beyond your toolkit · /toolkit makes a new one");
     expect(await page.isHidden("#no-results-weak")).toBe(true);
     expect(await page.isVisible("#browse-all")).toBe(true);
@@ -198,6 +221,18 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await page.click("#clear-filters");
     expect(await rowCount()).toBe(12);
     expect(await pressed("category-all")).toBe("true");
+    await page.close();
+  });
+
+  it("the stamp and the source filter use the same words for the same numbers", async () => {
+    await open();
+    const stamp = (await page.textContent("#machine-stamp-counts"))!;
+    const number = (text: string | null) => Number(/\d+/.exec(text ?? "")![0]);
+    expect(stamp).toContain(`${number(await page.textContent("#source-own"))} mine`);
+    expect(stamp).toContain(`${number(await page.textContent("#source-pulled"))} pulled in`);
+    expect(stamp).toContain(`= ${number(await page.textContent("#source-all"))} all`);
+    const unreadableRows = await page.$$eval("#group-couldnt-read .r", (n) => n.length);
+    expect(stamp).toContain(`${unreadableRows} couldn't read`);
     await page.close();
   });
 
@@ -370,6 +405,20 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
     await page.close();
   });
 
+  it("typing a new query after See full chain searches every skill, not only the lane", async () => {
+    await open();
+    await openRow("listen-audio");
+    await page.click("#full-chain-audio-then-video");
+    expect(await rowCount()).toBe(3);
+    await page.fill("#search-input", "plain");
+    expect(await rowNames("#results-name-group")).toEqual(["/plain"]);
+    expect(await pressed("lane-audio-then-video")).toBe("false");
+    expect(await page.textContent("#filter-status-detail")).toBe("Source: All · Category: All");
+    await page.fill("#search-input", "video");
+    expect(await rowCount()).toBeGreaterThan(0);
+    await page.close();
+  });
+
   it("the rail's lane list filters to installed stages in order", async () => {
     await open();
     expect(await ids("#lane-list button")).toEqual(["lane-video-load-then-trim", "lane-audio-then-video"]);
@@ -391,13 +440,31 @@ describe.skipIf(!hasChromium)("skills page (fixture build)", () => {
       const id = await activeId();
       if (id) reached.add(id);
     }
+    expect(await page.$$eval("#result-listbox .r", (n) => n.every((r) => (r as HTMLElement).tabIndex === -1))).toBe(true);
     const expected = [
-      ...(await ids("#result-listbox .r")), ...(await ids("#category-list button")), ...(await ids("#lane-list button")),
+      ...(await ids("#category-list button")), ...(await ids("#lane-list button")),
       ...(await ids("#source-filter button")), "clear-filters", "copy-usage", "tab-overview",
       "compare-listen-audio", "compare-cut-video", "compare-any-input", "full-chain-video-load-then-trim",
       "full-chain-audio-then-video",
     ];
     expect(expected.filter((id) => !reached.has(id))).toEqual([]);
+    // The list is one Tab stop: Tab never lands on a row, and the arrow keys reach every row.
+    expect([...reached].filter((id) => id.startsWith("row-"))).toEqual([]);
+    await page.focus("#search-input");
+    await page.keyboard.press("Tab");
+    expect(await activeId()).toBe("source-own");
+    const lanes = await ids("#lane-list button");
+    await page.focus(`#${lanes[lanes.length - 1]}`);
+    await page.keyboard.press("Tab");
+    expect(await activeId()).toBe("copy-usage"); // The next control after the list.
+    await page.focus("#search-input");
+    await page.keyboard.press("Escape"); // No active row: the first ArrowDown lands on the first row.
+    const arrowed = new Set<string>();
+    for (let i = 0; i < 12; i++) {
+      await page.keyboard.press("ArrowDown");
+      arrowed.add((await page.getAttribute("#search-input", "aria-activedescendant"))!);
+    }
+    expect([...arrowed].sort()).toEqual((await ids("#result-listbox .r")).sort());
     // Tabs use a roving focus: Tab reaches the selected tab, arrow keys reach the other.
     await page.focus("#tab-overview");
     await page.keyboard.press("ArrowRight");
