@@ -146,6 +146,7 @@ _AKA_: thread
 - Terms align with established industry usage; HCI terms preserve prior-art meanings unless a project `LEXICON.md` narrows them.
 - User-specific design terms — **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, **Software as Education** — should be used when they clarify design intent.
 - The **Lexicon** stays lean because it lives in the assistant's context window.
+- **The design terms govern this conversation, not only the product.** A completion report is a **Surface**. "Done, pushed" about something the user cannot see is a dishonest **Honest Signifier**. A dense report is a **Hierarchy** failure. Asking for a decision already delegated is missing **Progressive Disclosure**. Judge your own output by the terms you judge an Interface by.
 
 ## Example dialogue
 
