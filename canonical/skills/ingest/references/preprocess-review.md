@@ -89,7 +89,7 @@ decision. Summary table first, then one section per item:
     |---|------|------|----------|------|
 
     ## 1. <title>
-    - **Source**: [raw file or original link] (karakeep: <id> where applicable)
+    - **Source**: [raw file] — or, for a Karakeep save: [original URL](url) · [Karakeep](https://keep.chrooks.com/dashboard/preview/<id>) · karakeep: <id>
     - **What it is**: <kind first, then one-clause substance — a report, not a pitch>
     - **Proposed**: ingest → [draft](drafts/<name>.md) · fold into [[page]] · to-engage row · to-consume row · discard
     - **Why saved** _(guess — confirm)_: <queue-row items only>
@@ -99,13 +99,18 @@ decision. Summary table first, then one section per item:
 verdict the user may want to double-check against the actual item, and a one-liner with
 no link forces them to ask. (Learned 2026-08-27, first review pass.)
 
+A Karakeep entry carries **two** links: the original, so the user can rewatch the video
+before deciding, and Karakeep's cached copy, for when the original has vanished.
+
 ## The review pass
 
 The sit-down. Same pacing discipline as an inbox walk — one item at a time, approval
 per item, never read ahead of the user's decision.
 
-1. Open the packet, state the count, walk the items in order.
-2. Per item the user says **approve**, **adjust** (then approve), or **reject**:
+1. Open the packet, state the count, walk the items in order. **Lead each item with its
+   Source links**, so the user can reopen the video before deciding.
+2. Per item the user says **approve** (yes), **adjust** (a dictated change, then approve), or
+   **reject** (no):
    - **Approve** — apply it: move the draft from `staging/drafts/` to its `target:`
      path, apply described folds against the *current* page state, update `index.md`,
      add the `log.md` entry, add backlog rows (with the confirmed "Why I saved it"),
@@ -122,6 +127,20 @@ failure signal it always was: triage too loose.
 
 ## Cadence
 
-Manual trigger for now. Once the procedure has repeated enough to trust, promote the
-preprocess pass to a scheduled run on the home server (same manual-until-earned lifecycle
-as the Digest syncs) — the review pass stays human, always.
+**The Karakeep preprocess is scheduled.** It runs hourly from cron on the home server —
+`hearth/scripts/karakeep-preprocess.sh`; hearth runbook 12 "Scheduled preprocess", ADR 0001
+decision 10. The user never starts it. The vault-inbox preprocess stays manual, and the
+review pass stays human, always.
+
+The scheduled run splits at a trust Boundary. The script does every network and shell
+step — Karakeep API, `watch-video`, `gallery-dl` — into a per-save folder. A locked-down
+`claude -p` then reads those folders and drafts: no Bash, no web, no MCP, and it may edit
+only `staging/`. The script then archives each save whose id reached the packet.
+
+Scheduled mode differs from a manual pass in three ways:
+
+- **No `log.md` entry per run** — an hourly entry is noise. The apply at review logs.
+- **The model never archives** — the script does, and only for ids in the packet.
+- **`staging/preprocess-status.md` is the run's health Surface** — written by the script
+  beside the packet: staged count, saves still waiting, extraction failures, stuck saves.
+  Check it when the packet stops growing.

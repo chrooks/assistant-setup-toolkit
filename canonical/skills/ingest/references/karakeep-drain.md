@@ -44,7 +44,8 @@ the contents."*
 about metadata, and never skip an item unread to save time. The drain's cost is real and
 it is handled on the other side — by the **preprocess pass**
 ([preprocess-review.md](./preprocess-review.md)), which moves extraction and drafting to
-unattended time so the user's sit-down is decisions only.
+unattended time so the user's sit-down is decisions only. That pass now runs **hourly on its own**
+(preprocess-review.md, "Cadence") — a live drain is the exception, not the routine.
 
 Drain **one item at a time**, oldest first unless told otherwise.
 
