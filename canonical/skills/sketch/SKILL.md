@@ -95,20 +95,34 @@ toward whichever option looks finished. So:
 - A short header in each file: which of the five it serves best, which worst, and which
   harvested pattern it borrows.
 - Mark a deliberate convention break inside the region that breaks it.
+- **Every annotation carries one of five classes, and nothing else does:** `.tag`
+  (Affordance tags), `.rid` (`#id` labels), `.break` (convention-break callouts),
+  `.notes` (the notes list), `.anno` (any other note-only text). The calm copy hides
+  exactly these, so text in no class leaks into it and UI copy in one vanishes from it.
 - Make them disagree. If two layouts answer the same question the same way, one of them
   is wasted.
 
 Write `layout-a.html`, `layout-b.html`, `layout-c.html`.
 
-**Render each one at the target viewport and look at it before handing off** — headless,
+**Every HTML file ships as two copies: annotated and calm.** The annotated copy is for
+talking about the layout by `#id`; the calm copy is for judging how it feels, with the
+annotation layer gone and the ids still in the markup. Generate the calm copies — never
+write one by hand — with the bundled script, and re-run it after every edit:
+
+    python3 <this skill's directory>/make-calm.py sketch/layout-a.html sketch/layout-b.html sketch/layout-c.html
+
+It writes `layout-a-calm.html` and the rest beside each source.
+
+**Render every file, annotated and calm, at the target viewport and look at it before handing off** — headless,
 never a window on the user's screen. Overflow, a region pushed below the fold, and a
 ranked-higher Affordance sitting under a lower one only show in a render; the markup
 reads fine. Found by the first run: a lane map whose tags overflowed at 1440px, and a
 merged detail pane that put A4 above A2 and sank A2 below the fold. No headless browser
 available → say so, and call the layouts unrendered.
 
-Then tell the user how to open them. On a remote machine, follow the machine context for
-serving — never a localhost URL.
+Then tell the user how to open them — serve and link **both** copies of every file, calm
+and annotated. On a remote machine, follow the machine context for serving — never a
+localhost URL.
 
 ## Step 4 — Pick and mix
 
@@ -116,14 +130,15 @@ Ask the user which parts of which layout to keep. This is **taste** — their si
 Division of Responsibility. Offer a recommendation and its one reason, never a neutral
 menu.
 
-Then build the amalgamation as `chosen.html`, same lo-fi rules, and confirm it before
-anything moves to `/plan`.
+Then build the amalgamation as `chosen.html`, same lo-fi rules, run `make-calm.py` on it
+for `chosen-calm.html`, and confirm it before anything moves to `/plan`.
 
 ## Where it lands
 
 `.tasks/<issue#>-<slug>/sketch.md` — the five, the patterns with links, and the pick.
 The layouts sit beside it in `sketch/`: `layout-a.html` through `layout-c.html`, and
-`chosen.html`. `/plan` reads both.
+`chosen.html`, each with its `-calm.html` copy. `/plan` reads `sketch.md` and the
+annotated `chosen.html`.
 
 ## Handoffs
 
@@ -138,5 +153,6 @@ The layouts sit beside it in `sketch/`: `layout-a.html` through `layout-c.html`,
 - [ ] Every platform convention is named, and every deliberate break is marked
 - [ ] Three self-contained HTML layouts that differ in structure, not styling
 - [ ] Every region has a readable `id` and an Affordance tag
-- [ ] Each layout was rendered at the target viewport and looked at, and `chosen.html` too
+- [ ] Every HTML file has a `-calm.html` copy made by `make-calm.py`, and both copies were served and linked
+- [ ] Every file, annotated and calm, was rendered at the target viewport and looked at, `chosen.html` too
 - [ ] The user chose, and the amalgamation was confirmed before `/plan`
