@@ -127,6 +127,15 @@ Prefer additive code changes followed by subtractions that keep tests passing. P
 
     Describe the current state relevant to this task as if the reader knows nothing. Name the key files and modules by full path. Define any non-obvious term you will use. Do not refer to prior plans.
 
+    ## Four Principles
+
+    One line per principle, naming what it demands of this work (see "Four principles for every problem → solution" in the common development-workflow rule). An empty line here is an open decision, not a pass.
+
+    - Human-centered design: who is met where, and where they need to go.
+    - Solution architecture: the one home per responsibility; the Boundaries and Seams named.
+    - Solve at scale: this case, all cases, the pattern — and which milestone proves the first case by hand.
+    - Separation of concerns: the Boundaries the work sits inside (data, money, record).
+
     ## Architecture Decisions
 
     Key choices made during design, updated as decisions are finalized. The table records the approved snapshot; the Decision Log records the reasoning history. Only include decisions worth preserving — skip obvious defaults.

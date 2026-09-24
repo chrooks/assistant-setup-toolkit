@@ -61,6 +61,11 @@ Author or update `.tasks/<issue#>-<slug>/plan.md` per the format above. Break
 the work into independently verifiable milestones. Record the design choices
 you make in its Decision Log.
 
+Fill the **Four Principles** section first: one line per principle naming what
+it demands of this work, carried from the `/scope` sizing when one exists. The
+build order then proves the first case by hand without blocking the rest — the
+milestones follow from the "solve at scale" line, not the other way round.
+
 Within each milestone, decompose the work into tasks sized **2–5 minutes** for
 a competent agent. Each task names its **exact file paths** and ends with a
 **one-line verification step** — a command to run or a thing to observe. A task

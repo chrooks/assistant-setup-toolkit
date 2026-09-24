@@ -46,6 +46,14 @@ Produce a sizing verdict, always:
 
 - **Count the Meaningful Decisions.** List each open choice the human still
   owns (a naming choice already made is not one; an unstated trade-off is).
+- **Name what the four principles demand.** One line each, from the "Four
+  principles for every problem → solution" section of
+  `~/.claude/rules/common/development-workflow.md`: human-centered design (who
+  is met where), solution architecture (the one home per responsibility),
+  solve at scale (this case, all cases, the pattern), separation of concerns
+  (the Boundaries the work sits inside). A demand you cannot name yet is a
+  Meaningful Decision — add it to the list above. `/plan` carries the four
+  lines into its Four Principles section.
 - **Stamp Grillable.** Two or more open Meaningful Decisions → `grillable: true`.
   Zero or one, and the path is obvious → `grillable: false`. Use judgment; the
   threshold is a default, not a law.
