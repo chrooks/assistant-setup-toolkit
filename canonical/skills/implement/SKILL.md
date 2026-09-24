@@ -18,6 +18,16 @@ through verification, review, fix-forward, and commit. Do not treat
 step that reads the user-level `## Right Skill, Right Job` section, chooses the
 matching Skill workflow, and then starts that workflow.
 
+## Research and reuse — before any new implementation
+
+1. **GitHub code search first.** Run `gh search repos` and `gh search code` for existing implementations, templates, and patterns. Always `--sort=stars --order=desc`; the default best-match sort floats one-off forks above maintained projects. Use 2-3 keywords per query and several phrasings; GitHub ANDs keywords across name and description only. Whole-project adopt/fork/build decisions route through `/build-or-buy`.
+2. **Library docs second.** Confirm API behavior, package usage, and version details with Context7 or the vendor docs.
+3. **Registries.** Search npm, PyPI, crates.io before writing utility code. Prefer battle-tested libraries.
+4. **Web search last**, only when the above come up short.
+5. Prefer adopting or porting a proven approach (an open-source project that solves 80%+ of the problem) over net-new code when it meets the requirement.
+
+Build with `/tdd`: tests first (RED), implement to pass (GREEN), refactor (IMPROVE). Before any review request, confirm CI passes, conflicts are resolved, and the branch is current with its target.
+
 ## Process
 
 1. Read the user-level assistant instructions:

@@ -41,9 +41,8 @@ working directory. If it does not exist, create this minimal scaffold:
 ## Language
 ```
 
-Only modify the `## Language` section. Never touch `## Relationships`,
-`## Example dialogue`, `## Flagged ambiguities`, or any other section unless the
-user explicitly asks.
+Only modify the `## Language` section. Never touch `## Relationships`, the
+maintenance comment, or any other section unless the user explicitly asks.
 
 ### Capture mode — when the real Lexicon is not reachable
 

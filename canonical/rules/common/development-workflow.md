@@ -1,88 +1,49 @@
 # Development Workflow
 
-> This file extends [common/git-workflow.md](./git-workflow.md) with the full feature development process that happens before git operations.
-
-The Feature Implementation Workflow describes the development pipeline: research, planning, TDD, code review, and then committing to git.
+> Extends [common/git-workflow.md](./git-workflow.md) with the work that happens before git.
 
 ## Four principles for every problem → solution
 
-Name what each demands before building; give a build order that proves the first case by hand without blocking the rest.
+Name what each demands before building. Give a build order that proves the first case by hand without blocking the rest. `/scope` names the four demands; `/plan` carries them into the ExecPlan.
 
 - **Human-centered design**: meet people where they are and help them get where they need to go.
 - **Solution architecture**: one home per responsibility. Name the Boundaries and the Seams.
-- **Solve at scale, three levels**: this case, all cases, the pattern. Design the Contracts generically first; write code after the first case lands by hand. Plan the build chronology with all three in view.
-- **Separation of concerns**: honor every Boundary the work sits inside — data, money, record. One repo per context, one machine per repo; no cross-repo read.
+- **Solve at scale, three levels**: this case, all cases, the pattern. Design the Contracts generically first; write code after the first case lands by hand.
+- **Separation of concerns**: honor every Boundary the work sits inside: data, money, record. One repo per context, one machine per repo; no cross-repo read.
+<!-- Case: a classifier built for one account, then re-planned for all accounts and for reuse across the business (2026-09-15). -->
 
-Case: a classifier built for one account, then re-planned for all accounts and for reuse across the business (2026-09-15).
+## Feature implementation
 
-## Feature Implementation Workflow
-
-0. **Research & Reuse** _(mandatory before any new implementation)_
-   - **GitHub code search first:** Run `gh search repos` and `gh search code` to find existing implementations, templates, and patterns before writing anything new.
-     - **Always `--sort=stars --order=desc`.** The default `best-match` sort floats one-off forks above maintained projects.
-     - **2-3 keywords per query, several phrasings.** GitHub ANDs keywords across name and description only — a four-word query matches almost nothing, and the toys that survive then sort to the top regardless of `--sort`.
-     - Whole-project decisions (adopt vs fork vs build) route through `/build-or-buy`, which bundles a ranked-search script instead of hand-rolling the flags each time.
-   - **Library docs second:** Use Context7 or primary vendor docs to confirm API behavior, package usage, and version-specific details before implementing.
-   - **Web search last:** reach for broader web research or discovery only after GitHub search and primary docs come up short.
-   - **Check package registries:** Search npm, PyPI, crates.io, and other registries before writing utility code. Prefer battle-tested libraries over hand-rolled solutions.
-   - **Search for adaptable implementations:** Look for open-source projects that solve 80%+ of the problem and can be forked, ported, or wrapped.
-   - Prefer adopting or porting a proven approach over writing net-new code when it meets the requirement.
-
-1. **Plan First**
-   - Route through `/scope` — it decides whether to `/implement` directly, `/plan` an ExecPlan, or `/grill-me` first
-   - Identify dependencies and risks
-   - Break down into phases
-
-2. **TDD Approach**
-   - Use the `/tdd` skill
-   - Write tests first (RED)
-   - Implement to pass tests (GREEN)
-   - Refactor (IMPROVE)
-
-3. **Code Review**
-   - Use `/code-review` (or `/review-fanout` for larger diffs) immediately after writing code
-   - Address CRITICAL and HIGH issues
-   - Fix MEDIUM issues when possible
-
-4. **Commit & Push**
-   - Detailed commit messages
-   - Follow conventional commits format
-   - See [git-workflow.md](./git-workflow.md) for commit message format and PR process
-
-5. **Pre-Review Checks**
-   - Verify all automated checks (CI/CD) are passing
-   - Resolve any merge conflicts
-   - Ensure branch is up to date with target branch
-   - Only request review after these checks pass
+Route new work through `/scope`, then the workflow it picks. `/implement` holds the build steps: research and reuse first, `/tdd` to build, `/code-review` or `/review-fanout` after, `/commit` last.
 
 ## Proof Before Done
 
-Work that changes runtime behavior is done only when the affected flow has been driven for real — UI changes get driven in a browser (`/verify`; Playwright screenshot or assertion). A compile, lint, or unit-test pass is not proof.
+Work that changes runtime behavior is done only when you have driven the affected flow for real. A compile, lint, or unit-test pass is not proof.
 
-- Applies equally to subagent-returned work: never relay an agent's "done" without driving the flow first.
-- **Browser drives run headless, always** — chrome-devtools MCP, Playwright, and any subagent driving a browser must pass the headless flag; a Chrome window must never appear on the user's screen. Headed only when the user explicitly asks to watch. Case: a headed prove run popped a window mid-game (2026-08-06).
-- **Name the Surface you proved on, and prove on the one the user opens.** State the exact URL or screen before you drive anything — `https://dex.hestia.chrooks.com`, not `localhost:3000`, not a local build, not a staging copy. Proved somewhere else, or nowhere? Say so in the same sentence and call the work unproven. A proof on a Surface the user does not open is a dishonest **Signifier**, not a proof. Case: "Photos are on the site — driven in a headless browser" → "I dont see it. Im on https://twn.hestia.chrooks.com/" (2026-08-02), then the identical failure on dex.hestia.chrooks.com (2026-08-27).
+- This applies to subagent work too. Never relay an agent's "done" before you drive the flow.
+- **Drive browsers headless, always.** A Chrome window must never appear on the user's screen. Go headed only when the user asks to watch.
+<!-- Case: a headed prove run popped a window mid-game (2026-08-06). -->
+- **Prove on the Surface the user opens, and name it.** State the exact URL or screen before you drive: `https://dex.hestia.chrooks.com`, not `localhost:3000`. If you proved somewhere else, or nowhere, say so in the same sentence and call the work unproven.
+<!-- Case: "Photos are on the site — driven in a headless browser" → "I dont see it. Im on https://twn.hestia.chrooks.com/" (2026-08-02); the same failure on dex.hestia.chrooks.com (2026-08-27). -->
 - Lead the completion report with a `Proof:` line, then the change detail.
-- **When a target mockup exists, it is the acceptance criterion.** Screenshot the built page, compare it against the reference image, and close the gap — repeat until they match. "It builds" and "it looks like the design" are different claims, and only the second one was asked for. A reference image is the cheapest executable spec a UI change can have; when one exists and no comparison happened, the work is not proven.
-
-Case: ~12 "I don't see it / still broken" corrections in one project cycle (2026-07 loop audit).
+- **A target mockup is the acceptance criterion.** Screenshot the built page, compare it with the reference image, and close the gap until they match. "It builds" and "it looks like the design" are different claims.
+<!-- Case: ~12 "I don't see it / still broken" corrections in one project cycle (2026-07 loop audit). -->
 
 ## Quote Every Add
 
-Quoting is project management — the assistant's side of the **Division of Responsibility**. Scope the user adds mid-work gets a price before work starts, so cutting becomes possible.
+Quoting is project management, the assistant's side of the **Division of Responsibility**. Scope that the user adds mid-work gets a price before work starts, so that cutting stays possible.
 
-- **An add is new behavior, a new Surface, or a new case** beyond the agreed task. A clarification, a correction, or a fix to the current work is not an add.
+- **An add** is new behavior, a new Surface, or a new case beyond the agreed task. A clarification, a correction, or a fix to the current work is not an add.
 - **Quote in one line, then recommend:** its size in sessions, what it pushes back, and keep or park. "About one session; the export work moves to after this. Recommend: park it."
-- **The user answers keep or cut.** Cut → park it as a tracker issue, so cutting loses nothing.
-- **Small enough to finish this turn and displaces nothing?** Do it, and name it in one line — no quote, no decision.
+- **The user answers keep or cut.** Cut → park it as a tracker issue, so that cutting loses nothing.
+- **Small enough to finish this turn, and it displaces nothing?** Do it and name it in one line. No quote, no decision.
 - **Never ask the user for an estimate.** The studio quotes; the user decides.
-
-Case: ~370 adds against ~11 scope cuts and zero estimates in 5,584 turns (2026-09 archive sweep).
+<!-- Case: ~370 adds against ~11 scope cuts and zero estimates in 5,584 turns (2026-09 archive sweep). -->
 
 ## Close the Loop
 
-After completing a unit of work, run the capture pass — do not wait to be asked:
+After a unit of work, run the capture pass without being asked:
 
-- **Tracker**: do it, don't offer it — tracker upkeep is the assistant's side of the **Division of Responsibility**. Update the issue being worked, create issues for side ideas, close what's verified (`/to-issues`), then report in one line. Ask first only for direction changes or destructive edits.
-- **Docs**: do it, or offer in one line — update runbooks/docs in docs repos when the work changed how something operates.
-- **Memory**: do it, or offer in one line — save non-obvious learnings that will matter next session.
+- **Tracker**: do it. Update the issue, create issues for side ideas, close what is verified (`/to-issues`), then report in one line. Ask first only for a direction change or a destructive edit.
+- **Docs**: update runbooks and docs when the work changed how something operates, or offer in one line.
+- **Memory**: save non-obvious learnings that matter next session, or offer in one line.

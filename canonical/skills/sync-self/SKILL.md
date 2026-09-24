@@ -66,7 +66,7 @@ the Lexicon (`~/.codex/LEXICON.md`) for the design ethos rather than re-deriving
 enumerate the withheld categories in the profile** — naming what's hidden advertises its shape.
 Refer to anything out of scope generically (e.g. "anything not covered here lives in the
 brain, consulted on demand"), never as a list of the redacted topics. Keep it lean — roughly
-35–80 lines. Higher-signal lines that change how an assistant reasons or talks
+25–60 lines, in ASD-STE100. Higher-signal lines that change how an assistant reasons or talks
 earn their place; biographical trivia does not.
 
 ## Step 3 — Diff, then write only on approval

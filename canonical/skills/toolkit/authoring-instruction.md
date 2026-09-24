@@ -20,7 +20,7 @@ Only a rule that is universal, conversational, and needed unprompted in every se
 
 Count first:
 
-    sed '/<!--/,/-->/d' canonical/INSTRUCTIONS.md | wc -l
+    perl -0pe 's/<!--.*?-->\n?//gs' canonical/INSTRUCTIONS.md | wc -l
 
 HTML comments are stripped before the file loads, so they do not count. Put a rule's `Case:` line in a comment under it.
 

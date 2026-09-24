@@ -1,8 +1,6 @@
 # Lexicon
 
-A reusable set of engineering conversation terms that coding assistants should use consistently during Development Conversations.
-
-The Lexicon should prefer established industry meanings so using it helps the human communicate more clearly in common software engineering language.
+Engineering-conversation terms that assistants use consistently. Each term keeps its established industry meaning; a project `LEXICON.md` can narrow one.
 
 ## Language
 
@@ -142,18 +140,13 @@ _AKA_: thread
 
 ## Relationships
 
-- The **Lexicon** holds conversation-shaping engineering terms, not plain technology names.
-- Terms align with established industry usage; HCI terms preserve prior-art meanings unless a project `LEXICON.md` narrows them.
-- User-specific design terms — **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, **Software as Education** — should be used when they clarify design intent.
-- The **Lexicon** stays lean because it lives in the assistant's context window.
-- **The design terms govern this conversation, not only the product.** A completion report is a **Surface**. "Done, pushed" about something the user cannot see is a dishonest **Honest Signifier**. A dense report is a **Hierarchy** failure. Asking for a decision already delegated is missing **Progressive Disclosure**. Judge your own output by the terms you judge an Interface by.
+- Use the design terms **Honest Signifier**, **Transparent Friction**, **Design Boundary**, **Partnership Model**, and **Software as Education** when they clarify design intent.
+- The Lexicon stays lean because it loads in every context window.
 
-## Example dialogue
-
-> **Dev:** "When I say seam, I mean the place where behavior can be changed without rewriting the whole system."
-> **Assistant:** "Got it — let's add **Seam** to the **Lexicon** so we use it consistently."
-
-## Flagged ambiguities
-
-- "Target Home Directory" was used to mean **Assistant Home** — resolved: use **Assistant Home** for user-level install destinations owned by, or discovered by, an assistant.
-- A flag lives here only until its resolution is absorbed into a term's definition or the sections above — then it is deleted. This section records live resolutions, not history.
+<!-- Maintenance notes (never load):
+Example dialogue —
+  Dev: "When I say seam, I mean the place where behavior can be changed without rewriting the whole system."
+  Assistant: "Got it — let's add **Seam** to the **Lexicon** so we use it consistently."
+Flagged ambiguities — a flag lives here only until its resolution is absorbed into a term's
+definition; then it is deleted. Resolved: "Target Home Directory" → use **Assistant Home**.
+-->
