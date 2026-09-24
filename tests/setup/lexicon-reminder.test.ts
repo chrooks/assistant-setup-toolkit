@@ -95,7 +95,7 @@ describe("Lexicon reminder", () => {
       "utf-8",
     );
 
-    expect(instructions).toMatch(/never a bare `?#5`?/i);
+    expect(instructions).toMatch(/never (write )?a bare `?#5`?/i);
     expect(hook).toMatch(/never a bare #5/i);
   });
 

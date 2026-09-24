@@ -31,7 +31,7 @@ matching Skill workflow, and then starts that workflow.
    - Use `/idea-to-design` for synthesizing ideas into concrete designs.
    - Use `/tdd` when implementing a feature, especially testable logic.
    - Use `/diagnose` for difficult bugs.
-   - If no other Skill has been invoked for the request, use `/find-skill` to
+   - If no other Skill has been invoked for the request, use `/find-skills` to
      choose the best, most relevant Skill before starting.
 4. State the selected workflow in one short sentence.
 5. Start the selected workflow immediately unless it requires a user decision
