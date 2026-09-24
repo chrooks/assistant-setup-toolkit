@@ -30,6 +30,15 @@ externalSources:
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/engineering
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - ask-matt
+      - diagnosing-bugs
+      - resolving-merge-conflicts
+      - setup-matt-pocock-skills
+      - to-spec
+      - to-tickets
+      - wayfinder
+      - wizard
     targets:
       - claude-code
       - codex-cli
@@ -48,6 +57,9 @@ externalSources:
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/productivity
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - wait-what
+      - writing-for-agents
     targets:
       - claude-code
       - codex-cli
@@ -62,6 +74,12 @@ externalSources:
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/in-progress
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - claude-handoff
+      - implement-spec
+      - loop-me
+      - retro
+      - setup-ts-deep-modules
     targets:
       - claude-code
       - codex-cli
@@ -129,6 +147,30 @@ externalSources:
     kind: plugin
     url: https://github.com/JuliusBrussee/caveman
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - cavecrew
+      - cavecrew-builder
+      - cavecrew-investigator
+      - cavecrew-reviewer
+      - caveman-commit
+      - caveman-compress
+      - caveman-discover
+      - caveman-evidence-review
+      - caveman-explore
+      - caveman-help
+      - caveman-init
+      - caveman-learn
+      - caveman-manage
+      - caveman-optimize
+      - caveman-review
+      - caveman-setup
+      - caveman-stats
+      - investigate-first
+      - lean-build
+      - migration
+      - safe-refactor
+      - surgical-patch
+      - verify-and-stop
     targets:
       - claude-code
       - codex-cli
@@ -139,6 +181,8 @@ externalSources:
       codex-cli:
         - npx skills add JuliusBrussee/caveman -a codex
     notes:
+      - >-
+        Only /caveman itself is used (2026-09-24 usage audit); the helpers cost standing context.
       - Native plugin install commands from the Caveman README Install section.
 
   - id: ponytail
@@ -146,6 +190,13 @@ externalSources:
     kind: plugin
     url: https://github.com/DietrichGebert/ponytail
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - ponytail
+      - ponytail-audit
+      - ponytail-debt
+      - ponytail-gain
+      - ponytail-help
+      - ponytail-review
     targets:
       - claude-code
       - codex-cli
@@ -156,6 +207,8 @@ externalSources:
       codex-cli:
         - codex plugin marketplace add DietrichGebert/ponytail
     notes:
+      - >-
+        The native plugin already lists these; the flat copies showed every skill twice. Auto-start is off via ~/.config/ponytail/config.json (defaultMode: off) — type /ponytail to use it.
       - Decision-ladder plugin that pushes agents to write minimal code
         (commands /ponytail-review and /ponytail-audit).
       - Requires Node.js on PATH for lifecycle hooks; the core skill works
@@ -186,6 +239,10 @@ externalSources:
     kind: plugin
     url: https://github.com/openai/codex-plugin-cc/tree/main/plugins/codex
     default: true
+    exclude:  # 0-use, no caller (2026-09-24 context audit)
+      - codex-cli-runtime
+      - codex-result-handling
+      - gpt-5-4-prompting
     targets:
       - claude-code
     installWhen:
@@ -195,6 +252,8 @@ externalSources:
         - /plugin marketplace add openai/codex-plugin-cc
         - /plugin install codex@openai-codex
     notes:
+      - >-
+        The native codex@openai-codex plugin already lists these; the flat copies were duplicates.
       - Monorepo — component dirs live under plugins/codex, not the repo root.
       - Native install (from the README) keeps the `codex:` namespace and the
         codex-rescue subagent; the fetched copy is the flat fallback.
@@ -258,7 +317,7 @@ externalSources:
   - id: humanizer
     name: Siqi Chen — humanizer
     kind: skill
-    url: https://github.com/blader/humanizer/tree/main/skills/humanizer
+    url: https://github.com/blader/humanizer
     default: true
     targets:
       - claude-code
@@ -274,7 +333,7 @@ externalSources:
     name: Thariq Shihipar — eli5
     kind: plugin
     url: https://github.com/anthropics/claude-plugins-community/tree/main/eli5
-    default: true
+    default: false  # 0 uses (2026-09-24 context audit)
     targets:
       - claude-code
       - codex-cli

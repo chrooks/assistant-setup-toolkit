@@ -323,6 +323,36 @@ describe("fetchExternalSource (plugin)", () => {
     expect(byPath["rules/style.md"].component).toBe("instructions");
     expect(byPath["agents/baz.md"].component).toBe("skills");
   });
+
+  it("drops excluded skills, commands, and agents by name", async () => {
+    const source: ExternalSource = {
+      id: "plug",
+      name: "plug",
+      kind: "plugin",
+      url: "https://github.com/o/r",
+      default: true,
+      targets: ["claude-code"],
+      exclude: ["a", "foo", "baz"],
+    };
+    const fakeGit = makeFakeGit({
+      "https://github.com/o/r.git": {
+        "skills/a/SKILL.md": "s",
+        "skills/a/ref.md": "s",
+        "skills/keep/SKILL.md": "k",
+        "commands/foo.md": "c",
+        "commands/foo.toml": "c",
+        "commands/keep.md": "k",
+        "agents/baz.md": "a",
+      },
+    });
+
+    const result = await fetchExternalSource(source, workDir, fakeGit);
+    expect(result.error).toBeUndefined();
+    expect(result.files.map((f) => f.relativePath).sort()).toEqual([
+      "commands/keep.md",
+      "skills/keep/SKILL.md",
+    ]);
+  });
 });
 
 // -- fetchPlannedSources aggregation --

@@ -298,6 +298,7 @@ async function mapPlugin(
     { dir: "rules", component: "instructions", destPrefix: "rules" },
   ];
 
+  const excluded = new Set(source.exclude ?? []);
   const out: PayloadFile[] = [];
   for (const c of componentDirs) {
     const fromDir = path.join(rootDir, c.dir);
@@ -313,7 +314,7 @@ async function mapPlugin(
       c.component,
       "external-source",
     );
-    out.push(...files);
+    out.push(...files.filter((f) => !excluded.has(componentName(f.relativePath, c.destPrefix))));
   }
 
   if (out.length === 0) {
@@ -322,6 +323,15 @@ async function mapPlugin(
     );
   }
   return out;
+}
+
+/**
+ * The name `exclude` matches for a plugin file: the first path segment under
+ * the component dir, minus its extension — `skills/<name>/…`, `commands/<name>.md`.
+ */
+function componentName(relativePath: string, destPrefix: string): string {
+  const rest = relativePath.slice(destPrefix.length + 1);
+  return rest.split("/")[0].replace(/\.[^.]+$/, "");
 }
 
 // -- Filesystem walkers --

@@ -35,10 +35,11 @@ const ExternalSourceSchema = z.object({
   targets: z.array(z.enum(["claude-code", "codex-cli"])).min(1, "targets must have at least one entry"),
   notes: z.array(z.string()).optional(),
   /**
-   * Skill names to drop from a `skill-pack` — upstream skills you do not want.
-   * A pack is otherwise all-or-nothing per group, which forces a choice between
-   * standing updates and inheriting every skill the group happens to contain.
-   * Ignored for non-pack kinds.
+   * Component names to drop from a `skill-pack` or `plugin` — upstream skills,
+   * commands, or agents you do not want. A source is otherwise all-or-nothing,
+   * which forces a choice between standing updates and inheriting every
+   * component it happens to contain. For a plugin, the name is the first path
+   * segment under its component dir, minus the extension. Ignored for other kinds.
    */
   exclude: z.array(z.string().min(1)).optional(),
   installCommands: InstallCommandsSchema.optional(),
