@@ -179,7 +179,6 @@ All hooks are Node scripts (`.js`) under `canonical/hooks/`, registered declarat
 | `strategic-compact.js` | tool-use events | Suggest `/compact` at strategic thresholds instead of hitting auto-compact |
 | `claude-notify.js` | Stop, Notification | Desktop banner / Pushover push when a turn finishes or input is needed |
 | `environment-context.js` | SessionStart | Tell the assistant which machine it's actually on |
-| `quiz-me.js` | SessionStart | Offer a recall quiz on the repo's previous conversation |
 
 ### Hook Wiring
 

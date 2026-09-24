@@ -52,7 +52,7 @@ function main() {
 
 try {
   // Drain stdin if the harness piped a payload; this hook's output doesn't
-  // depend on it. Best-effort and non-blocking, matching quiz-me.js.
+  // depend on it. Best-effort and non-blocking.
   try {
     fs.readFileSync(0);
   } catch {

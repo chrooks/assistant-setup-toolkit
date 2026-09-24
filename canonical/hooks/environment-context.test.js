@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Self-contained Node test for environment-context.js — no framework, just
-// `node` + assert, mirroring quiz-me.test.js's shape.
+// `node` + assert.
 //
 //   node canonical/hooks/environment-context.test.js
 
