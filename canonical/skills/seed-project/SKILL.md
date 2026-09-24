@@ -22,8 +22,9 @@ questions) to carry into the BRIEF.
 
 ## Step 2 — Decide shape (AskUserQuestion)
 
-Ask the project shape/stack before scaffolding. Offer options that fit the idea,
-e.g.:
+Ask the project shape/stack before scaffolding. The user's default stack: TypeScript/React/Next.js
+frontend · Python (FastAPI/Flask) or TypeScript (Node) backend · PostgreSQL via Supabase, SQLite
+locally. Offer options that fit the idea, e.g.:
 - **Python CLI tool** — fastest, terminal output, easy to automate later.
 - **Next.js full-stack** — TypeScript web app, UI + API routes.
 - **Python FastAPI + thin frontend** — clean Boundary between data and view.

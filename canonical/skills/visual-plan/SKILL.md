@@ -15,6 +15,8 @@ upstream:
 
 # Agent-Native Plans
 
+> **Publish target.** Never publish to Builder's hosted `plan.agent-native.com`. If the `plan` MCP is present, publish through it and give the self-hosted URL. If it is absent, use Local-Files Privacy Mode, and do not register an MCP server. The CLI needs Node 22.
+
 Agent-Native Plans is structured visual planning mode for coding agents. Build
 the plan you would normally write in Markdown, but as a scannable document with
 editable blocks mixed in: inline diagrams, code snippets,

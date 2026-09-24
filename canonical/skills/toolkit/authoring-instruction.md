@@ -20,7 +20,9 @@ Only a rule that is universal, conversational, and needed unprompted in every se
 
 Count first:
 
-    wc -l canonical/INSTRUCTIONS.md
+    sed '/<!--/,/-->/d' canonical/INSTRUCTIONS.md | wc -l
+
+HTML comments are stripped before the file loads, so they do not count. Put a rule's `Case:` line in a comment under it.
 
 Under the ceiling with room for the addition → write it and move on. At or over the ceiling, or the addition would cross it → run displacement.
 
@@ -58,13 +60,13 @@ Recorded in the file's own maintenance comment, and it applies to rules and skil
 - **State the positive action.** "Lead with the answer" beats "don't bury the answer."
 - **One concept per bullet.** Bullets are how this file is read and retained.
 - **Failure-derived beats speculative.** Add a rule *after* the mistake actually happened, not in anticipation of it.
-- **Annotate hard-won rules with a `Case:` line** — one line naming the incident that produced it. It tells a future reader why the rule is worth its lines.
+- **Annotate hard-won rules with a `Case:` HTML comment** — one line naming the incident that produced it. It tells a future reader why the rule is worth its lines, and it costs no context tokens.
 
 ## Create
 
 1. Run the budget check. Displace first if needed, with the user's pick.
 2. Write the section. Match the surrounding shape — an `## H2` heading, then bullets. Put it where it belongs topically, not at the end.
-3. Re-count: `wc -l canonical/INSTRUCTIONS.md`. Confirm you are under the ceiling.
+3. Re-count the loaded lines with the command above. Confirm you are under the ceiling.
 4. Install with `npm run sync`.
 
 ## Update

@@ -12,6 +12,8 @@ paths:
 
 # Web Coding Style
 
+**ALWAYS** give React and HTML elements human-readable `id` attributes that the user can name in conversation.
+
 ## File Organization
 
 Organize by feature or surface area, not by file type:

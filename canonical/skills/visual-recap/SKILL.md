@@ -15,6 +15,8 @@ upstream:
 
 # Visual Recap
 
+> **Publish target.** Never publish to Builder's hosted `plan.agent-native.com`. If the `plan` MCP is present, publish through it and give the self-hosted URL. If it is absent, use Local-Files Privacy Mode, and do not register an MCP server. The CLI needs Node 22.
+
 `/visual-recap` creates a visual plan built **from** a diff, not toward one. It
 is the reverse of forward planning: instead of describing the change you are
 about to make, you describe the change that was just made, at a higher altitude

@@ -166,7 +166,7 @@ describe("toolkit Skill — the instruction authoring branch (AC11)", () => {
   it("runs the budget check against the documented ceiling", async () => {
     const branch = await readFile(authoringInstructionPath, "utf-8");
 
-    expect(branch).toContain("wc -l canonical/INSTRUCTIONS.md");
+    expect(branch).toContain("canonical/INSTRUCTIONS.md | wc -l");
     expect(branch).toMatch(/120 lines/);
   });
 
@@ -308,8 +308,11 @@ describe("toolkit Skill — the check verb (#22 AC10)", () => {
 describe("toolkit Skill — the instruction budget (AC7)", () => {
   it("keeps INSTRUCTIONS.md under its documented ceiling", async () => {
     const instructions = await readFile(instructionsPath, "utf-8");
+    // HTML comments (maintenance notes, Case: lines) are stripped before the
+    // file loads, so only the loaded lines count against the budget.
+    const loaded = instructions.replace(/<!--[\s\S]*?-->\n?/g, "");
 
-    expect(instructions.split("\n").length).toBeLessThanOrEqual(120);
+    expect(loaded.split("\n").length).toBeLessThanOrEqual(120);
   });
 
   it("collapses the Where learnings go table into a pointer", async () => {
