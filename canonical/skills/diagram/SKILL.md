@@ -186,7 +186,7 @@ architecture map that tracks reality. For those:
 
 ### `roadmap` kind
 
-For issue/milestone maps (the twn.com pattern). Conventions:
+For issue/milestone maps (a site-build roadmap). Conventions:
 
 - **Nodes** = issues; `label` leads with a state emoji: `✅` closed, `🧍` waiting on a
   human, `🧊` icebox, none = open. Include the issue number and milestone in the label

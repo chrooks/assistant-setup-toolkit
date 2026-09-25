@@ -121,7 +121,7 @@ hooks:
   # Proxy credential guard — blocks Bash commands that would print proxy
   # secrets (env/printenv/set dumps, echoed *_PROXY vars, curl -v, git config
   # proxy reads). The script ships to every machine but wires only where the
-  # machine Variant is `work` (the credential-bearing corporate proxy box);
+  # machine Variant names a box whose *_PROXY vars carry credentials;
   # it also self-gates at runtime, exiting 0 instantly when no *_PROXY env
   # var carries a value. Converts machine.md's advisory secret rule into a
   # deterministic block.

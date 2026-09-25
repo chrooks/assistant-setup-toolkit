@@ -26,14 +26,14 @@ Splitting that paragraph into four lines loses nothing and surfaces everything.
 
 | Rule | Do | Not |
 |---|---|---|
-| Salutation | `Good afternoon, Som,` · `Hello Steve,` | `Hi Som` (no comma, too casual) |
+| Salutation | `Good afternoon, Dana,` · `Hello Sam,` | `Hi Dana` (no comma, too casual) |
 | Sign-off, warm or internal | `Well wishes,` | `Best,` · `Regards,` |
 | Sign-off, cold ask | `Thanks for any direction you can give,` | `Thanks!` |
-| Names | `Steve` if he knows them | `Stephen` — the formal name signals a name he was handed, not a relationship |
-| Shared corporate assets | `the Fixed Income account` | `our Fixed Income account` |
+| Names | `Sam` if he knows them | `Samuel` — the formal name signals a name he was handed, not a relationship |
+| Shared corporate assets | `the Operations account` | `our Operations account` |
 | Hedges | `If this isn't your area, a pointer is just as appreciated.` | `I suspect this may not be your area` — never put a limitation in the reader's mouth |
 
-Weave in the referral or relationship early — "I've been working with Steve and
+Weave in the referral or relationship early — "I've been working with Sam and
 company" earns more trust than any amount of explanation.
 
 ## Asks
@@ -62,8 +62,8 @@ State plainly what is *not* being asked for:
 
 ```text
 To be clear on what this needs:
-We are not asking anyone for banking credentials.
-Plaid runs the approval with the bank directly.
+We are not asking anyone for login credentials.
+The vendor runs the approval with the account owner directly.
 An authorized account owner opens a one-time link and approves read-only access.
 No username, password, or MFA code is shared with my team.
 ```
@@ -95,25 +95,25 @@ The ordering carries the email. Do not rearrange it.
 
 ## Worked example — cold access request
 
-Names, bank, and digits below are stand-ins. Real ones come from the live thread.
+Names, accounts, and digits below are stand-ins. Real ones come from the live thread.
 
 ```text
-Good afternoon, Som,
+Good afternoon, Dana,
 
-Marcus Webb passed your name to me as a good place to start.
+Priya Shah passed your name to me as a good place to start.
 If this isn't your area, a pointer to the right person is just as appreciated.
 
-I am on the Emerging Technology team.
-I've been working with Steve and company on an internal tool that classifies the cash activity on our bank statements.
-Today someone loads the statements by hand.
-We want the tool to retrieve them automatically instead, through Plaid.
+I am on the platform team.
+I've been working with Sam and company on an internal tool that reconciles our monthly vendor invoices.
+Today someone downloads the invoices by hand.
+We want the tool to retrieve them automatically instead, through the vendor's read-only API.
 
-The account in scope is the Fixed Income cash account at [THE BANK], ending 1234.
-I can give the full account number to whoever needs it.
+The account in scope is the shared Operations billing account, ID ending 1234.
+I can give the full account ID to whoever needs it.
 
 To be clear on what this needs:
-We are not asking anyone for banking credentials.
-Plaid runs the approval with the bank directly.
+We are not asking anyone for login credentials.
+The vendor runs the approval with the account owner directly.
 An authorized account owner opens a one-time link and approves read-only access.
 No username, password, or MFA code is shared with my team.
 
@@ -133,7 +133,7 @@ Chris
 Most email is this size. Do not inflate it.
 
 ```text
-Hello Steve,
+Hello Sam,
 
 My apologies. I was out of office last week.
 I do not have slides, but I do have a demo video I can share.

@@ -24,7 +24,7 @@ Work that changes runtime behavior is done only when you have driven the affecte
 - **Drive browsers headless, always.** A Chrome window must never appear on the user's screen. Go headed only when the user asks to watch.
 <!-- Case: a headed prove run popped a window mid-game (2026-08-06). -->
 - **Prove on the Surface the user opens, and name it.** State the exact URL or screen before you drive: `https://dex.hestia.chrooks.com`, not `localhost:3000`. If you proved somewhere else, or nowhere, say so in the same sentence and call the work unproven.
-<!-- Case: "Photos are on the site — driven in a headless browser" → "I dont see it. Im on https://twn.hestia.chrooks.com/" (2026-08-02); the same failure on dex.hestia.chrooks.com (2026-08-27). -->
+<!-- Case: "Photos are on the site — driven in a headless browser" → "I dont see it. Im on the dev site" (2026-08-02); the same failure on a second dev site (2026-08-27). -->
 - Lead the completion report with a `Proof:` line, then the change detail.
 - **A target mockup is the acceptance criterion.** Screenshot the built page, compare it with the reference image, and close the gap until they match. "It builds" and "it looks like the design" are different claims.
 <!-- Case: ~12 "I don't see it / still broken" corrections in one project cycle (2026-07 loop audit). -->

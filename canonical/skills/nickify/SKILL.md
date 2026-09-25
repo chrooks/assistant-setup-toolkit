@@ -36,8 +36,8 @@ question with the choices spelled out.
 
 ## Example
 
-Input: twn.com issue #5, "Asset re-collection from Nick" (camera-roll/IG
-photos, Printful mockups, logo files, hero videos needed for the site).
+Input: a site-build issue, "Asset re-collection from the client" (camera-roll
+and social photos, merch mockups, logo files, hero videos needed for the site).
 
 Output:
 
@@ -53,9 +53,8 @@ Output:
 >    Text or AirDrop them, or drop them in a shared Google Drive folder if
 >    there are a lot.
 > 2. Forward me any emails from your merch designer that have logo files
->    attached (the twn0 logo, the "NICKhome" logo, the "BACK FOR SEASON TWO"
->    graphic).
-> 3. If you have the "HOME" promo video file, send that too — check your
+>    attached (the main logo, the alternate logo, and the tour graphic).
+> 3. If you have the promo video file, send that too — check your
 >    phone or ask whoever shot it.
 > 4. For anything you can't find, just tell me "can't find it" — I'll figure
 >    out a replacement (reshoot, new design, or we drop it).

@@ -7,7 +7,7 @@ Status: accepted
 
 The user wants BuilderIO's `/visual-plan` and `/visual-recap` skills without depending
 on the hosted `plan.agent-native.com` database. Two machine classes with different
-constraints: the work laptop blocks adding MCP servers entirely; the personal
+constraints: one machine class cannot add MCP servers; the personal
 devices (Mac, PC, WSL) reach server over the tailnet. The Plan app itself is MIT
 (`templates/plan` in BuilderIO/agent-native) and self-hostable, and the skills
 already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
@@ -26,7 +26,7 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
      authoring via local MDX + `plan local check/serve/verify`. The hosted-UI
      page-load over the local bridge is the default render path; a fully local
      Plan app (`PLAN_LOCAL_DIR` → `/local-plans/<slug>`) is the documented
-     fallback if the company proxy blocks it — not pre-built (YAGNI).
+     fallback if a network proxy blocks it — not pre-built (YAGNI).
    - `self-hosted` (personal): Plan app deployed on the home server per the homelab house
      pattern — Docker container (TREK precedent: prod build, read-only,
      cap-drop), data under `/srv/compose/plan/` (restic-backed for free),
@@ -44,8 +44,8 @@ already branch on `AGENT_NATIVE_PLANS_MODE=local-files` for a no-MCP path.
 
 - Upstream sync stays a copy, not a merge — BuilderIO iterates fast (600+
   published versions) and we inherit improvements cheaply.
-- The work laptop carries zero MCP config, so there is nothing for the company
-  block to fight.
+- The work laptop carries zero MCP config, so there is nothing for that
+  restriction to fight.
 - Plan data on server lands in the existing backup and HTTPS story without new
   machinery; the cost is the homelab deploy ritual (inventory row, runbook,
   backup-path check) owned in the homelab repo, not here.

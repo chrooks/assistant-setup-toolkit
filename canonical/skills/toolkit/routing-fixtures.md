@@ -15,8 +15,8 @@ These fixtures serve two purposes: they document the routing table by example, a
 | "lead every completion report with the plain-English summary" | instruction | Universal and conversational — it applies to every response in every repo. |
 | "from now on always run typecheck before committing" | instruction **and** hook | "Always" plus a mechanical, checkable action. Ask the belt-and-suspenders question, then write both. |
 | "never let me push to main without running the tests" | instruction **and** hook | "Never" plus an enforceable runtime event. The hook is the half that survives the model forgetting. |
-| "on my work laptop, make a skill that searches Active Directory" | Skill at machine scope, `canonical/machines/work/skills/` | The user named the machine. Scope is stated, not inferred. |
-| "the work laptop sits behind a corporate proxy on port 8080" | machine rule, `canonical/machines/work/rules.md` | A fact true on one machine, not a workflow. |
+| "on my work laptop, make a skill that searches the internal directory" | Skill at machine scope, `canonical/machines/work/skills/` | The user named the machine. Scope is stated, not inferred. |
+| "the work laptop sits behind a proxy that needs special settings" | machine rule, `canonical/machines/work/rules.md` | A fact true on one machine, not a workflow. |
 | "pull in that vercel-labs find-skills skill" | external source, `manifests/install.yaml` | Somebody else's published work. |
 | "drop the caveman rule, I don't use it" | remove | Confirm the blast radius once, then prune. |
 | "the commit skill should stop asking before it pushes" | update | An existing artifact changes in place; preserve everything else. |

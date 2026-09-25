@@ -192,11 +192,11 @@ describe("hook-wiring", () => {
       // must use forward slashes so `node C:/Users/.../hook.js` resolves instead
       // of the loader reading the backslash-mangled `C:Users...`.
       const plans = planHookWiring(entries, {
-        "claude-code": "C:\\Users\\X278451\\.claude",
+        "claude-code": "C:\\Users\\example\\.claude",
       });
 
       expect(plans[0].actions[0].command).toBe(
-        "node C:/Users/X278451/.claude/hooks/lexicon-reminder.js",
+        "node C:/Users/example/.claude/hooks/lexicon-reminder.js",
       );
     });
 

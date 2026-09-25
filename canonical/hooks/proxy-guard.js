@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // PreToolUse guard (matcher: Bash): blocks commands that would print proxy
-// credentials. On machines behind a credential-bearing corporate proxy
-// (machine Variant `work`), the *_PROXY env vars embed username:password —
+// credentials. On machines whose *_PROXY env vars embed username:password
+// (gated by the machine Variant), those credentials are exposed —
 // anything that echoes them writes a secret into the transcript and tool
 // logs, where no after-the-fact redaction can reach it. Prevention is the
 // only control that works ex ante; the prose rule in machine.md is advisory,
 // this hook is the guarantee.
 //
-// Wired only where wiring.yaml's variant gate matches (work preset). Also
+// Wired only where wiring.yaml's variant gate matches. Also
 // self-gates at runtime: when no *_PROXY variable carries a value it allows
 // everything instantly, so the script is inert on non-proxy machines even
 // if wired by hand.
