@@ -32,8 +32,8 @@ Never `mlx-whisper` — Apple-Silicon-only, so it fails on other machines.
 **Behind a corporate proxy**, the first whisper run downloads model weights and may be
 blocked with an HTTP 403. Which host it needs depends on the client, and that matters:
 `whisper-ctranslate2` fetches from `huggingface.co`, while OpenAI's `whisper` fetches from
-`openaipublic.azureedge.net`. If one is blocked, try the other before anything else — the
-Azure CDN is the more commonly allowlisted of the two.
+`openaipublic.azureedge.net`. If the download is blocked, stop and tell the user which host
+the model needs. A proxy allowlist is a security control — never route around it.
 
 A blocked download is survivable either way: the load completes with frames,
 `transcript.status` comes back `none`, and `transcript.reason` names the fix.
