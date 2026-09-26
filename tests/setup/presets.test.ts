@@ -293,9 +293,13 @@ describe("mergePresets — the machine-local overlay", () => {
 
 describe("loadPresetsWithLocal — reading the overlay from disk", () => {
   it("reports no overrides when the overlay is absent", async () => {
-    const { presets, overriddenByLocal } = await loadPresetsWithLocal(
-      path.join(process.cwd(), "manifests"),
-    );
+    // Copy only the tracked files: the real manifests/ dir may hold this
+    // machine's gitignored overlay, which would make the test machine-dependent.
+    const dir = await fs.mkdtemp(path.join(tmpdir(), "presets-"));
+    for (const name of ["presets.yaml", "presets.local.example.yaml"]) {
+      await fs.copyFile(path.join(process.cwd(), "manifests", name), path.join(dir, name));
+    }
+    const { presets, overriddenByLocal } = await loadPresetsWithLocal(dir);
 
     // The tracked file still loads; the example file must not be picked up.
     expect(Object.keys(presets)).toContain("work");

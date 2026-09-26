@@ -7,7 +7,7 @@
 # skill's real frontmatter, never from this file.
 
 categories:
-  "Plan & decide": [dev, scope, grill-me, grill-with-docs, plan, roadmap, to-issues, project-flow-setup, build-or-buy, seed-project, handoff, ask-matt, grilling, loop-me, to-questionnaire, to-spec, to-tickets, triage, wayfinder, claude-handoff, domain-modeling]
+  "Plan & decide": [dev, scope, grill-me, grill-with-docs, plan, decision-doc, roadmap, to-issues, project-flow-setup, build-or-buy, seed-project, handoff, ask-matt, grilling, loop-me, to-questionnaire, to-spec, to-tickets, triage, wayfinder, claude-handoff, domain-modeling]
   "Build & ship": [implement, tdd, diagnose, commit, prep-pr, prove-it, verification-loop, security-review, review-fanout, code-review, implement-spec, lean-build, surgical-patch, safe-refactor, migration, investigate-first, diagnosing-bugs, resolving-merge-conflicts, verify-and-stop, codebase-design, improve-codebase-architecture, setup-ts-deep-modules, prototype, wizard, setup-matt-pocock-skills]
   "Design": [discover, idea-to-design, sketch, design-audit, make-interfaces-feel-better, impeccable, design-an-interface]
   "Explain & visualize": [visualize, table, diagram, figure, wym, walkthrough, recap, visual-plan, visual-recap, quiz-me, prep-demo, make-deck, nickify, eli5, teach, wait-what]
