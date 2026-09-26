@@ -28,6 +28,9 @@ presets:
   my-home-server:
     variants:
       visual-plans: self-hosted
+      # ADR-0005: personal-only skills and hooks are opt-in. Leave this out on a
+      # restricted or client machine.
+      personal-tools: "on"
       # ADR-0003: installs canonical/machines/my-home-server/rules.md as
       # rules/machine.md. That file is gitignored — author it on the box itself.
       machine: my-home-server

@@ -24,8 +24,11 @@ presets:
   personal:
     variants:
       visual-plans: self-hosted
+      # ADR-0005: opt in to personal-only skills and the phone-notification hooks.
+      personal-tools: "on"
   mac:
     variants:
       visual-plans: self-hosted
+      personal-tools: "on"
       # machine Variant also gates canonical/machines/mac/skills/<skill>/ into the payload.
       machine: mac

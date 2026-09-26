@@ -998,7 +998,7 @@ export async function runSetupWizard(
             }
             if (result.stale.length > 0) {
               summary(
-                `  [warning] ${plan.target}: ${result.stale.length} hook entr${result.stale.length === 1 ? "y runs a" : "ies run"} script the toolkit no longer wires: ${result.stale.join("; ")}. Run with --write prune to remove.`,
+                `  [warning] ${plan.target}: ${result.stale.length} hook ${result.stale.length === 1 ? "entry runs a script" : "entries run scripts"} the toolkit no longer wires: ${result.stale.join("; ")}. Run with --write prune to remove.`,
               );
             }
             hooksRemoved += result.removed.length;

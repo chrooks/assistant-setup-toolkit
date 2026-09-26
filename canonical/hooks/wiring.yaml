@@ -79,10 +79,14 @@ hooks:
   # Lets the user run many windows/terminals and get pinged instead of
   # manually checking which session has come back. Secrets stay in a
   # private chmod-600 file (see Next Steps); never committed.
+  # Personal-only (ADR-0005): Pushover receives the project folder name, so
+  # these three wire only on machines whose Preset sets `personal-tools: on`.
   - file: claude-notify.js
     event: Stop
     targets: [claude-code, codex-cli]
     command: "node {hook} done"
+    variants:
+      personal-tools: "on"
   # Proof gate — the enforcement half of Proof Before Done. Refuses a turn that
   # ends on a 🟢 status line with no `Proof:` line, so an unverified "done"
   # cannot reach the user because the model forgot. Unverified completion was
@@ -96,11 +100,15 @@ hooks:
     event: Notification
     targets: [claude-code, codex-cli]
     command: "node {hook} needs-input"
+    variants:
+      personal-tools: "on"
   # Stamps session activity so claude-notify.js can stay quiet while you're
   # actively working and only ping after real silence (quiet-debounce).
   - file: notify-activity.js
     event: UserPromptSubmit
     targets: [claude-code, codex-cli]
+    variants:
+      personal-tools: "on"
   # Tells the assistant what machine it's actually on (hostname, OS, remote
   # SSH or not) every session — informational only, no config, no off-switch.
   # Claude-only, mirroring devos-steering.js/quick-recap-reminder.js (Codex

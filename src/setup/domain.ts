@@ -72,6 +72,22 @@ export function selfHostedPlanOrigin(
  */
 export const MACHINE_VARIANT_KEY = "machine";
 
+/**
+ * Opt-in Variant for personal-only pieces (ADR-0005): skills that write to the
+ * personal knowledge base or history archive, and the phone-notification hooks.
+ * They reach a machine only when its Preset sets `personal-tools: on`, so a new
+ * restricted or client machine never gets them by default.
+ */
+export const PERSONAL_TOOLS_VARIANT_KEY = "personal-tools";
+
+/** The skill directories the personal-tools Variant governs. */
+export const PERSONAL_SKILL_NAMES = [
+  "ingest",
+  "notebooklm-export",
+  "sync-self",
+  "loop-audit",
+] as const;
+
 /** Fixed install path for the (single) matching machine rule. */
 export const MACHINE_RULE_INSTALL_PATH = "rules/machine.md";
 

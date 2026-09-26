@@ -19,6 +19,8 @@ import {
   resolveAssistantHomes,
   MACHINE_RULE_INSTALL_PATH,
   MACHINE_VARIANT_KEY,
+  PERSONAL_SKILL_NAMES,
+  PERSONAL_TOOLS_VARIANT_KEY,
   VISUAL_PLANS_SKILL_NAMES,
   VISUAL_PLANS_VARIANT_KEY,
 } from "./domain.js";
@@ -27,6 +29,7 @@ import {
 const VISUAL_PLANS_SKILL_PREFIXES = VISUAL_PLANS_SKILL_NAMES.map(
   (name) => `skills/${name}/`,
 );
+const PERSONAL_SKILL_PREFIXES = PERSONAL_SKILL_NAMES.map((name) => `skills/${name}/`);
 
 // -- Types --
 
@@ -119,9 +122,13 @@ export function buildAssistantPayloads(
   // every source layer before routing.
   const excludeVisualPlans =
     input.variants?.[VISUAL_PLANS_VARIANT_KEY] === "none";
+  // Variant gate: personal-only skills drop unless the machine opts in.
+  const excludePersonal = input.variants?.[PERSONAL_TOOLS_VARIANT_KEY] !== "on";
   const isIncluded = (file: PayloadFile): boolean =>
-    !excludeVisualPlans ||
-    !VISUAL_PLANS_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p));
+    (!excludeVisualPlans ||
+      !VISUAL_PLANS_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p))) &&
+    (!excludePersonal ||
+      !PERSONAL_SKILL_PREFIXES.some((p) => file.relativePath.startsWith(p)));
 
   // Machine gate (ADR-0003): canonical/machines/<name>/ holds one machine
   // class's profile — rules.md ships only to the machine whose `machine`
