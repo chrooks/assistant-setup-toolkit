@@ -10,6 +10,7 @@
     "claude-ai": "tsx scripts/claude-ai-pack.ts",
     "loop-audit:extract": "tsx scripts/loop-audit.ts",
     "check-upstream": "tsx scripts/check-upstream.ts",
+    "pins": "tsx scripts/pins.ts",
     "sync": "npm run setup -- --sync",
     "sync:watch": "chokidar 'canonical/**/*' 'manifests/**/*' -c 'npm run sync' --initial",
     "test": "vitest run",

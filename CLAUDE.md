@@ -17,6 +17,10 @@ npm run setup -- --claude --default --artifacts        # Also build Skill Artifa
 # claude.ai pack — curated skill ZIPs + preferences for manual upload
 npm run claude-ai                             # manifests/claude-ai.yaml -> artifacts/claude-ai/
 
+# External Source pins — setup fetches each source's pinned commit, never the tip
+npm run pins                                  # report: current / behind (with compare link) / unpinned
+npm run pins -- --update [id...]              # move pins to the upstream tip after review
+
 # Dev commands
 npm test                                      # Run all tests (vitest run)
 npm run test:watch                            # Run tests in watch mode

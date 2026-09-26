@@ -124,19 +124,31 @@ export async function fetchExternalSource(
   // Ensure parent exists so `git clone` can write into it.
   await fs.mkdir(workDir, { recursive: true });
 
-  // Build clone command: shallow clone of the repo root, optionally pinned to a ref.
   const cloneUrl = `https://github.com/${parsed.owner}/${parsed.repo}.git`;
-  const cloneArgs = ["clone", "--depth", "1"];
-  if (parsed.ref) {
-    cloneArgs.push("--branch", parsed.ref);
-  }
-  cloneArgs.push(cloneUrl, cloneDir);
 
   try {
-    await runGit(cloneArgs, workDir);
+    if (source.commit) {
+      // Pinned: fetch exactly that commit (GitHub serves any reachable SHA),
+      // never the moving branch tip.
+      await runGit(["init", "-q", cloneDir], workDir);
+      await runGit(["-C", cloneDir, "fetch", "-q", "--depth", "1", cloneUrl, source.commit], workDir);
+      await runGit(["-C", cloneDir, "checkout", "-q", "FETCH_HEAD"], workDir);
+    } else {
+      // Unpinned: shallow clone of the branch tip.
+      const cloneArgs = ["clone", "--depth", "1"];
+      if (parsed.ref) {
+        cloneArgs.push("--branch", parsed.ref);
+      }
+      cloneArgs.push(cloneUrl, cloneDir);
+      await runGit(cloneArgs, workDir);
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    return { sourceId: source.id, files: [], error: `git clone failed: ${message}` };
+    return {
+      sourceId: source.id,
+      files: [],
+      error: `git ${source.commit ? `fetch of pinned commit ${source.commit.slice(0, 12)}` : "clone"} failed: ${message}`,
+    };
   }
 
   // The directory we map files from — drop into subpath when one was specified.

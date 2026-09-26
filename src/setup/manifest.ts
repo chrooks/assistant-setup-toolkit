@@ -31,6 +31,15 @@ const ExternalSourceSchema = z.object({
   name: z.string().min(1, "name must not be empty"),
   kind: z.enum(["skill", "skill-pack", "plugin", "skill-or-plugin", "mcp-server"]),
   url: z.string().url("url must be a valid URL"),
+  /**
+   * The exact upstream commit to install. When set, setup fetches this commit
+   * instead of the branch tip, so third-party code changes only through a
+   * reviewed pin bump (`npm run pins`).
+   */
+  commit: z
+    .string()
+    .regex(/^[0-9a-f]{40}$/, "commit must be a full 40-character SHA")
+    .optional(),
   default: z.boolean(),
   targets: z.array(z.enum(["claude-code", "codex-cli"])).min(1, "targets must have at least one entry"),
   notes: z.array(z.string()).optional(),

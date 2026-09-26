@@ -88,6 +88,42 @@ describe("parseGitHubUrl", () => {
 
 // -- fetchExternalSource — skill kind --
 
+describe("pinned External Sources", () => {
+  const PIN = "0123456789abcdef0123456789abcdef01234567";
+
+  it("fetches exactly the pinned commit instead of cloning the branch tip", async () => {
+    const calls: string[][] = [];
+    const runGit: RunGit = async (args) => {
+      calls.push([...args]);
+      if (args[0] === "clone") throw new Error("a pinned source must not clone the tip");
+      if (args[0] === "init") await fs.mkdir(args[args.length - 1], { recursive: true });
+      if (args.includes("fetch")) {
+        const dir = args[args.indexOf("-C") + 1];
+        await fs.mkdir(path.join(dir, "skills", "pinned-skill"), { recursive: true });
+        await fs.writeFile(path.join(dir, "skills", "pinned-skill", "SKILL.md"), "---\nname: pinned-skill\n---\n");
+      }
+      return { stdout: "", stderr: "" };
+    };
+    const source: ExternalSource = {
+      id: "pinned",
+      name: "Pinned pack",
+      kind: "skill-pack",
+      url: "https://github.com/owner/repo/tree/main/skills",
+      commit: PIN,
+      default: true,
+      targets: ["claude-code"],
+    };
+
+    const result = await fetchExternalSource(source, workDir, runGit);
+
+    expect(result.error).toBeUndefined();
+    expect(result.files.map((f) => f.relativePath)).toEqual(["skills/pinned-skill/SKILL.md"]);
+    const fetchCall = calls.find((c) => c.includes("fetch"))!;
+    expect(fetchCall).toEqual(expect.arrayContaining(["--depth", "1", "https://github.com/owner/repo.git", PIN]));
+    expect(calls.some((c) => c.includes("checkout") && c.includes("FETCH_HEAD"))).toBe(true);
+  });
+});
+
 describe("fetchExternalSource (skill)", () => {
   it("maps a single-skill repo to skills/<id>/...", async () => {
     const source: ExternalSource = {

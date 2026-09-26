@@ -14,6 +14,7 @@ Append to the `externalSources:` list. The schema is strict — unknown fields a
 | `name` | yes | human label shown in the wizard summary |
 | `kind` | yes | `skill`, `skill-pack`, `plugin`, `skill-or-plugin`, or `mcp-server` |
 | `url` | yes | must be a valid URL |
+| `commit` | yes, except `mcp-server` | the full 40-character upstream SHA to install; setup fetches exactly this commit, never the branch tip. Write it with `npm run pins -- --update <id>`; a test fails on any fetched source without one |
 | `default` | yes | whether a default install includes it |
 | `targets` | yes | `claude-code`, `codex-cli`, or both — at least one |
 | `notes` | no | list of strings; why it exists, what breaks without it |
@@ -29,10 +30,13 @@ A minimal entry:
       name: Vercel Labs — find-skills
       kind: skill
       url: https://github.com/vercel-labs/skills/tree/main/skills/find-skills
+      commit: 7407f3893ad4dceab546ac002c3ef806e4000c73
       default: true
       targets:
         - claude-code
         - codex-cli
+
+**Pins are the review point.** Third-party code reaches every machine only when a pin moves. `npm run pins` lists each source as current, behind (with the commit count, the files changed under the source's own path, and a compare link), or unpinned. Read the compare link, then `npm run pins -- --update <id>`.
 
 `exclude` exists because a `skill-pack` is otherwise all-or-nothing per group, which forces a choice between standing updates and inheriting every skill the group happens to contain. It is ignored for non-pack kinds.
 

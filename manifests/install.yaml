@@ -29,6 +29,7 @@ externalSources:
     name: Matt Pocock Skills — engineering
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/engineering
+    commit: 484efcbe67ae1e558b4df95bfc90135b7b0c9df8
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - ask-matt
@@ -56,6 +57,7 @@ externalSources:
     name: Matt Pocock Skills — productivity
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/productivity
+    commit: 484efcbe67ae1e558b4df95bfc90135b7b0c9df8
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - wait-what
@@ -73,6 +75,7 @@ externalSources:
     name: Matt Pocock Skills — in-progress
     kind: skill-pack
     url: https://github.com/mattpocock/skills/tree/main/skills/in-progress
+    commit: 484efcbe67ae1e558b4df95bfc90135b7b0c9df8
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - claude-handoff
@@ -97,6 +100,7 @@ externalSources:
     name: find-skills
     kind: skill
     url: https://github.com/vercel-labs/skills/tree/main/skills/find-skills
+    commit: 7407f3893ad4dceab546ac002c3ef806e4000c73
     default: true
     targets:
       - claude-code
@@ -106,6 +110,7 @@ externalSources:
     name: Impeccable
     kind: skill
     url: https://github.com/pbakaus/impeccable/tree/main/plugin/skills/impeccable
+    commit: 9d715cc4f5564a990ca8345abfdd5df6dc9b41c8
     default: true
     targets:
       - claude-code
@@ -120,6 +125,7 @@ externalSources:
     name: Agent-Native Visual Plans
     kind: skill
     url: https://github.com/BuilderIO/skills
+    commit: a74a3a0b8f400d2820351bcd695a7217dc88bec7
     default: false
     targets:
       - claude-code
@@ -146,6 +152,7 @@ externalSources:
     name: Caveman
     kind: plugin
     url: https://github.com/JuliusBrussee/caveman
+    commit: 2fd153c67988e980fb0b2455c90832159a6a5a25
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - cavecrew
@@ -189,6 +196,7 @@ externalSources:
     name: Ponytail
     kind: plugin
     url: https://github.com/DietrichGebert/ponytail
+    commit: e3ba2aa6f1e6f0bc4d69eb09c9f0d0a93af56156
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - ponytail
@@ -221,6 +229,7 @@ externalSources:
     name: Everything Claude Code
     kind: plugin
     url: https://github.com/affaan-m/everything-claude-code
+    commit: e482e579415fde18357cafce70f177ae19fd7f03
     default: false
     targets:
       - claude-code
@@ -238,6 +247,7 @@ externalSources:
     name: Codex for Claude Code
     kind: plugin
     url: https://github.com/openai/codex-plugin-cc/tree/main/plugins/codex
+    commit: db52e28f4d9ded852ab3942cea316258ae4ef346
     default: true
     exclude:  # 0-use, no caller (2026-09-24 context audit)
       - codex-cli-runtime
@@ -304,6 +314,7 @@ externalSources:
     name: Hardik Pandya — stop-slop
     kind: skill
     url: https://github.com/hardikpandya/stop-slop
+    commit: 8da1f030185bdfe8471220585162991eaeb970e9
     default: true
     targets:
       - claude-code
@@ -318,6 +329,7 @@ externalSources:
     name: Siqi Chen — humanizer
     kind: skill
     url: https://github.com/blader/humanizer
+    commit: 9862685f575c65a8247f90369951df1b3416e3d6
     default: true
     targets:
       - claude-code
@@ -333,6 +345,7 @@ externalSources:
     name: Thariq Shihipar — eli5
     kind: plugin
     url: https://github.com/anthropics/claude-plugins-community/tree/main/eli5
+    commit: a727be1c7bd6064419b6f60d71993a19198adc17
     default: false  # 0 uses (2026-09-24 context audit)
     targets:
       - claude-code
@@ -356,6 +369,7 @@ externalSources:
     name: tt-a1i — archify
     kind: skill
     url: https://github.com/tt-a1i/archify/tree/main/archify
+    commit: 9e35d2b0b39b155553ba9fcfe0b4f2a5198dd993
     default: true
     targets:
       - claude-code
