@@ -343,6 +343,41 @@ describe("payload", () => {
         );
       });
 
+      it("stops when a machine skill shares a name with a canonical skill, on either target", () => {
+        const colliding = [
+          skill("skills/commit/SKILL.md"),
+          skill("machines/work/skills/commit/SKILL.md"),
+          skill("machines/work/skills/commit/extra.md"),
+        ];
+        for (const target of ["claude-code", "codex-cli"] as const) {
+          expect(() =>
+            buildAssistantPayloads({
+              targets: [target],
+              components: ["skills"],
+              externalFiles: [],
+              canonicalFiles: target === "claude-code" ? colliding : [],
+              projectionFiles: target === "codex-cli" ? colliding : [],
+              variants: { machine: "work" },
+            }),
+          ).toThrow(/machines\/work\/skills\/commit[\s\S]*skills\/commit/);
+        }
+      });
+
+      it("ignores a same-named skill under a machine that is not this one", () => {
+        const result = buildAssistantPayloads({
+          targets: ["claude-code"],
+          components: ["skills"],
+          externalFiles: [],
+          canonicalFiles: [skill("skills/commit/SKILL.md"), skill("machines/server/skills/commit/SKILL.md")],
+          projectionFiles: [],
+          variants: { machine: "work" },
+        });
+
+        expect(result.payloads[0].files.map((f) => f.sourcePath)).toEqual([
+          "/repo/canonical/skills/commit/SKILL.md",
+        ]);
+      });
+
       it("drops every machine skill when no machine Variant is set", () => {
         const result = buildAssistantPayloads({
           targets: ["claude-code"],

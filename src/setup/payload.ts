@@ -150,6 +150,16 @@ export function buildAssistantPayloads(
     return { ...file, relativePath: MACHINE_RULE_INSTALL_PATH };
   };
 
+  // A machine skill that shares a name with a canonical skill would install
+  // differently per target (Claude keeps canonical SKILL.md plus the machine's
+  // other files; Codex keeps the machine copy), so refuse it outright.
+  if (machine && input.components.includes("skills")) {
+    assertNoMachineSkillCollision(
+      [...input.canonicalFiles, ...input.projectionFiles],
+      machine,
+    );
+  }
+
   // Build a merged file map per home: external first, then local overwrites
   const homeFileMaps = new Map<AssistantHomeId, Map<string, PayloadFile>>();
 
@@ -234,4 +244,29 @@ export function buildAssistantPayloads(
   }
 
   return { payloads, conflicts };
+}
+
+function assertNoMachineSkillCollision(
+  files: readonly PayloadFile[],
+  machine: string,
+): void {
+  const canonicalSkills = new Set<string>();
+  const machineSkills = new Set<string>();
+  for (const file of files) {
+    const canonical = file.relativePath.match(/^skills\/([^/]+)\//);
+    if (canonical) canonicalSkills.add(canonical[1]);
+    const scoped = file.relativePath.match(/^machines\/([^/]+)\/skills\/([^/]+)\//);
+    if (scoped && scoped[1] === machine) machineSkills.add(scoped[2]);
+  }
+  const clashes = [...machineSkills].filter((name) => canonicalSkills.has(name)).sort();
+  if (clashes.length === 0) return;
+  throw new Error(
+    clashes
+      .map(
+        (name) =>
+          `Machine skill canonical/machines/${machine}/skills/${name}/ has the same name as ` +
+          `canonical skill canonical/skills/${name}/.`,
+      )
+      .join("\n") + "\nRename one of each pair; the harnesses would otherwise install different versions.",
+  );
 }
