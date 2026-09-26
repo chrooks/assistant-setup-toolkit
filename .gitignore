@@ -30,10 +30,13 @@ canonical/config/*
 # Machine rules are local-only (ADR-0003) — they describe a real box; never commit them.
 canonical/machines/*/rules.md
 
-# Machine-scoped skills: only the work laptop's are local-only (it can't push).
-# Other machines' skills stay tracked; the .gitkeep keeps work/skills/ on clone.
-canonical/machines/work/skills/*
-!canonical/machines/work/skills/.gitkeep
+# Machine-scoped skills are local-only by default, so a new machine class never
+# reaches the remote by accident. The `!` lines are the one allowlist of classes
+# whose skills are tracked (tests/setup/machine-profiles-tracking.test.ts reads it).
+# The .gitkeep keeps work/skills/ on clone.
+canonical/machines/*/skills/*
+!canonical/machines/*/skills/.gitkeep
+!canonical/machines/mac/skills/*
 
 .exports
 # Machine-local Preset overlay (ADR-0002). The work laptop cannot push, so its

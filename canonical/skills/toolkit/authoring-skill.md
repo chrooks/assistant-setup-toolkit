@@ -20,7 +20,9 @@ For **project** scope, write to **both** target paths so the Skill works on both
 
 For **machine** scope, `canonical/machines/<name>/skills/<skill>/` is the whole mechanism — `src/setup/payload.ts` matches that path, gates on the run's resolved `machine` Variant, and installs at `skills/<skill>/` with the prefix removed. Nothing else needs configuring. Check which machine names exist under `canonical/machines/` before writing to a new one.
 
-The motivating case: a Skill that searches Active Directory belongs to `canonical/machines/work/skills/`, not to every machine.
+Machine skills are local-only by default: `.gitignore` ignores every `canonical/machines/*/skills/*`, and only the classes on its `!` allowlist are tracked. A skill for a new machine class stays on that machine unless the user asks to track the class; then add its `!canonical/machines/<name>/skills/*` line.
+
+The motivating case: a Skill that searches the internal directory belongs to `canonical/machines/work/skills/`, not to every machine.
 
 ## Create
 

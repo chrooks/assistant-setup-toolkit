@@ -52,3 +52,10 @@ select components and Variants, not individual rule files.
   is a first-class grouping, so it gets a top-level home. Install paths and the
   Variant mechanism are unchanged. The rules template is
   `canonical/machines/TEMPLATE.md`.
+- **Amended 2026-09-26:** machine skills are local-only by default. `.gitignore`
+  ignores every `canonical/machines/*/skills/*`; its `!canonical/machines/<class>/skills/*`
+  lines are the one allowlist of tracked classes (today: `mac`). Before, only
+  `work/skills/` was ignored, so a new machine class's skills — a client box, say —
+  would have been committed and pushed by default. `tests/setup/machine-profiles-tracking.test.ts`
+  fails when any tracked path under `canonical/machines/` falls outside the
+  allowlist, which catches a `git add -f`.
