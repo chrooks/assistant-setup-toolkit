@@ -36,6 +36,12 @@ export interface WritePlan {
   readonly backupPath: string | null;
   readonly actions: readonly PlannedAction[];
   readonly warnings: readonly string[];
+  /**
+   * Receipt-owned files still present but no longer in the payload, on a run
+   * that does not prune (grouped for display by groupInstalledPaths). Empty on
+   * prune runs — there they become remove actions — and on incomplete payloads.
+   */
+  readonly orphans: readonly string[];
 }
 
 /** Input for planning writes to an Assistant Home. */
@@ -152,6 +158,19 @@ export function planWrites(input: PlanWritesInput): WritePlan {
     }
   }
 
+  // Safe Merge and Overwrite never remove, so a file the toolkit stopped
+  // shipping would linger silently. Name it instead. Skipped on an incomplete
+  // payload, where every External Source file would look orphaned.
+  let orphans: string[] = [];
+  if (effectiveBehavior !== "prune" && previousReceipt && payloadComplete !== false) {
+    orphans = groupInstalledPaths(
+      resolveOwnedFiles(previousReceipt).filter(
+        (file) => !payloadPaths.has(file) && existingSet.has(file),
+      ),
+      payloadPaths,
+    );
+  }
+
   // Plan backup for non-dry-run writes
   const backupPath = dryRun ? null : resolveBackupPath(assistantHome);
 
@@ -162,5 +181,29 @@ export function planWrites(input: PlanWritesInput): WritePlan {
     backupPath,
     actions,
     warnings,
+    orphans,
   };
+}
+
+/**
+ * Collapse installed paths for display: the files of a skill that no longer
+ * ships at all become one `skills/<name>/` entry. A stale file inside a skill
+ * that still ships (any path in `stillShipped` under it) is listed by itself,
+ * so a live skill never reads as removed. Sorted.
+ */
+export function groupInstalledPaths(
+  paths: readonly string[],
+  stillShipped: Iterable<string> = [],
+): string[] {
+  const liveSkills = new Set<string>();
+  for (const file of stillShipped) {
+    const skill = file.match(/^skills\/([^/]+)\//);
+    if (skill) liveSkills.add(skill[1]);
+  }
+  const grouped = new Set<string>();
+  for (const file of paths) {
+    const skill = file.match(/^skills\/([^/]+)\//);
+    grouped.add(skill && !liveSkills.has(skill[1]) ? `skills/${skill[1]}/` : file);
+  }
+  return [...grouped].sort();
 }

@@ -648,5 +648,96 @@ describe("hook-wiring", () => {
         expect(toml).toMatch(/^memories\s*=\s*true$/m);
       });
     });
+
+    describe("stale entries for scripts the toolkit owns", () => {
+      const seed = async (commands: string[]) => {
+        await fs.writeFile(
+          plan.settingsPath,
+          JSON.stringify({
+            hooks: {
+              SessionStart: commands.map((command) => ({ hooks: [{ type: "command", command }] })),
+            },
+          }),
+        );
+      };
+      const read = async () => JSON.parse(await fs.readFile(plan.settingsPath, "utf-8"));
+
+      it("prune removes an entry whose owned script is no longer wired", async () => {
+        const stale = `node ${homeDir}/hooks/retired.js`;
+        await seed([stale]);
+
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/retired.js`],
+          prune: true,
+        });
+
+        expect(result.removed).toEqual([stale]);
+        expect((await read()).hooks.SessionStart).toBeUndefined();
+        expect((await read()).hooks.UserPromptSubmit).toHaveLength(1);
+      });
+
+      it("without prune it only names the stale entry and leaves settings alone", async () => {
+        const stale = `node ${homeDir}/hooks/retired.js`;
+        await seed([stale]);
+
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/retired.js`],
+        });
+
+        expect(result.removed).toEqual([]);
+        expect(result.stale).toEqual([stale]);
+        expect((await read()).hooks.SessionStart[0].hooks[0].command).toBe(stale);
+      });
+
+      it("never touches an entry for a script the toolkit does not own", async () => {
+        const handWired = `node ${homeDir}/hooks/my-own.js`;
+        await seed([handWired]);
+
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/retired.js`],
+          prune: true,
+        });
+
+        expect(result.removed).toEqual([]);
+        expect((await read()).hooks.SessionStart[0].hooks[0].command).toBe(handWired);
+      });
+
+      it("matches the owned script path exactly, not as a prefix of another script", async () => {
+        const lookalike = `node ${homeDir}/hooks/retired.js.bak`;
+        await seed([lookalike]);
+
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/retired.js`],
+          prune: true,
+        });
+
+        expect(result.removed).toEqual([]);
+        expect((await read()).hooks.SessionStart[0].hooks[0].command).toBe(lookalike);
+      });
+
+      it("keeps an owned script that is still wired", async () => {
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/lexicon-reminder.sh`],
+          prune: true,
+        });
+
+        expect(result.removed).toEqual([]);
+        expect((await read()).hooks.UserPromptSubmit).toHaveLength(1);
+      });
+
+      it("dry-run prune reports the removal without writing", async () => {
+        const stale = `node ${homeDir}/hooks/retired.js`;
+        await seed([stale]);
+
+        const result = await applyHookWiring(plan, {
+          ownedScripts: [`${homeDir}/hooks/retired.js`],
+          prune: true,
+          dryRun: true,
+        });
+
+        expect(result.removed).toEqual([stale]);
+        expect((await read()).hooks.SessionStart[0].hooks[0].command).toBe(stale);
+      });
+    });
   });
 });

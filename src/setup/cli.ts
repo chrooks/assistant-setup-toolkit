@@ -79,7 +79,7 @@ Writing
 Sources & Variants
   --sources <a,b,c>        Only these External Sources
   --no-sources             Skip all External Sources
-  --no-fetch               Use cached sources; do not hit the network
+  --no-fetch               Skip External Sources; do not hit the network
   --preset <name>          Apply a Preset from manifests/presets.yaml
   --visual-plans <v>       ${VISUAL_PLANS_VARIANTS.join(" | ")}
 

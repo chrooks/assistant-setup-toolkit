@@ -121,3 +121,17 @@ export function planExternalFetches(
 
   return { planned, skipped };
 }
+
+/**
+ * True when fetching is disabled but a fetching run would have installed at
+ * least one source. `--no-fetch` plans nothing, so without this check its
+ * payload — every External Source file missing — reads as complete, and a
+ * prune would delete everything those sources installed.
+ */
+export function leavesSourcesUnfetched(
+  sources: readonly ExternalSource[],
+  options: FetchPlanOptions,
+): boolean {
+  if (options.fetch) return false;
+  return planExternalFetches(sources, { ...options, fetch: true }).planned.length > 0;
+}

@@ -86,6 +86,24 @@ export interface ApplyWiringResult {
   readonly added: number;
   readonly alreadyPresent: number;
   readonly flagAdded: boolean;
+  /** Commands removed (or, on a dry run, that would be removed) because their owned script is no longer wired. */
+  readonly removed: readonly string[];
+  /** Stale commands left in place because this run does not prune. */
+  readonly stale: readonly string[];
+}
+
+export interface ApplyHookWiringOptions {
+  readonly dryRun?: boolean;
+  /**
+   * Absolute paths of hook scripts the toolkit owns in this home, read from the
+   * Install Receipt as it stood BEFORE this run's writes. A settings entry that
+   * runs one of them but matches no planned action is stale: wiring.yaml is the
+   * source of truth for toolkit scripts. Entries for scripts the toolkit does
+   * not own are never touched.
+   */
+  readonly ownedScripts?: readonly string[];
+  /** Remove stale entries (the prune write behavior). Otherwise they are only reported. */
+  readonly prune?: boolean;
 }
 
 export interface PlanHookWiringOptions {
@@ -151,6 +169,14 @@ const SETTINGS_PATH_BY_TARGET: Record<AssistantTargetId, string> = {
  * Home (e.g. `~/.claude` or `~/.codex`) so this function stays pure: it
  * doesn't touch the filesystem and doesn't re-resolve home paths.
  */
+/** The settings file a target's assistant-home-scoped hooks are wired into. */
+export function assistantHomeSettingsPath(
+  target: AssistantTargetId,
+  home: string,
+): string {
+  return path.join(home, SETTINGS_PATH_BY_TARGET[target]);
+}
+
 export function planHookWiring(
   entries: readonly WiringEntry[],
   assistantHomeByTarget: Readonly<Partial<Record<AssistantTargetId, string>>>,
@@ -267,7 +293,7 @@ interface SettingsFile {
  */
 export async function applyHookWiring(
   plan: WiringPlan,
-  options: { readonly dryRun?: boolean } = {},
+  options: ApplyHookWiringOptions = {},
 ): Promise<ApplyWiringResult> {
   const dryRun = options.dryRun === true;
 
@@ -297,12 +323,19 @@ export async function applyHookWiring(
     added += 1;
   }
 
+  const staleResult = removeStaleOwnedCommands(
+    hooks,
+    plan.actions.map((a) => a.command),
+    options.ownedScripts ?? [],
+    options.prune === true,
+  );
+
   let flagAdded = false;
   if (plan.featureFlag) {
     flagAdded = await assertTomlFeatureFlag(plan.featureFlag, { dryRun });
   }
 
-  if ((added > 0 || deduped) && !dryRun) {
+  if ((added > 0 || deduped || staleResult.removed.length > 0) && !dryRun) {
     const next: SettingsFile = { ...settings, hooks };
     await writeSettings(plan.settingsPath, next);
   }
@@ -313,7 +346,53 @@ export async function applyHookWiring(
     added,
     alreadyPresent,
     flagAdded,
+    removed: staleResult.removed,
+    stale: staleResult.stale,
   };
+}
+
+/**
+ * Find hook commands that run a toolkit-owned script but match no planned
+ * action. With `prune`, drop them from `hooks` in place (emptied matcher groups
+ * and events go too); otherwise leave `hooks` untouched and report them.
+ */
+function removeStaleOwnedCommands(
+  hooks: Record<string, MatcherGroup[]>,
+  plannedCommands: readonly string[],
+  ownedScripts: readonly string[],
+  prune: boolean,
+): { readonly removed: string[]; readonly stale: string[] } {
+  const planned = new Set(plannedCommands.map(normalizeHookCommand));
+  // A script path counts only as a whole token (bounded by the string's ends,
+  // whitespace, or a quote), so hooks/a.js never claims hooks/a.js.bak.
+  const owned = ownedScripts.map(
+    (p) =>
+      new RegExp(
+        `(^|[\\s"'])${escapeRegExp(normalizeHookCommand(toHookCommandPath(p)))}($|[\\s"'])`,
+      ),
+  );
+  const isStale = (command: string): boolean => {
+    const normalized = normalizeHookCommand(command);
+    return !planned.has(normalized) && owned.some((script) => script.test(normalized));
+  };
+
+  const found: string[] = [];
+  for (const [event, groups] of Object.entries(hooks)) {
+    const kept: MatcherGroup[] = [];
+    for (const group of groups) {
+      const keptHooks = group.hooks.filter((hook) => {
+        if (!isStale(hook.command)) return true;
+        found.push(hook.command);
+        return false;
+      });
+      if (keptHooks.length > 0) kept.push({ ...group, hooks: keptHooks });
+    }
+    if (!prune) continue;
+    if (kept.length > 0) hooks[event] = kept;
+    else delete hooks[event];
+  }
+
+  return prune ? { removed: found, stale: [] } : { removed: [], stale: found };
 }
 
 // -- Internals --

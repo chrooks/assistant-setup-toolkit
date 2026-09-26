@@ -14,6 +14,7 @@ import { tryParseCliFlags } from "./cli.js";
 import { runInteractivePrompts } from "./prompts.js";
 import {
   resolveAssistantHomes,
+  resolveOwnedFiles,
   resolveVisualPlansVariant,
   MACHINE_RULE_INSTALL_PATH,
   MACHINE_VARIANT_KEY,
@@ -23,6 +24,7 @@ import {
 import type {
   AssistantTargetId,
   AssistantHomeId,
+  InstallReceipt,
   PayloadFile,
   ComponentKind,
   SetupProfile,
@@ -33,7 +35,7 @@ import { resolveAssistantHomePath, resolveReceiptPath } from "./paths.js";
 import { planCodexProjection, rewriteContentForCodex, inlineCanonicalImports } from "./projection.js";
 import type { ProjectionMapping } from "./projection.js";
 import { buildAssistantPayloads } from "./payload.js";
-import { planWrites } from "./write-plan.js";
+import { groupInstalledPaths, planWrites } from "./write-plan.js";
 import type { WritePlan } from "./write-plan.js";
 import { planVerificationChecks, formatVerificationResult } from "./verify.js";
 import { planMcpNextSteps } from "./mcp.js";
@@ -60,12 +62,13 @@ import {
   loadWiringManifest,
   planHookWiring,
   applyHookWiring,
+  assistantHomeSettingsPath,
 } from "./hook-wiring.js";
 import { planSkillArtifacts, createSkillArtifacts } from "./artifacts.js";
 import type { PlannedArtifact } from "./artifacts.js";
 import { createReporter } from "./reporter.js";
 import type { Reporter } from "./reporter.js";
-import { planExternalFetches } from "./external-sources.js";
+import { leavesSourcesUnfetched, planExternalFetches } from "./external-sources.js";
 import { fetchPlannedSources } from "./external-fetcher.js";
 import os from "node:os";
 
@@ -596,6 +599,16 @@ export async function runSetupWizard(
       // payload — they are not stale, just unfetched.
       sourcesResolved = false;
     }
+    if (
+      leavesSourcesUnfetched(manifest.externalSources, {
+        targets: profile.targets,
+        fetch: profile.fetch,
+        selectedIds: profile.selectedExternalSourceIds,
+      })
+    ) {
+      // --no-fetch: same reasoning as a dry run — unfetched, not stale.
+      sourcesResolved = false;
+    }
 
     // Plan and regenerate Target Projections if Codex is selected
     const hasCodex = profile.targets.includes("codex-cli");
@@ -784,6 +797,10 @@ export async function runSetupWizard(
 
     // Plan writes for each Assistant Home
     const writePlans: WritePlan[] = [];
+    // Receipts as they stood before this run's writes. Hook unwiring needs the
+    // old ownership set: a prune removes a retired script from the new receipt,
+    // and the settings entry that runs it still has to go.
+    const receiptsBeforeRun = new Map<string, InstallReceipt | null>();
     log("Planned writes:");
     if (profile.dryRun) {
       log("  (dry-run — no files will be written)");
@@ -805,6 +822,7 @@ export async function runSetupWizard(
       // here, so the receipt has to be read before planning — without it
       // prune silently degrades to overwrite and never removes anything.
       const previousReceipt = await readInstallReceipt(homePath);
+      receiptsBeforeRun.set(homePath, previousReceipt);
 
       const plan = planWrites({
         assistantHome: homePath,
@@ -822,6 +840,26 @@ export async function runSetupWizard(
       // on the console, not buried in the log.
       for (const warning of plan.warnings) {
         summary(`  [warning] ${homeLabel(payload.homeId)}: ${warning}`);
+      }
+
+      // The console gets a glance (count and the first few); the run log
+      // names every entry.
+      const removals = groupInstalledPaths(
+        plan.actions.filter((a) => a.action === "remove").map((a) => a.relativePath),
+        payload.files.map((f) => f.relativePath),
+      );
+      if (removals.length > 0) {
+        summary(
+          `  [${profile.dryRun ? "would remove" : "remove"}] ${homeLabel(payload.homeId)}: ${glance(removals)}`,
+        );
+      }
+      if (plan.orphans.length > 0) {
+        summary(
+          `  [warning] ${homeLabel(payload.homeId)}: ${plan.orphans.length} installed item(s) are no longer shipped by the toolkit: ${glance(plan.orphans)}. Run with --write prune to remove them.`,
+        );
+        for (const orphan of plan.orphans) {
+          log(`  [orphan] ${homeLabel(payload.homeId)}/${orphan}`);
+        }
       }
 
       if (!profile.dryRun && plan.backupPath) {
@@ -921,18 +959,49 @@ export async function runSetupWizard(
           homesByTarget[target] = resolveAssistantHomePath(homeId);
         }
 
-        const wiringPlans = planHookWiring(wiringEntries, homesByTarget, {
+        const plannedWiring = planHookWiring(wiringEntries, homesByTarget, {
           projectRoot: repoRoot,
           variants: profile.variants,
         });
+        // Every selected home gets a plan, even with nothing to add, so an entry
+        // whose last wiring line was removed or gated out can still be unwired.
+        const wiringPlans = [...plannedWiring];
+        for (const target of profile.targets) {
+          const home = homesByTarget[target];
+          if (!home) continue;
+          const settingsPath = assistantHomeSettingsPath(target, home);
+          if (!wiringPlans.some((p) => p.settingsPath === settingsPath)) {
+            wiringPlans.push({ target, settingsPath, actions: [] });
+          }
+        }
         if (wiringPlans.length > 0) {
           log("Hook Wiring:");
           let hooksAdded = 0;
           let hooksPresent = 0;
+          let hooksRemoved = 0;
           for (const plan of wiringPlans) {
+            const home = homesByTarget[plan.target];
+            const priorReceipt = home ? receiptsBeforeRun.get(home) ?? null : null;
+            const ownedScripts =
+              home && priorReceipt && path.dirname(plan.settingsPath) === home
+                ? resolveOwnedFiles(priorReceipt)
+                    .filter((file) => file.startsWith("hooks/"))
+                    .map((file) => path.join(home, file))
+                : [];
             const result = await applyHookWiring(plan, {
               dryRun: profile.dryRun,
+              ownedScripts,
+              prune: profile.writeBehavior === "prune",
             });
+            for (const command of result.removed) {
+              summary(`  [${profile.dryRun ? "would unwire" : "unwire"}] ${plan.target}: ${command}`);
+            }
+            if (result.stale.length > 0) {
+              summary(
+                `  [warning] ${plan.target}: ${result.stale.length} hook entr${result.stale.length === 1 ? "y runs a" : "ies run"} script the toolkit no longer wires: ${result.stale.join("; ")}. Run with --write prune to remove.`,
+              );
+            }
+            hooksRemoved += result.removed.length;
             const verbAdd = profile.dryRun ? "would add" : "added";
             const verbSkip = profile.dryRun
               ? "would skip"
@@ -953,7 +1022,7 @@ export async function runSetupWizard(
             hooksPresent += result.alreadyPresent;
           }
           summary(
-            `  Hooks      ${hooksAdded} ${profile.dryRun ? "would add" : "added"}, ${hooksPresent} already present`,
+            `  Hooks      ${hooksAdded} ${profile.dryRun ? "would add" : "added"}, ${hooksPresent} already present, ${hooksRemoved} ${profile.dryRun ? "would remove" : "removed"}`,
           );
         }
       }
@@ -1093,4 +1162,10 @@ export async function runSetupWizard(
       }
     }
   }
+}
+
+/** Console glance at a long list: the first few entries, then a count. */
+function glance(items: readonly string[], shown = 6): string {
+  if (items.length <= shown) return items.join(", ");
+  return `${items.slice(0, shown).join(", ")}, and ${items.length - shown} more (full list in the run log)`;
 }

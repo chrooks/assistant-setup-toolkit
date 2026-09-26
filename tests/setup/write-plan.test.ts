@@ -190,6 +190,64 @@ describe("write-plan", () => {
     });
   });
 
+  describe("orphans on runs that do not prune", () => {
+    const receiptOwning = (files: string[]): InstallReceipt => ({
+      schemaVersion: 2,
+      toolkit: "code-assistant-context",
+      installedAt: "2026-05-05T00:00:00.000Z",
+      assistantTarget: "claude-code",
+      assistantHome,
+      setupProfile: { mode: "default", components: ["skills", "hooks"], writeBehavior: "safe-merge" },
+      files,
+      ownedFiles: files,
+    });
+    const owned = ["skills/kept/SKILL.md", "skills/old/SKILL.md", "skills/old/ref.md", "hooks/retired.js"];
+
+    for (const writeBehavior of ["safe-merge", "overwrite"] as const) {
+      it(`${writeBehavior} names each orphan, grouped by skill, and removes nothing`, () => {
+        const plan = planWrites({
+          assistantHome,
+          payloadFiles: [makeFile("skills/kept/SKILL.md")],
+          existingFiles: owned,
+          previousReceipt: receiptOwning(owned),
+          writeBehavior,
+          dryRun: false,
+        });
+
+        expect(plan.actions.filter((a) => a.action === "remove")).toEqual([]);
+        expect(plan.orphans).toEqual(["hooks/retired.js", "skills/old/"]);
+      });
+    }
+
+    it("lists a stale file inside a skill that still ships, instead of the whole skill", () => {
+      const withStaleRef = [...owned, "skills/kept/old-ref.md"];
+      const plan = planWrites({
+        assistantHome,
+        payloadFiles: [makeFile("skills/kept/SKILL.md")],
+        existingFiles: withStaleRef,
+        previousReceipt: receiptOwning(withStaleRef),
+        writeBehavior: "safe-merge",
+        dryRun: false,
+      });
+
+      expect(plan.orphans).toEqual(["hooks/retired.js", "skills/kept/old-ref.md", "skills/old/"]);
+    });
+
+    it("stays quiet when the payload is incomplete, since every external file would look orphaned", () => {
+      const plan = planWrites({
+        assistantHome,
+        payloadFiles: [makeFile("skills/kept/SKILL.md")],
+        existingFiles: owned,
+        previousReceipt: receiptOwning(owned),
+        writeBehavior: "safe-merge",
+        dryRun: false,
+        payloadComplete: false,
+      });
+
+      expect(plan.orphans).toEqual([]);
+    });
+  });
+
   describe("dry-run", () => {
     it("does not plan a backup path", () => {
       const plan = planWrites({

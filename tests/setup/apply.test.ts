@@ -66,6 +66,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "copy", sourcePath },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);
@@ -88,6 +89,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "overwrite", sourcePath },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);
@@ -110,6 +112,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "overwrite", sourcePath },
         ],
         warnings: [],
+        orphans: [],
       };
 
       await applyWritePlan(plan);
@@ -131,6 +134,7 @@ describe("apply", () => {
           { relativePath: "skills/old/SKILL.md", action: "remove", sourcePath: null },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);
@@ -152,6 +156,7 @@ describe("apply", () => {
           { relativePath: "skills/old/SKILL.md", action: "remove", sourcePath: null },
         ],
         warnings: [],
+        orphans: [],
       };
 
       await applyWritePlan(plan);
@@ -175,6 +180,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "skip", sourcePath: null },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);
@@ -197,6 +203,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "copy", sourcePath },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);
@@ -218,6 +225,7 @@ describe("apply", () => {
           { relativePath: "CLAUDE.md", action: "copy", sourcePath },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan, {
@@ -264,6 +272,7 @@ describe("apply", () => {
         dryRun: false,
         backupPath: path.join(homeDir, ".assistant-setup-toolkit", "backups", "test"),
         warnings: [],
+        orphans: [],
       };
 
       // Run 1 installs two skills.
@@ -311,6 +320,7 @@ describe("apply", () => {
           { relativePath: "skills/shared/other.md", action: "copy", sourcePath: siblingSource },
         ],
         warnings: [],
+        orphans: [],
       });
 
       await applyWritePlan({
@@ -323,6 +333,7 @@ describe("apply", () => {
           { relativePath: "skills/shared/SKILL.md", action: "remove", sourcePath: null },
         ],
         warnings: [],
+        orphans: [],
       });
 
       // Emptied by the prune — the husk goes too.
@@ -351,6 +362,7 @@ describe("apply", () => {
           backupPath: path.join(homeDir, ".assistant-setup-toolkit", "backups", "a"),
           actions: [{ relativePath: "skills/gone/SKILL.md", action: "copy", sourcePath }],
           warnings: [],
+          orphans: [],
         },
         receiptOptions,
       );
@@ -365,6 +377,7 @@ describe("apply", () => {
             { relativePath: "skills/gone/SKILL.md", action: "remove", sourcePath: null },
           ],
           warnings: [],
+          orphans: [],
         },
         receiptOptions,
       );
@@ -396,6 +409,7 @@ describe("apply", () => {
           },
         ],
         warnings: [],
+        orphans: [],
       };
 
       const result = await applyWritePlan(plan);

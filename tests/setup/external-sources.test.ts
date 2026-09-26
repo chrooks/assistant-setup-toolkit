@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { planExternalFetches } from "../../src/setup/external-sources.js";
+import { leavesSourcesUnfetched, planExternalFetches } from "../../src/setup/external-sources.js";
 import type { ExternalSource } from "../../src/setup/manifest.js";
 
 const SKILL_SOURCE: ExternalSource = {
@@ -48,6 +48,23 @@ describe("external-sources", () => {
       expect(plan.planned).toHaveLength(0);
       expect(plan.skipped).toHaveLength(1);
       expect(plan.skipped[0].reason).toContain("disabled");
+    });
+
+    it("marks a --no-fetch run as missing sources a fetching run would install", () => {
+      expect(
+        leavesSourcesUnfetched([SKILL_SOURCE], { targets: ["claude-code"], fetch: false }),
+      ).toBe(true);
+      // Nothing selected: skipping the fetch loses nothing.
+      expect(
+        leavesSourcesUnfetched([SKILL_SOURCE], {
+          targets: ["claude-code"],
+          fetch: false,
+          selectedIds: [],
+        }),
+      ).toBe(false);
+      expect(
+        leavesSourcesUnfetched([SKILL_SOURCE], { targets: ["claude-code"], fetch: true }),
+      ).toBe(false);
     });
 
     it("skips sources not targeting selected targets", () => {
