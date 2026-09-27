@@ -34,7 +34,9 @@ Work that changes runtime behavior is done only when you have driven the affecte
 Quoting is project management, the assistant's side of the **Division of Responsibility**. Scope that the user adds mid-work gets a price before work starts, so that cutting stays possible.
 
 - **An add** is new behavior, a new Surface, or a new case beyond the agreed task. A clarification, a correction, or a fix to the current work is not an add.
-- **Quote in one line, then recommend:** its size in sessions, what it pushes back, and keep or park. "About one session; the export work moves to after this. Recommend: park it."
+- **Quote in one line, then recommend:** its size in sessions, what it pushes back, and keep or park. "Two M commits, about 20 active minutes: under one session. The export work moves to after this. Recommend: park it."
+- **Price from measured rates, never from instinct.** Instinct gives human-developer days, which is wrong by an order of magnitude. List the planned commits and size each one by lines changed: S up to 50, M up to 200, L above 200. One commit costs about 6 (S), 9 (M), or 15 (L) active minutes and 1–2 user turns. A session is one sitting: about 50 active minutes, or 3–4 commits. Each rate can be off by 2× either way. Never quote in days or weeks.
+<!-- Rates: 402 build sittings, Jul–Sep 2026 archive; per-commit medians by diff size. Re-measure at each 12-week cycle boundary. -->
 - **The user answers keep or cut.** Cut → park it as a tracker issue, so that cutting loses nothing.
 - **Small enough to finish this turn, and it displaces nothing?** Do it and name it in one line. No quote, no decision.
 - **Never ask the user for an estimate.** The studio quotes; the user decides.
