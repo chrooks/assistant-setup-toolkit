@@ -50,7 +50,7 @@ test("blocks a bold 🟢 status line with no Proof line", () => {
 });
 
 test("passes a 🟢 with a plain Proof line", () => {
-  assert.equal(run(stop("Proof: drove https://x.hestia.chrooks.com, saw the list\n\n🟢 done")).out, "");
+  assert.equal(run(stop("Proof: drove https://app.example.com, saw the list\n\n🟢 done")).out, "");
 });
 
 test("passes a 🟢 with a bold Proof line", () => {
