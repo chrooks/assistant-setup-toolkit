@@ -89,7 +89,7 @@ decision. Summary table first, then one section per item:
     |---|------|------|----------|------|
 
     ## 1. <title>
-    - **Source**: [raw file] — or, for a Karakeep save: [original URL](url) · [Karakeep](https://keep.chrooks.com/dashboard/preview/<id>) · karakeep: <id>
+    - **Source**: [raw file] — or, for a Karakeep save: [original URL](url) · [Karakeep](<karakeepUrl>/dashboard/preview/<id>) · karakeep: <id>
     - **What it is**: <kind first, then one-clause substance — a report, not a pitch>
     - **Proposed**: ingest → [draft](drafts/<name>.md) · fold into [[page]] · to-engage row · to-consume row · discard
     - **Why saved** _(guess — confirm)_: <queue-row items only>
@@ -101,6 +101,9 @@ no link forces them to ask. (Learned 2026-08-27, first review pass.)
 
 A Karakeep entry carries **two** links: the original, so the user can rewatch the video
 before deciding, and Karakeep's cached copy, for when the original has vanished.
+`karakeepUrl` is this machine's Karakeep web address, read from `knowledge-config.json` —
+the same file SKILL.md reads for the vault. No `karakeepUrl` → drop that link and keep
+`karakeep: <id>`, so the entry still names the save.
 
 ## The review pass
 
