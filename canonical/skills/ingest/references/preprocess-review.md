@@ -56,6 +56,9 @@ out of `<rawDir>/inbox/`, and never asks a question — open questions go in the
      - *to-engage / to-consume* → draft the row (What it is / Why I saved it / Size /
        Saved) into the packet. **Do not summarize the source** — a row helps the user
        choose when to spend the evening; it never replaces spending it.
+     - *repo issue* → name the repo and draft the issue (title + Why / What to explore /
+       Acceptance) into the packet entry. The review creates it — an unattended pass never
+       creates an issue. See [karakeep-drain.md](./karakeep-drain.md) "Repo issue".
      - *discard* → propose it with the source link, never a bare one-liner.
    - Mark every "Why I saved it" cell as a guess — the user confirms or rewrites it at
      review.
@@ -91,7 +94,7 @@ decision. Summary table first, then one section per item:
     ## 1. <title>
     - **Source**: [raw file] — or, for a Karakeep save: [original URL](url) · [Karakeep](<karakeepUrl>/dashboard/preview/<id>) · karakeep: <id>
     - **What it is**: <kind first, then one-clause substance — a report, not a pitch>
-    - **Proposed**: ingest → [draft](drafts/<name>.md) · fold into [[page]] · to-engage row · to-consume row · discard
+    - **Proposed**: ingest → [draft](drafts/<name>.md) · fold into [[page]] · to-engage row · to-consume row · repo issue → <repo> · discard
     - **Why saved** _(guess — confirm)_: <queue-row items only>
     - **Open question**: <only when a real decision is open>
 
@@ -117,12 +120,13 @@ per item, never read ahead of the user's decision.
    - **Approve** — apply it: move the draft from `staging/drafts/` to its `target:`
      path, apply described folds against the *current* page state, update `index.md`,
      add the `log.md` entry, add backlog rows (with the confirmed "Why I saved it"),
-     move the raw file `inbox/` → `archived/`. Then delete the item's packet section.
+     create any repo issue and put its link in the log entry, move the raw file
+     `inbox/` → `archived/`. Then delete the item's packet section.
    - **Reject** — delete the draft, move the raw to `archived/` with nothing filed, log
      the drop. The existing drop semantics, unchanged.
 3. **Finish**: when the packet is empty, delete `review-packet.md`. Close with the
    consolidated report (pages created / updated / rows added / dropped, same as the walk
-   flows) and the LiveSync publish reminder.
+   flows, plus issues opened per repo) and the LiveSync publish reminder.
 
 A review where most items get approved unchanged is the success signal — it means
 preprocess is drafting at the right quality. Most items becoming wiki pages is still the

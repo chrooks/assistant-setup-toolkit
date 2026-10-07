@@ -49,16 +49,17 @@ unattended time so the user's sit-down is decisions only. That pass now runs **h
 
 Drain **one item at a time**, oldest first unless told otherwise.
 
-## Triage — the four outcomes
+## Triage — the five outcomes
 
 | Outcome | When | Where it lands |
 |---|---|---|
 | **Ingest now** | Reference-shaped — a technique, recipe, checklist, explainer. *Knowing it* is the whole point; there's nothing to "experience" | Wiki page, normal Steps 2–6 |
 | **To-consume** | Leisure media they'll actually play or watch — a game, show, movie, book, album | A row on `backlog/to-consume.md` |
 | **To-engage** | Anything else worth digging into themselves — an article, talk, repo, paper | A row on `backlog/to-engage.md` |
+| **Repo issue** | Clearly serves one project's *work* — a framework for that codebase, a tool to harvest into it, an idea for that product | An issue in that repo's tracker, or the project's own inbox when it has none. No wiki page, no backlog row |
 | **Discard** | Didn't hold up, or the thought has since been had | Nothing filed; say so |
 
-**In all four cases, archive the item in Karakeep** (never delete). The cached snapshot is
+**In all five cases, archive the item in Karakeep** (never delete). The cached snapshot is
 link-rot insurance for reels that vanish.
 
 ### The queue rows are processed, not copied
@@ -76,6 +77,24 @@ it carries what a bookmark can't:
 
 Reading the source enough to fill those four columns is the *work* of the drain. A row that
 just restates the title has done nothing for them.
+
+### Repo issue — a recurring outcome, not an exception
+
+Work belongs where the work is tracked. When a save is really a task for one project, a
+wiki page or a backlog row strands it: the project's own sessions never see it. **Look for
+this every review** — it recurs. On 2026-10-07 one review sent six saves this way: a
+roster-fit framework became an exploration issue in the basketball app's repo, four agent
+repos became harvest issues in the toolkit repo, and a UI pattern went to the consulting
+vault's inbox for a product idea there. The coach-homie hand-off below is the same move.
+
+- **Name the repo in the proposal** — "repo issue → <repo>", never "maybe an issue".
+- **Draft the issue, not a summary**: a title, then *Why* (the source link, what it is, the
+  user's own words about it), *What to explore*, and *Acceptance*. Follow the repo's own
+  issue conventions and labels (`docs/agents/issue-tracker.md` when it exists).
+- **The review creates it** (`gh issue create` from the repo's clone), then logs the issue
+  link. A project with no tracker gets a dated note in its inbox instead.
+- A save can be both: a wiki page for the knowledge, an issue for the work. Propose both only
+  when each earns its place.
 
 ### Provenance marker on pages born from un-engaged saves
 

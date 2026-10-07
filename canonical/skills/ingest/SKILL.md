@@ -42,8 +42,9 @@ completes.
 - **Karakeep** — the phone share-sheet capture inbox, usually things the user saved but
   *hasn't* dug into yet. "Drain karakeep", "ingest my saves/bookmarks" →
   [references/karakeep-drain.md](./references/karakeep-drain.md). Same one-at-a-time loop, but
-  gated by a **four-way triage** — most items become a queue row in `backlog/`, not a wiki
-  page. Filing an un-engaged save as knowledge is the failure mode that flow exists to prevent.
+  gated by a **five-way triage** — most items become a queue row in `backlog/` or an issue in
+  the repo whose work they serve, not a wiki page. Filing an un-engaged save as knowledge is
+  the failure mode that flow exists to prevent.
 
 **Both inboxes also run split-shift** — "preprocess my inbox / my saves" does the mechanical
 half unattended (read, extract, triage, draft into `<vaultPath>/staging/`), and "review my
