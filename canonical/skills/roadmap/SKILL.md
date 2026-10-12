@@ -1,7 +1,7 @@
 ---
 name: roadmap
-description: Choose, prioritize, sequence, and reshape issue-tracker work across open issues, sub-issues, Projects, milestones, labels, priorities, and blockers. Use when deciding what to pick up next, reviewing a Kanban board, milestone, roadmap, or backlog, triaging blocked work, or choosing between open issue records.
-argument-hint: "[next|board|milestone|blocked|reprioritize] [issue|milestone|project]"
+description: Choose, prioritize, sequence, and reshape issue-tracker work across open issues, sub-issues, Projects, milestones, labels, priorities, and blockers. Use when deciding what to pick up next, reviewing a Kanban board, milestone, roadmap, or backlog, triaging blocked work, drawing the backlog as a dependency graph in Orca, or choosing between open issue records.
+argument-hint: "[next|board|milestone|blocked|reprioritize|graph] [issue|milestone|project|owner/repo]"
 disable-model-invocation: false
 ---
 
@@ -26,6 +26,7 @@ Parse arguments positionally from the user's invocation.
 - `/roadmap milestone <milestone>` -> review milestone health, priority, risk, and next slices.
 - `/roadmap blocked` -> identify blocked work, missing dependencies, and unblock steps.
 - `/roadmap reprioritize [scope]` -> propose priority, milestone, status, or dependency changes.
+- `/roadmap graph [owner/repo]` -> draw the open issues as a dependency graph and open it in Orca (see Graph).
 
 If the user asks "what should I pick up next?", "what is the next slice?", "what should move next?", or "what is highest priority?", infer `/roadmap next`.
 
@@ -131,6 +132,23 @@ Ask first only when the reshape crosses into the human's side of the **Division 
 - anything that reshapes product direction rather than sequencing it
 
 Closures stay out of scope either way: identify issue records that should close and route them through `/to-issues close`.
+
+## Graph
+
+`/roadmap graph` is a view, not a ranking. One script does the whole job:
+
+```bash
+python3 scripts/backlog-graph.py [owner/repo] --open    # scripts/ sits next to this SKILL.md
+```
+
+1. It reads every open issue through `gh`: title, URL, milestone, labels, open blockers, parent, sub-issues. It never writes to GitHub.
+2. One node per open issue. Red = blocked (an open blocker, or the `blocked` label). Amber = `needs-decision` or `needs-scope`. Green = ready.
+3. Solid edge = blocker → blocked. Dashed edge = parent → sub-issue. Edges to closed issues are dropped.
+4. It builds the page with the diagram skill's `build-diagram.py` and writes `<cwd>/.exports/backlog/<repo>.html`. Add `.exports/` to the repo's `.gitignore` if missing.
+5. `--open` opens the page as a tab in Orca's embedded browser, scoped to the repo's worktree. Without the `orca` CLI, give the printed path.
+6. Click a node for status, labels, milestone, and link. Double-click opens the issue on GitHub.
+
+Report the script's count line (open, ready, waiting, blocked, links) and the path. Zero links means the tracker has no blocked-by or sub-issue relations recorded yet; `/to-issues` adds them. Offer the graph in one line after `/roadmap blocked` or `/roadmap board` when the repo has links. Re-run after the tracker changes; never edit the HTML.
 
 ## Output shapes
 
