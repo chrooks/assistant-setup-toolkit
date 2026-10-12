@@ -145,7 +145,7 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
   function renderMeta(meta) {
     if (!meta || typeof meta !== "object") return "";
-    const rows = Object.entries(meta).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    const rows = Object.entries(meta).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${/^https?:\/\//.test(String(v)) ? `<a href="${esc(v)}" target="_blank" rel="noopener">${esc(v)}</a>` : esc(v)}</dd>`).join("");
     return rows ? `<dl class="meta">${rows}</dl>` : "";
   }
   function showNode(id) {
@@ -165,7 +165,13 @@
     else if (params.edges.length) showEdge(params.edges[0]);
     else detail.innerHTML = `<div class="empty">Click a node or edge to read its explanation. Drag to rearrange, scroll to zoom, drag the background to pan.</div>`;
   });
-  network.on("doubleClick", (params) => { if (params.nodes.length) network.focus(params.nodes[0], { scale: 1.2, animation: true }); });
+  // Double-click: open the node's meta.url when it is a link (issues, docs); otherwise zoom to it.
+  network.on("doubleClick", (params) => {
+    if (!params.nodes.length) return;
+    const n = nodes.get(params.nodes[0]);
+    if (n && n.meta && /^https?:\/\//.test(String(n.meta.url))) window.open(n.meta.url, "_blank", "noopener");
+    else network.focus(params.nodes[0], { scale: 1.2, animation: true });
+  });
 
   document.getElementById("fit-btn").onclick = () => network.fit({ animation: true });
   let physicsOn = options.physics !== false;
