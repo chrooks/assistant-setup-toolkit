@@ -115,7 +115,7 @@ describe.skipIf(!hasChromium || !hasClaudeHome)("skills page (this machine's rea
 
   it("reads each mode from real frontmatter", async () => {
     expect(await page.textContent("#row-to-questionnaire .m")).toBe("typed only");
-    expect(await page.textContent("#row-consult .m")).toBe("Claude only");
+    expect(await page.textContent("#row-roadmap .m")).toBe("auto");
   });
 
   it("'watch a video' puts /watch-video first", async () => {
