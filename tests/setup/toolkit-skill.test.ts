@@ -134,12 +134,13 @@ describe("toolkit Skill — the rule authoring branch (AC10)", () => {
 describe("canonical/rules — the always-on invariant", () => {
   const ALWAYS_ON = [
     "common/coding-style.md",
+    "common/cost-guardrails.md",
     "common/development-workflow.md",
     "common/git-workflow.md",
     "common/resource-index.md",
   ];
 
-  it("gates every rule except the four imported by INSTRUCTIONS.md", async () => {
+  it("gates every rule except the five imported by INSTRUCTIONS.md", async () => {
     const rulesDir = path.join(repoRoot, "canonical", "rules");
     const entries = await readdir(rulesDir, { recursive: true });
     const ruleFiles = entries.filter((e) => e.endsWith(".md")).sort();

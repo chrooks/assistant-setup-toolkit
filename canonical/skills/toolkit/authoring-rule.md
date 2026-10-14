@@ -40,7 +40,7 @@ Verified 2026-08-05: ten ECC-era rule files with no frontmatter and no `@` impor
 
 The `@` import does a different job: it carries the rule to **Codex**, which reads the projected file but does not glob-gate it. On Claude the file would load either way.
 
-The current state is a clean invariant worth preserving — exactly four rules have no `paths:` block, and those are exactly the four imported from `INSTRUCTIONS.md`: `common/resource-index.md`, `common/coding-style.md`, `common/git-workflow.md`, `common/development-workflow.md`. Every other rule under `canonical/rules/` is path-gated. `tests/setup/toolkit-skill.test.ts` enforces this — add an ungated rule and the suite fails.
+The current state is a clean invariant worth preserving — exactly five rules have no `paths:` block, and those are exactly the five imported from `INSTRUCTIONS.md`: `common/resource-index.md`, `common/coding-style.md`, `common/git-workflow.md`, `common/development-workflow.md`, `common/cost-guardrails.md`. Every other rule under `canonical/rules/` is path-gated. `tests/setup/toolkit-skill.test.ts` enforces this — add an ungated rule and the suite fails.
 
 So: **write `paths:` unless you intend the rule to load in every session, everywhere.** An always-on rule costs context in every session, which makes it an instruction-budget decision wearing a rule's clothing — read [authoring-instruction.md](authoring-instruction.md) before choosing that branch.
 

@@ -110,6 +110,7 @@ Follow the linter configuration and `.editorconfig` when present. End text files
 @~/.claude/rules/common/coding-style.md
 @~/.claude/rules/common/git-workflow.md
 @~/.claude/rules/common/development-workflow.md
+@~/.claude/rules/common/cost-guardrails.md
 
 Machine context (ADR-0003) holds hard constraints for THIS machine: network and proxy posture, secrets, and service discipline. Read it before any infra, network, or URL action. Its values are machine-local secrets. Never copy them into repos, commits, or anything that leaves the machine. A missing import is a no-op.
 
