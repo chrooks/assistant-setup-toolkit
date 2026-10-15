@@ -47,6 +47,12 @@ const STATE_DIR = path.join(claudeHome(), ".cost-guard");
 const ESCAPE_HATCH = /(^|\s)\/(handoff|compact|clear|exit|cost|resume)\b|cost guard override/i;
 const WORKFLOW_OPT_IN = /\bultracode\b|\b(use|run|start) (a |the )?workflow\b|fan out agents|orchestrate (this )?with subagents/i;
 const LONG_CONTEXT_MODEL = /\[1m\]|-1m\b/i;
+const API_KEY_OK = /api key ok/i;
+
+/** True when this process would bill an API key instead of the subscription. */
+export function hasApiKeyBilling(env = process.env) {
+  return Boolean(env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN);
+}
 
 function num(raw, fallback) {
   const n = Number(raw);
@@ -153,6 +159,21 @@ function emit(obj) {
 function onPrompt(payload) {
   const prompt = String(payload.prompt || "");
   if (WORKFLOW_OPT_IN.test(prompt)) recordOptIn(payload.session_id);
+
+  // The 2026-10 bill was not Max overage: hestia's ~/.bashrc exported
+  // ANTHROPIC_API_KEY, so every session there paid API rates with no
+  // subscription coverage. Refuse to run on a key unless the user says so.
+  if (hasApiKeyBilling() && !API_KEY_OK.test(prompt)) {
+    emit({
+      decision: "block",
+      reason:
+        "Cost guard: ANTHROPIC_API_KEY (or ANTHROPIC_AUTH_TOKEN) is set, so this session bills the API key at full rates, not your Max plan. " +
+        "Unset it (check ~/.bashrc, ~/.zshrc, the service unit) and restart Claude Code. " +
+        'To continue on the key on purpose, add the words "api key ok" to your prompt.',
+      hookSpecificOutput: { hookEventName: "UserPromptSubmit", suppressOriginalPrompt: false },
+    });
+    return;
+  }
   if (ESCAPE_HATCH.test(prompt)) return;
 
   const { tokens, model, ageHours } = measureTranscript(payload.transcript_path);

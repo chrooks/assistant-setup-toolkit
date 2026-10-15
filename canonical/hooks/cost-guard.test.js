@@ -117,4 +117,23 @@ function fresh() {
   assert.equal(run({ session_id: "s7", transcript_path: "/nope.jsonl", hook_event_name: "UserPromptSubmit", prompt: "x" }, home2).json, null);
 }
 
+// An API key in the environment blocks prompts unless the user says "api key ok".
+{
+  const home = fresh();
+  const t = transcript(home, { tokens: 5_000 });
+  const base = { session_id: "s8", transcript_path: t, hook_event_name: "UserPromptSubmit" };
+  const withKey = (payload) =>
+    JSON.parse(
+      spawnSync("node", [HOOK], {
+        input: JSON.stringify(payload),
+        env: { PATH: process.env.PATH, HOME: home, CLAUDE_CONFIG_DIR: path.join(home, ".claude"), ANTHROPIC_API_KEY: "sk-ant-test" },
+        encoding: "utf-8",
+      }).stdout.trim() || "null",
+    );
+  const blocked = withKey({ ...base, prompt: "hello" });
+  assert.equal(blocked.decision, "block");
+  assert.match(blocked.reason, /bills the API key/);
+  assert.equal(withKey({ ...base, prompt: "hello, api key ok" }), null);
+}
+
 console.log("cost-guard.test.js: all assertions passed");

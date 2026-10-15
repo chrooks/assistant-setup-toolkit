@@ -1,10 +1,12 @@
 # Cost Guardrails
 
-> Why this file exists: in Sep–Oct 2026 one Claude Code session on hestia ran for 11 days at ~470K tokens of context per call, launched 19 multi-agent Workflows, and cost about $500 in extra usage on top of the Max subscription. None of it was visible until the invoices. These rules, plus the `cost-guard.js` and `spend-report.js` hooks, make that impossible to repeat quietly.
+> Why this file exists: in Sep–Oct 2026 Claude Code sessions on hestia cost about $500 of real money. Root cause: hestia's `~/.bashrc` exported `ANTHROPIC_API_KEY`, so every Orca, VS Code Remote-SSH, and shell-launched session there billed the Console org at full API rates with zero Max coverage. One of those sessions ran 11 days at ~320K tokens of context per call and launched 19 multi-agent Workflows. None of it was visible until the invoices. These rules, plus the `cost-guard.js` and `spend-report.js` hooks, make that impossible to repeat quietly.
 
 ## How billing works (do not assume otherwise)
 
-- The Max subscription has a 5-hour and a 7-day limit. When extra usage is on, work past the limit bills at API rates. The subscription does not cap spend; the extra-usage cap at claude.ai → Settings → Billing does. Chris set it to $50 on 2026-10-14.
+- Two separate bills exist. The Max subscription (claude.ai) covers sessions logged in with OAuth, up to its 5-hour and 7-day limits, then extra usage if enabled. The Console org (console.anthropic.com) bills any session that finds `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` in its environment, at full API rates, from the first token. Claude Code prefers the key over the login when both exist.
+- The Console monthly spend limit defaulted to $200,000. Chris set it to $50 on 2026-10-14. The error "You have reached your specified API usage limits" is that cap working.
+- Never export an Anthropic key in a shell profile. Apps that need one read it from their own `.env`. A key in the environment is a billing bug, and the cost guard blocks the session until the user types "api key ok".
 - Cost per call scales with context. A call at 400K context costs about 40x a call at 10K context, even on cache reads.
 - Workflows and subagents each pay their own context. A fan-out from a large session multiplies the bill.
 
@@ -22,9 +24,9 @@
 
 | Hook | Event | Enforces |
 |---|---|---|
-| `cost-guard.js` | UserPromptSubmit | Warns at 120K context, 24h session age, or a 1M model. Blocks prompts at 250K except `/handoff`, `/compact`, `/clear`, `/exit`, or "cost guard override". Records Workflow opt-ins. |
+| `cost-guard.js` | UserPromptSubmit | Blocks every prompt when `ANTHROPIC_API_KEY` is set unless the prompt says "api key ok". Warns at 120K context, 24h session age, or a 1M model. Blocks prompts at 250K except `/handoff`, `/compact`, `/clear`, `/exit`, or "cost guard override". Records Workflow opt-ins. |
 | `cost-guard.js` | PreToolUse `Workflow\|Agent` | Denies Workflow without a fresh opt-in or above 80K context. Denies Agent above 200K context. |
-| `spend-report.js` | SessionStart | Estimates today, yesterday, and 7-day spend at list rates from local transcripts. Pushover alert when today passes $10. |
+| `spend-report.js` | SessionStart | Leads with a billing warning if an API key is in the environment. Estimates today, yesterday, and 7-day spend at list rates from local transcripts. Pushover alert when today passes $10. |
 | status line | always | Shows context tokens, session cost, Max 5h/7d usage, and a red `OVERAGE` flag when the 7-day limit is spent. |
 
 Kill switch for one session: `COST_GUARD=0`. Global: `touch ~/.claude/.cost-guard.off`. Say so to the user if you ever use one.

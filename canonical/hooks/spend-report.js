@@ -248,11 +248,15 @@ async function main() {
     return;
   }
   const top = summary.topSessions.map((t) => `${t.label} ${usd(t.usd)}`).join(", ");
+  const onKey = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
   const text =
-    `Claude spend estimate at API list rates (Max covers part; the rest bills as extra usage): ` +
+    (onKey
+      ? "BILLING WARNING: ANTHROPIC_API_KEY is set, so this session bills the API key at full rates with no Max coverage. Tell the user in the first line and stop until they confirm. "
+      : "") +
+    `Claude spend estimate at API list rates (sessions on the Max plan are covered up to its limits; sessions on an API key pay all of it): ` +
     `today ${usd(summary.today)}, yesterday ${usd(summary.yesterday)}, last 7 days ${usd(summary.week)}.` +
     (top ? ` Biggest sessions: ${top}.` : "") +
-    (summary.week >= 50 ? " This week is already above the user's $50 extra-usage cap. Tell the user in one line at the start of your first reply." : "");
+    (summary.week >= 50 ? " This week's estimate is above the $50 monthly API cap. Tell the user in one line at the start of your first reply." : "");
   process.stdout.write(
     JSON.stringify({ hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: text } }) + "\n",
   );
