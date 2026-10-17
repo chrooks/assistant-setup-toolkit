@@ -26,7 +26,7 @@
 |---|---|---|
 | `cost-guard.js` | UserPromptSubmit | Blocks every prompt when `ANTHROPIC_API_KEY` is set unless the prompt says "api key ok". Warns at 120K context, 24h session age, or a 1M model. Blocks prompts at 250K except `/handoff`, `/compact`, `/clear`, `/exit`, or "cost guard override". Records Workflow opt-ins. |
 | `cost-guard.js` | PreToolUse `Workflow\|Agent` | Denies Workflow without a fresh opt-in or above 80K context. Denies Agent above 200K context. |
-| `spend-report.js` | SessionStart | Leads with a billing warning if an API key is in the environment. Estimates today, yesterday, and 7-day spend at list rates from local transcripts. Pushover alert when today passes $10. |
+| `spend-report.js` | SessionStart | Checks who pays for this session first: an API key or `apiKeyHelper` means the Console org, otherwise the claude.ai login. Records the mode per session and reports API-billed spend (real charges) apart from the subscription-covered estimate (list-rate value of Max sessions). Pushover alert and the $50-cap warning fire on the API-billed bucket only. |
 | status line | always | Shows context tokens, session cost, Max 5h/7d usage, and a red `OVERAGE` flag when the 7-day limit is spent. |
 
 Kill switch for one session: `COST_GUARD=0`. Global: `touch ~/.claude/.cost-guard.off`. Say so to the user if you ever use one.

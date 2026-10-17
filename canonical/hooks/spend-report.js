@@ -11,9 +11,17 @@
 //
 // Why: the 2026-10 overrun ran for 11 days without a single visible number.
 // The subscription hides spend until the invoice. This puts a number in
-// front of the user every day. List-rate estimates run high: Max covers part
-// of it, and only the overflow is billed as extra usage. Treat the figure as
-// "what this would cost at API prices".
+// front of the user every day.
+//
+// Billing mode. Transcripts do not record who paid for a session, so the hook
+// checks at SessionStart: an ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN in the
+// environment, or an apiKeyHelper in settings.json, means the Console org
+// pays ("api"); otherwise the claude.ai login pays ("subscription"). The mode
+// is recorded per session id in ~/.claude/.cost-guard/billing-modes.json and
+// the summary is split into an API-billed bucket (real money) and a
+// subscription-covered estimate (what it would cost at API prices). Alerts
+// and the $50-cap warning fire on the API bucket only. Sessions that predate
+// the record are counted as covered and reported as unrecorded.
 //
 // Per-file parse results are cached by (size, mtime) so steady-state runs
 // read only the transcripts that changed since last time.
@@ -50,6 +58,40 @@ const STATE_DIR = path.join(claudeHome(), ".cost-guard");
 const CACHE_FILE = path.join(STATE_DIR, "spend-cache.json");
 const SUMMARY_FILE = path.join(STATE_DIR, "spend-summary.json");
 const ALERT_STAMP = path.join(STATE_DIR, "last-alert");
+const MODES_FILE = path.join(STATE_DIR, "billing-modes.json");
+const API_CAP_USD = 50;
+
+/** "api" when the session will bill the Console org, else "subscription". */
+export function detectBillingMode(env = process.env, settingsFile = path.join(claudeHome(), "settings.json")) {
+  if (env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN) return "api";
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsFile, "utf-8"));
+    if (settings && settings.apiKeyHelper) return "api";
+  } catch {
+    // no settings file or unparsable: no key helper
+  }
+  return "subscription";
+}
+
+export function loadBillingModes(file = MODES_FILE) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf-8"));
+  } catch {
+    return {};
+  }
+}
+
+export function recordBillingMode(sessionId, mode, file = MODES_FILE, now = Date.now()) {
+  if (!sessionId) return loadBillingModes(file);
+  const modes = { ...loadBillingModes(file), [sessionId]: { mode, recordedAt: new Date(now).toISOString() } };
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(modes));
+  } catch {
+    // the record is best-effort
+  }
+  return modes;
+}
 
 function priceFor(model) {
   const key = Object.keys(PRICES).find((k) => String(model).startsWith(k));
@@ -140,33 +182,46 @@ function sessionLabel(file) {
   return rel.split(path.sep)[0].replace(/^ssh-/, "remote:");
 }
 
-export function buildSummary(root = path.join(claudeHome(), "projects"), now = Date.now()) {
+export function buildSummary(
+  root = path.join(claudeHome(), "projects"),
+  now = Date.now(),
+  modes = loadBillingModes(),
+) {
   const since = now - DAYS * 86_400_000;
   const cache = loadCache();
   const nextCache = {};
   const perDay = {};
+  const apiPerDay = {};
   const perSession = {};
+  let unrecordedSessions = 0;
 
   for (const f of listTranscripts(root, since)) {
     const hit = cache[f.path];
     const days = hit && hit.size === f.size && hit.mtimeMs === f.mtimeMs ? hit.days : parseTranscript(f.path);
     nextCache[f.path] = { size: f.size, mtimeMs: f.mtimeMs, days };
     const label = sessionLabel(f.path);
+    const sessionId = path.basename(f.path, ".jsonl");
+    const mode = modes[sessionId]?.mode;
+    if (!mode && Object.keys(days).length > 0) unrecordedSessions += 1;
     for (const [day, models] of Object.entries(days)) {
       if (Date.parse(day) < since) continue;
       for (const [model, u] of Object.entries(models)) {
         const usd = costOf(model, u);
         perDay[day] = (perDay[day] || 0) + usd;
         perSession[label] = (perSession[label] || 0) + usd;
+        if (mode === "api") apiPerDay[day] = (apiPerDay[day] || 0) + usd;
       }
     }
   }
 
   const today = new Date(now).toISOString().slice(0, 10);
   const yesterday = new Date(now - 86_400_000).toISOString().slice(0, 10);
-  const week = Object.entries(perDay)
-    .filter(([d]) => Date.parse(d) >= since)
-    .reduce((s, [, v]) => s + v, 0);
+  const sumWeek = (days) =>
+    Object.entries(days)
+      .filter(([d]) => Date.parse(d) >= since)
+      .reduce((s, [, v]) => s + v, 0);
+  const week = sumWeek(perDay);
+  const apiWeek = sumWeek(apiPerDay);
   const top = Object.entries(perSession)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
@@ -183,6 +238,10 @@ export function buildSummary(root = path.join(claudeHome(), "projects"), now = D
     today: round(perDay[today] || 0),
     yesterday: round(perDay[yesterday] || 0),
     week: round(week),
+    apiToday: round(apiPerDay[today] || 0),
+    apiYesterday: round(apiPerDay[yesterday] || 0),
+    apiWeek: round(apiWeek),
+    unrecordedSessions,
     topSessions: top,
   };
 }
@@ -209,7 +268,7 @@ function parseSecrets(file) {
 }
 
 async function maybeAlert(summary) {
-  if (summary.today < ALERT_USD) return;
+  if (summary.apiToday < ALERT_USD) return;
   try {
     const last = Number(fs.readFileSync(ALERT_STAMP, "utf-8"));
     if (Date.now() - last < ALERT_COOLDOWN_MS) return;
@@ -228,7 +287,7 @@ async function maybeAlert(summary) {
         token: secrets.PUSHOVER_TOKEN,
         user: secrets.PUSHOVER_USER,
         title: "Claude spend alert",
-        message: `Today ≈ ${usd(summary.today)} at list rates (alert at ${usd(ALERT_USD)}). 7 days ≈ ${usd(summary.week)}. Check claude.ai → Settings → Billing.`,
+        message: `API-billed today ≈ ${usd(summary.apiToday)} (alert at ${usd(ALERT_USD)}). 7 days ≈ ${usd(summary.apiWeek)}. Check console.anthropic.com → Billing.`,
         priority: 1,
       }),
       signal: AbortSignal.timeout(5000),
@@ -239,26 +298,57 @@ async function maybeAlert(summary) {
   }
 }
 
+/** Reads the hook payload from stdin without blocking a TTY. */
+function readPayload() {
+  try {
+    if (process.stdin.isTTY) return {};
+    return JSON.parse(fs.readFileSync(0, "utf-8") || "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function reportText(summary, mode) {
+  const top = summary.topSessions.map((t) => `${t.label} ${usd(t.usd)}`).join(", ");
+  const lead =
+    mode === "api"
+      ? "BILLING WARNING: this session found an API key (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, or apiKeyHelper), so it bills the Console org at full rates with no Max coverage. Tell the user in the first line and stop until they confirm. "
+      : "This session bills the claude.ai subscription (no API key found). ";
+  const apiPart =
+    summary.apiWeek > 0
+      ? `API-billed sessions (real Console charges): today ${usd(summary.apiToday)}, yesterday ${usd(summary.apiYesterday)}, last 7 days ${usd(summary.apiWeek)}. `
+      : "API-billed sessions in the last 7 days: none recorded. ";
+  const coveredPart =
+    `Subscription-covered estimate (what the Max-plan sessions would cost at API list rates): ` +
+    `today ${usd(summary.today - summary.apiToday)}, yesterday ${usd(summary.yesterday - summary.apiYesterday)}, last 7 days ${usd(summary.week - summary.apiWeek)}.` +
+    (summary.unrecordedSessions > 0
+      ? ` ${summary.unrecordedSessions === 1 ? "1 session predates" : `${summary.unrecordedSessions} sessions predate`} the billing record and count as covered.`
+      : "");
+  return (
+    lead +
+    apiPart +
+    coveredPart +
+    (top ? ` Biggest sessions: ${top}.` : "") +
+    (summary.apiWeek >= API_CAP_USD
+      ? ` API-billed spend this week is at or above the $${API_CAP_USD} monthly Console cap. Tell the user in one line at the start of your first reply.`
+      : "")
+  );
+}
+
 async function main() {
+  const payload = readPayload();
+  const mode = detectBillingMode();
+  const modes = recordBillingMode(payload.session_id, mode);
   let summary;
   try {
-    summary = buildSummary();
+    summary = buildSummary(undefined, undefined, modes);
+    summary = { ...summary, thisSessionMode: mode };
     fs.writeFileSync(SUMMARY_FILE, JSON.stringify(summary));
   } catch {
     return;
   }
-  const top = summary.topSessions.map((t) => `${t.label} ${usd(t.usd)}`).join(", ");
-  const onKey = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
-  const text =
-    (onKey
-      ? "BILLING WARNING: ANTHROPIC_API_KEY is set, so this session bills the API key at full rates with no Max coverage. Tell the user in the first line and stop until they confirm. "
-      : "") +
-    `Claude spend estimate at API list rates (sessions on the Max plan are covered up to its limits; sessions on an API key pay all of it): ` +
-    `today ${usd(summary.today)}, yesterday ${usd(summary.yesterday)}, last 7 days ${usd(summary.week)}.` +
-    (top ? ` Biggest sessions: ${top}.` : "") +
-    (summary.week >= 50 ? " This week's estimate is above the $50 monthly API cap. Tell the user in one line at the start of your first reply." : "");
   process.stdout.write(
-    JSON.stringify({ hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: text } }) + "\n",
+    JSON.stringify({ hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: reportText(summary, mode) } }) + "\n",
   );
   await maybeAlert(summary);
 }

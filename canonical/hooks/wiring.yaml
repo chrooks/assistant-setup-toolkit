@@ -158,8 +158,12 @@ hooks:
     targets: [claude-code]
   # Spend report — puts a dollar figure in front of the user every session:
   # today / yesterday / 7-day estimate at list rates from local transcripts,
-  # cached per file, Pushover alert above $10/day. The subscription hides spend
-  # until the invoice; this is the only daily readout.
+  # cached per file. Checks billing mode first (API key or apiKeyHelper =
+  # Console pays; otherwise the claude.ai login pays), records it per session
+  # in .cost-guard/billing-modes.json, and reports the API-billed bucket apart
+  # from the subscription-covered estimate. Pushover alert above $10/day and
+  # the $50-cap warning fire on the API bucket only. The subscription hides
+  # spend until the invoice; this is the only daily readout.
   - file: spend-report.js
     event: SessionStart
     targets: [claude-code]
