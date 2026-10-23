@@ -69,6 +69,7 @@ Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`
 | `scripts/` | Setup Wizard entry point (`setup.ts`) and skill packaging helper (`get-skills.sh`) |
 | `manifests/` | YAML Installation Manifests listing External Sources |
 | `artifacts/` | Generated Skill Artifacts (ZIPs for manual upload, `--artifacts`); gitignored |
+| `portable-skills/` | Skills made for other people's assistants (any platform). Not installed by the Setup Wizard; zip one by hand. Script checks live in `tests/portable-skills/` (pytest via `uv run`) |
 | `.setup/logs/` | Setup Wizard run logs — full narration the console summarizes; gitignored |
 | `.tasks/` | Per-work-item docs — one gitignored `<issue#>-<slug>/` folder holding the Throughline, ExecPlan, and related docs |
 
