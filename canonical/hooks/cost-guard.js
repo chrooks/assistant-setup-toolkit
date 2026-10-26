@@ -10,7 +10,12 @@
 // Wired on two events:
 //
 //   UserPromptSubmit  — measures the live context from the transcript. Above
-//                       WARN it tells the assistant to wrap up and hand off.
+//                       SOFT, and only when the previous turn ended on a 🟢
+//                       status line (a finished unit of work, see CLAUDE.md
+//                       "Completion Status"), it asks the assistant once to
+//                       recommend a handoff if the new prompt starts new work.
+//                       Mid-work turns (🟡/🔴/no status) stay silent, so the
+//                       nudge lands between tasks instead of every prompt.
 //                       Above BLOCK it refuses the prompt (the user sees why)
 //                       until the session is handed off and cleared. Escape
 //                       hatches: /handoff, /compact, /clear, /exit, /cost,
@@ -25,7 +30,7 @@
 //
 // Thresholds are tokens of live context (input + cache read + cache write on
 // the last API call). Override with env vars for a session:
-//   COST_GUARD_WARN, COST_GUARD_BLOCK, COST_GUARD_WORKFLOW_MAX,
+//   COST_GUARD_SOFT, COST_GUARD_BLOCK, COST_GUARD_WORKFLOW_MAX,
 //   COST_GUARD_AGENT_MAX, COST_GUARD_MAX_HOURS
 // Disable for a session: COST_GUARD=0. Disable globally: touch
 // ~/.claude/.cost-guard.off. Fails open on any read error.
@@ -34,7 +39,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const TOKENS_WARN = num(process.env.COST_GUARD_WARN, 120_000);
+const TOKENS_SOFT = num(process.env.COST_GUARD_SOFT, 100_000);
 const TOKENS_BLOCK = num(process.env.COST_GUARD_BLOCK, 250_000);
 const WORKFLOW_MAX_TOKENS = num(process.env.COST_GUARD_WORKFLOW_MAX, 80_000);
 const AGENT_MAX_TOKENS = num(process.env.COST_GUARD_AGENT_MAX, 200_000);
@@ -48,6 +53,8 @@ const ESCAPE_HATCH = /(^|\s)\/(handoff|compact|clear|exit|cost|resume)\b|cost gu
 const WORKFLOW_OPT_IN = /\bultracode\b|\b(use|run|start) (a |the )?workflow\b|fan out agents|orchestrate (this )?with subagents/i;
 const LONG_CONTEXT_MODEL = /\[1m\]|-1m\b/i;
 const API_KEY_OK = /api key ok/i;
+// Same shape as proof-gate.js: 🟢 opens the last line, markers allowed in front.
+const GREEN_STATUS = /^[\s>*_-]*🟢/u;
 
 /** True when this process would bill an API key instead of the subscription. */
 export function hasApiKeyBilling(env = process.env) {
@@ -91,7 +98,7 @@ function readSlice(file, start, length) {
 
 /** Live context and model from the newest assistant message with usage. */
 export function measureTranscript(transcriptPath) {
-  const empty = { tokens: 0, model: "", ageHours: 0 };
+  const empty = { tokens: 0, model: "", ageHours: 0, uuid: "", endsGreen: false };
   if (!transcriptPath || !fs.existsSync(transcriptPath)) return empty;
   const size = fs.statSync(transcriptPath).size;
   if (size === 0) return empty;
@@ -100,6 +107,8 @@ export function measureTranscript(transcriptPath) {
   const lines = tail.split("\n");
   let tokens = 0;
   let model = "";
+  let uuid = "";
+  let endsGreen = false;
   for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i];
     if (!line.includes('"usage"')) continue;
@@ -112,6 +121,8 @@ export function measureTranscript(transcriptPath) {
         (usage.cache_read_input_tokens || 0) +
         (usage.cache_creation_input_tokens || 0);
       model = entry.message.model || "";
+      uuid = entry.uuid || "";
+      endsGreen = endsOnGreen(entry.message.content);
       break;
     } catch {
       // partial first line of the slice, or a non-JSON line
@@ -125,7 +136,35 @@ export function measureTranscript(transcriptPath) {
     const started = Date.parse(first[1]);
     if (Number.isFinite(started)) ageHours = (Date.now() - started) / 3_600_000;
   }
-  return { tokens, model, ageHours };
+  return { tokens, model, ageHours, uuid, endsGreen };
+}
+
+/** True when the last text block of an assistant message closes on a 🟢 status line. */
+function endsOnGreen(content) {
+  const blocks = Array.isArray(content) ? content : [{ type: "text", text: content }];
+  const text = blocks.filter((b) => b?.type === "text").map((b) => b.text).pop();
+  if (typeof text !== "string") return false;
+  return GREEN_STATUS.test(text.trimEnd().split("\n").pop());
+}
+
+function nudgeFile(sessionId) {
+  return path.join(STATE_DIR, `${sessionId || "unknown"}.nudged`);
+}
+
+/** Once per 🟢: true the first time this message uuid is seen. */
+function claimNudge(sessionId, uuid) {
+  try {
+    if (fs.readFileSync(nudgeFile(sessionId), "utf-8") === uuid) return false;
+  } catch {
+    // no prior nudge
+  }
+  try {
+    fs.mkdirSync(STATE_DIR, { recursive: true });
+    fs.writeFileSync(nudgeFile(sessionId), uuid);
+  } catch {
+    // unwritable: nudging again is the cheap failure
+  }
+  return true;
 }
 
 function optInFile(sessionId) {
@@ -176,7 +215,7 @@ function onPrompt(payload) {
   }
   if (ESCAPE_HATCH.test(prompt)) return;
 
-  const { tokens, model, ageHours } = measureTranscript(payload.transcript_path);
+  const { tokens, model, ageHours, uuid, endsGreen } = measureTranscript(payload.transcript_path);
 
   if (tokens >= TOKENS_BLOCK) {
     emit({
@@ -192,10 +231,11 @@ function onPrompt(payload) {
   }
 
   const notes = [];
-  if (tokens >= TOKENS_WARN) {
+  if (tokens >= TOKENS_SOFT && endsGreen && claimNudge(payload.session_id, uuid)) {
     notes.push(
-      `Context is ${fmt(tokens)} tokens (warn at ${fmt(TOKENS_WARN)}, hard stop at ${fmt(TOKENS_BLOCK)}). ` +
-        `Finish the current step, then tell the user in one line to run /handoff and start a fresh session. Do not start new multi-step work here.`,
+      `The last turn finished a unit of work (🟢) and context is ${fmt(tokens)} tokens (hard stop at ${fmt(TOKENS_BLOCK)}). ` +
+        `If this prompt starts new work, tell the user in one line that this is a good point to /handoff to a fresh session, then proceed. ` +
+        `If it continues the same work, say nothing about context.`,
     );
   }
   if (ageHours >= MAX_SESSION_HOURS) {

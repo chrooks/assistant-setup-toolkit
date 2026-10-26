@@ -143,8 +143,9 @@ hooks:
       machine: work
   # Cost guard — hard limits after the 2026-10 overrun (one 11-day session at
   # ~470K context + 19 multi-agent Workflows ≈ $500 of extra usage). On
-  # UserPromptSubmit it measures live context from the transcript: warns at
-  # 120K / 24h / 1M-window model, blocks prompts at 250K (escape: /handoff,
+  # UserPromptSubmit it measures live context from the transcript: above 100K
+  # it nudges once per 🟢 turn (handoff if the next prompt is new work), warns
+  # on 24h / 1M-window model, blocks prompts at 250K (escape: /handoff,
   # /compact, /clear, /exit, "cost guard override"), and records Workflow
   # opt-ins ("ultracode", "use a workflow"). On PreToolUse it denies Workflow
   # without a fresh opt-in or above 80K, and Agent above 200K. Claude-only:
