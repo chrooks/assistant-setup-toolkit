@@ -157,6 +157,15 @@ hooks:
     event: PreToolUse
     matcher: "Workflow|Agent"
     targets: [claude-code]
+  # Orca handoff enrichment — Orca's "Hand Off to Another Agent" button sends a
+  # fixed prompt whose only session-specific content is ~200 chars of the last
+  # assistant message. On that prompt, inject what it truncates: the full last
+  # assistant message (TLDR + status line), the newest .claude/handoffs/*.md
+  # from the last 7 days, and the newest .tasks/ Throughline folder. Silent on
+  # every other prompt. Claude-only: Orca drives Claude Code sessions.
+  - file: orca-handoff.js
+    event: UserPromptSubmit
+    targets: [claude-code]
   # Spend report — puts a dollar figure in front of the user every session:
   # today / yesterday / 7-day estimate at list rates from local transcripts,
   # cached per file. Checks billing mode first (API key or apiKeyHelper =

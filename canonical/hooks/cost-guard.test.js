@@ -15,19 +15,20 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const HOOK = path.resolve(__dirname, "cost-guard.js");
 
-function transcript(dir, { tokens, model = "claude-opus-5-5", hoursOld = 1 }) {
+function transcript(dir, { tokens, model = "claude-opus-5-5", hoursOld = 1, text = "ok", uuid = "u1" }) {
   const file = path.join(dir, "session.jsonl");
   const started = new Date(Date.now() - hoursOld * 3_600_000).toISOString();
   const lines = [
     JSON.stringify({ type: "user", timestamp: started, message: { role: "user", content: "hi" } }),
     JSON.stringify({
       type: "assistant",
+      uuid,
       timestamp: new Date().toISOString(),
       message: {
         id: "msg_1",
         model,
         role: "assistant",
-        content: [{ type: "text", text: "ok" }],
+        content: [{ type: "text", text }],
         usage: { input_tokens: 2, cache_read_input_tokens: tokens - 2, cache_creation_input_tokens: 0, output_tokens: 5 },
       },
     }),
@@ -78,8 +79,7 @@ function fresh() {
   const home = fresh();
   const t = transcript(home, { tokens: 150_000 });
   const base = { session_id: "s3", transcript_path: t };
-  const prompt = run({ ...base, hook_event_name: "UserPromptSubmit", prompt: "ultracode go" }, home).json;
-  assert.match(prompt.hookSpecificOutput.additionalContext, /Context is 150K/);
+  assert.equal(run({ ...base, hook_event_name: "UserPromptSubmit", prompt: "ultracode go" }, home).json, null);
   const wf = run({ ...base, hook_event_name: "PreToolUse", tool_name: "Workflow", tool_input: {} }, home).json;
   assert.match(wf.hookSpecificOutput.permissionDecisionReason, /allowed only below 80K/);
 }
@@ -96,6 +96,20 @@ function fresh() {
   assert.equal(run({ ...base, prompt: "keep going, cost guard override" }, home).json, null);
   const agent = run({ ...base, hook_event_name: "PreToolUse", tool_name: "Agent", tool_input: {} }, home).json;
   assert.match(agent.hookSpecificOutput.permissionDecisionReason, /no new subagents/);
+}
+
+// Soft line: above 100K the nudge fires once per 🟢 turn and never mid-work (🟡).
+{
+  const home = fresh();
+  const base = { session_id: "s9", hook_event_name: "UserPromptSubmit", prompt: "next task" };
+  const green = transcript(home, { tokens: 150_000, text: "Done.\n\n**🟢** shipped", uuid: "g1" });
+  const first = run({ ...base, transcript_path: green }, home).json;
+  assert.match(first.hookSpecificOutput.additionalContext, /finished a unit of work .* 150K tokens/);
+  assert.equal(run({ ...base, transcript_path: green }, home).json, null, "same 🟢 nudges once");
+  const yellow = transcript(home, { tokens: 150_000, text: "Done.\n\n🟡 tests remain", uuid: "y1" });
+  assert.equal(run({ ...base, transcript_path: yellow }, home).json, null, "🟡 is mid-work");
+  const lowGreen = transcript(home, { tokens: 50_000, text: "🟢 done", uuid: "g2" });
+  assert.equal(run({ ...base, transcript_path: lowGreen }, home).json, null, "below soft line");
 }
 
 // Old session and 1M model both produce a warning.
