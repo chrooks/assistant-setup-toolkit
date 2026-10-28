@@ -92,6 +92,7 @@ function fresh() {
   const blocked = run({ ...base, prompt: "keep going" }, home).json;
   assert.equal(blocked.decision, "block");
   assert.match(blocked.reason, /300K tokens/);
+  assert.match(blocked.reason, /background commands keep running/);
   assert.equal(run({ ...base, prompt: "/handoff next session" }, home).json, null);
   assert.equal(run({ ...base, prompt: "keep going, cost guard override" }, home).json, null);
   const agent = run({ ...base, hook_event_name: "PreToolUse", tool_name: "Agent", tool_input: {} }, home).json;

@@ -223,7 +223,8 @@ function onPrompt(payload) {
       reason:
         `Cost guard: this session's context is ${fmt(tokens)} tokens. ` +
         `Every reply re-reads all of it, so each turn now costs more than a whole small session. ` +
-        `Run /handoff, then /clear, and continue in a fresh session. ` +
+        `Hand off now (Orca: "Hand Off to Another Agent", or /handoff then /clear) and continue in a fresh session. ` +
+        `Nothing is lost: background commands keep running and write to their output files, and the new session can watch the same file or table. ` +
         `To send this one prompt anyway, add the words "cost guard override" to it.`,
       hookSpecificOutput: { hookEventName: "UserPromptSubmit", suppressOriginalPrompt: false },
     });
