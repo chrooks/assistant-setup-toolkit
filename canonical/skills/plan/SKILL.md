@@ -156,6 +156,28 @@ through execution: a work stage completing updates its mapped issue
 (`/to-issues update`), and a verified completion closes it (`/to-issues close`)
 with the proof evidence.
 
+**Later slices never live only in the conversation.** A plan usually covers the
+first Vertical Slice of a larger piece of work, and the grill that preceded it
+settled decisions about slices two and three as well. Those decisions evaporate
+the moment the session ends unless they are written somewhere durable *before
+the approval gate*. For every later slice the conversation shaped:
+
+- Post its decisions as a comment on that slice's tracker issue (`/to-issues
+  update`), or create the issue when none exists. Lead the comment with the
+  date and "do not re-decide", then the settled shape, the open knobs, and what
+  the current slice must leave in place for it.
+- Add a `## Later slices` section to the ExecPlan that names each later slice,
+  links its issue, and states its dependency on the current slice.
+
+The ExecPlan is local and gitignored; the tracker is the record that crosses
+sessions and machines. A plan whose later slices exist only in chat is not
+ready for the approval gate.
+
+Observed failure this guards against (Cornerstone #164, 2026-10-28): slice 1
+was planned in full while the slice 2 and slice 3 decisions — the career-prior
+knob, the two-blend-then-combine shape — existed only in the conversation
+until the human asked where they were.
+
 ### Step 6 — Walk the human through it
 
 Present the plan as a walkthrough, not a wall of text:
@@ -209,6 +231,8 @@ valid YAML, preserve everything else.
 
 - Follow the ExecPlan format guide; keep the mandatory living sections.
 - Never record an acceptance criterion without its proof method.
+- Never reach the approval gate with a later slice's decisions recorded only in
+  the conversation — tracker comment plus `## Later slices`, every time.
 - Never start implementing before the human approves.
 - Plan proposes the issue breakdown; `/to-issues` is the only thing that
   mutates the tracker — and a closure only lands with verification evidence.
