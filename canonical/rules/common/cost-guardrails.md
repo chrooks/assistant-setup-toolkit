@@ -13,7 +13,7 @@
 ## Session hygiene (the assistant's side)
 
 - One task, one session. Finish with `/handoff`, then the user starts fresh. Never keep a session alive across days by compacting.
-- Say the context size when it matters. Above 100K, when the last turn ended on 🟢 and the next prompt starts new work, tell the user in one line to hand off. Mid-work, say nothing. Above 250K the hook blocks new prompts.
+- Say the context size when it matters, and only where context costs money. On an API-billed session: above 100K, when the last turn ended on 🟢 and the next prompt starts new work, tell the user in one line to hand off; mid-work, say nothing; above 250K the hook blocks new prompts. On a subscription session the cost is quota, which the status line already shows: the hook says one line once above 250K and never blocks or nudges. Do not raise context on your own.
 - Prefer inline work over subagents. Spawn an Agent only when the task needs a separate context, and never above 200K.
 - Workflows need a user opt-in in their own words ("ultracode", "use a workflow") in the last 2 hours, and a context under 80K. Quote the cost before launching: agents × expected turns.
 - Never pick a `[1m]` model variant. The default model in settings is the standard window. If the user needs 1M for one task, they switch and switch back.
@@ -24,7 +24,7 @@
 
 | Hook | Event | Enforces |
 |---|---|---|
-| `cost-guard.js` | UserPromptSubmit | Blocks every prompt when `ANTHROPIC_API_KEY` is set unless the prompt says "api key ok". Above 100K context, nudges once per 🟢 turn to recommend a handoff if the next prompt starts new work (silent mid-work). Warns on 24h session age or a 1M model. Blocks prompts at 250K except `/handoff`, `/compact`, `/clear`, `/exit`, or "cost guard override". Records Workflow opt-ins. |
+| `cost-guard.js` | UserPromptSubmit | Blocks every prompt when `ANTHROPIC_API_KEY` is set unless the prompt says "api key ok". API-billed only: above 100K context, nudges once per 🟢 turn to recommend a handoff if the next prompt starts new work (silent mid-work), and blocks prompts at 250K except `/handoff`, `/compact`, `/clear`, `/exit`, or "cost guard override". Subscription: one line once per session above 250K, no block. Warns on 24h session age or a 1M model. Records Workflow opt-ins. |
 | `cost-guard.js` | PreToolUse `Workflow\|Agent` | Denies Workflow without a fresh opt-in or above 80K context. Denies Agent above 200K context. |
 | `spend-report.js` | SessionStart | Checks who pays for this session first: an API key or `apiKeyHelper` means the Console org, otherwise the claude.ai login. Records the mode per session and reports API-billed spend (real charges) apart from the subscription-covered estimate (list-rate value of Max sessions). Pushover alert and the $50-cap warning fire on the API-billed bucket only. |
 | status line | always | Shows context tokens, session cost, Max 5h/7d usage, and a red `OVERAGE` flag when the 7-day limit is spent. |

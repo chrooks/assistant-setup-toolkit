@@ -37,15 +37,19 @@ function transcript(dir, { tokens, model = "claude-opus-5-5", hoursOld = 1, text
   return file;
 }
 
-function run(payload, home) {
+function run(payload, home, extraEnv = {}) {
   const result = spawnSync("node", [HOOK], {
     input: JSON.stringify(payload),
-    env: { PATH: process.env.PATH, HOME: home, CLAUDE_CONFIG_DIR: path.join(home, ".claude") },
+    env: { PATH: process.env.PATH, HOME: home, CLAUDE_CONFIG_DIR: path.join(home, ".claude"), ...extraEnv },
     encoding: "utf-8",
   });
   const out = result.stdout.trim();
   return { status: result.status, json: out ? JSON.parse(out) : null };
 }
+
+// API-billed session: the key is set and every prompt carries "api key ok" so the key gate passes.
+const API_ENV = { ANTHROPIC_API_KEY: "sk-ant-test" };
+const runApi = (payload, home) => run({ ...payload, prompt: `${payload.prompt} api key ok` }, home, API_ENV);
 
 function fresh() {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "costguard-"));
@@ -84,33 +88,47 @@ function fresh() {
   assert.match(wf.hookSpecificOutput.permissionDecisionReason, /allowed only below 80K/);
 }
 
-// Hard stop: prompt blocked above BLOCK, escape hatches still pass.
+// Hard stop (API-billed): prompt blocked above BLOCK, escape hatches still pass.
 {
   const home = fresh();
   const t = transcript(home, { tokens: 300_000 });
   const base = { session_id: "s4", transcript_path: t, hook_event_name: "UserPromptSubmit" };
-  const blocked = run({ ...base, prompt: "keep going" }, home).json;
+  const blocked = runApi({ ...base, prompt: "keep going" }, home).json;
   assert.equal(blocked.decision, "block");
   assert.match(blocked.reason, /300K tokens/);
   assert.match(blocked.reason, /background commands keep running/);
-  assert.equal(run({ ...base, prompt: "/handoff next session" }, home).json, null);
-  assert.equal(run({ ...base, prompt: "keep going, cost guard override" }, home).json, null);
+  assert.equal(runApi({ ...base, prompt: "/handoff next session" }, home).json, null);
+  assert.equal(runApi({ ...base, prompt: "keep going, cost guard override" }, home).json, null);
   const agent = run({ ...base, hook_event_name: "PreToolUse", tool_name: "Agent", tool_input: {} }, home).json;
   assert.match(agent.hookSpecificOutput.permissionDecisionReason, /no new subagents/);
 }
 
-// Soft line: above 100K the nudge fires once per 🟢 turn and never mid-work (🟡).
+// Subscription-billed: above BLOCK the prompt goes through, with one line of context once per session.
+{
+  const home = fresh();
+  const t = transcript(home, { tokens: 300_000 });
+  const base = { session_id: "s10", transcript_path: t, hook_event_name: "UserPromptSubmit", prompt: "keep going" };
+  const first = run(base, home).json;
+  assert.equal(first.decision, undefined, "subscription never blocks on context");
+  assert.match(first.hookSpecificOutput.additionalContext, /300K tokens.*Max subscription/);
+  assert.equal(run(base, home).json, null, "ceiling line said once per session");
+  const bigger = transcript(home, { tokens: 400_000, uuid: "u2" });
+  assert.equal(run({ ...base, transcript_path: bigger }, home).json, null, "still silent as context grows");
+}
+
+// Soft line (API-billed): above 100K the nudge fires once per 🟢 turn and never mid-work (🟡).
 {
   const home = fresh();
   const base = { session_id: "s9", hook_event_name: "UserPromptSubmit", prompt: "next task" };
   const green = transcript(home, { tokens: 150_000, text: "Done.\n\n**🟢** shipped", uuid: "g1" });
-  const first = run({ ...base, transcript_path: green }, home).json;
+  const first = runApi({ ...base, transcript_path: green }, home).json;
   assert.match(first.hookSpecificOutput.additionalContext, /finished a unit of work .* 150K tokens/);
-  assert.equal(run({ ...base, transcript_path: green }, home).json, null, "same 🟢 nudges once");
+  assert.equal(runApi({ ...base, transcript_path: green }, home).json, null, "same 🟢 nudges once");
   const yellow = transcript(home, { tokens: 150_000, text: "Done.\n\n🟡 tests remain", uuid: "y1" });
-  assert.equal(run({ ...base, transcript_path: yellow }, home).json, null, "🟡 is mid-work");
+  assert.equal(runApi({ ...base, transcript_path: yellow }, home).json, null, "🟡 is mid-work");
   const lowGreen = transcript(home, { tokens: 50_000, text: "🟢 done", uuid: "g2" });
-  assert.equal(run({ ...base, transcript_path: lowGreen }, home).json, null, "below soft line");
+  assert.equal(runApi({ ...base, transcript_path: lowGreen }, home).json, null, "below soft line");
+  assert.equal(run({ ...base, transcript_path: green }, home).json, null, "subscription: no 🟢 nudge");
 }
 
 // Old session and 1M model both produce a warning.

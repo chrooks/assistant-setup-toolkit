@@ -9,17 +9,25 @@
 //
 // Wired on two events:
 //
-//   UserPromptSubmit  — measures the live context from the transcript. Above
-//                       SOFT, and only when the previous turn ended on a 🟢
-//                       status line (a finished unit of work, see CLAUDE.md
-//                       "Completion Status"), it asks the assistant once to
-//                       recommend a handoff if the new prompt starts new work.
-//                       Mid-work turns (🟡/🔴/no status) stay silent, so the
-//                       nudge lands between tasks instead of every prompt.
+//   UserPromptSubmit  — measures the live context from the transcript. The
+//                       context limits apply in full only when the session
+//                       bills an API key (spend-report.js decides: env key or
+//                       apiKeyHelper), because that is where context costs
+//                       dollars. Above SOFT, and only when the previous turn
+//                       ended on a 🟢 status line (a finished unit of work, see
+//                       CLAUDE.md "Completion Status"), it asks the assistant
+//                       once to recommend a handoff if the new prompt starts
+//                       new work. Mid-work turns (🟡/🔴/no status) stay silent.
 //                       Above BLOCK it refuses the prompt (the user sees why)
 //                       until the session is handed off and cleared. Escape
 //                       hatches: /handoff, /compact, /clear, /exit, /cost,
 //                       or the phrase "cost guard override" in the prompt.
+//                       On the Max subscription the cost is quota, not money,
+//                       and the status line already shows it, so the guard
+//                       says one line once per session above BLOCK and never
+//                       blocks or nudges. The 2026-11-07 flow complaint: a
+//                       55-100K baseline plus ~45K per heavy turn hit the
+//                       250K block in 3-4 prompts on subscription sessions.
 //                       Also records an opt-in marker when the prompt says
 //                       "ultracode" / "use a workflow" so PreToolUse can tell
 //                       a user-requested Workflow from a model-initiated one.
@@ -38,6 +46,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { detectBillingMode } from "./spend-report.js";
 
 const TOKENS_SOFT = num(process.env.COST_GUARD_SOFT, 100_000);
 const TOKENS_BLOCK = num(process.env.COST_GUARD_BLOCK, 250_000);
@@ -147,20 +156,20 @@ function endsOnGreen(content) {
   return GREEN_STATUS.test(text.trimEnd().split("\n").pop());
 }
 
-function nudgeFile(sessionId) {
-  return path.join(STATE_DIR, `${sessionId || "unknown"}.nudged`);
+function nudgeFile(sessionId, kind) {
+  return path.join(STATE_DIR, `${sessionId || "unknown"}.${kind}`);
 }
 
-/** Once per 🟢: true the first time this message uuid is seen. */
-function claimNudge(sessionId, uuid) {
+/** Once per marker: true the first time this marker is seen for the kind (per 🟢 uuid, or once per session). */
+function claimNudge(sessionId, marker, kind = "nudged") {
   try {
-    if (fs.readFileSync(nudgeFile(sessionId), "utf-8") === uuid) return false;
+    if (fs.readFileSync(nudgeFile(sessionId, kind), "utf-8") === marker) return false;
   } catch {
     // no prior nudge
   }
   try {
     fs.mkdirSync(STATE_DIR, { recursive: true });
-    fs.writeFileSync(nudgeFile(sessionId), uuid);
+    fs.writeFileSync(nudgeFile(sessionId, kind), marker);
   } catch {
     // unwritable: nudging again is the cheap failure
   }
@@ -216,8 +225,9 @@ function onPrompt(payload) {
   if (ESCAPE_HATCH.test(prompt)) return;
 
   const { tokens, model, ageHours, uuid, endsGreen } = measureTranscript(payload.transcript_path);
+  const isApiBilled = detectBillingMode() === "api";
 
-  if (tokens >= TOKENS_BLOCK) {
+  if (tokens >= TOKENS_BLOCK && isApiBilled) {
     emit({
       decision: "block",
       reason:
@@ -232,7 +242,13 @@ function onPrompt(payload) {
   }
 
   const notes = [];
-  if (tokens >= TOKENS_SOFT && endsGreen && claimNudge(payload.session_id, uuid)) {
+  if (tokens >= TOKENS_BLOCK && !isApiBilled && claimNudge(payload.session_id, "said", "ceiling")) {
+    notes.push(
+      `Context is ${fmt(tokens)} tokens. This session bills the Max subscription, so that is quota, not money, and the status line shows it. ` +
+        `Say once, in one line, that a /handoff at the next finished unit of work keeps turns fast, then proceed. Do not raise context again this session.`,
+    );
+  }
+  if (tokens >= TOKENS_SOFT && endsGreen && isApiBilled && claimNudge(payload.session_id, uuid)) {
     notes.push(
       `The last turn finished a unit of work (🟢) and context is ${fmt(tokens)} tokens (hard stop at ${fmt(TOKENS_BLOCK)}). ` +
         `If this prompt starts new work, tell the user in one line that this is a good point to /handoff to a fresh session, then proceed. ` +
