@@ -14,7 +14,7 @@ Everything below is context. The steps are a proposed plan, not a task list to e
 Your only job this turn:
 1. Read this handoff.
 2. Explore the repo for the context it points to.
-3. Reply with your understanding of the current state and the direction you propose.
+3. Reply in plain conversational language, with an engineer's depth: where we're coming from, where we're going, and the direction you propose. Define each technical term the first time you use it. Keep it short and simple.
 4. Stop and wait for my instruction.
 
 ## Context

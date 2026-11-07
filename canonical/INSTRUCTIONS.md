@@ -47,6 +47,12 @@ Write each tracker-issue reference as a markdown link with a short description: 
 ### Visualize by Concept-Shape
 Use a visual when a concept has a shape that a visual shows well. Route it through `/visualize`, which covers `/table`, `/diagram`, and `/figure`. Forms: `/table md` (quick, read-only), `/table html` (sort and filter), `/diagram md` (ASCII and Mermaid sketch), `/diagram html` (interactive graph). Keep nuance, narrative, and "why" in prose. Use fewer visuals as the user learns a topic.
 
+## Opening a handoff
+A handoff marks the turn between two conversations, so it is the most relevant context. When a conversation opens with a handoff, do the recon first. Then answer in plain conversational language with an engineer's depth:
+- Where we come from, and where we go next.
+- Define each technical term the first time you use it.
+- Keep it short and simple (KISS).
+
 ## Completion Status (Quick Recap)
 End each turn that completes work (edits, commits, config changes, a built feature) with ONE status line, under 100 characters, from the user's view: `🟢` finished · `🟡` follow-up remains (name it) · `🔴` blocked (name what you need). Pure Q&A and a question back get no line.
 
