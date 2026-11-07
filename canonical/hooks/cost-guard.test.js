@@ -116,19 +116,21 @@ function fresh() {
   assert.equal(run({ ...base, transcript_path: bigger }, home).json, null, "still silent as context grows");
 }
 
-// Soft line (API-billed): above 100K the nudge fires once per 🟢 turn and never mid-work (🟡).
+// Scope delimiter: a 🟢 fires the handoff note once, at any context size, on any billing; never mid-work (🟡).
 {
   const home = fresh();
   const base = { session_id: "s9", hook_event_name: "UserPromptSubmit", prompt: "next task" };
-  const green = transcript(home, { tokens: 150_000, text: "Done.\n\n**🟢** shipped", uuid: "g1" });
-  const first = runApi({ ...base, transcript_path: green }, home).json;
-  assert.match(first.hookSpecificOutput.additionalContext, /finished a unit of work .* 150K tokens/);
-  assert.equal(runApi({ ...base, transcript_path: green }, home).json, null, "same 🟢 nudges once");
-  const yellow = transcript(home, { tokens: 150_000, text: "Done.\n\n🟡 tests remain", uuid: "y1" });
-  assert.equal(runApi({ ...base, transcript_path: yellow }, home).json, null, "🟡 is mid-work");
-  const lowGreen = transcript(home, { tokens: 50_000, text: "🟢 done", uuid: "g2" });
-  assert.equal(runApi({ ...base, transcript_path: lowGreen }, home).json, null, "below soft line");
-  assert.equal(run({ ...base, transcript_path: green }, home).json, null, "subscription: no 🟢 nudge");
+  const green = transcript(home, { tokens: 30_000, text: "Done.\n\n**🟢** shipped", uuid: "g1" });
+  const first = run({ ...base, transcript_path: green }, home).json;
+  assert.match(first.hookSpecificOutput.additionalContext, /closed a unit of work .* write the \/handoff .* stop/);
+  assert.doesNotMatch(first.hookSpecificOutput.additionalContext, /tokens/, "scope note says nothing about cost");
+  assert.equal(run({ ...base, transcript_path: green }, home).json, null, "same 🟢 nudges once");
+  const green2 = transcript(home, { tokens: 30_000, text: "🟢 next one done", uuid: "g2" });
+  assert.match(run({ ...base, transcript_path: green2 }, home).json.hookSpecificOutput.additionalContext, /closed a unit of work/, "a new 🟢 fires again");
+  const yellow = transcript(home, { tokens: 30_000, text: "Done.\n\n🟡 tests remain", uuid: "y1" });
+  assert.equal(run({ ...base, transcript_path: yellow }, home).json, null, "🟡 is mid-work");
+  const apiGreen = transcript(home, { tokens: 150_000, text: "🟢 done", uuid: "g3" });
+  assert.match(runApi({ ...base, transcript_path: apiGreen }, home).json.hookSpecificOutput.additionalContext, /closed a unit of work/, "API-billed fires too");
 }
 
 // Old session and 1M model both produce a warning.

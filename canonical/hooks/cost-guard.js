@@ -9,15 +9,19 @@
 //
 // Wired on two events:
 //
-//   UserPromptSubmit  — measures the live context from the transcript. The
-//                       context limits apply in full only when the session
-//                       bills an API key (spend-report.js decides: env key or
-//                       apiKeyHelper), because that is where context costs
-//                       dollars. Above SOFT, and only when the previous turn
-//                       ended on a 🟢 status line (a finished unit of work, see
-//                       CLAUDE.md "Completion Status"), it asks the assistant
-//                       once to recommend a handoff if the new prompt starts
-//                       new work. Mid-work turns (🟡/🔴/no status) stay silent.
+//   UserPromptSubmit  — two jobs that share one transcript read.
+//                       (a) Scope delimiter, not a cost control: when the
+//                       previous turn ended on a 🟢 status line (a finished
+//                       unit of work, CLAUDE.md "Completion Status"), the next
+//                       prompt is a new scope unless it corrects, proves, or
+//                       commits what just shipped. One task per session, so the
+//                       assistant writes the /handoff and stops instead of
+//                       starting the new scope here. Once per 🟢, at any context
+//                       size, on any billing. Mid-work turns (🟡/🔴/no status)
+//                       stay silent.
+//                       (b) Context limit, API-billed only (spend-report.js
+//                       decides: env key or apiKeyHelper), because that is
+//                       where context costs dollars.
 //                       Above BLOCK it refuses the prompt (the user sees why)
 //                       until the session is handed off and cleared. Escape
 //                       hatches: /handoff, /compact, /clear, /exit, /cost,
@@ -25,7 +29,7 @@
 //                       On the Max subscription the cost is quota, not money,
 //                       and the status line already shows it, so the guard
 //                       says one line once per session above BLOCK and never
-//                       blocks or nudges. The 2026-11-07 flow complaint: a
+//                       blocks. The 2026-11-07 flow complaint: a
 //                       55-100K baseline plus ~45K per heavy turn hit the
 //                       250K block in 3-4 prompts on subscription sessions.
 //                       Also records an opt-in marker when the prompt says
@@ -38,7 +42,7 @@
 //
 // Thresholds are tokens of live context (input + cache read + cache write on
 // the last API call). Override with env vars for a session:
-//   COST_GUARD_SOFT, COST_GUARD_BLOCK, COST_GUARD_WORKFLOW_MAX,
+//   COST_GUARD_BLOCK, COST_GUARD_WORKFLOW_MAX,
 //   COST_GUARD_AGENT_MAX, COST_GUARD_MAX_HOURS
 // Disable for a session: COST_GUARD=0. Disable globally: touch
 // ~/.claude/.cost-guard.off. Fails open on any read error.
@@ -48,7 +52,6 @@ import os from "node:os";
 import path from "node:path";
 import { detectBillingMode } from "./spend-report.js";
 
-const TOKENS_SOFT = num(process.env.COST_GUARD_SOFT, 100_000);
 const TOKENS_BLOCK = num(process.env.COST_GUARD_BLOCK, 250_000);
 const WORKFLOW_MAX_TOKENS = num(process.env.COST_GUARD_WORKFLOW_MAX, 80_000);
 const AGENT_MAX_TOKENS = num(process.env.COST_GUARD_AGENT_MAX, 200_000);
@@ -248,11 +251,11 @@ function onPrompt(payload) {
         `Say once, in one line, that a /handoff at the next finished unit of work keeps turns fast, then proceed. Do not raise context again this session.`,
     );
   }
-  if (tokens >= TOKENS_SOFT && endsGreen && isApiBilled && claimNudge(payload.session_id, uuid)) {
+  if (endsGreen && claimNudge(payload.session_id, uuid)) {
     notes.push(
-      `The last turn finished a unit of work (🟢) and context is ${fmt(tokens)} tokens (hard stop at ${fmt(TOKENS_BLOCK)}). ` +
-        `If this prompt starts new work, tell the user in one line that this is a good point to /handoff to a fresh session, then proceed. ` +
-        `If it continues the same work, say nothing about context.`,
+      `The last turn closed a unit of work (🟢). One task per session: this prompt is a new scope unless it corrects, proves, or commits what just shipped. ` +
+        `New scope: do not start it here. Tell the user in one line, write the /handoff for it, and stop; they continue in a fresh session (Orca: "Hand Off to Another Agent"). ` +
+        `Same scope, or the user says "same scope": continue and say nothing about it.`,
     );
   }
   if (ageHours >= MAX_SESSION_HOURS) {
