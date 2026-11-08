@@ -13,8 +13,10 @@
 //                       (a) Scope delimiter, not a cost control: when the
 //                       previous turn ended on a 🟢 status line (a finished
 //                       unit of work, CLAUDE.md "Completion Status"), the next
-//                       prompt is a new scope unless it corrects, proves, or
-//                       commits what just shipped. One task per session, so the
+//                       prompt is a new scope only if it falls outside what the
+//                       session was opened for and does not correct, prove, or
+//                       commit what just shipped (a 🟢 on a side task does not
+//                       close the session). One task per session, so the
 //                       assistant writes the /handoff and stops instead of
 //                       starting the new scope here. Once per 🟢, at any context
 //                       size, on any billing. Mid-work turns (🟡/🔴/no status)
@@ -253,7 +255,8 @@ function onPrompt(payload) {
   }
   if (endsGreen && claimNudge(payload.session_id, uuid)) {
     notes.push(
-      `The last turn closed a unit of work (🟢). One task per session: this prompt is a new scope unless it corrects, proves, or commits what just shipped. ` +
+      `The last turn closed a unit of work (🟢). One task per session: this prompt is a new scope only if it is outside the scope this session was opened for (its handoff or first request) ` +
+        `and does not correct, prove, or commit what just shipped. A 🟢 on a side task does not close the session. ` +
         `New scope: do not start it here. Tell the user in one line, write the /handoff for it, and stop; they continue in a fresh session (Orca: "Hand Off to Another Agent"). ` +
         `Same scope, or the user says "same scope": continue and say nothing about it.`,
     );
