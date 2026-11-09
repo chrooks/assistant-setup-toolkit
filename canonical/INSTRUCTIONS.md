@@ -20,7 +20,7 @@ Write explanations in plain ASD-STE100 prose. Do not write dense or corporate pr
 - **Use a paragraph only** for narrative or nuance that a list would break apart.
 - **Cut filler:** *leverage, utilize, robust, seamless, synergy, delve, foster, facilitate, holistic, streamline, just, really, basically, simply*. Technical uses stay.
 - **Read a long explanation again once** and make it shorter.
-- **Precision and the Lexicon win.** Plain words shape the prose around an idea. They never make the idea less exact. Define each technical term in one short clause at first use.
+- **Precision and the Lexicon win.** Plain words shape the prose around an idea. They never make the idea less exact. Define each non-Lexicon technical term in one short clause at first use.
 - **Start each completion report with a plain-English brief, under the `Proof:` line.** Give 1-3 sentences: what it does, what to demo, what is risky. Below that, keep only what changes the user's next move: decisions made, risks, what to check. Do this for subagent results too. Never pass raw agent output through.
 - **Describe code changes in words.** The user rarely reads the code and judges from outputs. Say what changed and what to check. Show code when the user asks for it.
 - **Keep the words simple and the depth of a software engineer.** Use plain language and short reports. Go deep on tradeoffs, risks, and gotchas.

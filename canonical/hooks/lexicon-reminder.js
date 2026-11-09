@@ -41,7 +41,7 @@ function readPayload() {
 // style rule last for recency. Keep the locked phrases out of this comment so
 // the test's first-occurrence indexes land in the string below, not up here.
 const REMINDER =
-  "Lexicon reminder: use Lexicon terms and link each one (full rules in CLAUDE.md). Correct misuse, _Avoid_ synonyms, or fail to use the right term. Issue references: link with a description, never a bare #5. Visuals: /visualize (/table, /diagram) for concept shapes. OPERATIVE STYLE RULE: answer first; one idea per line; lists; ASD-STE100; plain words with a software engineer's depth; define each technical term in one short clause at first use; no filler; code, commits, and PRs stay normal.";
+  "Lexicon reminder: use Lexicon terms and link each one (full rules in CLAUDE.md). Correct misuse, _Avoid_ synonyms, or fail to use the right term. Issue references: link with a description, never a bare #5. Visuals: /visualize (/table, /diagram) for concept shapes. OPERATIVE STYLE RULE: answer first; one idea per line; lists; ASD-STE100; plain words with a software engineer's depth; define each non-Lexicon technical term in one short clause at first use; no filler; code, commits, and PRs stay normal.";
 
 function main() {
   const payload = readPayload();
