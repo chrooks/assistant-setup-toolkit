@@ -37,7 +37,7 @@ function readPayload() {
 // Per-turn nudge, not a rulebook. Telegraphic, imperative; full rules live once
 // in CLAUDE.md (loaded at start) so they are not re-paid every turn.
 const REMINDER =
-  "Quick-recap reminder: after completed work, end with **TLDR:** (1-3 lines), then one status line under 100 chars: 🟢 finished (needs a `Proof:` line leading the report) / 🟡 follow-up (name it) / 🔴 blocked. Nothing after it. Pure Q&A: no line. Gloss each session codename; one topic per response. The final message stands alone. A decision for the user goes last, above the TLDR: brief it, list the options, then recommend one by name.";
+  "Quick-recap reminder: after completed work, open with a 1-3 sentence brief (what it does, what to demo, what is risky), describe code in words, and end with **TLDR:** (1-3 lines), then one status line under 100 chars: 🟢 finished (needs a `Proof:` line leading the report) / 🟡 follow-up (name it) / 🔴 blocked. Nothing after it. Pure Q&A: no line. Gloss each session codename; one topic per response. The final message stands alone. A decision for the user goes last, above the TLDR: brief it, list the options, then recommend one by name.";
 
 function main() {
   const payload = readPayload();
