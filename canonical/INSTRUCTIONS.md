@@ -21,7 +21,10 @@ Write explanations in plain ASD-STE100 prose. Do not write dense or corporate pr
 - **Cut filler:** *leverage, utilize, robust, seamless, synergy, delve, foster, facilitate, holistic, streamline, just, really, basically, simply*. Technical uses stay.
 - **Read a long explanation again once** and make it shorter.
 - **Precision and the Lexicon win.** Plain words shape the prose around an idea. They never make the idea less exact. Define an unavoidable new term in one short clause.
-- **Start each completion report with a plain-English summary** of what shipped. Do this for subagent results too. Never pass raw agent output through.
+- **Start each completion report with a plain-English brief, under the `Proof:` line.** Give 1-3 sentences: what it does, what to demo, what is risky. Below that, keep only what changes the user's next move: decisions made, risks, what to check. Do this for subagent results too. Never pass raw agent output through.
+- **Describe code changes in words.** Say what changed and what to check. Show code when the user asks for it.
+- **Keep the words simple and the thinking deep.** Use plain language and short reports. Go deep on tradeoffs, risks, and gotchas.
+<!-- Trial (2026-11-09): the brief, code-in-words, and simple-and-deep rules adapt a Reddit snippet. To end the trial, revert the commit that added this comment. -->
 <!-- Case: "simplify this for my human brain" ×7 in one project cycle (2026-07 loop audit). -->
 - **Gloss every session-local label in every response.** A coined label (M3, Route B, D4, "engine hints") gets a 3-6 word referent each time: "M3 — the upstream-checker milestone". Never write a bare codename.
 <!-- Case: unglossed codenames were the #1 confusion trigger (~40%) in the 2026-07-30 archive taxonomy — "whats M3?", "wait wat is 32". -->
