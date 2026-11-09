@@ -111,7 +111,7 @@ describe("DevOS steering hook", () => {
     expect(payload.additionalContext).toContain("dex-table-controls");
   });
 
-  it("stays silent when no Throughline exists", () => {
+  it("nudges /dev and /grill-me routing when no Throughline exists", () => {
     const result = runHook({
       session_id: "session-test",
       hook_event_name: "UserPromptSubmit",
@@ -120,10 +120,15 @@ describe("DevOS steering hook", () => {
 
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(result.stdout).toBe("");
+    const payload = JSON.parse(result.stdout.trim());
+    expect(payload.suppressOutput).toBe(true);
+    expect(payload.additionalContext).toContain("No DevOS run is active");
+    expect(payload.additionalContext).toContain("opens with /dev");
+    expect(payload.additionalContext).toContain("/grill-me");
+    expect(payload.additionalContext).not.toContain("DevOS run active:");
   });
 
-  it("stays silent when the only Throughline is done", () => {
+  it("nudges routing when the only Throughline is done", () => {
     writeThroughline(ACTIVE_THROUGHLINE.replace("status: in_progress", "status: done"));
 
     const result = runHook({
@@ -133,7 +138,9 @@ describe("DevOS steering hook", () => {
     });
 
     expect(result.status).toBe(0);
-    expect(result.stdout).toBe("");
+    const payload = JSON.parse(result.stdout.trim());
+    expect(payload.additionalContext).toContain("No DevOS run is active");
+    expect(payload.additionalContext).not.toContain("dex-table-controls");
   });
 
   it("writes a 'fired' breadcrumb when debug is on and a run is active", () => {
@@ -151,15 +158,14 @@ describe("DevOS steering hook", () => {
     expect(log).toContain("stage=scope");
   });
 
-  it("writes a 'silent' breadcrumb when debug is on and no run is active", () => {
+  it("writes an 'idle nudge' breadcrumb when debug is on and no run is active", () => {
     const result = runHook(
       { session_id: "session-test", user_prompt: "hello" },
       { CLAUDE_DEVOS_STEERING_DEBUG: "1" },
     );
 
     expect(result.status).toBe(0);
-    expect(result.stdout).toBe("");
-    expect(readDebugLog()).toContain("silent: no active throughline");
+    expect(readDebugLog()).toContain("fired: idle nudge");
   });
 
   it("writes no breadcrumb when debug is off", () => {

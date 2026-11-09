@@ -8,7 +8,8 @@
 // prompt, so over a long session or after compaction the agent can forget a run
 // is active; this hook fires every turn (guaranteed by the harness, not the
 // model) and re-anchors it. It fires ONLY when an active Throughline exists, so
-// it adds no noise otherwise.
+// it adds one routing line otherwise: a build-shaped request opens with /dev,
+// design questions go through /grill-me.
 //
 // This is the same proven pattern as lexicon-reminder.js in this directory.
 //
@@ -121,6 +122,9 @@ function findThroughlines(cwd) {
   return found;
 }
 
+const IDLE_NUDGE =
+  "No DevOS run is active. An open-ended build, change, or refactor request with no workflow named opens with /dev (the Conductor runs /scope first); a question, a one-line fix, or a correction does not. Design questions for the user, after /scope or at any point, go through /grill-me: batched, in its format, never loose in prose.";
+
 function main() {
   const payload = readPayload();
 
@@ -148,9 +152,22 @@ function main() {
     }
   }
 
-  // No active run: stay silent.
+  // Codex displays UserPromptSubmit additionalContext as transcript noise, so
+  // this hook stays quiet there (it is wired claude-code-only in wiring.yaml).
+  const isCodex = /"turn_id"\s*:/.test(payload);
+
+  // No active run: one-line routing nudge. The instructions already say a
+  // build-shaped request opens with /dev and design questions go through
+  // /grill-me, but the model forgets over a long session; the harness does not.
   if (!active) {
-    debugLog("silent: no active throughline");
+    if (isCodex) {
+      debugLog("silent: codex turn_id (no active throughline)");
+      return;
+    }
+    debugLog("fired: idle nudge");
+    process.stdout.write(
+      `${JSON.stringify({ suppressOutput: true, additionalContext: IDLE_NUDGE })}\n`,
+    );
     return;
   }
 
@@ -164,9 +181,7 @@ function main() {
 
   const reminder = `DevOS run active: ${slug} — stage=${stage}, next=${next}. The Throughline at ${active} is the source of truth; continue the run with /dev (the Conductor). Read the Throughline before acting, do the current stage's work, then advance stage and next_action.`;
 
-  // Codex displays UserPromptSubmit additionalContext as transcript noise, so
-  // this hook stays quiet there (it is wired claude-code-only in wiring.yaml).
-  if (/"turn_id"\s*:/.test(payload)) {
+  if (isCodex) {
     debugLog(`silent: codex turn_id (active=${slug} stage=${stage})`);
     return;
   }

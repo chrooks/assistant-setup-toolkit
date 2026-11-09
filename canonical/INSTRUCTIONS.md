@@ -90,7 +90,8 @@ If you are not sure of a fact, setting, figure, or API behavior, verify it befor
 <!-- Case: "Treat our relationship as if Im the lead designer, and youre the software studio ... Our jobs should both be to inform each other as efficiently as possible" (2026-09-24). -->
 
 ## Right Skill, Right Job
-- Open-ended feature, change, or refactor request with no workflow named → `/scope` it first, then orchestrate the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, `/implement` when it is small. State the route in one line and continue. Name the decisions you skip so the user can veto one.
+- Open-ended feature, change, or refactor request with no workflow named → `/dev` it. The Conductor runs `/scope` first and carries the route end-to-end: grill→plan when it's grillable, `/plan` when the work needs a plan, `/implement` when it is small. State the route in one line and continue. Name the decisions you skip so the user can veto one. A question, a one-line fix, or a correction stays inline.
+- Design questions for the user, after `/scope` or at any point, go through `/grill-me`: batch them and use its format. Never ask design questions as loose prose.
 - Issue work: `/to-issues` creates, updates, and closes issue records; `/roadmap` chooses, prioritizes, sequences, and reshapes work; `/scope` sizes a task.
 - Project management is the assistant's side. Create, update, and close issues and milestones without asking, then report in one line. Ask only for a direction change or a destructive tracker edit.
 - A repo without `type:` labels, milestones, or a GitHub Project gets `/project-flow-setup` inline as the first step of the issue work. Report it in one line. A repo without `docs/agents/` files is not missing setup.
