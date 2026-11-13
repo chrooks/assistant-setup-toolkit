@@ -352,4 +352,28 @@ describe("DevOS-conformed stage skills", () => {
       expect(skill).toMatch(/reopened \(`status: pending`\) criteria plus any/);
     });
   });
+
+  describe("fix round and view link", () => {
+    it("dev dispatches feedback on landed work as a fix brief, not a full implement run", () => {
+      const skill = readSkill("dev");
+      expect(skill).toMatch(/### The fix round/);
+      expect(skill).toMatch(/\*\*fix brief\*\*/);
+      expect(skill).toMatch(/files the last run changed/);
+      expect(skill).toMatch(/Dispatch the\s+re-entry as a fix round/);
+    });
+
+    it("implement works a fix brief without the plan, on the affected spec, with one push", () => {
+      const skill = readSkill("implement");
+      expect(skill).toMatch(/### Fix round/);
+      expect(skill).toMatch(/Do not read the plan or the Throughline/);
+      expect(skill).toMatch(/run only the affected spec/);
+      expect(skill).toMatch(/Push once/);
+    });
+
+    it("every work-stage result carries a view link", () => {
+      for (const name of ["dev", "implement", "prove-it"]) {
+        expect(readSkill(name)).toMatch(/"view_url"/);
+      }
+    });
+  });
 });

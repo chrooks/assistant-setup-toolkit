@@ -102,10 +102,14 @@ Throughline) writes back and uses to advance the run:
       "tests": "what ran and the outcome",
       "artifacts": "evidence worth keeping",
       "ac_status": {"ac1": "pass", ...},
+      "view_url": "https://… the changed page, or null",
       "suggested_next_action": "/dev prove <issue>"
     }
     ```
 
+- `view_url` — the link the human opens to see the change: the changed page at
+  its exact route, reachable from their device. `null` when nothing is viewable
+  (a backend change, a script).
 - `files_changed` — paths touched.
 - `tests` — tests added or run, and their outcome.
 - `artifacts` — anything produced worth keeping (logs, screenshots). When the
@@ -116,6 +120,25 @@ Throughline) writes back and uses to advance the run:
 
 The Conductor — not this Skill — edits the Throughline frontmatter and advances
 the stage. Parallel implementations naturally coalesce at the prove stage.
+
+### Fix round (a fix brief instead of a plan)
+
+When the Conductor dispatches a **fix brief** — feedback items on work that
+already landed — the brief is the whole task. It carries the items, the files
+the last run changed, the affected spec, and the proof Surface.
+
+- Do not read the plan or the Throughline, and skip "Research and reuse". If the
+  brief lacks something you need, read only that.
+- Open the named files first. Search outside them only when an item needs it,
+  and list each extra file in `files_changed`.
+- While you iterate, run only the affected spec. Run the full suite once, when
+  every item is done.
+- Push once, after the full suite passes — not once per item. Then prove on the
+  Surface the brief names.
+- Stage 1 for a fix round: every feedback item is done, or reported as not done
+  with the reason. Stage 2 still runs, against the fix diff only.
+- Return the same JSON. Put the outcome of each item in `artifacts`, and set
+  `ac_status` only for the criteria the fix touched.
 
 ## Story recap (every implement)
 

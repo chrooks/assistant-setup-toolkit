@@ -104,6 +104,7 @@ Return the result as a single fenced JSON block — and nothing else outside it:
       "tests": "the proofs that ran and how",
       "artifacts": "the evidence, including the clip path for every needs-human criterion",
       "ac_status": {"ac1": "pass", "ac2": "needs-human", ...},
+      "view_url": "the link the human opens to see what you proved, or null",
       "suggested_next_action": "/dev assess"
     }
     ```

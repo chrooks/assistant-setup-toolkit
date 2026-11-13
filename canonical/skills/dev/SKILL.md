@@ -264,6 +264,7 @@ result.
          "tests": "what ran and the outcome",
          "artifacts": "evidence worth keeping",
          "ac_status": {"ac1": "pass", "ac2": "needs-human", ...},
+         "view_url": "the link the human opens to see the change, or null",
          "suggested_next_action": "/dev prove 2"
        }
        ```
@@ -280,6 +281,11 @@ Parse the JSON and write it back with this fixed map:
   and any design concerns); preserve it in the ledger so a bounced design AC has
   the evidence behind it.
 - `files_changed` → a dated line in `## Work Log`.
+- `view_url` → the link in your report to the human, next to the proof. Every
+  implement, prove, and fix-round report carries it: the changed page at its
+  exact route, reachable from the human's device. When it is `null`, say in one
+  line that nothing is viewable. Never report a work stage without one or the
+  other.
 - When the Throughline or its ExecPlan carries an `## Issue Map`, the same
   result also syncs the mapped issue record via `/to-issues update` — a progress
   comment and ticked acceptance-criteria checkboxes for what the stage landed.
@@ -295,6 +301,43 @@ After every implement write-back, deliver the **story recap** defined in the
 shipped, real code snippets, a visual when the concept has shape, verified
 outputs as evidence, surprises led — never a raw relay of the sub-agent's
 JSON.
+
+### The fix round (feedback on landed work)
+
+When the human gives feedback on work a stage already landed — between
+milestones, after a proof link, or at an assess bounce — do **not** dispatch a
+full implement run. A full run pays to learn the code again: the measured cost
+was about 25 of 115 fix-round minutes spent on orientation before the first
+edit, and 200K+ tokens of context per round (2026-11-13, one UI work item).
+Dispatch a **fix round**: the same Context-Encapsulated sub-agent at the same
+tier, handed a **fix brief** instead of the plan.
+
+1. **Sort the feedback first.** A correction to landed work (a defect, a taste
+   change) is a fix item. New behavior, a new Surface, or a new case is an add:
+   quote it (Quote Every Add) before it goes anywhere. A kept add that touches
+   the same files may ride in the fix brief. Feedback that reverses a recorded
+   decision → write the new decision into `## Decision Ledger` yourself, then
+   state it in the brief.
+2. **Write the fix brief.** It is the sub-agent's whole task, so it must stand
+   alone:
+   - the feedback items, numbered, in the human's words, with the path of each
+     screenshot they attached;
+   - the files the last run changed (`files_changed` from the `## Work Log`);
+   - the affected spec or test file, from the last result's `tests`;
+   - the proof Surface: the exact URL the human opens;
+   - the design reference, when the work has one.
+3. **Dispatch it** with the `implement` Skill's "Fix round" rules: the sub-agent
+   does not read the plan or the Throughline, opens the named files first, runs
+   only the affected spec while it iterates, runs the full suite once, and
+   pushes once. One round takes the whole batch of items — never one sub-agent
+   per item.
+4. **Write back** as for any work stage, plus one `## Work Log` line that lists
+   the items the round closed and any it did not. A fix round between
+   milestones does not touch `bounces`; only assess does.
+
+Fall back to a full implement dispatch when the feedback needs work the plan
+never covered (a new milestone, a schema or Contract change). Say so in one
+line.
 
 ### The assess stage and the back-edge
 
@@ -332,7 +375,9 @@ diff. This is the mirror of the `/visual-plan` offer at the plan stage.
      yourself: the implement stage already detects bug-fix vs. feature and pulls
      in `/diagnose` or `/tdd` internally, so that judgment stays in one place.
    - On re-entry, implement works only the reopened (`pending`) ACs; prove
-     re-checks those plus any the implementer flags as touched.
+     re-checks those plus any the implementer flags as touched. Dispatch the
+     re-entry as a fix round (above), with the human's stated reasons as the
+     feedback items.
 4. **Loop guard (soft, threshold 3).** When `bounces` reaches 3 on the same
    work, do **not** silently re-dispatch. Stop and surface the `## Assessment
    Log` history, then offer the human three ways out: re-grill the approach,
