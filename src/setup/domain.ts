@@ -31,7 +31,8 @@ export type ComponentKind =
   | "config"
   | "settings"
   | "manifests"
-  | "mcp";
+  | "mcp"
+  | "workflows";
 
 /** A per-machine flavor choice for the visual-plan/visual-recap backend. */
 export type VisualPlansVariant = "local-files" | "self-hosted" | "none";
@@ -140,6 +141,7 @@ export const ALL_COMPONENT_KINDS: readonly ComponentKind[] = [
   "settings",
   "manifests",
   "mcp",
+  "workflows",
 ] as const;
 
 // -- Interfaces --

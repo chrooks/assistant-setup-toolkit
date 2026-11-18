@@ -28,6 +28,7 @@ describe("domain", () => {
         "settings",
         "manifests",
         "mcp",
+        "workflows",
       ]);
     });
   });

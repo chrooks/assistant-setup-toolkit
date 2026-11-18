@@ -62,6 +62,7 @@ Core types live in `src/setup/domain.ts` — `AssistantTargetId`, `SetupProfile`
 |-----------|---------|
 | `canonical/` | Canonical Assistant Source — distributable instructions, skills, hooks, rules, machine profiles |
 | `canonical/rules/` | Language/common rules; project to `~/.claude/rules/` and `~/.codex/rules/` |
+| `canonical/workflows/` | Saved Claude Code Workflow scripts (plain JS); install to `~/.claude/workflows/`, Claude target only. Each follows the lean workflow defaults in `canonical/rules/common/cost-guardrails.md` |
 | `canonical/machines/` | Machine profiles — one dir per machine class (`rules.md`, `skills/`), gated by the `machine` Variant (ADR-0003) |
 | `.claude/` | Repo-local Claude Code config (project-scoped skills, rules); gitignored |
 | `src/setup/` | Setup Wizard TypeScript source modules |

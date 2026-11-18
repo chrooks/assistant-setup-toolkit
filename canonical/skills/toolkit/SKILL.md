@@ -29,6 +29,7 @@ When it is genuinely ambiguous, ask one short question rather than guessing. Wri
 | A convention tied to a file type or directory | a `paths:`-gated **rule** in `canonical/rules/<area>/` | [authoring-rule.md](authoring-rule.md) |
 | A universal conversational rule | a section in `canonical/INSTRUCTIONS.md` — an **instruction** | [authoring-instruction.md](authoring-instruction.md) |
 | A behavior that must fire 100% of the time | **both** an instruction *and* a **hook** in `canonical/hooks/` | [authoring-instruction.md](authoring-instruction.md) + [authoring-hook.md](authoring-hook.md) |
+| A saved multi-agent fan-out (review, map, judge panel, research) | a **workflow script** in `canonical/workflows/<name>.js`; installs to the Claude home `workflows/` directory, Claude target only | the lean workflow defaults in [cost-guardrails.md](../../rules/common/cost-guardrails.md) |
 | A fact true only on one machine | a **machine rule** in `canonical/machines/<name>/rules.md` | [authoring-rule.md](authoring-rule.md) |
 | Somebody else's published work worth pulling in | an **external source** in `manifests/install.yaml` | [authoring-manifest.md](authoring-manifest.md) |
 | "Has upstream changed?" for a Skill copied or wrapped from elsewhere | the **drift check** over `upstream:` frontmatter blocks | [checking-upstream.md](checking-upstream.md) |

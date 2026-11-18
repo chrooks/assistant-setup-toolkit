@@ -77,6 +77,32 @@ describe("payload", () => {
       expect(result.conflicts).toHaveLength(0);
     });
 
+    it("routes workflows to claude-home only, never to a Codex home", () => {
+      const workflow: PayloadFile = {
+        relativePath: "workflows/x.js",
+        sourcePath: "/repo/canonical/workflows/x.js",
+        component: "workflows",
+        origin: "canonical-source",
+        executable: false,
+      };
+      const result = buildAssistantPayloads({
+        targets: ["claude-code", "codex-cli"],
+        components: ["workflows"],
+        externalFiles: [],
+        canonicalFiles: [workflow],
+        // Fed to Codex too, to prove routing (not projection) keeps it out.
+        projectionFiles: [workflow],
+      });
+
+      const has = (home: string) =>
+        result.payloads
+          .find((p) => p.homeId === home)
+          ?.files.some((f) => f.relativePath === "workflows/x.js") ?? false;
+      expect(has("claude-home")).toBe(true);
+      expect(has("codex-home")).toBe(false);
+      expect(has("agents-home")).toBe(false);
+    });
+
     it("builds separate payloads for codex-home and agents-home", () => {
       const result = buildAssistantPayloads({
         targets: ["codex-cli"],

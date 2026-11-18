@@ -158,6 +158,7 @@ async function discoverCanonicalFiles(
     skills: "skills",
     rules: "rules",
     config: "config",
+    workflows: "workflows",
   };
 
   // Config files (e.g. knowledge-config.example.json) are read by skills/hooks

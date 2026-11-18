@@ -91,7 +91,7 @@ function routeFileToHome(
     if (file.component === "skills") {
       return "agents-home";
     }
-    // Other component types (commands, agents, mcp) don't have
+    // Other component types (commands, agents, mcp, workflows) don't have
     // a Codex equivalent yet
     return null;
   }
