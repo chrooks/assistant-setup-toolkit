@@ -81,10 +81,14 @@ const opusCount = (calls: Call[]) =>
 const VALID_ARGS: Record<string, unknown> = {
   "lean-review": { target: "HEAD~1..HEAD" },
   "batch-map": { items: ["a", "b", "c"], instruction: "Uppercase the item." },
+  "blind-panel": { brief: "Design a settings page." },
+  "lean-research": { question: "Which vector store fits a homelab?" },
 };
 const EXPECTED_OPUS: Record<string, number> = {
   "lean-review": 0,
   "batch-map": 0,
+  "blind-panel": 1,
+  "lean-research": 1,
 };
 
 describe.each(Object.keys(VALID_ARGS))("workflow script %s", (name) => {
@@ -149,5 +153,26 @@ describe("batch-map", () => {
     const result = await run;
     // The stub answers index 0 only, so items 1 and 2 are missing.
     expect(result.missing).toEqual([1, 2]);
+  });
+});
+
+describe("lean-research", () => {
+  it.each([
+    [1, 3],
+    [9, 5],
+  ])("clamps surveyors %i to %i", async (surveyors, expected) => {
+    const { run, calls } = await runScript("lean-research", { question: "q", surveyors });
+    await run;
+    expect(calls.filter((c) => c.opts.phase === "Survey")).toHaveLength(expected);
+  });
+});
+
+describe("blind-panel", () => {
+  it("cycles angles when n exceeds them, one designer per n", async () => {
+    const { run, calls } = await runScript("blind-panel", { brief: "b", n: 3, angles: ["only"] });
+    await run;
+    const designers = calls.filter((c) => c.opts.phase === "Design");
+    expect(designers).toHaveLength(3);
+    expect(new Set(designers.map((c) => c.prompt)).size).toBe(3);
   });
 });
