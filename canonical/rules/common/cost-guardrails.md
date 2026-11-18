@@ -20,6 +20,17 @@
 - Bash output is context. Pipe through `head`, `tail`, `grep`, or `wc` instead of dumping files or logs.
 - No unattended loops without a cap. `/loop`, cron routines, and Remote Control sessions each need an end condition and a cost quote.
 
+## Lean workflow defaults
+
+Measured on hestia, 2026-11-17: 58 Workflow runs, 414 agents, 1.65B input tokens against 0.83M output. Every agent ran on Opus at full effort, started at a median 66K context before its first action, and ran 25-50 turns. The bill is turns × context on the default model, not output. Apply these defaults to every Workflow script:
+
+- Set `model` and `effort` per stage. Mechanical stages (map, capture, survey, list, verify) run on Haiku or Sonnet with `effort: 'low'`. Only the judge and synthesize stages inherit Opus.
+- Read-only stages use `agentType: 'Explore'`. It skips the CLAUDE.md files and reads excerpts instead of whole files.
+- Brief each agent narrowly: give it the file paths and excerpts it needs, and require a `schema` result. Orientation turns are the most expensive turns.
+- One verifier per finding. Use a 3-vote panel only when the user asks for an audit or ultracode is on.
+- Never build, test, deploy, or fix inside a workflow agent. Long edit loops belong to `/implement`; a workflow returns findings or options.
+- The cost quote names the agent count per stage and each stage's model.
+
 ## What the hooks enforce
 
 | Hook | Event | Enforces |
