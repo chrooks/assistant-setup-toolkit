@@ -22,9 +22,12 @@ export const meta = {
 //           accessibility. Any other string is a persona brief. Default: code,
 //           adversarial, architecture, security; accessibility joins when UI files are mapped.
 //   audit   (boolean, optional) three skeptics per finding instead of one.
+//   maxFindings (integer, optional, default 12) verify only the most severe N
+//           findings; the rest come back unverified in `dropped`.
 //
 // Cost shape: Map 1 x Haiku (low) + Find L x Sonnet (medium, L = lens count)
-//   + Verify F x Sonnet (low), F = deduped findings (3F with audit). No Opus.
+//   + Verify F x Sonnet (low), F = deduped findings, at most maxFindings
+//   (3F with audit). Worst case at defaults: 1 + 4 + 12 = 17 agents. No Opus.
 //
 // Barrier, not pipeline: dedup runs across all lenses before verification, so
 // Find is a barrier. Simpler, and it stops two lenses paying to verify one bug.
@@ -40,6 +43,10 @@ if (a.lenses !== undefined && (!Array.isArray(a.lenses) || !a.lenses.length || a
 if (a.audit !== undefined && typeof a.audit !== 'boolean') {
   throw new Error(`lean-review: args.audit must be a boolean. Example args: ${EXAMPLE}`)
 }
+if (a.maxFindings !== undefined && (!Number.isInteger(a.maxFindings) || a.maxFindings < 1)) {
+  throw new Error(`lean-review: args.maxFindings must be a positive integer. Example args: ${EXAMPLE}`)
+}
+const MAX_FINDINGS = a.maxFindings || 12
 
 const LENSES = {
   code: 'Correctness: logic errors, edge cases, broken contracts between caller and callee, wrong error handling.',
@@ -137,9 +144,16 @@ for (const f of found.filter(Boolean).flat()) {
 const failedLenses = lenses.filter((_, i) => !found[i])
 if (failedLenses.length) log(`Find returned nothing usable for: ${failedLenses.join(', ')}`)
 
+// The verifier fan-out is the one unbounded stage, so cap it: verify the most
+// severe findings and return the rest unverified in `dropped`.
+const bySeverity = [...deduped].sort((x, y) => SEVERITY_RANK[x.severity] - SEVERITY_RANK[y.severity])
+const toVerify = bySeverity.slice(0, MAX_FINDINGS)
+const dropped = bySeverity.slice(MAX_FINDINGS)
+if (dropped.length) log(`Verifying ${toVerify.length} of ${deduped.length} findings; ${dropped.length} dropped by maxFindings.`)
+
 phase('Verify')
 const votesPer = a.audit ? 3 : 1
-const judged = await parallel(deduped.map((f, i) => () =>
+const judged = await parallel(toVerify.map((f, i) => () =>
   parallel(Array.from({ length: votesPer }, (_, v) => () => agent(
     `Try to refute this review finding. Read the code at the location and decide if the claim is wrong, ` +
     `already handled, or not reachable. Default to refuted=true if the evidence is unclear.\n\n` +
@@ -164,5 +178,6 @@ return {
   findings: confirmed,
   unverified: byStatus('unverified'),
   refuted: byStatus('refuted'),
-  stats: { files: map.files.length, found: found.filter(Boolean).flat().length, deduped: deduped.length, verifierCalls: deduped.length * votesPer, failedLenses },
+  dropped,
+  stats: { files: map.files.length, found: found.filter(Boolean).flat().length, deduped: deduped.length, verified: toVerify.length, verifierCalls: toVerify.length * votesPer, failedLenses },
 }

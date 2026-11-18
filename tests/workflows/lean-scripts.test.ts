@@ -46,13 +46,18 @@ function fromSchema(schema: Record<string, unknown>): unknown {
   }
 }
 
-async function runScript(name: string, args: unknown) {
+async function runScript(
+  name: string,
+  args: unknown,
+  /** Optional canned answer per call; return undefined to fall back to the schema stub. */
+  respond: (opts: Opts) => unknown = () => undefined,
+) {
   const source = await readFile(path.join(WORKFLOWS_DIR, `${name}.js`), "utf-8");
   const body = source.replace(/export const meta\s*=/, "const meta = __m.meta =");
   const calls: Call[] = [];
   const agent = async (prompt: string, opts: Opts = {}) => {
     calls.push({ prompt, opts });
-    return opts.schema ? fromSchema(opts.schema) : "x";
+    return respond(opts) ?? (opts.schema ? fromSchema(opts.schema) : "x");
   };
   const parallel = (thunks: Array<() => Promise<unknown>>) =>
     Promise.all(thunks.map((t) => t().catch(() => null)));
@@ -122,6 +127,31 @@ describe("lean-review verifier fan-out", () => {
     const verifies = calls.filter((c) => c.opts.phase === "Verify");
     expect(result.stats.deduped).toBeGreaterThan(0);
     expect(verifies).toHaveLength(per * result.stats.deduped);
+  });
+
+  it("verifies only the maxFindings most severe findings and reports the rest as dropped", async () => {
+    const finding = (file: string, severity: string) => ({
+      file, lineStart: 1, lineEnd: 2, severity, claim: "c", failureScenario: "s",
+    });
+    const { run, calls } = await runScript(
+      "lean-review",
+      { target: "src/a.ts", lenses: ["code"], maxFindings: 2 },
+      (opts) =>
+        opts.phase === "Find"
+          ? { findings: [finding("low.ts", "low"), finding("crit.ts", "critical"), finding("med.ts", "medium")] }
+          : undefined,
+    );
+    const result = await run;
+    const verifies = calls.filter((c) => c.opts.phase === "Verify");
+    expect(verifies).toHaveLength(2);
+    expect(verifies.some((c) => c.prompt.includes("low.ts"))).toBe(false);
+    expect(result.dropped.map((f: { file: string }) => f.file)).toEqual(["low.ts"]);
+  });
+
+  it.each([0, -1, 1.5, "3"])("rejects maxFindings %j before any agent starts", async (maxFindings) => {
+    const { run, calls } = await runScript("lean-review", { target: "src/a.ts", maxFindings });
+    await expect(run).rejects.toThrow(/maxFindings/);
+    expect(calls).toHaveLength(0);
   });
 
   it("adds an accessibility lens only when UI files are in scope, and treats unknown lenses as personas", async () => {
