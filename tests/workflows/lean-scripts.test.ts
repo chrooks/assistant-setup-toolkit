@@ -80,9 +80,11 @@ const opusCount = (calls: Call[]) =>
 
 const VALID_ARGS: Record<string, unknown> = {
   "lean-review": { target: "HEAD~1..HEAD" },
+  "batch-map": { items: ["a", "b", "c"], instruction: "Uppercase the item." },
 };
 const EXPECTED_OPUS: Record<string, number> = {
   "lean-review": 0,
+  "batch-map": 0,
 };
 
 describe.each(Object.keys(VALID_ARGS))("workflow script %s", (name) => {
@@ -128,5 +130,24 @@ describe("lean-review verifier fan-out", () => {
     expect(finds).toHaveLength(2);
     expect(finds.some((c) => c.prompt.includes("Employer's counsel"))).toBe(true);
     expect(result.lenses).not.toContain("accessibility");
+  });
+});
+
+describe("batch-map", () => {
+  it("rejects an Opus model", async () => {
+    const { run, calls } = await runScript("batch-map", {
+      items: ["a"],
+      instruction: "x",
+      model: "opus",
+    });
+    await expect(run).rejects.toThrow(/model/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("reports items with no result", async () => {
+    const { run } = await runScript("batch-map", VALID_ARGS["batch-map"]);
+    const result = await run;
+    // The stub answers index 0 only, so items 1 and 2 are missing.
+    expect(result.missing).toEqual([1, 2]);
   });
 });
