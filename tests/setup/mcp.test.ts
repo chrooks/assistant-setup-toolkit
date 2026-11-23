@@ -78,5 +78,28 @@ describe("mcp", () => {
       const steps = planMcpNextSteps(sources);
       expect(steps).toHaveLength(0);
     });
+
+    it("puts the native install command in the Next Step", () => {
+      const sources: ExternalSource[] = [
+        {
+          id: "plane-mcp",
+          name: "Plane MCP",
+          kind: "mcp-server",
+          url: "https://github.com/makeplane/plane-mcp-server",
+          default: true,
+          targets: ["claude-code"],
+          requiresConfirmation: true,
+          requiredSecrets: ["PLANE_API_KEY"],
+          installCommands: { "claude-code": ["claude mcp add --scope user plane -- x"] },
+        },
+      ];
+
+      const steps = planMcpNextSteps(sources);
+
+      expect(steps).toHaveLength(1);
+      expect(steps[0].kind).toBe("mcp-secret");
+      expect(steps[0].description).toContain("PLANE_API_KEY");
+      expect(steps[0].description).toContain("claude mcp add --scope user plane -- x");
+    });
   });
 });

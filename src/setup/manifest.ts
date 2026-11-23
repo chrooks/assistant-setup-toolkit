@@ -9,6 +9,7 @@
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import type { AssistantTargetId, ExternalSourceKind } from "./domain.js";
+import { variantGateSatisfied } from "./domain.js";
 
 // -- Zod schemas --
 
@@ -55,6 +56,12 @@ const ExternalSourceSchema = z.object({
   requiresConfirmation: z.boolean().optional(),
   requiredSecrets: z.array(z.string()).optional(),
   installWhen: InstallWhenSchema.optional(),
+  /**
+   * Optional Variant gate, same shape as hook wiring: the source exists for a
+   * run only when every pair matches the run's resolved variants
+   * (e.g. `personal-tools: "on"` keeps a personal service off the work Preset).
+   */
+  variants: z.record(z.string(), z.string()).optional(),
 });
 
 /** Schema for the full Installation Manifest. Uses strict() to reject unknown top-level fields. */
@@ -121,4 +128,12 @@ export async function loadInstallationManifest(
   const { readFile } = await import("node:fs/promises");
   const content = await readFile(filePath, "utf-8");
   return parseInstallationManifestYaml(content, filePath);
+}
+
+/** The sources whose Variant gate the run's resolved variants satisfy. */
+export function sourcesForVariants(
+  sources: readonly ExternalSource[],
+  variants: Readonly<Record<string, string>> | undefined,
+): ExternalSource[] {
+  return sources.filter((source) => variantGateSatisfied(source.variants, variants));
 }

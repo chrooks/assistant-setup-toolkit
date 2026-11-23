@@ -298,6 +298,31 @@ externalSources:
         mechanism. Overlaps playwright-mcp; this one is for inspecting and comparing,
         Playwright for scripted flows.
 
+  - id: plane-mcp
+    name: Plane MCP
+    kind: mcp-server
+    url: https://github.com/makeplane/plane-mcp-server
+    # Personal service on the home server: personal-tools machines only, never
+    # the work Preset (ADR-0005). Selected by default where the gate holds.
+    default: true
+    variants:
+      personal-tools: "on"
+    targets:
+      - claude-code
+    requiresConfirmation: true
+    requiredSecrets:
+      - PLANE_API_KEY, PLANE_BASE_URL, PLANE_WORKSPACE_SLUG in ~/.config/plane-mcp/env (mode 600; values in hearth runbook 26)
+    installCommands:
+      claude-code:
+        - claude mcp add --scope user plane -- sh -c 'set -a; . "$HOME/.config/plane-mcp/env"; PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH" exec uvx plane-mcp-server stdio'
+    notes:
+      - Official Plane MCP Server (stdio) against the self-hosted Community Edition.
+        The registered command sources the env file at launch, so the token never
+        lands in ~/.claude.json and the URL and slug stay machine-local.
+      - Needs uv (uvx) installed, and Tailscale on when the machine is off the LAN.
+      - Pro-only tools (initiative, milestone, release, customer, work_log,
+        workitem_type, template) fail on Community Edition.
+
   - id: context7
     name: Context7
     kind: mcp-server

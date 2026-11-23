@@ -29,7 +29,7 @@ import type {
   ComponentKind,
   SetupProfile,
 } from "./domain.js";
-import { loadInstallationManifest } from "./manifest.js";
+import { loadInstallationManifest, sourcesForVariants } from "./manifest.js";
 import type { ExternalSource } from "./manifest.js";
 import { resolveAssistantHomePath, resolveReceiptPath } from "./paths.js";
 import { planCodexProjection, rewriteContentForCodex, inlineCanonicalImports } from "./projection.js";
@@ -440,6 +440,13 @@ export async function runSetupWizard(
         effectivePresetName,
       );
     }
+
+    // Drop sources whose Variant gate this machine does not satisfy, so a
+    // personal service (plane-mcp) never reaches the work Preset.
+    manifest = {
+      ...manifest,
+      externalSources: sourcesForVariants(manifest.externalSources, profile.variants),
+    };
 
     // Two channels (see reporter.ts): `log` is the full narration and lands in
     // the run log file; `summary` is the short version a human reads at a

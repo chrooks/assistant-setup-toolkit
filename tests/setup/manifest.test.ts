@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { parseInstallationManifestYaml } from "../../src/setup/manifest.js";
+import { parseInstallationManifestYaml, sourcesForVariants } from "../../src/setup/manifest.js";
 
 // Minimal valid manifest with one skill and one MCP server
 const VALID_YAML = `
@@ -159,7 +159,7 @@ externalSources:
 
       expect(manifest.version).toBe(1);
       // All sources tracked in manifests/install.yaml
-      expect(manifest.externalSources).toHaveLength(17);
+      expect(manifest.externalSources).toHaveLength(18);
 
       // Verify key IDs exist
       const ids = manifest.externalSources.map((s) => s.id);
@@ -180,6 +180,7 @@ externalSources:
       expect(ids).toContain("playwright-mcp");
       expect(ids).toContain("chrome-devtools-mcp");
       expect(ids).toContain("context7");
+      expect(ids).toContain("plane-mcp");
       expect(ids).toContain("agent-native-visual-plans");
       expect(ids).toContain("stop-slop");
       expect(ids).toContain("humanizer");
@@ -209,6 +210,31 @@ externalSources:
 
       const ctx7 = manifest.externalSources.find((s) => s.id === "context7")!;
       expect(ctx7.requiredSecrets).toEqual(["CONTEXT7_API_KEY"]);
+    });
+  });
+
+  describe("sourcesForVariants", () => {
+    const repoManifest = parseInstallationManifestYaml(
+      readFileSync(resolve(__dirname, "../../manifests/install.yaml"), "utf-8"),
+      "install.yaml",
+    );
+    const ids = (variants?: Record<string, string>) =>
+      sourcesForVariants(repoManifest.externalSources, variants).map((s) => s.id);
+
+    it("keeps the Plane MCP Server on a personal-tools machine", () => {
+      expect(ids({ "personal-tools": "on", machine: "mac" })).toContain("plane-mcp");
+    });
+
+    it("drops the Plane MCP Server on the work Preset", () => {
+      expect(ids({ "visual-plans": "local-files", machine: "work" })).not.toContain("plane-mcp");
+    });
+
+    it("drops the Plane MCP Server when no variants are set", () => {
+      expect(ids(undefined)).not.toContain("plane-mcp");
+    });
+
+    it("keeps ungated sources everywhere", () => {
+      expect(ids(undefined)).toContain("context7");
     });
   });
 });

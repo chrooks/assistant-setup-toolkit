@@ -36,3 +36,11 @@ Preset, so a restricted machine or a client machine got them by default.
   and the cost: a personal machine must name its Preset (or opt in by overlay).
 - The hook scripts themselves still ship everywhere with the `hooks`
   component; unwired, they never run.
+
+## Amendment — 2026-11-23: External Sources carry the gate too
+
+An Installation Manifest entry may now carry the same `variants:` gate as a hook
+wiring entry. The Setup Wizard drops a gated source before selection, so it never
+reaches a machine whose resolved variants do not match. The first user is
+`plane-mcp` (the self-hosted Plane MCP Server), gated on `personal-tools: "on"`
+so it never reaches the `work` Preset.

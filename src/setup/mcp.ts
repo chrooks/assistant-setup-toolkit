@@ -32,12 +32,17 @@ export function planMcpNextSteps(
       : source.default === true;
     if (!isSelected) continue;
 
+    // MCP sources are skipped by fetch planning, so their native install
+    // command travels on this step instead of the install-command step.
+    const commands = Object.values(source.installCommands ?? {}).flat();
+    const install = commands.length > 0 ? ` Then run: ${commands.join(" && ")}` : "";
+
     // Sources with required secrets get a secret step
     if (source.requiredSecrets && source.requiredSecrets.length > 0) {
       const secrets = source.requiredSecrets.join(", ");
       steps.push({
         kind: "mcp-secret",
-        description: `Add required secret(s) for ${source.name}: ${secrets}. Do not commit secrets to source control.`,
+        description: `Add required secret(s) for ${source.name}: ${secrets}. Do not commit secrets to source control.${install}`,
         sourceId: source.id,
       });
       continue;
@@ -47,7 +52,7 @@ export function planMcpNextSteps(
     if (source.requiresConfirmation) {
       steps.push({
         kind: "mcp-confirmation",
-        description: `${source.name} requires confirmation before installation. Review ${source.url} and configure manually.`,
+        description: `${source.name} requires confirmation before installation. Review ${source.url} and configure manually.${install}`,
         sourceId: source.id,
       });
     }

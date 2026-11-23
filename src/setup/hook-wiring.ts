@@ -17,6 +17,7 @@ import path from "node:path";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import type { AssistantTargetId } from "./domain.js";
+import { variantGateSatisfied } from "./domain.js";
 
 // -- Manifest schema --
 
@@ -603,15 +604,6 @@ async function assertTomlFeatureFlag(
 }
 
 // -- Small helpers --
-
-/** True when the entry has no Variant gate, or every required pair matches the run's variants. */
-function variantGateSatisfied(
-  required: Readonly<Record<string, string>> | undefined,
-  actual: Readonly<Record<string, string>> | undefined,
-): boolean {
-  if (!required) return true;
-  return Object.entries(required).every(([key, value]) => actual?.[key] === value);
-}
 
 function isErrnoNotFound(error: unknown): boolean {
   return (

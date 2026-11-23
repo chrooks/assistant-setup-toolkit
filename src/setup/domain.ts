@@ -297,3 +297,12 @@ export function resolveAssistantHomes(
   }
   return result;
 }
+
+/** True when the entry has no Variant gate, or every required pair matches the run's variants. */
+export function variantGateSatisfied(
+  required: Readonly<Record<string, string>> | undefined,
+  actual: Readonly<Record<string, string>> | undefined,
+): boolean {
+  if (!required) return true;
+  return Object.entries(required).every(([key, value]) => actual?.[key] === value);
+}
