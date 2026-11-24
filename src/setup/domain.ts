@@ -89,6 +89,15 @@ export const PERSONAL_SKILL_NAMES = [
   "loop-audit",
 ] as const;
 
+/**
+ * Single files the personal-tools Variant governs, inside skills that ship
+ * everywhere. The Plane tracker doc names a self-hosted service only personal
+ * machines reach.
+ */
+export const PERSONAL_FILE_PATHS = [
+  "skills/project-flow-setup/defaults/issue-tracker.plane.md",
+] as const;
+
 /** Fixed install path for the (single) matching machine rule. */
 export const MACHINE_RULE_INSTALL_PATH = "rules/machine.md";
 

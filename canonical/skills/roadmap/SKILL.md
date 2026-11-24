@@ -42,11 +42,13 @@ Read the project `LEXICON.md` first when present, then the project-flow Contract
 
 Each one lives as a bundled default at `~/.claude/skills/project-flow-setup/defaults/<name>.md`. A repo-local `docs/agents/<name>.md` is an **Override** — when it exists it replaces the default of that name entirely. Read the Override where present, the default otherwise. Most repos have no Override, and that is the normal case, not missing setup.
 
-The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check `gh label list --json name`. When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line; do not stop to recommend it. Skip the setup only when the user asked for a one-off answer.
+When the `issue-tracker.md` in force names Plane as the tracker, also read the bundled `issue-tracker.plane.md` next to it and make every tracker call through its **Tracker verbs**. The GitHub default answers the same verbs, so the rest of this Skill reads the same for both.
+
+The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check it with the tracker doc's **Setup check** verb (GitHub: `gh label list --json name`). When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line; do not stop to recommend it. Skip the setup only when the user asked for a one-off answer.
 
 Then read any additional project planning docs or active ExecPlans.
 
-Use live issue-tracker data when available. For GitHub-backed repos, prefer `gh` commands from the project guidance. Inspect open issues, recently closed issues when relevant, milestones, Project items, labels, assignees, blockers, parent/sub-issue relationships, and pull requests.
+Use live issue-tracker data when available, through the tracker doc's **List** and **Read** verbs. Inspect open issues, recently closed issues when relevant, milestones, Project items, labels, assignees, blockers, parent/sub-issue relationships, and pull requests.
 
 If the user named a specific Project, milestone, label, issue, or board column, scope the lookup there first.
 
@@ -141,7 +143,7 @@ Closures stay out of scope either way: identify issue records that should close 
 python3 scripts/backlog-graph.py [owner/repo] --open    # scripts/ sits next to this SKILL.md
 ```
 
-1. It reads every open issue through `gh`: title, URL, milestone, labels, open blockers, parent, sub-issues. It never writes to GitHub.
+1. It reads every open issue through `gh`: title, URL, milestone, labels, open blockers, parent, sub-issues. It never writes to GitHub. It is GitHub-only: on a Plane repo it reads the GitHub twins, which carry state, labels, and parents but not blockers yet.
 2. One node per open issue. Red = blocked (an open blocker, or the `blocked` label). Amber = `needs-decision` or `needs-scope`. Green = ready.
 3. Solid edge = blocker → blocked. Dashed edge = parent → sub-issue. Edges to closed issues are dropped.
 4. It builds the page with the diagram skill's `build-diagram.py` and writes `<cwd>/.exports/backlog/<repo>.html`. Add `.exports/` to the repo's `.gitignore` if missing.

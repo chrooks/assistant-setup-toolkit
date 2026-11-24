@@ -19,6 +19,8 @@ const files = [
   skill("skills/commit/SKILL.md"),
   skill("skills/ingest/SKILL.md"),
   skill("skills/loop-audit/SKILL.md"),
+  skill("skills/project-flow-setup/defaults/issue-tracker.md"),
+  skill("skills/project-flow-setup/defaults/issue-tracker.plane.md"),
 ];
 const installed = (variants: Record<string, string>, target: "claude-code" | "codex-cli") =>
   buildAssistantPayloads({
@@ -35,11 +37,16 @@ const installed = (variants: Record<string, string>, target: "claude-code" | "co
 describe("personal-tools Variant", () => {
   for (const target of ["claude-code", "codex-cli"] as const) {
     it(`${target}: personal-only skills install only when the machine opts in`, () => {
-      expect(installed({}, target)).toEqual(["skills/commit/SKILL.md"]);
+      expect(installed({}, target)).toEqual([
+        "skills/commit/SKILL.md",
+        "skills/project-flow-setup/defaults/issue-tracker.md",
+      ]);
       expect(installed({ "personal-tools": "on" }, target)).toEqual([
         "skills/commit/SKILL.md",
         "skills/ingest/SKILL.md",
         "skills/loop-audit/SKILL.md",
+        "skills/project-flow-setup/defaults/issue-tracker.md",
+        "skills/project-flow-setup/defaults/issue-tracker.plane.md",
       ]);
     });
   }

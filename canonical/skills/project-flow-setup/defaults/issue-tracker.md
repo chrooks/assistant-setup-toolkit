@@ -2,6 +2,8 @@
 
 This repository treats GitHub issues as Issue records: the durable work items that `/to-issues`, `/roadmap`, `/implement`, and `/verification-loop` coordinate around.
 
+GitHub is the default tracker. A repo whose `docs/agents/issue-tracker.md` Override names Plane uses the bundled `issue-tracker.plane.md` instead; it answers the same **Tracker verbs** below.
+
 ## Issue Records
 
 An issue record should describe one Vertical Slice that can be implemented and verified on its own. Prefer small issue records with clear acceptance criteria over broad tracking issues.
@@ -79,6 +81,50 @@ Use `/to-issues close <issue>` when:
 - The work is complete.
 - Verification evidence is present.
 - The closing comment can name the proof.
+
+## Tracker verbs
+
+The issue Skills name these verbs; each tracker doc says how to do them.
+
+### Setup check
+
+`gh label list`, `gh api repos/{owner}/{repo}/milestones`, and `gh project list --owner <owner>`.
+
+### Create
+
+`gh issue create --title "<title>" --body-file <file> --label "<label>"`.
+
+### Read
+
+`gh issue view <number> --comments`.
+
+### List
+
+`gh issue list --state open --limit 100` (add `--label`, `--milestone`, or `--search` to filter).
+
+### Update
+
+`gh issue edit <number>` with `--title`, `--body-file`, `--add-label`, or `--remove-label`.
+
+### Comment
+
+`gh issue comment <number> --body "<comment>"`.
+
+### Close
+
+`gh issue close <number> --comment "<verification evidence>"`.
+
+### Parent
+
+Native sub-issue: `gh api repos/{owner}/{repo}/issues/<parent>/sub_issues -F sub_issue_id=<child database id>`. Fallback: the `Parent` section above.
+
+### Blocker
+
+A `## Blocked by` section in the body naming the blocking issue.
+
+### Milestone
+
+`gh api repos/{owner}/{repo}/milestones` to list or create; `gh issue edit <number> --milestone "<title>"` to assign.
 
 ## GitHub CLI
 

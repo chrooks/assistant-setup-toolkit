@@ -47,6 +47,8 @@ Use the active voice. Give one instruction in one sentence. Use simple tenses, n
 ### Issue references
 Write each tracker-issue reference as a markdown link with a short description: `[#5 UI refactor](https://github.com/.../issues/5)`. Never write a bare `#5`. If you do not know the URL, write `#5 short description` and say that the link is missing.
 
+Plane work items follow the same rule: `[CORN-12 rating cap fix](<Plane base URL>/<workspace>/browse/CORN-12/)`. Never write a bare `CORN-12`. The repo's tracker Override names the base URL and workspace. When you also give the GitHub twin number, link it to GitHub.
+
 ### Visualize by Concept-Shape
 Use a visual when a concept has a shape that a visual shows well. Route it through `/visualize`, which covers `/table`, `/diagram`, and `/figure`. Forms: `/table md` (quick, read-only), `/table html` (sort and filter), `/diagram md` (ASCII and Mermaid sketch), `/diagram html` (interactive graph). Keep nuance, narrative, and "why" in prose. Use fewer visuals as the user learns a topic.
 

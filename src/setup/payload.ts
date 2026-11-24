@@ -19,6 +19,7 @@ import {
   resolveAssistantHomes,
   MACHINE_RULE_INSTALL_PATH,
   MACHINE_VARIANT_KEY,
+  PERSONAL_FILE_PATHS,
   PERSONAL_SKILL_NAMES,
   PERSONAL_TOOLS_VARIANT_KEY,
   VISUAL_PLANS_SKILL_NAMES,
@@ -29,7 +30,10 @@ import {
 const VISUAL_PLANS_SKILL_PREFIXES = VISUAL_PLANS_SKILL_NAMES.map(
   (name) => `skills/${name}/`,
 );
-const PERSONAL_SKILL_PREFIXES = PERSONAL_SKILL_NAMES.map((name) => `skills/${name}/`);
+const PERSONAL_SKILL_PREFIXES = [
+  ...PERSONAL_SKILL_NAMES.map((name) => `skills/${name}/`),
+  ...PERSONAL_FILE_PATHS,
+];
 
 // -- Types --
 

@@ -70,6 +70,8 @@ Inspect:
 - Milestones: `gh api repos/:owner/:repo/milestones --paginate`
 - Projects: `gh project list --owner <owner-or-org>`
 
+When `docs/agents/issue-tracker.md` names Plane as the tracker, replace the label, milestone, and Project checks above with the **Setup check** verb in the bundled `defaults/issue-tracker.plane.md`, and create missing labels in Plane. The GitHub twins get their labels from Plane.
+
 If `gh project` reports missing scope, tell the user to run:
 
 ```bash

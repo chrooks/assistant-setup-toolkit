@@ -15,7 +15,9 @@ Local mode uses the bundled TODO.md format in [LOCAL-TODO-FORMAT.md](./LOCAL-TOD
 
 In issue tracker mode, read the `issue-tracker.md` and `triage-labels.md` in force. Each lives as a bundled default at `~/.claude/skills/project-flow-setup/defaults/<name>.md`; a repo-local `docs/agents/<name>.md` is an **Override** that replaces the default of that name entirely. Read the Override where present, the default otherwise. Most repos have no Override, and that is the normal case, not missing setup.
 
-The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check `gh label list --json name`. When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
+When the `issue-tracker.md` in force names Plane as the tracker, also read the bundled `issue-tracker.plane.md` next to it and make every tracker call through its **Tracker verbs**. The GitHub default answers the same verbs, so the rest of this Skill reads the same for both.
+
+The signal that a repo was never set up is the **absence of a `type:` label family**, not a missing doc — check it with the tracker doc's **Setup check** verb (GitHub: `gh label list --json name`). When there are no `type:` labels, run `/project-flow-setup` inline first and say so in one line — do not stop to recommend it. Skip the setup only when the user asked for a one-off issue-tracker change. Local mode does not require issue tracker setup.
 
 Every record this Skill creates or updates carries **exactly one `type:` category
 and at most one state label** (`needs-scope`, `needs-decision`, `blocked`). Never
@@ -145,7 +147,7 @@ For sub-issues, prefer native issue-tracker parent/sub-issue support when the pr
 
 For roll-ins and updates, do not create a new issue record. Add the checklist item, body edit, metadata change, or comment to the target issue record.
 
-**Milestones.** When the source material's Issue Map calls for a milestone grouping its issues, create it — `gh api` for GitHub-backed repos, the tracker equivalent from the project guidance elsewhere — and set it on the records through update mode. Reuse an existing milestone when one already fits; do not ask first.
+**Milestones.** When the source material's Issue Map calls for a milestone grouping its issues, create it with the tracker doc's **Milestone** verb (a Module on Plane) and set it on the records through update mode. Reuse an existing milestone when one already fits; do not ask first.
 
 Do not close issue records until verification evidence is present. With evidence in hand, close without asking. When closing, add a concise closing comment that names the verification command, manual check, PR, commit, or release evidence. Do not close parent issues merely because sub-issues were created.
 
