@@ -1,6 +1,6 @@
 ---
 name: idea-to-design
-description: Turn an early product idea into a design frame with intent, target user, user growth arc, Design Boundary, Honest Signifiers, Transparent Friction, Progressive Disclosure, first Vertical Slice, risks, and /impeccable handoff. Use when shaping a rough idea, product concept, product direction, or future design Conversation Thread before UI/frontend work.
+description: Turn an early product idea into a design frame with intent, target user, user growth arc, Design Boundary, Honest Signifiers, Transparent Friction, Progressive Disclosure, first Vertical Slice, risks, and /impeccable handoff. Use when shaping a rough idea, product concept, product direction, a rethink or redesign of an existing flow, or a future design Conversation Thread before UI/frontend work.
 argument-hint: "<idea or product direction>"
 user-invocable: true
 ---

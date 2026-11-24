@@ -78,12 +78,13 @@ A user-facing change with none of these settled is grillable even when the
 engineering is obvious. Counting them is what stops design from arriving as a
 finishing coat.
 
-For a genuinely new user-facing feature, the route runs `/idea-to-design` —
-preceded by `/discover` when the frame belongs to people the user has not talked to
-yet
-first — it produces the design frame (intent, user, Design Boundary, first
-Vertical Slice) that `/plan` otherwise assumes it was handed. For a change to an
-existing Surface, name the design intent in one line and carry it forward.
+When the work adds, removes, or reorders steps the user takes — a new feature, a
+rethink, or a redesign — the route runs `/idea-to-design` first, preceded by
+`/discover` when the frame belongs to people the user has not talked to yet. It
+produces the design frame (intent, user, Design Boundary, first Vertical Slice)
+that `/plan` otherwise assumes it was handed. For a change that keeps the user's
+steps as they are, name the intent in one line — the journey step it touches, who
+meets it, and the value it adds — and carry it forward.
 
 > The full treatment of design across the lifecycle lives in the `dev` Skill,
 > "User-facing work: design is a first-class thread, not a finishing coat."

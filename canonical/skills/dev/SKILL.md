@@ -101,9 +101,11 @@ end. Detect this at scope (does the change alter what a user sees or does?); if
 so, thread design through every stage:
 
 - **kickoff / scope** — frame the design intent before the mechanics: who the
-  user is, the value the Surface delivers, its Design Boundary. For a genuinely
-  new user-facing feature, run `/idea-to-design` to produce that frame; for a
-  change to an existing Surface, name the intent in one line. Design questions
+  user is, the value the Surface delivers, its Design Boundary. When the work adds,
+  removes, or reorders steps the user takes — a new feature, a rethink, or a
+  redesign — run `/idea-to-design` first to produce that frame. For a change that
+  keeps the user's steps as they are, name the intent in one line: the journey
+  step it touches, who meets it, and the value it adds. Design questions
   are **Meaningful Decisions** — count them: the Hierarchy, the primary
   Affordance, the Empty State and Error State, what Progressive Disclosure hides.
 - **grill** — resolve those design decisions alongside the technical ones. An
