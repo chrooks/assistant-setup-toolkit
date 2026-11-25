@@ -112,7 +112,7 @@ The issue Skills name these verbs; each tracker doc says how to do them.
 
 ### Close
 
-`gh issue close <number> --comment "<verification evidence>"`.
+`gh issue close <number> --comment "<verification evidence>"`. For work that will not happen, add `--reason "not planned"`.
 
 ### Parent
 
@@ -124,7 +124,11 @@ A `## Blocked by` section in the body naming the blocking issue.
 
 ### Milestone
 
-`gh api repos/{owner}/{repo}/milestones` to list or create; `gh issue edit <number> --milestone "<title>"` to assign.
+`gh api repos/{owner}/{repo}/milestones` to list or create; `gh issue edit <number> --milestone "<title>"` to assign. `gh issue list --milestone "<title>"` gives the members.
+
+### Cycle
+
+None. GitHub has no Cycles; skip any Cycle step.
 
 ## GitHub CLI
 

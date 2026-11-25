@@ -55,7 +55,13 @@ All calls go through the Plane MCP tools. UUID fields (state, labels, parent, mo
 
 ### List
 
-`workitem list` with `project_id` and a PQL filter, for example `stateGroup IN openStates()`. Call `get_pql_reference` before a complex filter.
+Plane CE rejects every `pql` filter ("PQL and structured filters are not supported on this Plane edition"). Never pass `pql`; filter on your side.
+
+1. `state list` once for the project. Keep a map of state id → name and group.
+2. `workitem list` with `project_id`, `per_page: 100`, and `fields: id,sequence_id,name,state,priority,labels,parent,updated_at`. While `next_page_results` is true, call again with `cursor` set to `next_cursor`.
+3. Keep the items whose state group is backlog, unstarted, or started. Those are the open items.
+
+The list does not show Module or Cycle membership. Read it from the container: **Milestone** and **Cycle** below.
 
 ### Update
 
@@ -79,4 +85,10 @@ Record the verification evidence with **Comment**, then `workitem update` with t
 
 ### Milestone
 
-`module list` / `module create`, then `module manage_workitems` with `add_ids`.
+`module list` / `module create`, then `module manage_workitems` with `add_ids` or `remove_ids`. `module list_workitems` gives the members. Retire a Module with `module update` (status `completed` or `cancelled`), then `module archive`.
+
+### Cycle
+
+A Cycle is a time-boxed iteration. `cycle list` gives the Cycles, and `cycle list_workitems` gives the members. `cycle manage_workitems` adds or removes items, and `cycle update` changes the name, description, or dates. `cycle archive` retires a Cycle and ends it first. `cycle transfer_workitems` moves the unfinished items to another Cycle, but only after `cycle complete` ends the source.
+
+Modules and Cycles do not mirror to GitHub. A change to either stays in Plane.
