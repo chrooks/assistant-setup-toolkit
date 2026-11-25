@@ -102,6 +102,10 @@ The issue Skills name these verbs; each tracker doc says how to do them.
 
 `gh issue list --state open --limit 100` (add `--label`, `--milestone`, or `--search` to filter).
 
+### Age
+
+`gh issue list --state open --json number,createdAt,updatedAt`. On a repo whose issues are mirror twins, `updatedAt` counts mirror writes; use the tracker of record instead.
+
 ### Update
 
 `gh issue edit <number>` with `--title`, `--body-file`, `--add-label`, or `--remove-label`.

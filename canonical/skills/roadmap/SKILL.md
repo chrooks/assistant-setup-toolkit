@@ -165,7 +165,7 @@ The pass exists so the human can see the board and judge the planned work. A ver
 
 1. Read the open records with the tracker doc's **List** verb. Read container membership with its **Milestone** verb, and with its **Cycle** verb when the tracker has Cycles (the GitHub doc says it has none; skip that step).
 2. Review the containers first: milestones, then Cycles. A container verdict changes the verdicts of its records.
-3. Review the records next, grouped by container in container order. Records with no container come last.
+3. Review the records next, grouped by container in container order. Records with no container come last, grouped by theme.
 
 ### Board brief
 
@@ -176,17 +176,26 @@ Open the pass with a brief of the board, before Batch 1. Keep it under 10 lines:
 - What is moving now: the in-progress records and the current Cycle, if any.
 - The containers, each with one sentence on what it delivers and how far along it is.
 - The themes of the records with no container, for example "7 evaluations of outside tools".
-- The signals that drive the verdicts: records that look shipped but are still open, records with no activity in a long time, and dates that have passed.
+- The signals that drive the verdicts: records that look shipped but are still open, records in progress but untouched for 30 days or more, records untouched for 90 days or more, and dates that have passed.
 
 ### Batches
 
-Show about 10 records per batch, under the container name. Each record gets the rich reference, then 1-2 plain sentences on what the work is and where it stands, then the proposed verdict, a one-line reason, and the evidence. Read the body to write the sentences; never restate the title. Name what the work does for the user or the project, what it waits on, and what is already done.
+Show about 10 records per batch, under the container name. Each record gets:
+
+1. The rich reference.
+2. Its age: when it was opened and when it was last touched, in plain units ("opened 2 months ago · last touched 9 weeks ago"). Last touched is the newest of a commit that names the record (`git log -1 --format=%cs --grep`), a comment, or a state change by a person. A bulk import or a mirror write is not a touch. The tracker doc's **Age** verb says where the true dates live.
+3. 1-2 plain sentences on what the work is and where it stands. Read the body to write them; never restate the title. Name what the work does for the user or the project, what it waits on, and what is already done.
+4. The proposed verdict, a one-line reason, and the evidence.
+
+A container line gives the age of its oldest record and the last touch of its newest.
 
 - **keep** — no change.
 - **update** — name the exact change: title, description, priority, state, milestone, Cycle, labels, parent, or blocker. A duplicate closes as not planned, with a comment that links the record it duplicates.
 - **remove** — close it. Close as completed when the evidence shows the work shipped, with that evidence as the closing comment (Verified Closure). Otherwise close as not planned. Delete only when the human says "delete". A removed container retires through the Milestone or Cycle verb; its open records keep their own verdicts.
 
 Evidence is what you checked: the last update date, a commit that names the record (`git log --grep`), code that already ships the behavior, a duplicate, or a removed container. With no evidence either way, propose keep and say "no evidence".
+
+**Quick wins.** Tag a record `quick win` when it is open, unblocked, has no open decision, and fits one S or M commit at the Quote Every Add rates (about 6-15 active minutes). Put the tag and the size on the verdict line. When the pass ends or stops, list every quick win found so far, ranked by what each one fixes or unblocks, so the human can pick one up next.
 
 The human answers only the lines they disagree with. A line they do not mention takes its proposed verdict.
 
@@ -206,15 +215,15 @@ Report each batch in one line, then show the next: `Batch 2/6: kept 6, updated 3
 Batch 2/5 — milestone "Upstream provenance" (3 open)
 Notices when a Skill copied from another repo changes upstream.
 
-1. [#12 Drift check cron](https://tracker/issue/12)
+1. [#12 Drift check cron](https://tracker/issue/12) · opened 3 weeks ago · last touched 3 weeks ago
    Runs the upstream drift check every night and posts what moved. Nothing is built yet; it waits on #4.
    → keep — next in the milestone plan.
-2. [#9 Pin report colors](https://tracker/issue/9)
+2. [#9 Pin report colors](https://tracker/issue/9) · opened 2 months ago · last touched 6 weeks ago
    Colors the pin report so a behind source stands out from a current one.
    → remove (shipped) — commit a1b2c3d "feat(pins): color the report".
-3. [#4 Vendored skill list](https://tracker/issue/4)
+3. [#4 Vendored skill list](https://tracker/issue/4) · opened 2 months ago · never touched
    Lists every copied Skill with its source repo, so the drift check knows what to watch.
-   → update: priority p3 → p2 — it blocks #12.
+   → update: priority p3 → p2, quick win (S) — it blocks #12.
 
 Answer only the lines you disagree with.
 ```

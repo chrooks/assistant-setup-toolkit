@@ -63,6 +63,10 @@ Plane CE rejects every `pql` filter ("PQL and structured filters are not support
 
 The list does not show Module or Cycle membership. Read it from the container: **Milestone** and **Cycle** below.
 
+### Age
+
+A work item with `external_source: github-import` came over in the import, so its `created_at` and `updated_at` are the import time. Read its creation date from the GitHub twin (`gh issue view <N> --json createdAt`). Read the last touch from the newest commit that names the GitHub number (`git log -1 --format=%cs --grep="#<N>"`) and from `workitem_comment list`. Ignore comments the sync wrote. For any other work item, `created_at` is true.
+
 ### Update
 
 `workitem update` with only the fields that change. `manage_label` adds or removes labels without replacing the list.
