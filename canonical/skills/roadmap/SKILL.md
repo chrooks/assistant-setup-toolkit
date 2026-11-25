@@ -1,7 +1,7 @@
 ---
 name: roadmap
-description: Choose, prioritize, sequence, and reshape issue-tracker work across open issues, sub-issues, Projects, milestones, labels, priorities, and blockers. Use when deciding what to pick up next, reviewing a Kanban board, milestone, roadmap, or backlog, triaging blocked work, drawing the backlog as a dependency graph in Orca, or choosing between open issue records.
-argument-hint: "[next|board|milestone|blocked|reprioritize|graph] [issue|milestone|project|owner/repo]"
+description: Choose, prioritize, sequence, and reshape issue-tracker work across open issues, sub-issues, Projects, milestones, labels, priorities, and blockers. Use when deciding what to pick up next, reviewing a Kanban board, milestone, roadmap, or backlog, triaging blocked work, drawing the backlog as a dependency graph in Orca, choosing between open issue records, or grooming a backlog by walking its milestones, cycles, and issues for keep, update, or remove verdicts.
+argument-hint: "[next|board|milestone|blocked|reprioritize|graph|review] [issue|milestone|project|owner/repo]"
 disable-model-invocation: false
 ---
 
@@ -27,8 +27,11 @@ Parse arguments positionally from the user's invocation.
 - `/roadmap blocked` -> identify blocked work, missing dependencies, and unblock steps.
 - `/roadmap reprioritize [scope]` -> propose priority, milestone, status, or dependency changes.
 - `/roadmap graph [owner/repo]` -> draw the open issues as a dependency graph and open it in Orca (see Graph).
+- `/roadmap review [project]` -> walk every milestone, Cycle, and open issue record for a keep, update, or remove verdict, in batches (see Review).
 
 If the user asks "what should I pick up next?", "what is the next slice?", "what should move next?", or "what is highest priority?", infer `/roadmap next`.
+
+If the user asks to "clean up the backlog", "groom the board", "go through the issues", or "what can we cut?", infer `/roadmap review`.
 
 ## Process
 
@@ -151,6 +154,48 @@ python3 scripts/backlog-graph.py [owner/repo] --open    # scripts/ sits next to 
 6. Click a node for status, labels, milestone, and link. Double-click opens the issue on GitHub.
 
 Report the script's count line (open, ready, waiting, blocked, links) and the path. Zero links means the tracker has no blocked-by or sub-issue relations recorded yet; `/to-issues` adds them. Offer the graph in one line after `/roadmap blocked` or `/roadmap board` when the repo has links. Re-run after the tracker changes; never edit the HTML.
+
+## Review
+
+`/roadmap review` grooms the backlog. It gives every open container and issue record a verdict: **keep**, **update**, or **remove**. It does not rank; `/roadmap next` ranks.
+
+### Order
+
+1. Read the open records with the tracker doc's **List** verb. Read container membership with its **Milestone** verb, and with its **Cycle** verb when the tracker has Cycles (the GitHub doc says it has none; skip that step).
+2. Review the containers first: milestones, then Cycles. A container verdict changes the verdicts of its records.
+3. Review the records next, grouped by container in container order. Records with no container come last.
+
+### Batches
+
+Show about 10 lines per batch, under the container name. Each line gives the rich reference, the proposed verdict, a one-line reason, and the evidence:
+
+- **keep** — no change.
+- **update** — name the exact change: title, description, priority, state, milestone, Cycle, labels, parent, or blocker. A duplicate closes as not planned, with a comment that links the record it duplicates.
+- **remove** — close it. Close as completed when the evidence shows the work shipped, with that evidence as the closing comment (Verified Closure). Otherwise close as not planned. Delete only when the human says "delete". A removed container retires through the Milestone or Cycle verb; its open records keep their own verdicts.
+
+Evidence is what you checked: the last update date, a commit that names the record (`git log --grep`), code that already ships the behavior, a duplicate, or a removed container. With no evidence either way, propose keep and say "no evidence".
+
+The human answers only the lines they disagree with. A line they do not mention takes its proposed verdict.
+
+### Apply each batch
+
+The human's answer to a batch is the approval. It covers the removals and milestone drops that step 5 of the Process would otherwise ask about. Apply the batch before you show the next one:
+
+- field changes (priority, state, milestone, Cycle, labels, parent, blocker): apply them here as reshape actions.
+- title or description edits: `/to-issues update`.
+- removals: `/to-issues close`, with the evidence or the human's reason as the closing comment.
+
+Report each batch in one line, then show the next: `Batch 2/6: kept 6, updated 3, removed 1.` The human can stop after any batch; applied batches stay applied. When the pass ends or stops, give one count line for the whole pass and name the first container not yet reviewed.
+
+### Batch shape
+
+```
+Batch 1/4 — milestone "Upstream provenance" (3 open)
+1. [#12 Drift check cron](https://tracker/issue/12) — keep — updated 2026-11-20; next in the milestone plan.
+2. [#9 Pin report colors](https://tracker/issue/9) — remove (shipped) — commit a1b2c3d "feat(pins): color the report".
+3. [#4 Vendored skill list](https://tracker/issue/4) — update: priority p3 → p2 — it blocks #12.
+Answer only the lines you disagree with.
+```
 
 ## Output shapes
 
