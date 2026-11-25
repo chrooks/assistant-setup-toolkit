@@ -159,15 +159,28 @@ Report the script's count line (open, ready, waiting, blocked, links) and the pa
 
 `/roadmap review` grooms the backlog. It gives every open container and issue record a verdict: **keep**, **update**, or **remove**. It does not rank; `/roadmap next` ranks.
 
+The pass exists so the human can see the board and judge the planned work. A verdict the human cannot understand is useless, so every line explains what the work is before it gives the verdict.
+
 ### Order
 
 1. Read the open records with the tracker doc's **List** verb. Read container membership with its **Milestone** verb, and with its **Cycle** verb when the tracker has Cycles (the GitHub doc says it has none; skip that step).
 2. Review the containers first: milestones, then Cycles. A container verdict changes the verdicts of its records.
 3. Review the records next, grouped by container in container order. Records with no container come last.
 
+### Board brief
+
+Open the pass with a brief of the board, before Batch 1. Keep it under 10 lines:
+
+- What the project is for, in one sentence.
+- Counts: open records, and how many are in progress, blocked, waiting on the human, or not yet scoped.
+- What is moving now: the in-progress records and the current Cycle, if any.
+- The containers, each with one sentence on what it delivers and how far along it is.
+- The themes of the records with no container, for example "7 evaluations of outside tools".
+- The signals that drive the verdicts: records that look shipped but are still open, records with no activity in a long time, and dates that have passed.
+
 ### Batches
 
-Show about 10 lines per batch, under the container name. Each line gives the rich reference, the proposed verdict, a one-line reason, and the evidence:
+Show about 10 records per batch, under the container name. Each record gets the rich reference, then 1-2 plain sentences on what the work is and where it stands, then the proposed verdict, a one-line reason, and the evidence. Read the body to write the sentences; never restate the title. Name what the work does for the user or the project, what it waits on, and what is already done.
 
 - **keep** — no change.
 - **update** — name the exact change: title, description, priority, state, milestone, Cycle, labels, parent, or blocker. A duplicate closes as not planned, with a comment that links the record it duplicates.
@@ -190,10 +203,19 @@ Report each batch in one line, then show the next: `Batch 2/6: kept 6, updated 3
 ### Batch shape
 
 ```
-Batch 1/4 — milestone "Upstream provenance" (3 open)
-1. [#12 Drift check cron](https://tracker/issue/12) — keep — updated 2026-11-20; next in the milestone plan.
-2. [#9 Pin report colors](https://tracker/issue/9) — remove (shipped) — commit a1b2c3d "feat(pins): color the report".
-3. [#4 Vendored skill list](https://tracker/issue/4) — update: priority p3 → p2 — it blocks #12.
+Batch 2/5 — milestone "Upstream provenance" (3 open)
+Notices when a Skill copied from another repo changes upstream.
+
+1. [#12 Drift check cron](https://tracker/issue/12)
+   Runs the upstream drift check every night and posts what moved. Nothing is built yet; it waits on #4.
+   → keep — next in the milestone plan.
+2. [#9 Pin report colors](https://tracker/issue/9)
+   Colors the pin report so a behind source stands out from a current one.
+   → remove (shipped) — commit a1b2c3d "feat(pins): color the report".
+3. [#4 Vendored skill list](https://tracker/issue/4)
+   Lists every copied Skill with its source repo, so the drift check knows what to watch.
+   → update: priority p3 → p2 — it blocks #12.
+
 Answer only the lines you disagree with.
 ```
 
